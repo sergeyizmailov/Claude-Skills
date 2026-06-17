@@ -1,0 +1,36 @@
+name: Bug report
+description: A skill misbehaves, gives wrong guidance, or doesn't trigger
+title: "bug: <short summary>"
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Which skill?
+      options:
+        - responsive-adapter
+        - design-stack-picker
+        - other / not sure
+    validations:
+      required: true
+  - type: input
+    id: tool
+    attributes:
+      label: Agent / tool
+      description: Where you ran it.
+      placeholder: Claude Code, Cursor, Gemini CLI, ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected vs. what happened
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The prompt you used and any relevant project context.
+    validations:
+      required: true

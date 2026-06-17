@@ -214,6 +214,7 @@ These primitives encode responsiveness without media queries.
 Heuristic: if removing the component from the page would change what styles apply → `@container`. If only resizing the browser would → `@media`.
 
 ## Sources
+
 - every-layout.dev (Heydon Pickering)
 - moderncss.dev (Stephanie Eckles)
 - ishadeed.com/article/responsive-design

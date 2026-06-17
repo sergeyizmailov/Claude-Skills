@@ -1,0 +1,14 @@
+{
+  // Rules tuned for skill documentation: long, table-heavy, link-rich Markdown.
+  "config": {
+    "default": true,
+    "MD013": false, // line length — descriptions and tables run long by design
+    "MD033": false, // inline HTML — allowed where Markdown can't express it
+    "MD041": false, // first line need not be a top-level heading (frontmatter precedes it)
+    "MD024": { "siblings_only": true }, // repeated headings ok unless siblings
+    "MD040": false, // fenced blocks without a language (ASCII trees, plain output)
+    "MD046": false, // mixed code block styles
+    "MD060": false // table pipe padding style — cosmetic
+  },
+  "ignores": ["node_modules"]
+}

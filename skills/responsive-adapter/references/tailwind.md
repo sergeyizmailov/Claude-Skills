@@ -54,6 +54,7 @@ module.exports = {
 ```
 
 Named containers:
+
 ```html
 <div class="@container/card">
   <div class="@md/card:grid-cols-2">...</div>
@@ -65,6 +66,7 @@ Container query units: `cqi`, `cqw`, `cqh`, `cqb`, `cqmin`, `cqmax`. In Tailwind
 ## Patterns
 
 ### Stack → row at breakpoint
+
 ```html
 <div class="flex flex-col md:flex-row gap-4">
   <div class="flex-1">A</div>
@@ -73,39 +75,46 @@ Container query units: `cqi`, `cqw`, `cqh`, `cqb`, `cqmin`, `cqmax`. In Tailwind
 ```
 
 ### Grid columns adapt
+
 ```html
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 ```
 
 ### Auto-fit RAM pattern (the 320px-safe grid)
+
 ```html
 <div class="grid gap-4
             [grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr))]">
 ```
 
 ### Show/hide based on viewport
+
 ```html
 <nav class="hidden md:flex">...desktop nav...</nav>
 <button class="md:hidden">menu</button>
 ```
 
 ### Fluid spacing & type
+
 ```html
 <section class="py-[clamp(2rem,5vw,6rem)] px-[clamp(1rem,4vw,3rem)]">
   <h1 class="text-[clamp(2rem,1rem+4vw,4rem)] leading-tight">
 ```
 
 ### Container width pattern
+
 ```html
 <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 ```
 
 Or with `min()`:
+
 ```html
 <div class="mx-auto w-[min(100%-2rem,80rem)]">
 ```
 
 ### Safe-area aware mobile nav
+
 ```html
 <nav class="fixed inset-x-0 bottom-0
             pb-[max(0.75rem,env(safe-area-inset-bottom))]
@@ -113,6 +122,7 @@ Or with `min()`:
 ```
 
 ### Mobile drawer with `<dialog>`
+
 ```html
 <dialog class="ml-auto m-0 h-dvh w-[85vw] max-w-[20rem]
                border-0 p-4 open:translate-x-0
@@ -123,6 +133,7 @@ Or with `min()`:
 ```
 
 ### Sticky table with first-column lock
+
 ```html
 <div role="region" tabindex="0" class="overflow-x-auto focus:outline-2">
   <table class="min-w-full">
@@ -139,6 +150,7 @@ Or with `min()`:
 ## Arbitrary values — when to use
 
 Use arbitrary values for one-off fluid scaling:
+
 - `text-[clamp(...)]` — fluid font-size
 - `py-[clamp(...)]` — fluid padding
 - `w-[min(100%-2rem,80rem)]` — capped fluid container
@@ -157,12 +169,14 @@ Don't use arbitrary values for values you'll repeat — promote to design tokens
 - `lg:p-12` without smaller-screen baseline padding → mobile gets 0 padding from missing class.
 
 ## Plugins worth using
+
 - `@tailwindcss/container-queries` (Tailwind v3; v4 has it built in)
 - `@tailwindcss/forms` — sane defaults for form controls (16px font, proper sizing)
 - `@tailwindcss/aspect-ratio` (v3; v4 has `aspect-*` built in)
 - `tailwind-utopia` — Utopia fluid type/space scale as utilities
 
 ## Tailwind v4 highlights
+
 - Native container queries (no plugin)
 - CSS-first config via `@theme {}`
 - `@variant` for custom variants
@@ -170,6 +184,7 @@ Don't use arbitrary values for values you'll repeat — promote to design tokens
 - `dvh`/`svh`/`lvh` units built into `h-*` / `min-h-*` / `max-h-*` utilities
 
 ## Sources
+
 - tailwindcss.com/docs/responsive-design
 - tailwindcss.com/docs/container-queries
 - tailwindcss.com/docs/v4

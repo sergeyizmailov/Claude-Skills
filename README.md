@@ -1,82 +1,57 @@
-# Claude Code Skills
+# Agent Skills
 
-A small collection of production-grade [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code) — focused on frontend craft, not toy demos. Each skill is a self-contained playbook: Claude loads it on demand, follows a concrete workflow, and verifies its own work.
+[![CI](https://github.com/sergeyizmailov/claude-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeyizmailov/claude-skills/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Agent Skills standard](https://img.shields.io/badge/Agent%20Skills-open%20standard-8A2BE2)](https://agentskills.io)
+
+A growing library of **production-grade skills for AI coding agents** — concrete playbooks that make an agent measurably better at a task, not toy demos. Each skill is a self-contained workflow the agent loads on demand, follows step by step, and verifies its own work against.
+
+Built on the open [Agent Skills standard](https://agentskills.io) (`SKILL.md`), so they work in **Claude Code, Cursor, Gemini CLI, GitHub Copilot, VS Code, Codex, opencode** and other compatible tools — not tied to any single model or vendor.
+
+## Highlights
+
+- **Verification-driven** — skills don't just *do*, they *check*. The responsive skill won't claim done until a real browser confirms every viewport passes.
+- **Self-contained** — no dependency on private tooling; portable across agents and stacks.
+- **Lazy by design** — only a short `description` stays in context; the full playbook and references load when the skill is actually triggered, so they're cheap to keep installed.
+- **CI-enforced quality** — every skill's frontmatter is schema-validated, scripts are shellchecked, Markdown is linted.
+
+## Skills
 
 | Skill | What it does | Triggers on |
 |---|---|---|
-| [**responsive-adapter**](#responsive-adapter) | Makes any existing page fully adaptive from 320px phones to 2560px+ widescreens — without touching the visual design | "make this responsive", "fix mobile layout", "horizontal scroll", "sidebar broken on tablet" |
-| [**design-stack-picker**](#design-stack-picker) | Picks the right building blocks (icons, fonts, components, color, motion) instead of inventing them — reuse-first | "build a landing page", "restyle this", "make it look better", any frontend visual choice |
+| [**responsive-adapter**](skills/responsive-adapter) | Makes any existing page fully adaptive from 320px phones to 2560px+ widescreens — without changing the visual design | "make this responsive", "fix mobile layout", "horizontal scroll", "sidebar broken on tablet" |
+| [**design-stack-picker**](skills/design-stack-picker) | Picks the right building blocks (icons, fonts, components, color, motion) instead of inventing them — reuse-first | "build a landing page", "restyle this", "make it look better", any frontend visual choice |
 
----
-
-## responsive-adapter
-
-Take a page someone already designed and built, and make it hold up at **every real viewport width** — without redesigning it. The desktop visual is the source of truth; every other width is a graceful adaptation.
-
-**What makes it different from "just add media queries":**
-
-- **Static anti-pattern scanner** (`scripts/scan.sh`) — greps the codebase for 14+ known responsive killers (missing viewport meta, `user-scalable=no`, fixed `px` widths, `100vh` without `dvh`, sub-16px inputs that trigger iOS zoom, `100vw` overflow, …) and outputs a severity-graded, `file:line` issue list before a single fix.
-- **Modern primitives over breakpoint salad** — solves adaptivity with `clamp()`, container queries, `dvh/svh/lvh`, `aspect-ratio`, and `grid auto-fit/minmax` instead of five media queries per component.
-- **Stack-aware** — detects vanilla CSS, Tailwind, or CSS-in-JS and follows each one's idioms (12 bundled reference files).
-- **Browser-verified** — screenshots an 8-width device matrix (Android baseline → iPhone → iPad → Full HD), checks each for overflow / tap targets / typography, and **won't claim done** until every width passes.
-- **Strict scope guard** — colors, fonts, content, and components are *forbidden* to change. A before/after desktop screenshot must be indistinguishable.
-
-**5-phase workflow:** Discover → Static scan → Apply fixes → Browser verification → Report.
-
-```
-responsive-adapter/
-├── SKILL.md                 # the playbook
-├── scripts/scan.sh          # static anti-pattern scanner
-└── references/              # 12 deep-dive guides
-    ├── anti-patterns.md     # full catalog: detection + fix per pattern
-    ├── modern-primitives.md # clamp, container queries, dvh/svh, :has(), subgrid
-    ├── fluid-typography.md  # Utopia scale, WCAG-safe clamp formula
-    ├── device-matrix.md     # every test width with rationale
-    ├── touch-targets.md     # WCAG 2.5.8 vs 2.5.5, MD3 vs HIG
-    ├── tailwind.md · vanilla-css.md · css-in-js.md
-    ├── admin-patterns.md · menus-drawers.md · design-systems.md
-    └── platform-quirks.md   # iOS Safari / Android / foldable gotchas
-```
-
-## design-stack-picker
-
-A **selection layer** for frontend work. Instead of hand-crafting every icon, font, and component from scratch — or bolting on a random library — it inspects the current project and picks the smallest building block that fits.
-
-**Decision order it enforces:**
-
-1. Reuse the existing project system if it works.
-2. Extend it with the smallest compatible block.
-3. Add a new library only when there's a real gap.
-4. Hand-craft only for brand assets or when a dependency is heavier than the code.
-
-**What it covers:** icon sets, typography pairings, component/block libraries, accessible primitives, imagery sources, color systems, motion, shadows, spacing, and image optimization — with a **dependency budget** (don't add a library for one icon) and **context routing** (Astro vs React vs admin vs ecommerce vs marketing each get different defaults).
-
-```
-design-stack-picker/
-├── SKILL.md       # selection rules, defaults, dependency budget, context routing
-├── resources.md   # the curated catalog (libraries, fonts, icons, color, motion)
-└── patterns.md    # implementation snippets (tokens, reset, icons, cards, motion)
-```
-
----
+More on the way. Each skill's own `SKILL.md` is the full reference.
 
 ## Install
 
-Skills live one level deep under `~/.claude/skills/`. Clone the repo and copy the skill(s) you want:
+Skills live one level deep under your agent's skills directory (`~/.claude/skills/` for Claude Code; see your tool's docs for others). Clone and copy the ones you want:
 
 ```bash
 git clone https://github.com/sergeyizmailov/claude-skills.git
-cp -R claude-skills/responsive-adapter   ~/.claude/skills/
-cp -R claude-skills/design-stack-picker  ~/.claude/skills/
+cp -R claude-skills/skills/responsive-adapter   ~/.claude/skills/
+cp -R claude-skills/skills/design-stack-picker  ~/.claude/skills/
 ```
 
-Claude Code auto-discovers them on the next session. Each skill's `description` stays in context (cheap); the full playbook and reference files load only when the skill is triggered.
+Your agent auto-discovers them on the next session. To confirm: ask it *"make this page responsive"* or *"pick an icon set for this landing"* and it should reach for the matching skill.
 
-To verify they're picked up: ask Claude *"make this page responsive"* or *"pick an icon set for this landing"* and it should reach for the matching skill.
+## How a skill is built
 
-## How these are built
+Each skill is one directory with a `SKILL.md` entrypoint and optional bundled resources:
 
-Each skill follows the Agent Skills spec: a `SKILL.md` with `name` + `description` frontmatter, a concrete workflow in the body (<500 lines), and bundled resources (`references/`, `scripts/`) that load on demand instead of bloating context. They favor verification over assertion — the page is "responsive" only after the browser says so.
+```
+skills/<name>/
+├── SKILL.md        # name + description frontmatter, then the workflow
+├── references/     # deep-dive docs, loaded only when the workflow needs them
+└── scripts/        # helper scripts the skill calls
+```
+
+The `description` is the only part always in context, so it carries the trigger; everything else stays out of the way until needed. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
+
+## Contributing
+
+New skills and fixes are welcome — one skill per PR. The bar: it should make an agent measurably better at a real task. See [CONTRIBUTING.md](CONTRIBUTING.md) for the anatomy of a skill and the local checks to run.
 
 ## License
 

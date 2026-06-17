@@ -112,9 +112,11 @@ Order of fixes (earlier fixes prevent later breakage):
 3. **Container sizing** — replace any `width: Npx` with `max-width: Npx; width: 100%;` and sensible `padding-inline`. Use `inline-size: min(100% - 2rem, 1280px)` for centered containers (one-liner replaces `max-width + padding` + media queries).
 
 4. **Layout primitives** — wrap flex/grid with sane wrapping. Switch fixed grids to:
+
    ```css
    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
    ```
+
    `min(100%, 280px)` is the magic that makes 320px viewports safe.
 
 5. **Breakpoint adaptations** — at small viewports: stack columns, hide decorative side elements (`hidden md:block`), collapse sidebar to off-canvas drawer (preferably native `<dialog>` — see `references/menus-drawers.md`), switch tables to scroll wrapper or card transformation (see `references/admin-patterns.md`).

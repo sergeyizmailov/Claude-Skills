@@ -11,6 +11,7 @@
 | Extra-large | ≥ 1600dp       | Desktop |
 
 Height classes:
+
 | Class | Height |
 |---|---|
 | Compact   | < 480dp |
@@ -30,6 +31,7 @@ dp ≈ CSS px at DPR 1. M3 breakpoints translate directly to CSS `min-width`.
 | Extra-large (≥1600) | 12 | up to 200dp           | 24dp | Permanent drawer + multi-pane |
 
 Other M3 specifics:
+
 - Pane padding: 16dp internal, 24dp spacing between panes.
 - Max content line length: 60 characters on large screens.
 - **Touch target: 48dp minimum.**
@@ -80,6 +82,7 @@ Slide Over, Split View, Stage Manager can produce app window widths from ~320pt 
 Build web breakpoints from Material 3 numbers (600 / 840 / 1200 / 1600), layer Apple's 44pt touch target and `safe-area-inset` rules on top. This combination gives you Android-correct, iOS-friendly, and WCAG 2.2-compliant defaults.
 
 ## Sources
+
 - m3.material.io/foundations/layout/applying-layout/window-size-classes
 - developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
 - developer.apple.com/design/human-interface-guidelines/layout

@@ -46,6 +46,7 @@ Five strategies. Pick based on **how the user reads the data**.
 | Master-detail | Heavy row detail | Row list → tap → detail view |
 
 ### Horizontal scroll + sticky first column (default)
+
 ```html
 <div role="region" aria-labelledby="tbl-cap" tabindex="0" class="table-wrap">
   <table>
@@ -57,6 +58,7 @@ Five strategies. Pick based on **how the user reads the data**.
   </table>
 </div>
 ```
+
 ```css
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-wrap:focus-visible { outline: 2px solid currentColor; }
@@ -69,6 +71,7 @@ Five strategies. Pick based on **how the user reads the data**.
 ```
 
 ### Card transformation (independent rows)
+
 ```css
 .table-wrap { container-type: inline-size; }
 
@@ -95,6 +98,7 @@ Five strategies. Pick based on **how the user reads the data**.
   }
 }
 ```
+
 Requires `<td data-label="Date">` on each cell.
 
 Semantics: keep `<table>`. `role="grid"` is for editable spreadsheet-style widgets, NOT display tables.
@@ -200,6 +204,7 @@ Bottom sheets: `pointer-events: none` on backdrop when scrollable inside; respec
 Same widget renders as stacked at 280px, side-by-side at 480px, with chart at 720px+ — driven entirely by its own width, not the viewport.
 
 ## Sources
+
 - ishadeed.com/article/css-container-query-guide
 - ui.shadcn.com/docs/components/radix/sidebar, Drawer
 - m3.material.io/components/navigation-rail/guidelines, navigation-drawer/guidelines

@@ -133,12 +133,14 @@ xl:  1200px – M3 Expanded→Large (laptop / large tablet landscape)
 ```
 
 This satisfies:
+
 - HIG compact-vs-regular pivot at 600-768 range
 - Material 3 numeric breakpoints (600 / 840 / 1200 / 1600)
 - StatCounter dominant device clusters
 - Foldable inner display boundary (840-984)
 
 ## Sources
+
 - gs.statcounter.com (mobile + desktop resolution share, April 2026)
 - yesviz.com/devices.php (CSS viewport + DPR database)
 - screensizechecker.com (iPhone + Android viewport tables 2026)

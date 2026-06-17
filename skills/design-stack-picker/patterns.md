@@ -73,7 +73,7 @@ One dominant brand color + a sharp accent. Fluid scales via `clamp()`.
 }
 ```
 
-For a full fluid type+space scale, generate tokens at https://utopia.fyi and paste them here.
+For a full fluid type+space scale, generate tokens at <https://utopia.fyi> and paste them here.
 
 ---
 
@@ -165,7 +165,7 @@ export function Icon({ name, size = 24, className = "" }:
 <iconify-icon icon="solar:magnifer-linear" width="24" height="24"></iconify-icon>
 ```
 
-> Browse/copy icon ids at https://icon-sets.iconify.design/solar/. Stay in one set.
+> Browse/copy icon ids at <https://icon-sets.iconify.design/solar/>. Stay in one set.
 
 ---
 
@@ -205,7 +205,7 @@ h1 { font-size: clamp(2rem, 1.2rem + 4vw, 3.5rem); }       /* min, fluid, max */
 .section-head h2 { font-size: clamp(1.5rem, 3.2vw, 2.1rem); }
 ```
 
-Generate a full coherent scale at https://utopia.fyi (keep min/max in `rem` so zoom still works).
+Generate a full coherent scale at <https://utopia.fyi> (keep min/max in `rem` so zoom still works).
 
 ---
 
@@ -389,18 +389,21 @@ Astro: `<Picture formats={['avif','webp']} priority />` from `astro:assets`. Rea
 ## Modern CSS techniques (2026)
 
 ### OKLCH tokens (perceptually uniform) + tinting
+
 ```css
 :root { --brand: oklch(0.62 0.19 18); }                 /* L chroma hue */
 .btn-soft { background: color-mix(in oklch, var(--brand) 14%, white); }
 ```
 
 ### Balanced headings (one line, big win)
+
 ```css
 h1, h2, h3 { text-wrap: balance; }   /* prevents ugly single-word last lines */
 p, li      { text-wrap: pretty; }    /* progressive enhancement */
 ```
 
 ### Animated gradient via @property (CSS can't interpolate raw gradients without this)
+
 ```css
 @property --stop { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
 .cta { background: linear-gradient(120deg, var(--brand) var(--stop), var(--brand-strong));
@@ -409,12 +412,14 @@ p, li      { text-wrap: pretty; }    /* progressive enhancement */
 ```
 
 ### Enter animation from display:none — no JS (@starting-style)
+
 ```css
 .popover { transition: opacity .25s, transform .25s; opacity: 1; transform: translateY(0); }
 @starting-style { .popover { opacity: 0; transform: translateY(-8px); } }
 ```
 
 ### Glassmorphism (use sparingly, needs a busy bg behind it)
+
 ```css
 .glass {
   background: color-mix(in srgb, var(--bg) 55%, transparent);
@@ -424,6 +429,7 @@ p, li      { text-wrap: pretty; }    /* progressive enhancement */
 ```
 
 ### Same-document View Transition (morph between states) — progressive
+
 ```js
 function update(dom) {
   if (!document.startViewTransition) return dom();   // graceful fallback

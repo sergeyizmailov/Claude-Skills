@@ -67,6 +67,7 @@ Note: `MAX/MIN = 80/32 = 2.5`, sitting exactly on the WCAG 1.4.4 threshold.
 `vw` units ignore browser zoom. `font-size: 5vw` renders the same physical size at 100% and 500% zoom, blocking users from enlarging text and violating **WCAG 2.1 SC 1.4.4** (text must scale to 200%). `rem` and `px` *do* respond to zoom.
 
 ### Accessibility-safe rule (Adam Argyle, Adrian Bece)
+
 ```
 MAX_font_size ≤ 2.5 × MIN_font_size
 ```
@@ -140,6 +141,7 @@ body { line-height: 24px; }    /* WRONG — frozen */
 ```
 
 Tighter leading for display:
+
 ```css
 h1, h2 { line-height: 1.1; }
 h3, h4 { line-height: 1.2; }
@@ -148,6 +150,7 @@ body   { line-height: 1.55; }
 ```
 
 Josh Comeau's fluid line-height trick:
+
 ```css
 * { line-height: calc(1em + 0.5rem); }
 ```
@@ -180,6 +183,7 @@ small      { letter-spacing: 0.04em;  }
 ## 6. Apple & Google Guidelines
 
 ### Apple HIG — Dynamic Type
+
 - Use text styles (`largeTitle`, `title1`...`title3`, `headline`, `body`, `callout`, `subheadline`, `footnote`, `caption1`, `caption2`).
 - Scales from xSmall → AX5 (~310% of base).
 - Min readable: 11pt.
@@ -196,6 +200,7 @@ small      { letter-spacing: 0.04em;  }
 | Label      | 14px  | 12px   | 11px  |
 
 M3 default is NOT fluid. Conversion:
+
 ```css
 .md-typescale-display-large {
   font-size: clamp(2.25rem, 1.5rem + 3.75vw, 3.5625rem);

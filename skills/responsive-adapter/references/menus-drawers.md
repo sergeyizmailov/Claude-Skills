@@ -77,6 +77,7 @@ Heydon Pickering's disclosure-widget pattern. Nav links are a list of links, not
 ```
 
 `showModal()` provides AUTOMATICALLY:
+
 - Focus management (moves to first focusable / `autofocus`)
 - Escape key closes
 - Focus trapping (modal mode)
@@ -167,6 +168,7 @@ function toggleDrawer() {
 ---
 
 ## Sources
+
 - inclusive-components.design/menus-menu-buttons (Heydon Pickering)
 - scottohara.me/code (Scott O'Hara accessibility)
 - css-tricks.com/there-is-no-need-to-trap-focus-on-a-dialog-element
