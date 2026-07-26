@@ -143,7 +143,6 @@ const Widget = styled.article`
 ## Critical: SSR + responsive
 
 If using SSR (Next.js, Remix, etc.):
-
 - **DO** prefer pure CSS media/container queries (above) — they work the same SSR and client.
 - **DON'T** use `useMediaQuery` for layout — produces hydration mismatch flash (renders mobile on server then switches client-side).
 - For the `<Dialog>` vs `<Drawer>` swap pattern (one of the few legit JS-driven cases): render both in DOM and toggle visibility with CSS, OR use `useIsClient()` + accept a one-frame flash.
@@ -208,7 +207,6 @@ const Card = styled.div`
 **stitches** (deprecated 2024): if you have legacy code, migrate to vanilla-extract or styled-components v6.
 
 ## Sources
-
 - styled-components.com/docs/basics#getting-started
 - emotion.sh/docs/introduction
 - vanilla-extract.style

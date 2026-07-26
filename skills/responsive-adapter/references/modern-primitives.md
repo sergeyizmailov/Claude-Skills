@@ -5,7 +5,6 @@
 **Browser support:** Baseline Widely available since April 2020. ~97-98%.
 
 **Recipe:**
-
 ```css
 html { font-size: clamp(1rem, 0.875rem + 0.5vw, 1.25rem); }
 h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
@@ -16,7 +15,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - Pure viewport-only preferred (`clamp(1rem, 5vw, 2rem)`) breaks WCAG 1.4.4 (zoom to 200%). Always mix `rem` into middle.
 - If `max < min`, browsers use `min` and silently ignore — easy to miss.
 - WCAG rule: `max ≤ 2.5 × min`.
@@ -31,7 +29,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Widely available since April 2020. ~97-98%.
 
 **Recipe — page wrapper:**
-
 ```css
 .wrapper {
   width: min(100% - 2rem, 1200px);
@@ -59,7 +56,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Widely available since February 2023. Size queries ~94-95%. Style queries Chrome/Edge only. Scroll-state queries Chrome 133+.
 
 **Recipe:**
-
 ```css
 .card {
   container-type: inline-size;
@@ -73,7 +69,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - `container-type: inline-size` creates layout containment — container can no longer be sized by children's intrinsic widths.
 - Don't put `container-type` on `html`/`body` — breaks `vh`-based child layouts.
 - Container query units (`cqi`, `cqb`, `cqw`, `cqh`) without eligible container ancestor **silently fall back to small viewport**.
@@ -93,7 +88,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 - `dvh` = changes live as UI shows/hides
 
 **Recipe:**
-
 ```css
 .hero { min-height: 100svh; }
 .mobile-menu { position: fixed; inset: 0; height: 100dvh; }
@@ -106,7 +100,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - `dvh` triggers reflows as address bar animates — never use on `font-size` or anything causing layout shift.
 - **On-screen keyboard does NOT shrink viewport** — `100dvh` ignores it. Use `visualViewport` API in JS or `interactive-widget=resizes-content` meta.
 - None of the units account for scrollbar width — `100vw` overflows by scrollbar size on desktops.
@@ -121,7 +114,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Widely available since September 2021. ~97%.
 
 **Recipe:**
-
 ```css
 .video-embed { aspect-ratio: 16 / 9; width: 100%; }
 
@@ -141,7 +133,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - Ignored if **both** dimensions constrained — `width: 200px; height: 200px; aspect-ratio: 16/9` does nothing.
 - `min-content`/`max-content` on flex/grid children can win over ratio.
 - On `<img>`, intrinsic ratio from width/height attributes takes precedence unless `aspect-ratio: auto 16/9`.
@@ -156,7 +147,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** ~98%. Grid auto-fit since 2017, min() since 2020.
 
 **Recipe:**
-
 ```css
 .product-grid {
   display: grid;
@@ -186,7 +176,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Newly available since September 2023. Firefox 71+, Safari 16+, Chrome 117+. ~92-93%.
 
 **Recipe — aligned card internals:**
-
 ```css
 .cards {
   display: grid;
@@ -203,7 +192,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - Subgrid child must first span tracks: `grid-row: span 3` BEFORE `grid-template-rows: subgrid`.
 - Subgrid doesn't create implicit tracks; must exist on parent.
 - Gap on subgrid child overrides parent's gap for those tracks.
@@ -218,7 +206,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Widely available. ~96%.
 
 **Recipe:**
-
 ```css
 .container {
   padding-inline: clamp(1rem, 4vw, 3rem);
@@ -240,7 +227,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 ```
 
 **Pitfalls:**
-
 - Mixing physical (`padding-left`) and logical (`padding-inline-start`) creates cascade chaos.
 - RTL flips inline-start to right; block-start stays top unless `writing-mode: vertical-*`.
 
@@ -254,7 +240,6 @@ h1 { font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3.5rem); line-height: 1.1; }
 **Browser support:** Baseline Newly available December 2023. ~94%.
 
 **Recipe:**
-
 ```css
 .grid:has(> :nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
 
@@ -269,7 +254,6 @@ body:has(dialog[open]) { overflow: hidden; }
 ```
 
 **Pitfalls:**
-
 - `:has()` is unforgiving — invalid selectors inside invalidate the whole rule.
 - Performance fine for typical DOM, but `*:has(...)` or deep chains can degrade in large apps.
 
@@ -283,7 +267,6 @@ body:has(dialog[open]) { overflow: hidden; }
 **Browser support:** Baseline Widely available since 2015. ~99%. `@supports selector()` since 2022.
 
 **Recipe:**
-
 ```css
 @supports (aspect-ratio: 1) { .media { aspect-ratio: 16 / 9; } }
 @supports selector(:has(*)) { .card:has(img) { grid-template-columns: 1fr 2fr; } }
@@ -292,7 +275,6 @@ body:has(dialog[open]) { overflow: hidden; }
 ```
 
 **Pitfalls:**
-
 - Only tests **syntax** parsing — can't detect bugs in feature.
 - `@supports not (X)` true in browsers without `@supports` itself AND those without X.
 

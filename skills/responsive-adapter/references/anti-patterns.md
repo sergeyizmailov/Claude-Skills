@@ -11,7 +11,6 @@ Each anti-pattern has: detection (regex / visual symptom), why it breaks, fix.
 **Symptom:** Mobile browsers render at 980px logical width and shrink-fit. Fluid CSS frozen. Tap-targets sub-pixel. `100vw` broken.
 
 **Fix:**
-
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 ```
@@ -33,14 +32,12 @@ Each anti-pattern has: detection (regex / visual symptom), why it breaks, fix.
 ## A3. Fixed pixel width / `min-width` lock-out
 
 **Detect:**
-
 - `width:\s*\d{3,}px` on containers
 - `min-width:\s*\d{3,}px` on layout elements
 
 **Symptom:** Element refuses to shrink, blows out body, horizontal page scroll on viewports narrower than the value. `min-width` is the silent killer — nothing visually overflows at desktop sizes.
 
 **Fix:**
-
 ```css
 .container { width: 100%; max-width: 75rem; margin-inline: auto; }
 .card      { min-width: 0; inline-size: 100%; }
@@ -56,13 +53,11 @@ Each anti-pattern has: detection (regex / visual symptom), why it breaks, fix.
 **Symptom:** iOS Safari zooms viewport on focus, doesn't zoom back. Still reproduces iOS 18 / iPhone 16 as of late 2025.
 
 **Fix (simple):**
-
 ```css
 input, textarea, select { font-size: 16px; }
 ```
 
 **Fix (if 14px visual mandatory):**
-
 ```css
 @supports (-webkit-touch-callout: none) {
   input, textarea, select {
@@ -84,7 +79,6 @@ Never fix this with `maximum-scale=1` — see A2.
 **Symptom:** `vh` is calculated against the largest viewport (chrome retracted). With URL bar visible at load, the element is taller than screen. iOS 18 still doesn't update `window.innerHeight` when address bar expands.
 
 **Fix:**
-
 ```css
 .hero {
   height: 100vh;       /* fallback for very old browsers */
@@ -108,7 +102,6 @@ Baseline since June 2025.
 **Symptom:** Fails WCAG 2.2 SC 2.5.8 (24×24 minimum). 25%+ mis-tap rate per Apple's research.
 
 **Fix:**
-
 ```css
 .icon-btn {
   inline-size: 44px;
@@ -130,7 +123,6 @@ Baseline since June 2025.
 **Symptom:** Wide table forces document width to its intrinsic content width → body-level horizontal scroll.
 
 **Fix (with a11y):**
-
 ```html
 <div role="region" aria-labelledby="tbl-cap" tabindex="0" class="table-wrap">
   <table>
@@ -139,7 +131,6 @@ Baseline since June 2025.
   </table>
 </div>
 ```
-
 ```css
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-wrap:focus-visible { outline: 2px solid currentColor; }
@@ -156,7 +147,6 @@ Baseline since June 2025.
 **Symptom:** Image renders at intrinsic pixel width, pushing viewport wider.
 
 **Fix (global rule):**
-
 ```css
 img, svg, video, canvas {
   max-inline-size: 100%;
@@ -175,7 +165,6 @@ Keep `width`/`height` HTML attrs — browser uses them for CLS-preventing aspect
 **Symptom:** Sits under iOS home indicator / Android nav gestures.
 
 **Fix:**
-
 ```css
 .bottom-nav {
   position: fixed;
@@ -195,7 +184,6 @@ Note: sticky inside `overflow: auto` or transformed ancestors breaks on iOS Safa
 **Symptom:** Permanently steals viewport width on mobile.
 
 **Fix:**
-
 ```css
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 64rem) {
@@ -214,7 +202,6 @@ For mobile sidebar reveal, use `<dialog>` + `showModal()` — see `menus-drawers
 **Symptom:** User text-size preferences and zoom >200% can't rescale UI proportionally. Defeats WCAG 1.4.4.
 
 **Fix:**
-
 ```css
 :root { font-size: 100%; } /* respect user default */
 .heading {
@@ -235,7 +222,6 @@ For mobile sidebar reveal, use `<dialog>` + `showModal()` — see `menus-drawers
 **Symptom:** Rivers (vertical gaps). Severely harms legibility on mobile, dyslexia-affecting.
 
 **Fix:**
-
 ```css
 p { text-align: start; hyphens: auto; }
 @media (min-width: 60rem) {
@@ -252,7 +238,6 @@ p { text-align: start; hyphens: auto; }
 **Symptom:** `100vw` includes scrollbar width on desktop. Transforms create new containing blocks that escape parent clipping.
 
 **Fix:**
-
 ```css
 html { overflow-x: clip; }   /* `clip` does NOT create scroll container, unlike `hidden` */
 .full-bleed {
@@ -282,7 +267,6 @@ html { overflow-x: clip; }   /* `clip` does NOT create scroll container, unlike 
 **Symptom:** Touch devices simulate hover on first tap → double-tap with no affordance. Stylus / keyboard blocked.
 
 **Fix:**
-
 ```css
 .menu:has(:focus-within) .submenu,
 .menu:hover .submenu { display: block; }
@@ -333,7 +317,6 @@ Plus structural:
 ---
 
 ## Sources
-
 - web.dev/articles, defensivecss.dev
 - ishadeed.com responsive guide
 - css-tricks.com (responsive tables, fluid typography)

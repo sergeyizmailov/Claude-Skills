@@ -3,11 +3,18 @@
   "config": {
     "default": true,
     "MD013": false, // line length — descriptions and tables run long by design
+    "MD012": false, // multiple blank lines — allowed in long reference documents
+    "MD022": false, // compact headings — skill references favor dense scanning
+    "MD029": false, // ordered-list prefixes — workflows may restart numbering by phase
+    "MD031": false, // compact fenced blocks — common in implementation references
+    "MD032": false, // compact lists — common in checklists and reference catalogs
     "MD033": false, // inline HTML — allowed where Markdown can't express it
+    "MD034": false, // bare URLs — references intentionally preserve source addresses
     "MD041": false, // first line need not be a top-level heading (frontmatter precedes it)
     "MD024": { "siblings_only": true }, // repeated headings ok unless siblings
     "MD040": false, // fenced blocks without a language (ASCII trees, plain output)
     "MD046": false, // mixed code block styles
+    "MD058": false, // compact tables — acceptable in reference catalogs
     "MD060": false // table pipe padding style — cosmetic
   },
   "ignores": ["node_modules"]
