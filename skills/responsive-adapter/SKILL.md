@@ -60,7 +60,7 @@ Detect what you're working with before you touch anything.
    - Mix is common — record what each file uses.
 3. **Enumerate pages/components in scope.** For a single HTML file: just that file. For a Next.js project: `app/` or `pages/` routes. For an admin: each route under the panel.
 4. **Note the existing breakpoint system** if any. Don't introduce a parallel one — extend the existing one.
-5. **Open the page in a browser** (via any browser-automation tool — Playwright, Puppeteer, or an equivalent agent browser skill — against a dev server the user is running) at desktop width 1440px and capture a **baseline screenshot**. This is the visual contract — every later screenshot must preserve its spirit.
+5. **Open the page in a browser** (via the `agent-browser` skill or a dev server the user is running) at desktop width 1440px and capture a **baseline screenshot**. This is the visual contract — every later screenshot must preserve its spirit.
 
 **Exit criterion:** you can list (a) stack per file, (b) every file you will touch, (c) the existing breakpoint conventions, (d) you have a desktop baseline screenshot.
 
@@ -112,11 +112,9 @@ Order of fixes (earlier fixes prevent later breakage):
 3. **Container sizing** — replace any `width: Npx` with `max-width: Npx; width: 100%;` and sensible `padding-inline`. Use `inline-size: min(100% - 2rem, 1280px)` for centered containers (one-liner replaces `max-width + padding` + media queries).
 
 4. **Layout primitives** — wrap flex/grid with sane wrapping. Switch fixed grids to:
-
    ```css
    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
    ```
-
    `min(100%, 280px)` is the magic that makes 320px viewports safe.
 
 5. **Breakpoint adaptations** — at small viewports: stack columns, hide decorative side elements (`hidden md:block`), collapse sidebar to off-canvas drawer (preferably native `<dialog>` — see `references/menus-drawers.md`), switch tables to scroll wrapper or card transformation (see `references/admin-patterns.md`).
@@ -142,7 +140,7 @@ After all fixes, do a **diff sanity check**: scan your own changes for the forbi
 
 Static scans miss runtime issues (computed layouts, JS-driven UI, font fallbacks, real iOS Safari behavior). Verify in a real browser.
 
-Use any browser-automation tool (Playwright, Puppeteer, or an equivalent agent browser skill) to:
+Use the `agent-browser` skill to:
 
 1. **Start a local server** for the page if not running:
    - Static HTML: `python3 -m http.server 8000` (or `npx serve`)

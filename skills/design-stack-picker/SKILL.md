@@ -1,13 +1,6 @@
 ---
 name: design-stack-picker
-description: >-
-  Build or restyle frontend UI by selecting proven building blocks: icon sets, fonts,
-  component/block libraries, accessible primitives, imagery sources, color systems,
-  motion, shadows, spacing, and image optimization patterns. Use for landing pages,
-  ecommerce, dashboards, web apps, emails, single components, and any task involving
-  visual assets or frontend design choices. Prefer existing project systems first;
-  add libraries only when they solve a real gap. See resources.md for the catalog and
-  patterns.md for implementation snippets.
+description: "Use when building or restyling frontend UI and choosing building blocks — icon sets, fonts, component/block libraries, accessible primitives, imagery sources, color systems, motion, shadows, spacing, and image optimization. For landing pages, ecommerce, dashboards, web apps, emails, and single components. Prefer existing project systems first; see resources.md for the catalog and patterns.md for implementation snippets."
 ---
 
 # design-stack-picker
