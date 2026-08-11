@@ -35,6 +35,11 @@ click_datetime/postback_datetime). CSV export via the `.csv` button. This is the
 source for completion-curve / lag-cohort analysis (03). Aggregate reports above
 are click-date based; per-conversion timing lives here.
 
+Replay/rebuild (Binom equivalent of Keitaro import — for the conversion ledger,
+03): update/add conversions for existing clicks via postback, conversion pixel,
+or manual update (docs.binom.org/update-conv.php), keyed by `cnv_id` +
+`cnv_status` (+ payout). Use it to restore a period from your raw ledger.
+
 ## Legacy cost update
 
 `?page=save_update_costs&camp_id=ID&date=12&date_s=&date_e=&timezone=-7&cost=170.95&api_key=KEY`
