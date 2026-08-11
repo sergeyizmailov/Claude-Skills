@@ -7,10 +7,14 @@ Live (else creative creation fails).
 ## Structures
 
 - 1-1-3 (1 camp, 1 adset, 3 ads): probe unknown accounts for delivery. Quirk:
-  Meta dumps ~90% of adset budget into ONE ad — unfair for creative testing.
-- 1-3-1 (3 adsets, 1 ad each): fair creative test.
-- CBO (daily_budget on campaign) is the common team pattern; even 1-3-1+CBO
-  favors one adset. ABO splits cleanly but multiplies spend.
+  Meta dumps ~90% of adset budget into ONE ad — useless for comparing creatives.
+- 1-3-1 (3 adsets, 1 ad each): cleaner SCREENING (each creative gets its own
+  adset budget), but NOT a fair/causal test — audiences overlap across adsets and
+  auction conditions differ, so read winners as directional. For a causal read use
+  the A/B Test tool (measurement-experimentation-ops).
+- CBO (daily_budget on campaign) is the common team pattern; 1-3-1+CBO is even
+  less balanced (CBO reallocates toward the early leader). ABO splits budget
+  evenly but multiplies spend — still not overlap-free.
 - Scale: winners → 1-1-3 higher budget, or horizontal (more accounts), +20-30%/day.
 
 ## Bid strategies (set explicitly at campaign creation)
