@@ -188,50 +188,50 @@ For a true landing-page CVR, use click-only conversion data or join analytics/ba
 
 ### 1. Cheap CTR, expensive purchase
 
-**Data:** CPM and CTR improved; click-to-LPV stable; LPV CVR fell; refunds rose.
-**Diagnosis:** creative expanded click volume by changing the promise or buyer mix, while the page/product economics worsened.
+**Data:** CPM and CTR improved; click-to-LPV stable; LPV CVR fell; refunds rose.  
+**Diagnosis:** creative expanded click volume by changing the promise or buyer mix, while the page/product economics worsened.  
 **Action:** compare promise/offer, device, new-customer share, paid orders, and refunds. Do not call the creative a winner from CPC.
 
 ### 2. Video “winner” receives most spend
 
-**Data:** one ad has best CPA and most spend; challengers have little delivery.
-**Diagnosis:** allocation and selection are confounded.
+**Data:** one ad has best CPA and most spend; challengers have little delivery.  
+**Diagnosis:** allocation and selection are confounded.  
 **Action:** treat the result as an operational winner; use an overlap-free experiment if the causal creative difference matters.
 
 ### 3. Strong hook, weak body
 
-**Data:** hook rate above the matched cohort; hold rate and link CTR below it.
-**Diagnosis:** pattern interrupt works, but message/proof does not earn continued attention or intent.
+**Data:** hook rate above the matched cohort; hold rate and link CTR below it.  
+**Diagnosis:** pattern interrupt works, but message/proof does not earn continued attention or intent.  
 **Action:** keep the opening treatment, replace the bridge/mechanism, and test against the same offer and duration.
 
 ### 4. Weak hook, strong conversion among clickers
 
-**Data:** low hook and CTR; click-to-LPV and page CVR strong.
-**Diagnosis:** downstream offer works for a small self-selected group; reach/attention is the constraint.
+**Data:** low hook and CTR; click-to-LPV and page CVR strong.  
+**Diagnosis:** downstream offer works for a small self-selected group; reach/attention is the constraint.  
 **Action:** create clearer variants of the same proposition before changing the page.
 
 ### 5. Instant-form CPL falls, sales do not rise
 
-**Data:** raw CPL halves; contact and qualified rates fall; closed CAC rises.
-**Diagnosis:** the campaign optimized form completion, while form friction or promise quality changed buyer intent.
+**Data:** raw CPL halves; contact and qualified rates fall; closed CAC rises.  
+**Diagnosis:** the campaign optimized form completion, while form friction or promise quality changed buyer intent.  
 **Action:** restore qualification, audit response time, and feed qualified/closed events where appropriate.
 
 ### 6. Meta ROAS rises after CAPI launch
 
-**Data:** Meta-attributed purchases rise; backend orders are flat; browser/server duplicates appear.
-**Diagnosis:** measurement coverage or duplication changed, not necessarily demand.
+**Data:** Meta-attributed purchases rise; backend orders are flat; browser/server duplicates appear.  
+**Diagnosis:** measurement coverage or duplication changed, not necessarily demand.  
 **Action:** reconcile event/order IDs and deduplication before claiming performance lift.
 
 ### 7. App CPI falls, D7 value falls faster
 
-**Data:** install volume rises and CPI falls; activation, retention, and D7 ROAS decline.
-**Diagnosis:** optimization found cheaper installers rather than valuable users.
+**Data:** install volume rises and CPI falls; activation, retention, and D7 ROAS decline.  
+**Diagnosis:** optimization found cheaper installers rather than valuable users.  
 **Action:** test a downstream activation/value event and keep cohort payback as the guardrail.
 
 ### 8. High-AOV campaign looks inefficient after one week
 
-**Data:** spend matures faster than purchases; assisted and delayed orders appear later.
-**Diagnosis:** evaluation window is shorter than the purchase-lag distribution.
+**Data:** spend matures faster than purchases; assisted and delayed orders appear later.  
+**Diagnosis:** evaluation window is shorter than the purchase-lag distribution.  
 **Action:** define the post-treatment window from observed lag and use a lift/geo design when the investment decision is material.
 
 ## 8. Reporting template

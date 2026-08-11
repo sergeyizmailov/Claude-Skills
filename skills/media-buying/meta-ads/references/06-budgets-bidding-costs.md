@@ -14,7 +14,7 @@ Set at the ad set level: **Ads Manager → Ad set → Budget & schedule → Budg
 - Easier to scale: change the number and pacing adjusts immediately. Default recommendation for most advertisers.
 
 ### Lifetime budget
-- A total amount across a fixed date range (requires an end date). Meta paces spend unevenly — some days more, some less — and only guarantees the *total* is spent by the end date. Back-loaded spending (slow start, rush at the end) is normal behavior, not a bug.
+- A total amount across a fixed date range (requires an end date). It is a spending **cap over the schedule, not a guarantee of full spend** — Meta paces spend unevenly (some days more, some less) and optimizes for results within the cap; thin auctions, tight cost/bid caps, or narrow targeting can leave it underspent. Back-loaded spending (slow start, rush at the end) is normal, not a bug.
 - The only budget type that unlocks **ad scheduling (dayparting)** — running ads only at specific hours/days, e.g. weekdays 9:00–17:00. Option appears under Budget & schedule only when lifetime is selected.
 - Best for: fixed-window promotions (holiday sale, event, product drop) and dayparting needs.
 
@@ -245,3 +245,6 @@ Derive test budget from business economics and uncertainty rather than a global 
 - **AdAmigo geo table (source 15)** is vendor-compiled "projections for 2026" with undisclosed methodology — directional only; US $23 CPM sits at the high end of other estimates ($13–23).
 - **WordStream 2025 Instagram-vs-Facebook split**: the LocaliQ 2025 study covers Facebook placements; Instagram-only medians by industry from a comparably large panel were not found (Instagram figures rely on adlibrary/AdAmigo aggregates).
 - **"75% daily overspend" rule** rests on practitioner reporting (Foxwell via LaFactory); Meta's current official daily-spend flexibility wording not directly verified.
+
+<!-- Changelog 2026-08-11 (peer-review, gpt): corrected the lifetime-budget line — it is a spending CAP over the schedule, not a guarantee the full amount is spent by the end date (delivery can underspend in thin auctions / under tight caps). -->
+

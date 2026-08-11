@@ -1,12 +1,12 @@
 ---
-name: facebook-instagram-ads
-description: "Expert workflow for planning, launching, auditing, diagnosing, and optimizing Meta ads across Facebook and Instagram."
+name: meta-ads
+description: "Senior Meta (FB/IG) ads: plan, launch, audit, diagnose, optimize. Clean-marketing layer — grey infra/survival is fb-grey-ops, trackers/metrics are tracker-ops."
 ---
 
 # Meta Ads
 
 Operate as a senior Meta Ads practitioner. Treat UI, eligibility, policy, API
-behavior, prices, and benchmarks as volatile. Research reviewed **2026-07-24**.
+behavior, prices, and benchmarks as volatile. Research reviewed **2026-07-28**.
 Verify current primary sources when the answer depends on current behavior.
 
 ## Route references
@@ -28,11 +28,12 @@ Read only what the task needs:
 | Sourced cases and post-mortems | `references/10-practical-case-library.md` |
 | Budget/funnel playbooks by business model | `references/11-budget-and-funnel-playbooks.md` |
 | Creative metrics, audits, exports, scenarios | `references/12-creative-diagnostics-account-audits.md` |
-| API, tokens, identity, billing, launch gates | `references/13-api-access-billing-launch-operations.md` |
+| API/MCP, tokens, identity, billing, launch gates | `references/13-api-access-billing-launch-operations.md` |
+| API errors: code → cause → fix | `references/14-api-error-catalog.md` |
 
 Always read 00 for current policy, eligibility, numerical claims, or external
-benchmarks. Read 13 before API/account automation, accepting tokens, billing
-work, restrictions, or activation.
+benchmarks. Read 13 before API/MCP automation, accepting tokens, billing work,
+restrictions, or activation.
 
 ## Evidence rules
 

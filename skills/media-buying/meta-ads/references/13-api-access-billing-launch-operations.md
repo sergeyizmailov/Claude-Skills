@@ -1,8 +1,8 @@
 # Meta Marketing API, Billing, and Launch Operations
 
-Last reviewed: 2026-07-24
+Last reviewed: 2026-07-28
 
-Use this reference for server-to-server Marketing API setup, System User tokens,
+Use this reference for Marketing API and Ads MCP automation, System User tokens,
 Page/Instagram advertising identity, payment readiness, restrictions, and final
 activation. Meta UI labels, Graph versions, permissions, app-mode rules, and
 support availability change; verify the live account and current official
@@ -16,12 +16,13 @@ developer documentation before an irreversible or spend-producing action.
 4. Readiness tests
 5. Page and Instagram identity
 6. App state and access levels
-7. Billing and payment diagnosis
-8. Restriction and support flow
-9. Safe API launch sequence
-10. Failure map
-11. Observed post-mortem
-12. Sources and uncertainty
+7. Ads MCP governance
+8. Billing and payment diagnosis
+9. Restriction and support flow
+10. Safe automation launch sequence
+11. Failure map
+12. Observed post-mortem
+13. Sources and uncertainty
 
 ## 1. Ownership model
 
@@ -190,7 +191,42 @@ user's behalf. Re-test the paused creative after the user completes the choice.
 - A successful token generation does not prove app review, access level, asset
   tasks, creative identity, or delivery eligibility.
 
-## 7. Billing and payment diagnosis
+## 7. Ads MCP governance
+
+Ads MCP availability and controls are account/rollout-dependent. Distinguish
+Meta's connector shown in Business Suite from a third-party MCP server and from
+direct Marketing API access; they have different operators, credentials, and
+trust boundaries.
+
+A secondary report dated 2026-07-27 shows
+`Business Suite -> Integrations -> Ads MCP Server` controls for:
+
+- read-only versus actions in the ad account;
+- budget editing with limits;
+- creating campaigns, ad sets, and ads initially off;
+- audience, creative, and delivery-status changes.
+
+It also reports that these controls may be enabled by default. Treat the path,
+defaults, and availability as **unverified** until confirmed in the exact
+portfolio. When present:
+
+1. Start read-only; verify the connected portfolio and ad accounts.
+2. Enable only the required write categories. Keep budget, creative, audience,
+   status, and activation writes off for analysis-only agents.
+3. Set the smallest workable budget ceiling. A daily budget is not itself an
+   agent permission boundary.
+4. Require new objects to remain off/paused and review stable IDs, identity,
+   targeting, placements, destination, schedule, and budget before activation.
+5. Keep activation and budget increases human-approved; recheck the live
+   integration controls before each spend-producing session.
+6. Review agent actions and revoke the integration if the operator, server, or
+   requested permissions are unclear.
+
+Never send a Marketing API token to an unknown MCP provider. Prefer Meta-hosted
+authorization when independently verified; otherwise inspect the server,
+credential storage, logging, deletion, and revocation model first.
+
+## 8. Billing and payment diagnosis
 
 The Marketing API does not replace the trusted Meta UI for entering card
 details, 3DS, temporary-hold codes, or payment-method verification. The user
@@ -221,7 +257,7 @@ A default or verified replacement card does not automatically clear a
 restriction caused by an earlier failed payment. Confirm restoration separately
 in Account Quality and by a paused write probe.
 
-## 8. Restriction and support flow
+## 9. Restriction and support flow
 
 1. For a personal-profile or Page feature restriction, inspect Facebook
    **Account Status**. For advertising/business assets, open Business Support
@@ -254,7 +290,7 @@ Do not include a token, app secret, full card number, CVV, verification code, or
 identity document in the message unless the official secure upload flow
 explicitly requests the relevant document.
 
-## 9. Safe API launch sequence
+## 10. Safe automation launch sequence
 
 Build for reversibility:
 
@@ -284,7 +320,7 @@ the final budget, schedule, destination, and creative set. “Do everything”
 authorizes setup within scope, not hidden changes to privacy choices, card
 details, legal declarations, or unrestricted spend.
 
-## 10. Failure map
+## 11. Failure map
 
 | Symptom | First checks |
 |---|---|
@@ -297,7 +333,7 @@ details, legal declarations, or unrestricted spend.
 | Campaign created but no delivery | Effective statuses, review, billing, schedule, bid, audience, identity, creative |
 | Old paused campaign cannot start | Refresh dates, budget period, policy/review state, creative availability |
 
-## 11. Observed post-mortem
+## 12. Observed post-mortem
 
 **Evidence: account-specific operational observation, not a universal Meta rule.**
 
@@ -320,7 +356,7 @@ Transferable lessons:
 4. Preserve paused drafts while resolving access; refresh schedules afterward.
 5. Do not keep swapping cards or rebuilding portfolios to bypass enforcement.
 
-## 12. Sources and uncertainty
+## 13. Sources and uncertainty
 
 Official/current sources to verify:
 
@@ -337,6 +373,8 @@ Official/current sources to verify:
   https://www.facebook.com/business/ads/review-policy-guidelines
 - Business Support Home: https://business.facebook.com/business-support-home/
 - Meta Status: https://metastatus.com/
+- Ads MCP controls report (secondary; verify in live Business Suite):
+  https://fbki.la/v-business-suite-upravljat-servera-ads-mcp
 
 The official Postman collection documents bearer authorization, System User
 token options, Standard versus Advanced Access for own versus third-party ad
@@ -345,3 +383,6 @@ Center pages often require a live login, so exact billing and support click
 paths must be verified in-product. Error subcodes, app-mode requirements,
 permission combinations, and Accounts Center privacy prompts are
 rollout/account-specific unless a current primary source states otherwise.
+No public primary Meta documentation confirming the reported Ads MCP control
+path and defaults was located during the 2026-07-28 review; keep those details
+unverified until the live portfolio or an official Meta source confirms them.
