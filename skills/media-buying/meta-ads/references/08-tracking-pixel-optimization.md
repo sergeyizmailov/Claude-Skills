@@ -182,8 +182,6 @@ Use IDs as stable join keys. If analysts also need readable names, add separate 
 
 ## 8. Creative testing frameworks used by pros
 
-- **Angles first, executions second.** Test materially different, policy-compliant messaging angles (problem context, social proof, offer/value, education, product demonstration) before minor visual changes. Vendor claims about faster angle testing are directional and not universal. (GoStellar, 2026-06: https://www.gostellar.app/blog/ab-testing-facebook-ads-7-proven-criteria-for-results; AdManage framework: https://admanage.ai/blog/facebook-ad-creative-testing-framework)
-- **One variable at a time** per test: hook (first 3s of video / headline), then visual style, then format, then CTA. Changing audience + creative + bid simultaneously = zero learnings. (Growwithba, 2026-04: https://growwithba.com/blog/facebook-ads-kill-criteria)
 - **Structure by angle in CBO:** one campaign, ad sets per angle (same targeting across sets for fairness), 2–3 creatives per set consistent with that angle. (PublicityPort, 2025-04: https://publicityport.com/awc/3964/)
 - **Volume framework (ecom, 2026):** Week 1 define 3–4 angles → generate 5–10 variations per angle (vary format, hook, visual style: lifestyle/product/UGC) → 20–40 variations → test 2 weeks, iterate. (InsightIQ, 2026-02: https://www.insight-iq.ai/blog/ai-ad-creative-testing-ecommerce)
 - **Challenger cadence:** maintain enough creative candidates to replace declining concepts without fragmenting delivery. The appropriate count and evaluation threshold depend on spend, volume, and the test question. (Atria, 2026-07: https://www.tryatria.com/blog/meta-creative-fatigue-diagnose-and-fix-2026)
@@ -196,7 +194,6 @@ Use IDs as stable join keys. If analysts also need readable names, add separate 
 
 ### When to kill an ad
 
-- **Rule zero:** set kill criteria in advance; never decide emotionally on one bad day. (Growwithba, 2026-04)
 - Avoid reacting to normal early variance, but do not impose a universal seven-day hold. Define a minimum data requirement from conversion delay, expected conversion rate, spend risk, and test purpose. Stop immediately for policy, tracking, brand-safety, or severe funnel failures.
 - Practitioner multiples such as "3× target CPA with zero conversions" can be used as pre-registered risk limits, not as proof of statistical significance. Also compare CTR, landing-page-view rate, CVR, lead quality, and backend outcomes against the account's own baseline.
 - Meta documents learning and learning-limited delivery but does not publish a universal current requirement of exactly 50 events in seven days for every optimization setup. Use the live Delivery status and observed stability; do not switch to a low-quality proxy event merely to satisfy a legacy heuristic. (Practitioner history: https://www.jonloomer.com/qvt/how-to-set-your-facebook-ads-budget/)

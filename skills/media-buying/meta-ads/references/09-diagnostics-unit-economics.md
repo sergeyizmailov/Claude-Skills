@@ -22,40 +22,14 @@ If inputs are missing, separate facts from assumptions and request only the vari
 
 ## 2. Unit economics
 
-Use contribution economics rather than revenue alone.
+Derive targets from contribution margin (standard break-even math assumed). The non-obvious disciplines:
 
-```text
-contribution_per_order = net_revenue - variable_costs
-contribution_margin_rate = contribution_per_order / net_revenue
-break_even_purchase_CPA = contribution_per_order
-break_even_ROAS = 1 / contribution_margin_rate
-maximum_lead_CPL = maximum_customer_CAC × lead_to_customer_rate
-maximum_raw_lead_CPL = maximum_customer_CAC × raw_lead_to_qualified_rate × qualified_to_customer_rate
-```
-
-`net_revenue` should reflect discounts, returns, refunds, and taxes when appropriate. Variable costs can include product cost, fulfillment, payment fees, commissions, and incremental support. If repeat purchases are included, state the observation window, retention evidence, discount rate, and cash-flow constraint; do not use an aspirational lifetime value as the default allowable CAC.
-
-A target below break-even is normally required to fund overhead and profit:
-
-```text
-target_CPA = contribution_per_order × allowable_acquisition_share
-target_ROAS = 1 / (contribution_margin_rate × allowable_acquisition_share)
-```
-
-For lead generation, optimize against qualified and closed outcomes whenever volume and data flow allow it. A cheap raw lead can be economically worse than an expensive high-intent lead.
+- Don't treat aspirational LTV as allowable CAC. If you count repeat purchases, state the observation window, retention evidence, discount rate, and cash-flow constraint.
+- Lead gen: allowable raw-lead CPL = max CAC × raw→qualified rate × qualified→customer rate; optimize against qualified/closed outcomes when volume and data flow allow, not raw-lead count.
 
 ## 3. Metric decomposition
 
-```text
-spend = impressions / 1000 × CPM
-link_clicks = impressions × link_CTR
-landing_page_views = link_clicks × click_to_LPV_rate
-conversions = landing_page_views × landing_page_CVR
-CPA = spend / conversions
-ROAS = attributed_revenue / spend
-```
-
-This decomposition prevents treating every high CPA as a targeting problem. Evaluate both the level and the change relative to a comparable account baseline.
+Decompose CPA to locate the constraint (CPM → link CTR → click-to-LPV → CVR), and judge each factor against a comparable account baseline — level AND change, not one blended number.
 
 ## 4. Symptom-first diagnostic tree
 
@@ -90,23 +64,13 @@ Choose a source of truth per decision. Meta is useful for delivery optimization 
 
 ## 6. Test design
 
-Write the test before launch:
+Generic experiment hygiene assumed; the decisions that are Meta/vertical-specific:
 
-- Decision: what action will change if the result differs?
-- Hypothesis: mechanism, not merely “variant B will win.”
-- Unit: campaign, ad set, ad, audience, landing page, or offer.
-- Primary metric: one decision metric aligned with the business outcome.
-- Guardrails: spend, policy, lead quality, refund rate, page reliability, and brand risk.
-- Minimum data: based on baseline rate, minimum detectable effect, conversion delay, and acceptable error.
-- Allocation: randomized Meta Experiments when causal confidence matters; operational splits only for directional screening.
-- Stop conditions: tracking/policy failure, maximum loss, or pre-specified statistical/operational criterion.
-- Analysis window: long enough to include conversion lag and representative weekday/weekend behavior where relevant.
-
-Changing audience, creative, offer, page, and budget together produces a new operating state, not an explanation of which variable caused the change.
+- Allocation: randomized Meta Experiments when causal confidence matters; parallel/operational splits are directional SCREENING only (audiences overlap, auction differs) — route causal reads to the measurement layer.
+- Window ≥ the conversion lag; judge on the click-date cohort (tracker-ops), not conversion-date volume mid-lag.
 
 ## 7. Stop, scale, and rollback logic
 
-- Use target CPA/ROAS derived from unit economics, not a generic industry benchmark.
 - Treat practitioner rules such as fixed days, fixed event counts, “3× CPA,” or fixed budget-edit percentages as optional priors to validate.
 - Stop immediately for policy violations, broken tracking, wrong geography, incorrect offer, runaway spend, or a damaged funnel.
 - For normal variance, wait for the pre-specified evidence threshold and observed conversion lag.
@@ -125,5 +89,3 @@ A useful audit or recommendation should state:
 6. Recommended action, expected mechanism, and risk.
 7. Test design, success metric, stop condition, and review date.
 8. What must be verified in the live account because availability or policy is rollout-dependent.
-
-Avoid false precision. A range is only useful when its source population resembles the account and the decision would change across that range.

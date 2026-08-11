@@ -18,14 +18,9 @@ This reference turns business constraints into an operating plan. It does not de
 
 ## 1. Budget tiers by decision capacity
 
-Start with contribution economics and an account-specific expected CPA or CPL range. Use conservative and optimistic scenarios rather than one forecast.
+Start with contribution economics and an account-specific expected CPA/CPL range (conservative + optimistic scenarios). Budget capacity in decision terms = how many results the test buys ÷ results needed per cell.
 
-```text
-expected_result_capacity = test_budget / expected_cost_per_business_result
-decision_cells_supported = expected_result_capacity / results_required_per_cell
-```
-
-`results_required_per_cell` is not a universal Meta threshold. Derive it from the baseline rate, minimum effect worth acting on, desired confidence, conversion delay, and acceptable loss. If those inputs are unknown, use a pilot to estimate them and describe the result as directional.
+`results_required_per_cell` is not a universal Meta threshold. Derive it from the baseline rate, minimum effect worth acting on, desired confidence, conversion delay, and acceptable loss. If those inputs are unknown, pilot to estimate them and call the result directional.
 
 | Tier | Operational definition | Appropriate design | Avoid |
 |---|---|---|---|
