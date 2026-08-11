@@ -71,6 +71,19 @@ without bid_amount (error 1815857, field-observed). Enum:
   #3738001, field-observed; needs history). Budgets in cents, clear IDs, imports
   PAUSED.
 
+## Spend warm-up (fresh accounts, ~d0-3)
+
+Slamming a fresh/low-history account with a high day-0 budget is a classic review
+trigger and often just tanks delivery. Common practice: open conservative and step
+up over the first days as the account proves stable, not launch at full target
+budget. The exact ramp (start budget, step, days) is account/GEO/vertical-specific
+— a practitioner prior to set with the TL, not a rule; don't hardcode a number.
+- Step-up signals: stable delivery, no restriction flags, CPL in range on a
+  matured/nowcast cohort (tracker-ops/03).
+- The tension to balance: too timid a start STARVES the optimization event and
+  keeps the ad set learning-limited (unstable CPL) — warm-up caution vs clearing
+  the learning-volume floor is the real trade, not "low = safe".
+
 ## Metric levers (grey application; theory in meta-ads/06 & 12)
 
 Account selection + creative volume move CPL far more than any budget trick

@@ -52,6 +52,25 @@ curl: `-x socks5h://user:pass@ip:port`.
 - Ad account disabled/restricted: normal background rate. Don't appeal fresh
   agency accounts — request replacement, keep a reserve pipeline.
 
+## Domain / pixel rotation cadence (rotate before burn, not after)
+
+Cadence is signal-driven, not a fixed clock:
+
+- Domain: rotate on the SIGNALS, not a timer — rising bot_share / moderation
+  crawlers on the white page, a spam/reputation flag, SSL or blocklist hit, or LP
+  CTR collapse with normal clicks (tracker-ops/03). Keep fresh domains
+  pre-provisioned (valid SSL, DNS propagated, slightly aged) so rotation is
+  instant; a same-day scramble bleeds spend. Rotate the domain, not the whole
+  funnel, so you can attribute the burn.
+- Pixel: it's an asset WITH history — rotating it is costly (new pixel = cold,
+  re-learns, custom audiences reset), so don't rotate reactively. The real lever
+  is PRE-SEGMENTING to contain blast radius: separate pixels per domain-cluster /
+  risk tier instead of one pixel across everything, so a burned funnel doesn't
+  take the shared pixel (and its learning) down with it. By the time a pixel is
+  flagged it's usually too late to save — the decision is upstream.
+- Never rotate domain + pixel + creative + account together — you lose which one
+  actually burned (fb-grey-ops/06 balanced designs).
+
 ## Where sessions live (current UI)
 
 Accounts Center → Password and security → Where you're logged in

@@ -70,6 +70,25 @@ costs:[{start_date,end_date,timezone,currency,cost, filters:{ad_campaign_id:"J41
 - Click-id flow: source id → Keitaro → offer via `{external_id}`; network
   returns it as `subid`. sub_id_1..30 = extra markup pass-through.
 
+## Postback drill (verify before trusting any conversion number)
+
+Before scaling a new funnel/offer/tracker link, fire a REAL test conversion
+end-to-end and confirm it lands right — don't assume the postback works because
+the URL looks correct.
+
+- Fire it: trigger the offer's conversion (or ask the network for a test fire),
+  OR hit the postback URL manually with a real click's `subid` + the agreed
+  `status` (+`payout`, +`tid`).
+- Confirm on the tracker: conversion appears on the RIGHT click (subid), with the
+  status mapped to YOUR payout metric, correct payout, correct campaign/sub_id
+  split. Read the incoming-postback log to see exactly what arrived vs expected.
+- Catches: subid dropped/renamed in the chain (lands on no click → invisible
+  conversions), status-string mismatch (network `deposit` vs your scheme), missing
+  or zero payout, missing `tid` (rebills overwrite instead of stacking).
+- Re-drill after ANY change to the redirect chain, offer link, status scheme, or
+  tracker. Tracker-side complement to the funnel click-through test
+  (senior-buyer-ops/03).
+
 ## Conversion lifecycle (what breaks daily numbers)
 
 - Report date mode: CHECK THE INSTANCE SETTING FIRST — `Settings → System →
