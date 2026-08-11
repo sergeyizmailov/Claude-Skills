@@ -17,11 +17,14 @@ is only the media-buying-specific application and the traps that actually bite.
 
 ## SRM — the first thing to check, before the metric
 
-Cells designed to split evenly should arrive within noise of even. A persistent
-skew (e.g. 60/40 on a "50/50") means randomization/logging/delivery is broken →
-the comparison is invalid regardless of how good the winner looks. In Meta's A/B
-tool, unequal delivery is expected in NON-A/B parallel cells (the algorithm
-favors one) — that's exactly why parallel ABO cells are screening, not causal.
+SRM is about the RANDOMIZED-UNIT counts vs the planned split, nothing else. If a
+50/50 assignment arrives materially off (a chi-square on the unit counts flags
+it), randomization or logging is broken → the comparison is invalid regardless of
+how good the winner looks. Do NOT call downstream divergence (spend, impressions,
+conversions between cells) SRM — that's usually a legitimate delivery/auction
+effect. In Meta's A/B tool the assignment is randomized (SRM-checkable); in NON-A/B
+parallel cells the algorithm allocates unevenly by design — that's not SRM, it's
+why parallel ABO cells are screening, not causal.
 
 ## Peeking & stopping
 
@@ -56,11 +59,14 @@ volume mid-lag systematically punishes the newest (still-maturing) variant.
 
 - INVALID (SRM, tracking break, policy pause mid-test, contamination): throw it
   out and re-run; it's not evidence either way.
-- INCONCLUSIVE (ran clean but underpowered / effect smaller than MDE): you
-  learned the effect is *at most small*; decide by cost, not by pretending it's a
-  tie you can break.
-- NEGATIVE (powered, clean, no lift): real information — stop funding the
-  variant/channel. Only a powered clean test earns this verdict.
+- INCONCLUSIVE (ran clean but underpowered, or CI too wide): you learned little.
+  An underpowered null bounds NOTHING — it does NOT mean "the effect is small,"
+  only that you couldn't detect it. Decide by cost/prior; re-run powered if the
+  decision is worth it.
+- NO MEANINGFUL EFFECT is a POSITIVE claim you must earn: the confidence interval
+  has to sit INSIDE pre-set equivalence bounds (a TOST / equivalence test). A
+  non-significant result alone — even from a powered test — does NOT prove absence
+  of effect. Only then stop funding the variant/channel.
 
 ## Cross-refs
 

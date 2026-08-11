@@ -5,11 +5,17 @@ only the API surface differs (01/02).
 
 ## CPL that doesn't lie
 
-Daily CPL = Meta spend (account-tz day) / tracker payout-metric count (same day).
-- Spend truth: ad platform API per account/day. Gotcha: `/me/adaccounts` returns
-  only LIVE accounts — disabled ones vanish and their spend silently drops from
-  totals. Keep your own spend log (or agency billing) for history with dead
-  accounts.
+Daily CPL (for BUYING) = click-date spend (account-tz day) ÷ that same click-date
+cohort's payout count. "Same day" only holds once the cohort has matured; while
+it's still lagging, use the matured or nowcast cohort count (cohort nowcasting
+below), NOT today's raw postback count — pairing click-date spend with
+conversion-date conversions is the classic apples-to-oranges CPL. Conversion-date
+basis (postback day) is for FINANCE/cashflow, not for buying decisions.
+- Spend truth: ad platform API per account/day. Field-observed gotcha (not a
+  documented Graph contract): a plain `/me/adaccounts` pull can omit disabled
+  accounts, so their spend silently drops from totals — verify what your
+  edge+fields actually return, and keep your own spend log (or agency billing)
+  for history with dead accounts.
 - Lead truth: tracker, the AGREED payout measure only (not "conversions" =
   all postback records; how much that exceeds your leads is integration-specific,
   not a fixed multiple — SKILL metric rule).
@@ -119,9 +125,13 @@ separately, because optimizing the wrong one is the most expensive silent error:
 Wiring: tracker/CRM status → CAPI event back to Meta. The separate Offline
 Conversions API was discontinued (~May 2025, widely reported — confirm the
 dataset migration in Events Manager) — all CRM/backend stages now flow through
-standard CAPI into the dataset; tag server/CRM events `action_source=
-system_generated` (`physical_store` for in-store). CAPI mechanics live in
-meta-ads/08; this is which status maps to what.
+standard CAPI into the dataset. Set `action_source` to where the conversion
+ACTUALLY happened, from the enum (`website`, `app`, `phone_call`, `chat`, `email`,
+`physical_store`, `business_messaging`, `system_generated`, `other`) — NOT
+`system_generated` for every server postback. `system_generated` is only for
+conversions that occur automatically with no customer interaction (e.g. a
+subscription auto-renewal); a CRM stage that began as a web/app/call action keeps
+that source. CAPI mechanics live in meta-ads/08; this is which status maps to what.
 
 Choosing the optimization event = reliability × volume × correlation-with-payout:
 - Deeper event (FTD / confirmed sale) is best aligned with revenue but LOW volume

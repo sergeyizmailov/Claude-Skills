@@ -28,11 +28,10 @@ enums per release.
   `GEO_LIFT`, `BACKEND_AB_TESTING`, `PORTFOLIO_OPTIMIZER`, `VERSION_CONTROL`,
   `CREATIVE_SPEND_ENFORCEMENT`. Objective `type` includes `CONVERSIONS`,
   `BRANDLIFT`, `SALES`, `NONSALES`, `MPC_CONVERSION`. [OFFICIAL]
-- Cells: name + `treatment_percentage` + ≥1 object (account/campaign/ad set IDs).
-  For a single test group treatment + control must sum to 100%; multi-group splits
-  may sum to <100%. (No officially documented per-cell minimum — the "90/10" you
-  see in docs is an illustrative example, not a floor.) [OFFICIAL:
-  developers.facebook.com/docs/marketing-api/guides/lift-studies/]
+- Cells: name + `treatment_percentage` (float, ≤2 decimals) + ≥1 object
+  (account/campaign/ad set IDs). Documented constraints: each cell's
+  `treatment_percentage` **should be ≥ 10**, and the **sum across all cells ≤ 100**.
+  [OFFICIAL: developers.facebook.com/docs/marketing-api/reference/ad-study/]
 - Use for scripted split tests at scale and to launch lift/geo studies without
   the UI. Enums shift by version — the safe move is GET the node schema for your
   pinned version before building.
@@ -65,8 +64,9 @@ enums per release.
 ## GeoLift (when the pixel can't be trusted — the grey-relevant one)
 
 - Meta OSS R package **`facebookincubator/GeoLift`**: geo holdout via **Synthetic
-  Control** — hold ads in randomly chosen regions, keep spend steady in matched
-  regions, build a synthetic counterfactual; ships power calculators + market
+  Control** — quasi-experimental, NOT randomized. Data-driven MARKET SELECTION
+  picks test/holdout regions (via the bundled power calculators), then builds a
+  synthetic counterfactual from the untreated regions. Ships power calc + market
   selection + inference. R ≥ 4.0.0. [OFFICIAL: GitHub]
 - Also expressible natively as `GEO_LIFT` in the `ad_study` node.
 - Why it matters for grey: geo lift needs NO user-level pixel signal — it works

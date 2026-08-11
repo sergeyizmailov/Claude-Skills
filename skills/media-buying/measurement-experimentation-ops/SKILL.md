@@ -37,9 +37,11 @@ honest weaker method beats a "causal" test that's silently contaminated.
 
 ## Validity traps (each one silently flips a conclusion)
 
-- **SRM (sample ratio mismatch):** cells that should split 50/50 arrive lopsided
-  → the randomization or logging is broken; the result is invalid, not "a win."
-  Check cell sizes before reading the metric.
+- **SRM (sample ratio mismatch):** the count of RANDOMIZED UNITS per cell
+  diverges from the planned split (e.g. a 50/50 assignment arrives 55/45) →
+  randomization/logging is broken and the result is invalid. Check this on the
+  assignment counts, NOT on spend/impressions/conversions — those diverging is
+  usually a real delivery effect, not SRM.
 - **Peeking:** stopping the moment it looks significant inflates false positives.
   Meta's A/B "end test early if a winner is found" IS peeking — leave it off, run
   the pre-set window (02).

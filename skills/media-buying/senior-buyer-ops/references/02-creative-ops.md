@@ -37,15 +37,17 @@ creative on these axes so you're building a combination map, not a leaderboard:
   version (which prelander/offer it ran to).
 
 - Score COMBINATIONS, not isolated winners: an angle×proof×emotion (and hook
-  family) that prints across multiple unrelated accounts/GEOs is real signal; a
-  single-account winner is noise until replicated. Briefs (below) then specify
-  the bundle to reproduce, so production compounds on known-transferable parts.
-- Decay is per-attribute on different clocks: a HOOK fatigues per audience (rotate
-  fast), while an ANGLE/MECHANISM/EMOTION fatigues market-wide — the whole scene
-  copies it and CTR decays everywhere at once. Detection cue: the same angle
-  suddenly flooding the spy tools (below) is the market-saturation signal to jump
-  to a new mechanism, not just a new hook. Track each axis as a time series, not
-  one blended fatigue number.
+  family) that prints across multiple unrelated accounts/GEOs is strong signal; a
+  single-account winner is weak/unconfirmed until replicated. Briefs (below) then
+  specify the bundle to reproduce, so production compounds on known-transferable
+  parts.
+- Decay tends to be per-attribute on different clocks: a HOOK usually fatigues per
+  audience (rotate fast), while an ANGLE/MECHANISM/EMOTION can fatigue market-wide
+  as the scene copies it and CTR decays broadly. Useful cue (corroborate, don't
+  act blind): the same angle suddenly flooding spy tools (below) often signals
+  market saturation — cross-check your own CTR trend before jumping to a new
+  mechanism rather than just a new hook. Track each axis as a time series, not one
+  blended fatigue number.
 
 ## Multi-stage graduation
 
@@ -59,7 +61,8 @@ budget and a higher bar; kill early stages fast, protect late-stage winners.
 Leading signals, per ad on the same audience: rising frequency with CTR / CVR
 decaying and CPA climbing = fatigue, not auction noise. Rotate to the next
 challenger from the backlog BEFORE the winner craters; don't edit the winning
-ad (resets learning, fb-grey-ops/04) — launch the successor.
+ad (a significant edit can re-enter learning, fb-grey-ops/04) — launch the
+successor.
 
 ## Backlog & briefs (throughput is the bottleneck)
 

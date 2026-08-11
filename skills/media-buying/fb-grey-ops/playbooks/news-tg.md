@@ -29,8 +29,9 @@ channel and is judged by the TL — cheap low-quality subs are a trap.
   Conversion event: Submit Application on the shared team pixel.
 - Targeting: USA 20+, Advantage+ broad, auto placements; kill placements with
   suspiciously cheap CPM and zero leads.
-- Structure: probe 1-1-3 to find delivering accounts; fair creative test
-  1-3-1; scale winners 1-1-3 + budget steps or horizontal (more accounts).
+- Structure: probe 1-1-3 to find delivering accounts; screen creatives with
+  1-3-1 (directional, not a causal test — see 04 / measurement-experimentation-ops);
+  scale winners 1-1-3 + budget steps or horizontal (more accounts).
 - Creatives: news-photo style with baked-in headline text; no ad-level
   primary text/headline (moderation rule); display link a big news domain
   (real destination stays the tracker link); CTA Learn more; all enhancements

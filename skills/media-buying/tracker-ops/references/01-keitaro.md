@@ -72,10 +72,14 @@ costs:[{start_date,end_date,timezone,currency,cost, filters:{ad_campaign_id:"J41
 
 ## Conversion lifecycle (what breaks daily numbers)
 
-- Report date mode: the two bases live in DIFFERENT endpoints — `/report/build`
-  time dimensions (`day`/`hour`/`datetime`/`week`...) are CLICK-time only (no
-  parameter switches it to conversion date). Conversion-date grouping + the raw
-  per-conversion rows come from `POST /conversions/log` (body: range, columns[],
+- Report date mode: CHECK THE INSTANCE SETTING FIRST — `Settings → System →
+  Report display conversion date` toggles the whole reporting basis between
+  `By Click Date` and `By Conversion Date`, and recalculates existing stats. So a
+  `/report/build` call returns click- OR conversion-date numbers depending on this
+  global setting; there's no per-request param that overrides it. Automation must
+  read the setting (or pin it) before trusting which basis a pull is on. The raw
+  per-conversion rows (regardless of the toggle) come from `POST /conversions/log`
+  (body: range, columns[],
   filters[], sort[], limit/offset). Columns you need (exact names from the
   instance openapi.json — confirm on your version): `click_datetime` (click
   time), `postback_datetime` (conversion registration time), `sale_datetime`,

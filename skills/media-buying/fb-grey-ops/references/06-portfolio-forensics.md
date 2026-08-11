@@ -13,15 +13,22 @@ attribute bundle from senior-buyer-ops/02), launch method (API vs manual,
 schedule, day-0 spend jump), spend-at-death, and the death signal (checkpoint /
 disable / restriction / soft throttle). Death without these fields = an anecdote.
 
-## Hazard, not raw count
+## Failure rate, not raw count (and know which rate)
 
-Rank each dimension by FAILURE RATE (deaths ÷ accounts exposed), not raw deaths —
-the most-used domain/proxy/creative shows the most deaths simply because it ran
-most. Set a minimum-exposure floor before trusting a rate: a batch of 3 accounts
-at 100% death outranks a 200-account batch at 30% but is noise — need enough
-accounts on a dimension before its rate means anything. Also weight by survival
-TIME (an account that died at $5 pre-spend is a DOA supply problem; one that died
-at $400 after 10 days is a scaling/creative-heat problem — opposite fixes).
+Rank each dimension by a RATE, not raw deaths — the most-used domain/proxy/creative
+shows the most deaths simply because it ran most. Two rates, don't conflate them:
+- `deaths ÷ accounts exposed` = cumulative failure rate (share dead so far).
+  Fine for a quick pass, but it ignores how long each account survived and
+  censors nothing.
+- True HAZARD = deaths ÷ account-days AT RISK, censoring accounts still alive; if
+  you want the shape over account age, use Kaplan–Meier / a discrete-time hazard.
+  Reach for this once you have enough history — it separates "dies fast" from
+  "dies eventually" that the cumulative rate blurs.
+Set a minimum-exposure floor before trusting either: 3 accounts at 100% death
+outranks a 200-account batch at 30% but is noise — need enough accounts (and
+account-days) on a dimension before its rate means anything. Survival TIME is the
+same signal directionally: died at $5 pre-spend = DOA supply problem; died at $400
+after 10 days = scaling/creative-heat problem — opposite fixes.
 
 ## Confounding is the whole trap → balanced designs
 
@@ -46,7 +53,9 @@ flagged → rotate, tracker-ops/03 signal), same supplier batch (bad shipment �
 stop launching it, claim replacements), same creative family (policy pattern
 tripping review → pull it everywhere, not just the banned account), same launch
 script/timing (automation fingerprint). One account dying is background rate;
-three sharing an attribute is that attribute.
+three sharing an attribute makes that attribute the PRIME SUSPECT — a hypothesis
+to confirm with a balanced/controlled check (above), not a proven cause (it can
+be a confounder, and clustered deaths can be coincidence at low counts).
 
 ## Incident fingerprints (match new deaths to a known pattern)
 
