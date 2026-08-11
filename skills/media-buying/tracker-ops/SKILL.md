@@ -32,9 +32,9 @@ below; the metric rules and daily sync port to any tracker.
 
 | Need | Reference |
 |---|---|
-| Keitaro: key, report/build, measures, update_costs, postback/S2S, gotchas | `references/01-keitaro.md` |
+| Keitaro: key, report/build, measures, update_costs, postback/S2S, postback drill, gotchas | `references/01-keitaro.md` |
 | Binom: legacy URL-param + v2 REST, reports, cost, postback/S2S | `references/02-binom.md` |
-| CPL math, funnel + anti-fraud metrics, cohort nowcasting, backend optimization contract (status→CAPI event), mapping, daily routine | `references/03-metrics-and-math.md` |
+| CPL math, funnel + anti-fraud metrics, cohort nowcasting, backend optimization contract (status→CAPI event), multi-tracker sync + conversion ledger, ATT asymmetry, mapping, daily routine | `references/03-metrics-and-math.md` |
 
 ## Non-negotiables
 

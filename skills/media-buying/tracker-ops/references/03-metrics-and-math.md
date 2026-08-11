@@ -43,6 +43,48 @@ Either way: reconcile ONE clean day end-to-end first (fire a test conversion,
 follow it both sides), set your own tolerance from that baseline, then trust the
 delta — don't chase noise day to day.
 
+### iOS ATT asymmetry (don't "fix" a gap that's structural)
+
+A chunk of the tracker>Meta gap is iOS ATT, not a bug: no ATT consent → no IDFA →
+iOS app conversions route through SKAdNetwork/AAK (aggregated, delayed, capped),
+so Meta systematically UNDER-attributes iOS while your S2S/tracker still counts
+them. It's OS- and GEO-dependent: heavy on iOS-heavy T1 (US/UK/AU), minor on
+Android-heavy T2/T3. Global ATT opt-in ≈ 35–38% (2025→2026, moving — verify),
+US lower. Implications:
+- Segment Meta-vs-tracker deltas by OS/GEO before reconciling — an iOS-driven gap
+  on a US campaign is expected, not a tracking break to chase.
+- Prefer S2S/postback as money-truth on iOS-heavy traffic; Meta's iOS numbers are
+  a floor, not the count.
+- PWA/web funnels dodge SKAN (they're web, senior-buyer-ops/03) — the asymmetry
+  mainly bites real native-app / store flows.
+
+## Multi-tracker sync & the conversion ledger
+
+Two trackers in the chain (your Keitaro + the network's tracker, or a redirect
+tracker + an analytics one) will NOT agree by default — different click-id keys,
+timezones, dedup, bot filters. Pick ONE as source of truth for money (usually the
+one that holds the payout postback); treat the other as cross-check, never a
+second total to add.
+
+- Join key: they reconcile only if a shared click id crosses both — carry your
+  subid/external_id into the network as its sub param and back on the postback, so
+  each conversion matches 1:1 across both. No shared key → you can only compare
+  aggregates, not rows.
+- Align timezone/window to the ad-account tz before comparing a day; a "gap" is
+  often just a boundary/lag mismatch (reconciliation tree above).
+
+Conversion ledger (raw, append-only): log every INCOMING postback verbatim —
+timestamp, subid, status, payout, tid, raw query — separate from the tracker's
+own mutable state. Why it's worth the trouble:
+
+- Rebuild/replay: if the tracker breaks or a status scheme changes, re-import
+  conversions (Keitaro imports via subid+status+payout+tid; the postback log is
+  the source) instead of losing the period.
+- Scrub disputes: you can prove exactly what the network sent, postback by
+  postback, when they later "adjust" approvals.
+- Dedup audit: distinct-tid vs overwrite behaviour is verifiable against the raw
+  stream. Append, never rewrite.
+
 ## Funnel metrics (what each says)
 
 - CTR(link): creative. CPM: account/auction quality (fresh ~2x premium).
