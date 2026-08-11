@@ -40,28 +40,20 @@ honest weaker method beats a "causal" test that's silently contaminated.
 
 ## Validity traps (each one silently flips a conclusion)
 
-- **SRM (sample ratio mismatch):** the count of RANDOMIZED UNITS per cell
-  diverges from the planned split (e.g. a 50/50 assignment arrives 55/45) →
-  randomization/logging is broken and the result is invalid. Check this on the
-  assignment counts, NOT on spend/impressions/conversions — those diverging is
-  usually a real delivery effect, not SRM.
-- **Peeking:** stopping the moment it looks significant inflates false positives.
-  Meta's A/B "end test early if a winner is found" reads as peeking — leave it off
-  and run the pre-set window unless Meta's sequential decision rule is verified
-  (its methodology isn't published) (02).
-- **Contamination:** overlapping audiences between cells (esp. Advantage+ broad
-  campaigns bleeding into manual cells; duplicated winners cannibalizing in the
-  auction) means you're not comparing clean groups. Use the A/B Test tool's
-  non-overlapping split, or geo separation.
-- **Conversion lag:** judging before the payout event matures counts spend
-  against unripe conversions → every fresh cohort looks like a loser. Window ≥
-  the lag; nowcast if you must decide early (tracker-ops/03).
-- **Multiple testing:** many variants tested at once produce chance "winners."
-  Screening tolerates this (you re-test winners anyway); a causal decision needs
-  the significance bar corrected for the number of comparisons.
-- **Underpowered:** too few conversions to detect the effect you care about →
-  "no significant difference" means *couldn't tell*, not *no difference*. Size
-  first (01).
+- **SRM:** check the RANDOMIZED-UNIT split (a 50/50 arriving 55/45 = broken
+  randomization/logging → invalid) — on assignment counts, NOT on
+  spend/impressions/conversions (those diverging is a delivery effect, not SRM).
+- **Peeking:** Meta's A/B "end test early if a winner is found" — leave off and run
+  the pre-set window unless Meta's sequential rule is verified (unpublished) (02).
+- **Contamination:** overlapping audiences between cells — Advantage+ broad
+  bleeding into manual cells; duplicated winners cannibalizing in the auction →
+  not clean groups. Use the A/B tool's non-overlapping split, or geo separation.
+- **Conversion lag:** judging before the payout event matures counts spend against
+  unripe conversions → every fresh cohort looks like a loser. Window ≥ lag; nowcast
+  if you must decide early (tracker-ops/03).
+- **Multiple testing:** screening tolerates chance winners (you re-test anyway); a
+  causal decision needs the bar corrected for the number of comparisons.
+- **Underpowered:** "no significant difference" ≠ "no effect" — size first (01).
 
 ## Route references
 

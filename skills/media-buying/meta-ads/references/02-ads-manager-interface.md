@@ -108,23 +108,14 @@ The table toolbar (appears above the rows; some buttons require selecting a row 
 ### Customizing columns
 Path: **Columns dropdown → Customize Columns**. Search/add metrics, drag to reorder, **save as preset** (checkbox when applying) for reuse. Built-in column presets include: Performance, Performance and clicks, Delivery, Engagement, Video engagement, App engagement, plus others (preset list varies by rollout).
 
-### Core metric definitions
-- **Impressions** — total times ads were shown (one person can generate many).
-- **Reach** — unique people who saw the ads. Impressions ÷ Reach ≈ Frequency.
-- **Frequency** — average times each reached person saw the ad. Practitioners watch for fatigue above ~5–8 (AdManage cites performance risk above 8–9; optimal zone often cited as 3–7 depending on campaign length).
-- **Results** — count of the optimization event defined by the campaign objective/performance goal (purchase, lead, link click, ThruPlay…). The same column shows different things per campaign — always check what "result" means for that row.
-- **Cost per result** — Amount spent ÷ Results.
-- **Amount spent** — total spend in the selected date range.
-- **CPM (cost per 1,000 impressions)** — (Amount spent ÷ Impressions) × 1,000. Measures how expensive the audience/inventory is; driven by targeting breadth, competition, seasonality (Q4 spikes of 50–100% are commonly reported).
-- **CPC (cost per click)** — Amount spent ÷ Clicks. Watch "CPC (all)" vs "CPC (link click)" — the "all" variants include reactions, comment clicks, etc., and look deceptively cheap.
-- **CTR (click-through rate)** — (Clicks ÷ Impressions) × 100. Again: "CTR (all)" vs "CTR (link click-through rate)" — use the link-click variant for creative evaluation. Indicative placement averages (AdManage, 2025-11): Facebook Feed ~0.9%, Instagram Feed ~0.5%, Stories ~0.3%.
-- **ROAS (return on ad spend)** — Purchase conversion value ÷ Amount spent. It requires supported conversion-value measurement for the selected conversion location; website campaigns commonly use Pixel and/or CAPI, while app, shop, and other flows differ. There are also "Purchase ROAS" and "Website purchase ROAS" variants.
-- **Conversion value** — revenue attributed to ads.
-- **Landing page views vs link clicks** — LPV counts only loaded pages; a large click→LPV drop indicates slow landing pages.
-- **Quality / Engagement rate / Conversion rate rankings** — per-ad diagnostics vs advertisers competing for the same audience (Above average / Average / Below average).
-
-### CPM vs CPC — how they interact
-CPM is set by the auction; CPC combines inventory cost and click rate. If CTR is a decimal, `CPC = CPM / (1,000 × CTR)`. If CTR is expressed as a percentage such as `1.5`, `CPC = CPM / (10 × CTR_percent)`. High CPM with strong CTR can still yield a viable CPC; diagnose whether CPM, click rate, or both changed.
+### Metric gotchas (definitions assumed; these are the Meta-specific traps)
+- **Results** shows a DIFFERENT event per campaign (purchase/lead/link click/ThruPlay by objective) — check what "result" means for that row before comparing rows.
+- **Frequency** fatigue watched above ~5–8 (AdManage: risk above 8–9; "optimal" 3–7, campaign-length dependent).
+- **CPM** driven by targeting breadth/competition/seasonality (Q4 spikes 50–100% commonly reported).
+- **"CPC (all)" / "CTR (all)"** include reactions/comment clicks and look deceptively cheap — use the LINK-click variants for creative evaluation. Indicative placement CTR (AdManage 2025-11): FB Feed ~0.9%, IG Feed ~0.5%, Stories ~0.3%.
+- **ROAS** needs supported conversion-value measurement for the conversion location (web = Pixel/CAPI; app/shop differ); note "Purchase ROAS" vs "Website purchase ROAS" variants.
+- **LPV < link clicks**: a large click→LPV drop = slow landing page, not a creative problem.
+- **Quality / Engagement / Conversion-rate rankings** — per-ad diagnostics vs competitors for the same audience (Above / Average / Below).
 
 ### Benchmarks (WordStream/LocaliQ 2025 study; US campaigns, Apr 2024–Jun 2025; medians)
 - Traffic campaigns (n=554): CTR 1.71%, CPC $0.70
