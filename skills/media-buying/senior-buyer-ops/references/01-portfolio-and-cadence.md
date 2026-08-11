@@ -21,8 +21,8 @@ a finite pool of accounts + budget + creative across testing and scaling.
   reserve topped so a ban never stalls a winner. Track ban rate as a metric — a
   spike has SEVERAL possible causes: infra (IP/persona/device), a bad account
   batch from the agency, a creative/policy pattern tripping review, a burned
-  domain, a billing/asset issue, or the whole bundle. Diagnose which before
-  reacting (fb-grey-ops/01).
+  domain, a billing/asset issue, or the whole bundle. Attribute the cause before
+  reacting — hazard-rate forensics in fb-grey-ops/06 (reactions in 01/05).
 
 ## Kill / watch / scale ladder
 
@@ -36,6 +36,28 @@ a finite pool of accounts + budget + creative across testing and scaling.
   large jumps CAN re-enter learning, but Meta guarantees no universal %,
   fb-grey-ops/04) or horizontal (duplicate the winner to reserve accounts).
   Migrate winners to fresh accounts before the old one fatigues/dies.
+
+## Marginal scaling (never scale on blended CPA)
+
+Blended CPA is an average over already-cheap early spend; it stays green while
+the NEXT dollar is already unprofitable. Decide scale on the margin:
+
+- `incremental_CPA = Δspend / Δmature_conversions` between two comparable windows
+  (same account, same tz-day basis). Two setup rules or the number is garbage:
+  compare a MEANINGFUL step (a tiny day-to-day Δspend is dominated by daily
+  variance — use a real budget jump or a multi-day window), and count only MATURE
+  conversions (the newest cohort lags, so a raw Δ fakes saturation — nowcast it,
+  tracker-ops/03).
+- Read the response curve: while incremental_CPA ≤ target, keep ramping; when it
+  rises with spend at fixed creative/audience, you've hit saturation — the fix is
+  new angle/audience/account (horizontal), not more budget into the same set.
+- Rule out FALSE saturation before declaring the account tapped: an OFFER/traffic
+  cap (spend past the cap is unpaid → incremental_CPA explodes but it's a payout
+  ceiling, not auction fatigue), a learning reset from too big a step, or an
+  immature cohort (above).
+- Rollback: pre-set the step-down (e.g. revert to the last budget where
+  incremental_CPA was in target) and the trigger (N days of mature
+  incremental_CPA over target). Log the step so a revert is one action.
 
 ## Team stop-loss
 
@@ -63,5 +85,8 @@ buckets, prioritisation, kill/watch/scale ladder, team stop-loss, buyer
 normalisation, watchlist/review). Ratios are levers, not laws. Peer-review r2
 (gpt): kill threshold sourced from operating contract (not a default); scaling %
 labelled heuristic; team stop-loss gated on matured cohort + tracking check (not
-same-day CPA); ban-rate-spike causes broadened beyond infra. -->
+same-day CPA); ban-rate-spike causes broadened beyond infra. Review r3 (gpt): added marginal
+scaling (incremental_CPA = Δspend/Δmature_conversions, response-curve saturation,
+false-saturation checks: offer cap / learning reset / immature cohort, rollback
+trigger) — never scale on blended CPA. -->
 

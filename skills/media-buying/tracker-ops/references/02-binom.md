@@ -25,6 +25,16 @@ Key (legacy): Settings → API section → copy `api_key=XXXX`.
   "leads" = conversions (whether all-events vs first-per-click is NOT stated in
   docs — verify per setup).
 
+## Conversions report (per-conversion rows — enables nowcasting)
+
+The conversions view (docs.binom.org/conversions.php) lists raw per-conversion
+rows: `Clickid, Time click, Time conversion, Time since click, Payout, Offer,
+GEO, Traffic source`. **`Time since click` is a BUILT-IN click→conversion lag
+column** — Binom gives it directly (Keitaro makes you compute it from
+click_datetime/postback_datetime). CSV export via the `.csv` button. This is the
+source for completion-curve / lag-cohort analysis (03). Aggregate reports above
+are click-date based; per-conversion timing lives here.
+
 ## Legacy cost update
 
 `?page=save_update_costs&camp_id=ID&date=12&date_s=&date_e=&timezone=-7&cost=170.95&api_key=KEY`
@@ -81,5 +91,7 @@ update, added postback/S2S; v2 exact paths UNVERIFIED. Compressed to dense form.
 Peer-review (gpt): postback path is v1 `/click.php` vs v2 `/click` (params
 identical); v2 timezone is a tracker-wide named zone, not the v1 -12..12 offset.
 Added a required v2 REST discovery workflow (pull /api/doc OpenAPI, cache the
-verified per-instance schema) since exact paths aren't public. -->
+verified per-instance schema) since exact paths aren't public. Review r3 (gpt):
+added the per-conversion Conversions report (Time click / Time conversion /
+built-in `Time since click` lag column) that feeds nowcasting in 03. -->
 

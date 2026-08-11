@@ -72,13 +72,22 @@ costs:[{start_date,end_date,timezone,currency,cost, filters:{ad_campaign_id:"J41
 
 ## Conversion lifecycle (what breaks daily numbers)
 
-- Report date mode: Keitaro can report by CLICK date OR CONVERSION date — check
-  the instance/report setting first. For MEDIA optimization use click-date (a
-  conversion attaches to the click's timestamp, so a lead posting back today
-  lands on YESTERDAY's row → yesterday's CPL keeps moving; re-pull a trailing
-  3-7d window each run, don't freeze a day after one pull). For FINANCIAL/payout
-  reporting, conversion-date can be the right basis — just don't mix the two in
-  one CPL number. Know which mode your pull used.
+- Report date mode: the two bases live in DIFFERENT endpoints — `/report/build`
+  time dimensions (`day`/`hour`/`datetime`/`week`...) are CLICK-time only (no
+  parameter switches it to conversion date). Conversion-date grouping + the raw
+  per-conversion rows come from `POST /conversions/log` (body: range, columns[],
+  filters[], sort[], limit/offset). Columns you need (exact names from the
+  instance openapi.json — confirm on your version): `click_datetime` (click
+  time), `postback_datetime` (conversion registration time), `sale_datetime`,
+  `status`/`previous_status`/`original_status`, `conversion_id`, `tid`, `sub_id_N`,
+  revenue. There is NO built-in lag measure — derive lag = postback_datetime −
+  click_datetime per row. (`sale_period` gives a coarse bucket.)
+- For MEDIA optimization use click-date (a conversion attaches to the click's
+  timestamp, so a lead posting back today lands on YESTERDAY's row → yesterday's
+  CPL keeps moving; re-pull a trailing 3-7d window each run, don't freeze a day
+  after one pull). For FINANCIAL/payout reporting, conversion-date
+  (`postback_datetime`) can be the right basis — just don't mix the two in one
+  CPL number. Know which mode/endpoint your pull used.
 - Delayed status changes: lead→sale/deposit can flip days later (same subid,
   status update). Approve/reject lifecycle means "today's" quality is provisional
   — report leads now, quality on a lag, and re-pull the cohort when it matures.
@@ -110,6 +119,10 @@ utm_campaign) and added the postback overwrite/tid dedup model. Added a
 conversion-lifecycle section (click-date cohorts, delayed status, offer caps,
 failed-postback replay, backend reconciliation). Peer-review r2 (gpt): report
 date mode is selectable (click-date for media opt vs conversion-date for
-finance) — check the instance, don't assume click-date. -->
+finance) — check the instance, don't assume click-date. Review r3 (gpt): named the
+endpoints precisely — /report/build time dims are click-time only;
+conversion-date + per-conversion timestamps (click_datetime / postback_datetime /
+sale_datetime, no built-in lag measure) come from /conversions/log. Feeds the
+nowcasting recipe in 03. -->
 
 

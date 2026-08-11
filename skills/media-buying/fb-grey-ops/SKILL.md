@@ -48,6 +48,7 @@ the brand.
 | Agency setups, BMs, asset sharing (pixel/pages/catalog), naming, replacements | `references/03-agency-accounts-and-bm.md` |
 | API mass launch: structures, params, bid strategies, scheduling, images | `references/04-mass-launch-api.md` |
 | API errors — grey survival response (freeze/replace/rotate); canonical code→fix in meta-ads/14 | `references/05-api-error-catalog.md` |
+| Why accounts die, attributed: hazard-rate forensics, balanced infra tests, anomaly pivots, incident fingerprints | `references/06-portfolio-forensics.md` |
 | Per-vertical playbooks | `playbooks/` |
 
 Playbooks: news-tg.md is filled (one team); nutra/casino/crypto-trading carry
@@ -78,5 +79,6 @@ field sauce). Added stack-agnostic note + crypto-trading skeleton. Routing
 between the three skills unchanged. Peer-review (gpt) consistency pass: synced
 non-negotiable #1 with the System-User IP exception; #5 labelled as one team's
 prior; bootstrap #4 no longer implies automatic tracker split (mapping contract).
-Added authority-boundary note. -->
+Added authority-boundary note. Review r3 (gpt): added reference 06
+(portfolio forensics) — hazard-rate attribution + balanced infra tests. -->
 
