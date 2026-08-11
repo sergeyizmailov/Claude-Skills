@@ -45,7 +45,7 @@ the brand.
 |---|---|
 | Antidetect, proxies, IP/session discipline, checkpoints, restrictions, domain/pixel rotation cadence | `references/01-infra-and-identity.md` |
 | App setup, Live mode, permissions, token lifecycle, System User, death codes | `references/02-meta-app-and-tokens.md` |
-| Agency setups, BMs, asset sharing, BM-ban & asset recovery, billing survival & location/VAT fees, naming, replacements | `references/03-agency-accounts-and-bm.md` |
+| Agency setups, BMs, asset sharing, BM-ban & asset recovery, billing gotchas & fees, naming, replacements | `references/03-agency-accounts-and-bm.md` |
 | API mass launch: structures, params, bid strategies, scheduling, images, spend warm-up | `references/04-mass-launch-api.md` |
 | API errors — grey survival response (freeze/replace/rotate); canonical code→fix in meta-ads/14 | `references/05-api-error-catalog.md` |
 | Why accounts die, attributed: hazard-rate forensics, balanced infra tests, anomaly pivots, incident fingerprints | `references/06-portfolio-forensics.md` |

@@ -53,37 +53,18 @@ replacement-to-evade as a violation):
 - Freeze during an active BM review (SKILL non-negotiable #3): appeals/edits mid-
   restriction extend it.
 
-## Billing survival & fees (grey margin killers)
+## Billing gotchas that affect launches
 
-Three limits people conflate — a launch can stall on ANY one:
-
-- Billing threshold — WHEN Meta charges (accrue to threshold → charge → reset;
-  remainder swept on the monthly bill date). Steps up with payment history
-  (~$25 start, climbing toward $10k+; exact ladder is account-specific and
-  unpublished — a prior, read Billing settings). NOT a spend cap.
-- Account Spending Limit (ASL) — a LIFETIME cap across all campaigns in the
-  account; hit it and EVERY ad pauses until raised/reset. Good hard
-  circuit-breaker, also a footgun if forgotten.
-- Ad set budget — per ad set. Independent of the two above.
-
-Failed payment: Meta tries the backup method, then an unpaid balance PAUSES
-delivery and restricts the account; repeated failure → disabled. On agency
-setups billing is theirs (crypto top-up) — a "dead" account may just be an unpaid
-balance, confirm before calling it a policy ban.
-
-Fees that eat margin (compute break-even on the REAL cost, not raw spend):
-
-- Location fees (ex "regulatory operating costs"), rolling out ~2026-07-01: a %
-  surcharge ON TOP of spend, keyed to where the IMPRESSION is delivered (audience
-  jurisdiction, not your location), on a separate invoice line (not shown in Ads
-  Manager). Field/practitioner sample rates — VOLATILE, Meta changes the list,
-  verify in Billing: UK ~2%, FR/IT/ES ~3%, AT/TR ~5%.
-- VAT/GST: per "Sold To" country; daily budget is VAT-EXCLUSIVE so the card is hit
-  for more than budget. EU business VAT ID → reverse charge (Meta adds no VAT, you
-  self-account); no ID / private use → VAT added; some countries (e.g. KR, AU, TR,
-  KE) charge regardless. VAT computes on (spend + location fee).
-- Net true cost on a fee'd GEO ≈ spend × (1 + location fee) × (1 + VAT) — bake it
-  into break-even or you'll scale a "profitable" campaign that isn't.
+- A "dead" account may just be an UNPAID BALANCE, not a ban: a failed payment
+  pauses delivery and restricts the account. On agency crypto-topup setups,
+  confirm the balance before requesting a replacement for a "banned" account.
+- Account Spending Limit (ASL) is a LIFETIME cap across the whole account that
+  pauses EVERY ad when hit — a silent full-stop that's easy to forget (distinct
+  from ad-set budget and the billing threshold).
+- Fees sit ON TOP of spend, so real CPL > what Ads Manager shows — fold into
+  break-even: Meta "location fees" (a % keyed to the audience's jurisdiction,
+  rolling out ~2026-07, separate invoice line) + VAT. Rates/countries change —
+  read them off Billing, don't hardcode.
 
 ## Naming (decide before first launch, never change mid-flight)
 
