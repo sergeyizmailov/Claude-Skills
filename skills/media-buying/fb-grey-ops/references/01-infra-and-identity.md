@@ -66,8 +66,10 @@ Cadence is signal-driven, not a fixed clock:
   re-learns, custom audiences reset), so don't rotate reactively. The real lever
   is PRE-SEGMENTING to contain blast radius: separate pixels per domain-cluster /
   risk tier instead of one pixel across everything, so a burned funnel doesn't
-  take the shared pixel (and its learning) down with it. By the time a pixel is
-  flagged it's usually too late to save — the decision is upstream.
+  take the shared pixel (and its learning) down with it. But only split as far as
+  each dataset still gets enough events to optimize — over-segmenting fragments
+  signal and starves learning. By the time a pixel is flagged it's usually too
+  late to save — the decision is upstream.
 - Never rotate domain + pixel + creative + account together — you lose which one
   actually burned (fb-grey-ops/06 balanced designs).
 

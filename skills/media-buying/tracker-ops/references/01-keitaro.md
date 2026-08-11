@@ -85,6 +85,10 @@ the URL looks correct.
 - Catches: subid dropped/renamed in the chain (lands on no click → invisible
   conversions), status-string mismatch (network `deposit` vs your scheme), missing
   or zero payout, missing `tid` (rebills overwrite instead of stacking).
+- Do it SAFELY (don't pollute production): use a test click/campaign and a unique
+  test `tid`, disable downstream forwarding so the test event doesn't flow to
+  CAPI/optimization or the network's payout, and confirm afterward it didn't land
+  as a payable/optimization conversion.
 - Re-drill after ANY change to the redirect chain, offer link, status scheme, or
   tracker. Tracker-side complement to the funnel click-through test
   (senior-buyer-ops/03).

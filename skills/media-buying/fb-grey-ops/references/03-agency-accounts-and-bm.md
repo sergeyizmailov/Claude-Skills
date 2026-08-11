@@ -31,8 +31,10 @@ Distinguish the LEVEL of the hit — recovery differs sharply:
 
 - Single ad account disabled: routine (above); assets under the BM survive →
   replace the account.
-- Whole BM restricted/disabled: every child ad account stops at once, and the
-  pixel/page/catalog OWNED by that BM go inaccessible with it. The expensive one.
+- Whole BM restricted/disabled: child ad accounts can all stop at once and assets
+  OWNED by that BM may go inaccessible — but scope VARIES by restriction type, and
+  a Page/dataset can survive or stay reachable via another role. Check Business
+  Support Home / Account Quality per asset before assuming it's lost.
 
 Recovery (do NOT rebuild/farm to evade — that's a ban path, and Meta treats
 replacement-to-evade as a violation):
@@ -50,8 +52,9 @@ replacement-to-evade as a violation):
 - Agency tenants can rarely appeal a BM ban or move assets themselves → request a
   fresh setup (new BM + accounts + re-shared page/pixel), give the agency the dead
   BM ID + asset IDs.
-- Freeze during an active BM review (SKILL non-negotiable #3): appeals/edits mid-
-  restriction extend it.
+- Freeze during an active BM review (SKILL non-negotiable #3): repeated
+  appeals/edits mid-restriction are widely held to extend it — field prior, not
+  documented.
 
 ## Billing gotchas that affect launches
 
@@ -63,8 +66,9 @@ replacement-to-evade as a violation):
   from ad-set budget and the billing threshold).
 - Fees sit ON TOP of spend, so real CPL > what Ads Manager shows — fold into
   break-even: Meta "location fees" (a % keyed to the audience's jurisdiction,
-  rolling out ~2026-07, separate invoice line) + VAT. Rates/countries change —
-  read them off Billing, don't hardcode.
+  rolling out ~2026-07, separate invoice line) + VAT (treatment depends on your
+  billing entity / country / VAT status). Rates/countries change — read them off
+  Billing, don't hardcode.
 
 ## Naming (decide before first launch, never change mid-flight)
 
