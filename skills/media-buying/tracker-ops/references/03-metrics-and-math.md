@@ -145,17 +145,13 @@ Choosing the optimization event = reliability × volume × correlation-with-payo
   If the payout event is too rare, optimize a reliable UPSTREAM proxy that
   correlates with payout, and monitor that correlation (reg→FTD rate) so you're
   not scaling volume that dies downstream.
-- Value optimization (VBO) needs `value`+`currency`; custom / non-purchase events
-  now need ~100 attributed conversions + ≥5 distinct values/14d to qualify
-  (tightened recently — verify live in Events Manager). Thin grey funnels often
-  can't meet that → optimize on conversion COUNT and control quality via which
-  status you send back, not via VBO.
-- Native lead forms: Meta's Conversion Leads goal (Lead Ads / Instant Forms)
-  takes CRM stage events via CAPI. Official eligibility [developers.facebook.com/
-  documentation/ads-commerce/conversions-api/conversion-leads-integration —
-  verify current]: ≥200 leads/mo, upload ≥1×/day, target stage within 28d of the
-  lead, target-stage CR 1–40%. Use it to optimize a down-funnel stage instead of
-  raw form fills.
+- Value optimization (VBO) needs `value`+`currency` and clears a volume gate thin
+  grey funnels often can't meet → optimize on conversion COUNT and control quality
+  via which status you send back, not VBO. (Exact VBO + Conversion-Leads
+  eligibility numbers live in meta-ads/08 — single source.)
+- Native lead forms: Meta's Conversion Leads goal (Lead Ads / Instant Forms) takes
+  CRM stage events via CAPI to optimize a down-funnel stage instead of raw form
+  fills — eligibility gates in meta-ads/08.
 - Only send events you can stand behind (deduped via event_id, real): the
   optimization signal also feeds Meta's quality modeling — noisy/fake events
   degrade delivery, not just reporting.

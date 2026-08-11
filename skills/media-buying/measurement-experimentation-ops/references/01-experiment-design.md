@@ -61,9 +61,9 @@ volume mid-lag systematically punishes the newest (still-maturing) variant.
 - INVALID (SRM, tracking break, policy pause mid-test, contamination): throw it
   out and re-run; it's not evidence either way.
 - INCONCLUSIVE (ran clean but underpowered, or CI too wide): you learned little.
-  An underpowered null bounds NOTHING — it does NOT mean "the effect is small,"
-  only that you couldn't detect it. Decide by cost/prior; re-run powered if the
-  decision is worth it.
+  A non-significant underpowered result only bounds the effect as widely as its CI
+  — usually too wide to be decision-useful; it does NOT mean "the effect is small."
+  Decide by cost/prior; re-run powered if the decision is worth it.
 - NO MEANINGFUL EFFECT is a POSITIVE claim you must earn: the confidence interval
   has to sit INSIDE pre-set equivalence bounds (a TOST / equivalence test). A
   non-significant result alone — even from a powered test — does NOT prove absence

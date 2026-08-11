@@ -23,7 +23,8 @@ shows the most deaths simply because it ran most. Two rates, don't conflate them
 - Exposure-adjusted rate = deaths ÷ account-days AT RISK, censoring accounts still
   alive. (The true hazard is time-dependent and conditional on survival; this is
   the practical incidence-rate estimator of it.) For the shape over account age,
-  use Kaplan–Meier / a discrete-time hazard.
+  use Kaplan–Meier (survival curve — the hazard is derived from it) or a
+  discrete-time hazard model.
   Reach for this once you have enough history — it separates "dies fast" from
   "dies eventually" that the cumulative rate blurs.
 Set a minimum-exposure floor before trusting either: 3 accounts at 100% death

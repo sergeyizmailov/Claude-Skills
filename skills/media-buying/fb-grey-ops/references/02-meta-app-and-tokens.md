@@ -1,6 +1,8 @@
 # 02 — Meta app & tokens
 
-API version v26.0 (2026-07-29); pin `/v26.0/` in call paths, ~2yr sunset window.
+API version v26.0 (2026-07-29); pin `/v26.0/` in call paths. Each version has a
+~2-year support window then deprecates — check the Graph API changelog for the
+exact sunset date rather than assuming.
 
 ## App setup (once)
 
