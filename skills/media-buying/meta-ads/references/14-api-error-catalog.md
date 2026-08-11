@@ -71,11 +71,3 @@ Marketing API = Business Use Case (BUC) limits, header-driven, not a fixed quota
   Errors 80000-family.
 Back off by reading headers: pause near 100; on 80000 honor
 estimated_time_to_regain_access. Batch reads, cache, no tight polling.
-
-<!-- Changelog 2026-08-11: Verified vs v26.0; neutralized grey framing; fixed
-467 + code-100; dual-model rate limits. Peer-review pass (gpt): made this the
-CANONICAL error catalog (grey RESPONSE moved to fb-grey-ops/05, pointer
-reversed); attributed each tier to its actual Meta page (190 subcodes = Graph
-API error-handling; 1885183 = Marketing API reference; 80000 = Rate Limiting
-guide); corrected the creative-enhancements note (standard_enhancements bundle
-control deprecated v22.0 → per-feature creative_features_spec enroll_status). -->

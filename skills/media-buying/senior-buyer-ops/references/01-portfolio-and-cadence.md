@@ -79,14 +79,3 @@ tested. Otherwise you reward the buyer who got the good stock.
   cohort is maturing, anything with a delivery anomaly.
 - Weekly review: winner migration plan, replacement queue depth, creative
   backlog vs test throughput (02), buyer comparison, ban-rate trend.
-
-<!-- Changelog 2026-08-11: New — TL portfolio/cadence decision layer (allocation
-buckets, prioritisation, kill/watch/scale ladder, team stop-loss, buyer
-normalisation, watchlist/review). Ratios are levers, not laws. Peer-review r2
-(gpt): kill threshold sourced from operating contract (not a default); scaling %
-labelled heuristic; team stop-loss gated on matured cohort + tracking check (not
-same-day CPA); ban-rate-spike causes broadened beyond infra. Review r3 (gpt): added marginal
-scaling (incremental_CPA = Δspend/Δmature_conversions, response-curve saturation,
-false-saturation checks: offer cap / learning reset / immature cohort, rollback
-trigger) — never scale on blended CPA. -->
-

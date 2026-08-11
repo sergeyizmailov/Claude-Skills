@@ -82,12 +82,3 @@ once volume builds (fb-grey-ops/04 event-volume lever).
 
 - Pin which tracker event = payout (reg? FTD? qualified FTD?) before any CPA
   math (tracker-ops metric rule). FTD lags → cohort by click date.
-
-<!-- Changelog 2026-08-11: Filled skeleton with directional iGaming benchmarks
-(reg→FTD, CPA/FTD by tier, bot funnel, CPC/CPI/RevShare — dated/sourced), event
-ladder + FTD KPI, creative first tests, failure modes. Numbers are internet-
-directional, NOT live data — flagged to replace. Verified policy + PWA/app
-tracking kept. Peer-review r2 (gpt): relabelled tables as unverified priors and
-split the conflated column into conversion-rate / affiliate-payout / player-value
-+ your-media-CPA (four different numbers). -->
-

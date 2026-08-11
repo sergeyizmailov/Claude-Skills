@@ -206,4 +206,3 @@ An invalid or inconclusive test is not a losing ad. Record why the design could 
 - Official Meta Advantage+ app overview: https://www.facebook.com/business/ads/meta-advantage-plus/app-campaigns
 
 Gaps: public sources do not provide a universal sample-size rule, currency budget tier, or result volume that guarantees a stable decision. Power calculations require account-specific baselines. Country-level prices, sales processes, app attribution, and regulated-category controls remain volatile.
-

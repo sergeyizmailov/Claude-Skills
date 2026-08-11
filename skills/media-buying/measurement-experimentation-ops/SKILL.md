@@ -1,12 +1,12 @@
 ---
 name: measurement-experimentation-ops
-description: "Decide whether a media-buying result is REAL before acting on it: pick the testing mode (causal / screening / infrastructure), size it, and dodge the validity traps (SRM, peeking, Advantage+ contamination, conversion lag, multiple testing). Covers Meta's tools — A/B Test, ad_study API, Conversion Lift, GeoLift, Robyn/MMM — and the grey reality where clean holdouts aren't available. Pairs with meta-ads, tracker-ops, senior-buyer-ops, fb-grey-ops."
+description: "Decide whether a media-buying result is real before scaling it: testing-mode choice (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag, multiple testing), and Meta's measurement tools (A/B Test, ad_study API, Conversion Lift, GeoLift, Robyn/MMM). Pairs with the media-buying set."
 ---
 
 # Measurement & Experimentation Ops
 
-The layer that answers the ONE question the other skills assume before they act:
-*is this difference real, or am I about to scale noise?*
+The other skills act on measured differences; this decides whether a difference
+is real or noise before they do.
 
 ## Pick the testing mode by the decision at stake
 
@@ -67,9 +67,3 @@ honest weaker method beats a "causal" test that's silently contaminated.
 Buy mechanics → meta-ads (its /09 owns single-account diagnosis & test-design
 intake; this skill owns the validity/incrementality layer above it). Counting &
 cohort truth → tracker-ops. Portfolio decisions on the result → senior-buyer-ops.
-
-<!-- Changelog 2026-08-11: New skill (review r3, gpt) — the measurement/validity
-layer for the media-buying set: three testing modes + grey feasibility gate,
-validity traps (SRM/peeking/contamination/lag/multiple-testing/power), and Meta
-tool routing. Tool facts verified 2026-08-11 (ad_study v25.0, GeoLift, Robyn).
-Dense/LLM-facing; defers stats basics an LLM already knows. -->

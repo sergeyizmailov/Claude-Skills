@@ -48,9 +48,3 @@ on one persona's IP is a needless signal.
 Rising bot_share / domain-level flags (from the tracker, tracker-ops/03) → this
 is the grey ACTION for that signal: rotate the domain before it burns the
 account; don't wait for the ban.
-
-<!-- Changelog 2026-08-11: Peer-review (gpt) boundary fix — restructured from a
-duplicate code catalog into the grey survival RESPONSE layer (freeze/replace/
-rotate); canonical code→fix now owned by meta-ads/14 (pointer reversed). Kept
-the death-code freeze protocol, replace-don't-fight account handling, and the
-domain-rotation action for tracker bot signals. -->

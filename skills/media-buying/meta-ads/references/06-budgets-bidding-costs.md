@@ -245,6 +245,3 @@ Derive test budget from business economics and uncertainty rather than a global 
 - **AdAmigo geo table (source 15)** is vendor-compiled "projections for 2026" with undisclosed methodology — directional only; US $23 CPM sits at the high end of other estimates ($13–23).
 - **WordStream 2025 Instagram-vs-Facebook split**: the LocaliQ 2025 study covers Facebook placements; Instagram-only medians by industry from a comparably large panel were not found (Instagram figures rely on adlibrary/AdAmigo aggregates).
 - **"75% daily overspend" rule** rests on practitioner reporting (Foxwell via LaFactory); Meta's current official daily-spend flexibility wording not directly verified.
-
-<!-- Changelog 2026-08-11 (peer-review, gpt): corrected the lifetime-budget line — it is a spending CAP over the schedule, not a guarantee the full amount is spent by the end date (delivery can underspend in thin auctions / under tight caps). -->
-

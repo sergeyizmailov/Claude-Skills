@@ -67,8 +67,3 @@ that flagged the persona.
   Profile creation → ads on day 0 is a classic ban path.
 - One action at a time when unstable. Batch API edits (rename, pause) are fine;
   profile/security edits agitate the system.
-
-<!-- Changelog 2026-08-11: Verified (Accounts Center URL, socks5h) + reframed
-"multiple sessions" as an undocumented anti-abuse trigger; compressed to dense
-form. Peer-review (gpt): labelled IP-consistency as session hygiene, not a Meta
-auth requirement (System User server calls exempt). -->

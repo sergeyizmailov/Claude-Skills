@@ -84,14 +84,3 @@ Path differs by version, params are identical:
 
 - Drill-down JSON formats numbers with separators/percent — parse as strings,
   strip before math. Multi-level reports carry a `level` field per row.
-
-<!-- Changelog 2026-08-11: Verified vs docs.binom.org — split LEGACY vs v2 REST
-(current major, api-key header, /api/doc), verified date/grouping codes and cost
-update, added postback/S2S; v2 exact paths UNVERIFIED. Compressed to dense form.
-Peer-review (gpt): postback path is v1 `/click.php` vs v2 `/click` (params
-identical); v2 timezone is a tracker-wide named zone, not the v1 -12..12 offset.
-Added a required v2 REST discovery workflow (pull /api/doc OpenAPI, cache the
-verified per-instance schema) since exact paths aren't public. Review r3 (gpt):
-added the per-conversion Conversions report (Time click / Time conversion /
-built-in `Time since click` lag column) that feeds nowcasting in 03. -->
-

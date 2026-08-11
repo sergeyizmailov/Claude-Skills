@@ -72,13 +72,3 @@ ecom, apps, loans, adult...).
    verify one day manually, then trust it.
 7. Kill rules with the TL in writing: spend-without-lead cap, CPL cap, account
    verdict threshold.
-
-<!-- Changelog 2026-08-11: Verified vs primary sources (v26.0, Keitaro/Binom
-docs); then compressed to dense LLM-facing form (cut base-knowledge prose, kept
-field sauce). Added stack-agnostic note + crypto-trading skeleton. Routing
-between the three skills unchanged. Peer-review (gpt) consistency pass: synced
-non-negotiable #1 with the System-User IP exception; #5 labelled as one team's
-prior; bootstrap #4 no longer implies automatic tracker split (mapping contract).
-Added authority-boundary note. Review r3 (gpt): added reference 06
-(portfolio forensics) — hazard-rate attribution + balanced infra tests. -->
-

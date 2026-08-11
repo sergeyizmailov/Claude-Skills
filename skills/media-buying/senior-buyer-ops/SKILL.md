@@ -1,6 +1,6 @@
 ---
 name: senior-buyer-ops
-description: "Operating layer for a senior grey media-buyer / team lead: the team operating-contract to pin on day 1, portfolio budget allocation (test/scale/reserve), kill/watch/scale ladder, creative production cadence, and end-to-end funnel QA. Orchestrates meta-ads (buy), fb-grey-ops (survive/launch), tracker-ops (count)."
+description: "Senior grey media-buyer / team-lead operating layer: day-1 operating contract, portfolio allocation (test/scale/reserve), kill/watch/scale + marginal scaling, creative-intelligence pipeline, end-to-end funnel QA. Orchestrates meta-ads / fb-grey-ops / tracker-ops / measurement-experimentation-ops."
 ---
 
 # Senior Buyer Ops
@@ -48,10 +48,3 @@ Missing any of 1-8 = you are flying blind; resolve before launch.
   scale (01) → update watchlist → report before the deadline.
 - Weekly: portfolio review — winner migration, replacement queue, creative
   backlog health, buyer/stock comparison (01).
-
-<!-- Changelog 2026-08-11: New orchestrator skill (per peer-review, gpt) giving
-the senior-buyer/TL operating layer that the three adapter skills lacked:
-operating-contract intake, cadence, and references for portfolio, creative-ops,
-funnel-ops. Dense/LLM-facing; routes to meta-ads/fb-grey-ops/tracker-ops. Review
-r3 (gpt): added routing to the new measurement-experimentation-ops sibling
-(confirm a result is real before scale/kill). -->

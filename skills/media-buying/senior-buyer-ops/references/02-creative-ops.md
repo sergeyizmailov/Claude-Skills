@@ -46,9 +46,6 @@ creative on these axes so you're building a combination map, not a leaderboard:
   suddenly flooding the spy tools (below) is the market-saturation signal to jump
   to a new mechanism, not just a new hook. Track each axis as a time series, not
   one blended fatigue number.
-- Feed this back into briefs (below): the brief specifies the attribute bundle
-  to reproduce, so production compounds on known-transferable parts instead of
-  restarting from a blank angle each time.
 
 ## Multi-stage graduation
 
@@ -86,14 +83,3 @@ ad (resets learning, fb-grey-ops/04) — launch the successor.
   rejected ads → baseline recon only, not competitive truth.
 Use spy for angle discovery and prelander teardown; the winning execution is
 still yours to test.
-
-<!-- Changelog 2026-08-11: New — creative production pipeline (concept model,
-control/challenger + winner lineage, one-variable variation matrix, fatigue
-signals, backlog/brief throughput, current spy-tool map). Diagnosis stays in
-meta-ads/12. Peer-review r2 (gpt): split explore vs exploit — one-variable
-applies to exploit only; added an explore quota (avoid local maxima) and
-multi-stage graduation. Review r3 (gpt): added attribute-level creative-
-intelligence tagging (mine transferable combinations, per-axis decay clocks:
-hook per-audience vs mechanism/angle market-wide) — analyze bundles, not
-isolated winners. -->
-
