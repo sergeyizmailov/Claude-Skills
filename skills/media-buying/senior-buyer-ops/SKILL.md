@@ -11,9 +11,14 @@ team's numbers. Call the adapters in order; this file owns the decisions between
 them.
 
 Route: buy mechanics → `meta-ads` · infra/launch/survival → `fb-grey-ops` ·
-trackers/metrics → `tracker-ops` · portfolio & cadence →
+trackers/metrics → `tracker-ops` · is-a-result-real / experiment design →
+`measurement-experimentation-ops` · portfolio & cadence →
 `references/01-portfolio-and-cadence.md` · creative production →
 `references/02-creative-ops.md` · funnel QA → `references/03-funnel-ops.md`.
+
+Before you scale or kill on a difference, confirm it's real, not noise
+(`measurement-experimentation-ops`): the kill/scale ladder and marginal-scaling
+math below assume a MATURED, non-contaminated result.
 
 ## Operating contract (pin on day 1, in writing — before any spend)
 
@@ -47,4 +52,6 @@ Missing any of 1-8 = you are flying blind; resolve before launch.
 <!-- Changelog 2026-08-11: New orchestrator skill (per peer-review, gpt) giving
 the senior-buyer/TL operating layer that the three adapter skills lacked:
 operating-contract intake, cadence, and references for portfolio, creative-ops,
-funnel-ops. Dense/LLM-facing; routes to meta-ads/fb-grey-ops/tracker-ops. -->
+funnel-ops. Dense/LLM-facing; routes to meta-ads/fb-grey-ops/tracker-ops. Review
+r3 (gpt): added routing to the new measurement-experimentation-ops sibling
+(confirm a result is real before scale/kill). -->

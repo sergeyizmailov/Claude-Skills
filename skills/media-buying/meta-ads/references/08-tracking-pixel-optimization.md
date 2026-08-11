@@ -92,6 +92,12 @@ Gotchas: Purchase events without `value`/`currency` break value optimization and
 - Biggest single lift: **hashed email** collected at the conversion point in the CAPI payload; email + phone + external ID + fbp/fbc cookies contribute most. (MB Adv Agency, 2026-06: https://www.mbadv.agency/meta-ads/meta-pixel-and-conversion-tracking)
 - Improve EMQ by sending accurate permitted identifiers, but do not optimize the score at the expense of consent, correctness, deduplication, or backend event fidelity. There is no universal EMQ launch gate.
 
+### Choosing the optimization event & value-optimization eligibility
+
+- You can optimize delivery for a custom conversion or a custom event, not only standard events; the specific event appears in the ad set Optimization & Delivery dropdown. [practitioner; verify in Ads Manager] A brand-new event has no history and optimizes poorly until it accrues volume — the learning-phase target (~50 optimization events per ad set per 7 days) is the practical floor, so a deep, rare event (e.g. qualified sale) can leave an ad set permanently learning-limited. Optimize for the deepest event that still clears that volume; otherwise optimize a reliable upstream proxy that correlates with the paid outcome and watch that correlation. (Tracker/CRM → CAPI event tiering is detailed in `tracker-ops`.)
+- Value optimization (VBO) requires `value` + `currency` (ISO 4217) on the event. Custom conversions can use VBO, but Meta reportedly raised the qualification bar for custom / non-purchase events to roughly **100 attributed conversions** plus **≥5 distinct values in the past 14 days** (higher than for Purchase). [practitioner-reported change; verify current thresholds in Events Manager] Thin funnels that can't meet this should optimize on conversion count and control quality via which event they send, not VBO.
+- **Conversion Leads** performance goal (Lead Ads / Instant Forms): send down-funnel CRM stage events back via CAPI and optimize for a chosen lead stage. Official eligibility: ≥200 leads/month, upload data ≥ once daily, target stage occurs within 28 days of lead creation, and target-stage conversion rate between 1%–40%. [official — developers.facebook.com/documentation/ads-commerce/conversions-api/conversion-leads-integration]
+
 ---
 
 ## 4. Domain verification & Aggregated Event Measurement (AEM)
@@ -162,7 +168,7 @@ Use IDs as stable join keys. If analysts also need readable names, add separate 
 
 - Path: Ads Manager → ☰ **All tools** → **Experiments** (Analyze and report section) → **A/B Test** → pick two existing campaigns/ad sets/ads or create a duplicate as the variable.
 - Ensures **no audience overlap** between cells — people who see variant A never see variant B. This is its core advantage over manual splits.
-- Defaults to **90% significance** (speed over precision). Option "End test early if a winner is found" exists — practitioners recommend disabling it. Key metric selection is limited mostly to "Cost per …" metrics; conversion rate isn't a native metric (workaround: custom metric = Purchases/Link clicks). (Convert/Daphne Tideman, 2025-12: https://www.convert.com/blog/growth-marketing/meta-ads-ab-testing-guide/)
+- Reports a "% confidence this will be a winner." The commonly repeated "90% default" is likely the **Lift-study** threshold; Meta's A/B framework appears to flag a winner at a lower bar (~65%+ has been cited), so an A/B "winner" is directional, not lift-grade. The official help page was geo-blocked at last check — verify the live figure in the results view. Option "End test early if a winner is found" exists — disable it (it is automated peeking). Key metric selection is limited mostly to "Cost per …" metrics; conversion rate isn't a native metric (workaround: custom metric = Purchases/Link clicks). (Convert/Daphne Tideman, 2025-12: https://www.convert.com/blog/growth-marketing/meta-ads-ab-testing-guide/)
 - Best use: validating big bets — offers, landing pages/journeys, funnels — where overlap-free delivery matters. Clunky for high-volume creative iteration (one test at a time per setup).
 
 ### Manual split tests

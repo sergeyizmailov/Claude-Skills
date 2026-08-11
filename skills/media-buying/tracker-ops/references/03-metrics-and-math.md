@@ -45,6 +45,31 @@ delta — don't chase noise day to day.
   reg→deposit / lead→sale: lead QUALITY (what the advertiser judges; cheap
   low-quality leads lose deals).
 
+## Cohort nowcasting (decide before the cohort matures)
+
+Today's CPA looks terrible because today's conversions haven't posted back yet
+(confirm/deposit/KYC lag). Don't wait blind and don't judge raw — project the
+mature number:
+
+1. Build the completion curve from history: take matured click-date cohorts,
+   bucket each conversion by lag = conversion_time − click_time (Keitaro
+   `/conversions/log`: `postback_datetime` − `click_datetime`; Binom: the
+   built-in `Time since click` column, 02). p(d) = cumulative fraction of a
+   cohort's eventual conversions that have arrived by age d days.
+2. Nowcast a fresh cohort: `predicted_mature ≈ observed_to_date ÷ p(age_so_far)`;
+   `predicted_CPA = spend ÷ predicted_mature`. Decide kill/scale on the NOWCAST,
+   not the raw immature count (feeds senior-buyer-ops marginal scaling + team
+   stop-loss — both require MATURE numbers).
+3. Keep the two bases separate: click-date cohorts drive MEDIA decisions (a
+   conversion belongs to the click that caused it); conversion-date drives
+   FINANCE/cashflow (when money actually lands). Never mix them in one figure.
+
+Caveats: the curve DRIFTS — a new offer/GEO/season changes the lag, so refit on
+recent cohorts, don't reuse a stale curve. Low-volume cohorts give a noisy
+nowcast (wide error) — treat as directional. And a never-arriving conversion
+isn't lag: a broken/failed postback looks identical to a slow one early on, so
+rule out a tracking break (01) before trusting the projection.
+
 ## Anti-fraud / cloaking signals (read as a set)
 
 - raw clicks >> unique: bot refresh / source re-fire — judge cost on payout
@@ -82,6 +107,50 @@ single thing that makes per-account/per-ad numbers real):
 - Pin the payout `status` in the contract too — optimization event, tracker
   status, and payout event must line up or CPL/ROI is measuring the wrong thing.
 
+## Backend optimization contract (which status → which CAPI event)
+
+Three events that people conflate but are usually DIFFERENT — pin each
+separately, because optimizing the wrong one is the most expensive silent error:
+
+- REPORTING event — what you show the team / call a "lead".
+- PAYOUT event — the tracker status you actually get paid on (senior-buyer-ops
+  operating-contract #1).
+- OPTIMIZATION event — the CAPI/Pixel event the ad set bids toward. This is the
+  one Meta's delivery learns from; it drives who you get shown to.
+
+Wiring: tracker/CRM status → CAPI event back to Meta. The separate Offline
+Conversions API was discontinued (~May 2025, widely reported — confirm the
+dataset migration in Events Manager) — all CRM/backend stages now flow through
+standard CAPI into the dataset; tag server/CRM events `action_source=
+system_generated` (`physical_store` for in-store). CAPI mechanics live in
+meta-ads/08; this is which status maps to what.
+
+Choosing the optimization event = reliability × volume × correlation-with-payout:
+- Deeper event (FTD / confirmed sale) is best aligned with revenue but LOW volume
+  → an ad set may never clear the learning-phase volume floor (Meta's ~50
+  optimization events/ad set/7d — a documented heuristic, verify live), so Meta
+  optimizes badly. Shallower event (reg / lead) is high-volume and easy to
+  optimize but weakly correlated with payout → cheap junk that never converts
+  downstream.
+- Rule: optimize for the DEEPEST event that still clears the learning-volume bar.
+  If the payout event is too rare, optimize a reliable UPSTREAM proxy that
+  correlates with payout, and monitor that correlation (reg→FTD rate) so you're
+  not scaling volume that dies downstream.
+- Value optimization (VBO) needs `value`+`currency`; custom / non-purchase events
+  now need ~100 attributed conversions + ≥5 distinct values/14d to qualify
+  (tightened recently — verify live in Events Manager). Thin grey funnels often
+  can't meet that → optimize on conversion COUNT and control quality via which
+  status you send back, not via VBO.
+- Native lead forms: Meta's Conversion Leads goal (Lead Ads / Instant Forms)
+  takes CRM stage events via CAPI. Official eligibility [developers.facebook.com/
+  documentation/ads-commerce/conversions-api/conversion-leads-integration —
+  verify current]: ≥200 leads/mo, upload ≥1×/day, target stage within 28d of the
+  lead, target-stage CR 1–40%. Use it to optimize a down-funnel stage instead of
+  raw form fills.
+- Only send events you can stand behind (deduped via event_id, real): the
+  optimization signal also feeds Meta's quality modeling — noisy/fake events
+  degrade delivery, not just reporting.
+
 ## Daily routine (automate)
 
 For YESTERDAY (account tz): pull Meta spend/impr/clicks per live account → push
@@ -102,5 +171,11 @@ also exists on many installs (see 01). Compressed to dense form. Peer-review
 (gpt): labelled ±20% and the inflation ratio as account-specific; moved the
 domain-rotation ACTION to fb-grey-ops (signal stays here); added the Meta↔tracker
 mapping contract (params, statuses, payout event). Peer-review r2 (gpt): added a
-directional reconciliation tree (Meta>tracker vs tracker>Meta). -->
+directional reconciliation tree (Meta>tracker vs tracker>Meta). Review r3 (gpt):
+added cohort nowcasting (completion curve from per-conversion lag → predicted
+mature CPA; click-date media vs conversion-date finance) and the backend
+optimization contract (reporting/payout/optimization event tiers; pick the
+optimization event by reliability×volume×correlation; offline-API dead →
+action_source=system_generated; VBO ~100-event/5-value gate; Conversion Leads
+eligibility). Verified 2026-08-11. -->
 

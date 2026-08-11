@@ -25,6 +25,31 @@ maximum, so reserve a fixed EXPLORE quota (e.g. ~20-30% of test budget, a lever)
 - Record winner lineage (which angle-family prints) AND explore results, so
   scaling pulls from exploit while explore keeps refilling the top of the funnel.
 
+## Creative intelligence (tag at the attribute level, not the ad level)
+
+A winner is a BUNDLE of attributes; logging "ad X won" throws away why, and the
+ad dies while its winning proof-type or mechanism could live on. Tag every tested
+creative on these axes so you're building a combination map, not a leaderboard:
+
+- persona / market-awareness stage / dominant desire · mechanism (the "how it
+  works" claim) · proof type (UGC, screenshot, authority, before/after-proxy,
+  data) · objection handled · core emotion · angle · hook · format · funnel
+  version (which prelander/offer it ran to).
+
+- Score COMBINATIONS, not isolated winners: an angle×proof×emotion (and hook
+  family) that prints across multiple unrelated accounts/GEOs is real signal; a
+  single-account winner is noise until replicated. Briefs (below) then specify
+  the bundle to reproduce, so production compounds on known-transferable parts.
+- Decay is per-attribute on different clocks: a HOOK fatigues per audience (rotate
+  fast), while an ANGLE/MECHANISM/EMOTION fatigues market-wide — the whole scene
+  copies it and CTR decays everywhere at once. Detection cue: the same angle
+  suddenly flooding the spy tools (below) is the market-saturation signal to jump
+  to a new mechanism, not just a new hook. Track each axis as a time series, not
+  one blended fatigue number.
+- Feed this back into briefs (below): the brief specifies the attribute bundle
+  to reproduce, so production compounds on known-transferable parts instead of
+  restarting from a blank angle each time.
+
 ## Multi-stage graduation
 
 Don't jump a new creative straight to a scaling account. Graduate it: cheap
@@ -67,5 +92,8 @@ control/challenger + winner lineage, one-variable variation matrix, fatigue
 signals, backlog/brief throughput, current spy-tool map). Diagnosis stays in
 meta-ads/12. Peer-review r2 (gpt): split explore vs exploit — one-variable
 applies to exploit only; added an explore quota (avoid local maxima) and
-multi-stage graduation. -->
+multi-stage graduation. Review r3 (gpt): added attribute-level creative-
+intelligence tagging (mine transferable combinations, per-axis decay clocks:
+hook per-audience vs mechanism/angle market-wide) — analyze bundles, not
+isolated winners. -->
 

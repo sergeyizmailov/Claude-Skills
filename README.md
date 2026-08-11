@@ -18,15 +18,16 @@ category (or a new category); the tooling discovers any `skills/**/SKILL.md`.
 
 ### Media buying — Meta (Facebook/Instagram)
 
-A connected set for running Meta ads across clean and grey verticals: three domain
-adapters plus one orchestrator that decides between them.
+A connected set for running Meta ads across clean and grey verticals: four domain
+layers plus one orchestrator that decides between them.
 
 | Skill | Purpose |
 |---|---|
 | [**meta-ads**](skills/media-buying/meta-ads) | Clean-marketing reference: plan, launch, audit, diagnose, and optimize Meta ads — objectives/ODAX, budgets & bidding, targeting, pixel/CAPI, policy, and a canonical Marketing API error catalog. |
-| [**fb-grey-ops**](skills/media-buying/fb-grey-ops) | Infrastructure & survival layer for grey verticals: antidetect/proxy/session discipline, agency accounts, token/session death, API mass-launch, and per-vertical playbooks (nutra, iGaming, crypto, news). |
-| [**tracker-ops**](skills/media-buying/tracker-ops) | Affiliate tracker operations: Keitaro & Binom APIs, postback/S2S, metric discipline (payout event, timezones, CPL), the Meta↔tracker mapping contract, and the daily spend-sync. |
-| [**senior-buyer-ops**](skills/media-buying/senior-buyer-ops) | Senior-buyer / team-lead operating layer: the day-1 operating contract, portfolio allocation, kill/watch/scale ladder, creative production pipeline, and end-to-end funnel QA — orchestrates the three adapters above. |
+| [**fb-grey-ops**](skills/media-buying/fb-grey-ops) | Infrastructure & survival layer for grey verticals: antidetect/proxy/session discipline, agency accounts, token/session death, API mass-launch, portfolio forensics, and per-vertical playbooks (nutra, iGaming, crypto, news). |
+| [**tracker-ops**](skills/media-buying/tracker-ops) | Affiliate tracker operations: Keitaro & Binom APIs, postback/S2S, metric discipline (payout event, timezones, CPL), cohort nowcasting, the Meta↔tracker mapping & backend-optimization contract, and the daily spend-sync. |
+| [**measurement-experimentation-ops**](skills/media-buying/measurement-experimentation-ops) | Decide whether a result is real before acting: testing-mode selection (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag), and Meta's measurement tools — A/B Test, `ad_study` API, Conversion Lift, GeoLift, Robyn/MMM. |
+| [**senior-buyer-ops**](skills/media-buying/senior-buyer-ops) | Senior-buyer / team-lead operating layer: the day-1 operating contract, portfolio allocation, kill/watch/scale + marginal-scaling ladder, creative-intelligence pipeline, and end-to-end funnel QA — orchestrates the adapters above. |
 
 ### Frontend
 
@@ -85,7 +86,8 @@ skills/<category>/<name>/
 
 Only `name` and `description` load for discovery; the body and supporting files load when the
 skill is selected. The media-buying skills also cross-reference each other by name (e.g.
-`senior-buyer-ops` routes into `meta-ads` / `fb-grey-ops` / `tracker-ops`).
+`senior-buyer-ops` routes into `meta-ads` / `fb-grey-ops` / `tracker-ops` /
+`measurement-experimentation-ops`).
 
 ## Contributing
 
