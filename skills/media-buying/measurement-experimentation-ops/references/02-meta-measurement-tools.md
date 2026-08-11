@@ -14,7 +14,8 @@ enums per release.
   framework appears to flag a "winner" at a LOWER bar (~65%+ cited), so an A/B
   "winner" is directional, not long-run-grade — don't treat it as a lift result.
   [PRACTITIONER; official help page geo-blocked at check — verify in-product.]
-- "End test early if a winner is found" = automated peeking → leave OFF.
+- "End test early if a winner is found" reads as peeking → leave OFF unless Meta's
+  sequential decision rule is verified (methodology unpublished).
 - Metric selection skews to "Cost per …"; conversion rate isn't native (build a
   custom metric). Clunky for high-volume creative iteration (one test per setup).
 - UI mechanics (paths, metric limits, ABO-vs-Advantage+ screening) are documented

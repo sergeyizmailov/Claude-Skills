@@ -13,10 +13,13 @@ is real or noise before they do.
 Three modes, different evidence bars — match the mode to what a wrong answer
 costs, don't default to whatever's easy:
 
-1. **Causal** (randomized): the ONLY mode that proves incrementality. One
-   treatment vs a non-overlapping control/holdout, pre-sized sample. Use for
-   expensive, hard-to-reverse bets: offer, funnel, landing page, "does this
-   channel even lift sales." Cost: volume + discipline + often a Meta rep.
+1. **Causal**: estimates incrementality (no design *proves* causality without
+   assumptions). Two sub-modes — a randomized experiment (one treatment vs a
+   non-overlapping control/holdout, pre-sized) is the strongest; quasi-experimental
+   causal estimation (GeoLift synthetic control, pre/post) is the fallback when you
+   can't randomize. Use for expensive, hard-to-reverse bets: offer, funnel, landing
+   page, "does this channel even lift sales." Cost: volume + discipline + often a
+   Meta rep.
 2. **Screening** (directional): many concepts in one ad set / parallel ABO cells;
    delivery is UNEQUAL by design, so a "winner" is a hypothesis, not a proof.
    Use for high-throughput creative hunting where being fast beats being certain.
@@ -43,8 +46,9 @@ honest weaker method beats a "causal" test that's silently contaminated.
   assignment counts, NOT on spend/impressions/conversions — those diverging is
   usually a real delivery effect, not SRM.
 - **Peeking:** stopping the moment it looks significant inflates false positives.
-  Meta's A/B "end test early if a winner is found" IS peeking — leave it off, run
-  the pre-set window (02).
+  Meta's A/B "end test early if a winner is found" reads as peeking — leave it off
+  and run the pre-set window unless Meta's sequential decision rule is verified
+  (its methodology isn't published) (02).
 - **Contamination:** overlapping audiences between cells (esp. Advantage+ broad
   campaigns bleeding into manual cells; duplicated winners cannibalizing in the
   auction) means you're not comparing clean groups. Use the A/B Test tool's
