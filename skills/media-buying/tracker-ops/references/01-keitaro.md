@@ -107,22 +107,3 @@ costs:[{start_date,end_date,timezone,currency,cost, filters:{ad_campaign_id:"J41
 - Bot clicks inflate `clicks` (not `campaign_unique_clicks`); cost spreads over
   all matching clicks → CPC looks diluted on bot days, but daily CPL vs your
   payout-status count stays correct.
-
-<!-- Changelog 2026-08-11: Verified vs openapi.json — dropped `domain`
-dimension, fixed sub_id 1..30 and 9 interval tokens; added postback/S2S;
-compressed to dense form. Peer-review correction (production evidence
-2026-08-10): `cpl` metric DOES exist on many installs (= cost/leads) — restored
-as version-dependent, not removed; update_costs documented with per-entry
-timezone/currency (openapi-required, production-verified) as primary. Peer-review
-(gpt): corrected `ad_campaign_id` to a mappable source param (not intrinsically
-utm_campaign) and added the postback overwrite/tid dedup model. Added a
-conversion-lifecycle section (click-date cohorts, delayed status, offer caps,
-failed-postback replay, backend reconciliation). Peer-review r2 (gpt): report
-date mode is selectable (click-date for media opt vs conversion-date for
-finance) — check the instance, don't assume click-date. Review r3 (gpt): named the
-endpoints precisely — /report/build time dims are click-time only;
-conversion-date + per-conversion timestamps (click_datetime / postback_datetime /
-sale_datetime, no built-in lag measure) come from /conversions/log. Feeds the
-nowcasting recipe in 03. -->
-
-

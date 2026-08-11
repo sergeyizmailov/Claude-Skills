@@ -63,9 +63,3 @@ not a ban — funnel fault, senior-buyer-ops/03).
 This is diagnosis/attribution METHOD. The reactions (freeze, rotate domain,
 replace batch, kill creative) live in 01/05 and tracker-ops; the portfolio-level
 decision (shift budget to testing after a wave) is senior-buyer-ops/01.
-
-<!-- Changelog 2026-08-11: New (review r3, gpt) — portfolio forensics: log
-survival dimensions, hazard-rate (not raw count) + survival-time weighting,
-balanced infra-test designs to beat confounding (the third testing mode from
-measurement-experimentation-ops), cross-account anomaly pivots, incident
-fingerprint library. Method only; reactions stay in 01/05/tracker-ops. -->

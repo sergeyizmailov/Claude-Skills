@@ -59,12 +59,3 @@ Tag every funnel version (prelander vN, offer vN, path vN) so a result attaches
 to the exact version that produced it — via a sub_id/token or the tracker's
 lander/offer id. Without it you can't tell which prelander won and can't roll
 back a regression. Bind the version in the mapping contract (tracker-ops/03).
-
-<!-- Changelog 2026-08-11: New — end-to-end funnel QA (click-id/fbclid
-persistence, WebView/TG/PWA attribution quirks, SSL/DNS/GEO-latency on rotating
-domains, form/checkout, version→result binding). Cloaking mechanics assumed
-known; this is the chain-integrity layer between meta-ads and tracker-ops.
-Peer-review r2 (gpt): corrected PWA (it's web — Pixel/CAPI/postbacks apply, MMP
-only for native/wrapper) and expanded fbclid → fbc formatting + matching params
-+ shared event_id dedup (not just pass-through). -->
-

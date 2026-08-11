@@ -76,11 +76,3 @@ before scaling. Spy: AdSpy / Anstrex (Anstrex rips native nutra pre-landers).
 - Lead = the CPA network's CONFIRMED event per the team's definition — pin down
   EXACTLY which tracker status/measure that is before any CPL math (tracker-ops
   metric rule). Confirm arrives on a lag → cohort by click date (tracker-ops 01).
-
-<!-- Changelog 2026-08-11: Filled skeleton with directional vendor benchmarks
-(dated/sourced), event ladder + confirmed-CPA KPI, GEO/device, creative first
-tests, failure modes. Numbers are internet-directional, NOT live team data —
-flagged to replace. Verified moderation section kept. Peer-review r2 (gpt):
-fixed confirmed-CPA formula (= spend ÷ confirmed, not payout ÷ confirmed);
-relabelled table as unverified priors; separated affiliate payout from media CPA. -->
-

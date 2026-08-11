@@ -41,8 +41,3 @@ Rename legacy campaigns before scaling — renames are safe, don't reset learnin
 - Verdict (with TL): trash after ~$50 with CPL over target, or zero delivery in
   2-3 days, or any disable. Report in batches.
 - On new accounts: check asset shares (pixel!), timezone, currency BEFORE building.
-
-<!-- Changelog 2026-08-11: Flagged #1815045 as field-observed; compressed to
-dense form. Peer-review (gpt): naming section no longer implies automatic
-tracker split — works only via the mapping contract (tracker-ops/03). -->
-

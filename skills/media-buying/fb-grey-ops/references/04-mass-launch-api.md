@@ -96,14 +96,3 @@ wasting spend:
 Re-read campaign (budget, bid_strategy), one adset (start_time, promoted_object,
 bid), one ad (renders, right page). Activate only on match. Resume-safe: log
 every created object ID to per-account JSON so a failed run continues, not dupes.
-
-<!-- Changelog 2026-08-11: Verified vs v26.0 (ODAX, OFFSITE_CONVERSIONS,
-custom_event_type, SAC enum, creative_features_spec replacing deprecated
-standard_enhancements, LOWEST_COST_WITH_MIN_ROAS); flagged
-1815857/3858040/2446814/3738001 field-observed; compressed to dense form. Added
-grey-application metric levers (learning-reset edit list, event-volume choice,
-optimization↔payout alignment, consolidation, cost-cap ramp) — theory in
-meta-ads. Peer-review (gpt): precised creative_features_spec (field persists in
-schema; bundle-toggle-on-create/update gone v22.0 → per-feature enroll_status)
-and marked image-hash cross-account linking as an UNVERIFIED field hypothesis. -->
-

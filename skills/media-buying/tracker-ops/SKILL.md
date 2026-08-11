@@ -43,10 +43,3 @@ below; the metric rules and daily sync port to any tracker.
 - No cost push = no CPL/ROI (report cost is 0). Overwriting a period is safe
   (idempotent).
 - API keys are write-once; store verbatim in gitignored notes.
-
-<!-- Changelog 2026-08-11: Route table reflects postback/S2S, Binom's two API
-surfaces, and anti-fraud metrics; softened Binom "leads" to ≈all. Compressed.
-Peer-review (gpt): metric rule #1 reframed — "conversions inflation" is
-integration-specific (overwrite-by-default; extra records only via distinct
-tid), not an inherent 3.5-4x. Rule #3 ±20% labelled account-specific; rule #5
-"unsubstituted macros" now = exclude-then-classify (not automatically bots). -->

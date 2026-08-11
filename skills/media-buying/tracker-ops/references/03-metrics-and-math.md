@@ -13,10 +13,9 @@ Daily CPL = Meta spend (account-tz day) / tracker payout-metric count (same day)
 - Lead truth: tracker, the AGREED payout measure only (not "conversions" =
   all postback records; how much that exceeds your leads is integration-specific,
   not a fixed multiple — SKILL metric rule).
-- Cross-check: pixel leads ≈ tracker leads. The ±20% tolerance is an
-  account-specific rule of thumb, not a Meta/tracker constant — set your own
-  from a reconciled baseline. A bigger gap = wrong metric or broken tracking →
-  stop and reconcile before reporting.
+- Cross-check: pixel leads ≈ tracker leads (±tolerance is account-specific, set
+  from a reconciled baseline — SKILL rule #3). A bigger gap = wrong metric or
+  broken tracking → stop and reconcile before reporting.
 
 ## Reconciliation tree (when Meta ≠ tracker)
 
@@ -81,9 +80,8 @@ rule out a tracking break (01) before trusting the projection.
 - near-zero LP CTR w/ normal clicks: cloaca over-filtering real users (or black
   page broken) — a tracking fault, not bad traffic; fix the filter, don't kill.
 - empty_referrers spike: stripped/direct traffic — correlate with bot_share.
-- unsubstituted `{{...}}` rows: exclude from analysis, then classify — bots, or
-  a broken template / unsupported macro / manual traffic (fix your template
-  first if it's yours).
+- unsubstituted `{{...}}` rows: exclude-then-classify (SKILL rule #5) — read
+  alongside the signals above, not automatically as bots.
 
 ## Markup & the mapping contract
 
@@ -164,18 +162,3 @@ date arg).
 Use the team's lead definition + their timezone (ask which the sheet uses).
 Never report a metric not reconciled once against a second source. Keep a dated
 stats log; correct by appending, not rewriting.
-
-<!-- Changelog 2026-08-11: Added anti-fraud/cloaking signal reading + "ports to
-other trackers" note. CPL is computed in account tz here; a Keitaro `cpl` metric
-also exists on many installs (see 01). Compressed to dense form. Peer-review
-(gpt): labelled ±20% and the inflation ratio as account-specific; moved the
-domain-rotation ACTION to fb-grey-ops (signal stays here); added the Meta↔tracker
-mapping contract (params, statuses, payout event). Peer-review r2 (gpt): added a
-directional reconciliation tree (Meta>tracker vs tracker>Meta). Review r3 (gpt):
-added cohort nowcasting (completion curve from per-conversion lag → predicted
-mature CPA; click-date media vs conversion-date finance) and the backend
-optimization contract (reporting/payout/optimization event tiers; pick the
-optimization event by reliability×volume×correlation; offline-API dead →
-action_source=system_generated; VBO ~100-event/5-value gate; Conversion Leads
-eligibility). Verified 2026-08-11. -->
-

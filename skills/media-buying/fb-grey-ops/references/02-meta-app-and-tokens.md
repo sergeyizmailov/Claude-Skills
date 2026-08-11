@@ -92,10 +92,3 @@ UTC-7. Tracker "day" and Meta "day" only align in account tz.
 Marketing API runs on dynamic BUC limits read from response headers, not a
 fixed quota (details/back-off in 05). A single buyer never approaches it — just
 don't poll in tight loops.
-
-<!-- Changelog 2026-08-11: Verified vs v26.0 (app flow, tier gate, 190 subcodes,
-code-100 fix, enums, timezone fields, BUC rate limits, System User); compressed
-to dense form. Peer-review (gpt): replaced the wrong "agency BM tenants inherit
-access" line with the correct per-app Limited/Full access matrix (managing
-others' accounts needs Full Access + Business Verification; verified BM is a
-prerequisite, not the grant) + write-probe check. -->

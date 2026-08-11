@@ -73,10 +73,3 @@ switch down once it builds. Spy: AdSpy / AdHeart.
 - Pin which tracker event = payout (reg? FTD? qualified FTD?) before any CPA
   math (tracker-ops metric rule). Broker traffic is scrubbed on quality —
   optimize to the advertiser's validated event, not cheap regs.
-
-<!-- Changelog 2026-08-11: Filled skeleton with directional crypto/forex
-benchmarks (CPA/FTD, lead→FTD by GEO, click→FTD — dated/sourced), event ladder +
-FTD KPI, creative first tests, failure modes. Numbers internet-directional, NOT
-live — flagged to replace. Verified policy kept. Peer-review r2 (gpt): relabelled
-tables as unverified priors; split payout / conversion / media-cost. -->
-

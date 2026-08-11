@@ -78,9 +78,3 @@ channel and is judged by the TL — cheap low-quality subs are a trap.
   not creative content, is usually the trigger.
 - FB profile restrictions (multiple sessions) come from IP/device
   inconsistency, not from ads — see 01-infra-and-identity.md.
-
-<!-- Changelog 2026-08-11: Added docs-level policy note (news personas trigger
-Social Issues by content, not styling; finance angle can invoke the financial/
-crypto authorization gate). Objective=Leads and Submit Application event re-
-verified on v26.0. Team benchmarks left as-is (one-team, already labelled). -->
-

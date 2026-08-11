@@ -320,6 +320,3 @@ Only available as a control when the language isn't common to the selected locat
 - Meta's Advantage+ performance stats (33% / 28% / 13% / 7%) are vendor-reported from a 2023 experiment; no newer official benchmark verified.
 - CPA/ROAS comparison numbers in §6.1 are agency stats relayed by Madgicx, not primary sources.
 - Special Ad Category targeting restrictions (housing/employment/credit/social issues) mentioned but full 2025–2026 restriction matrix not detailed here.
-
-<!-- Changelog 2026-08-11 (peer-review, gpt): corrected customer-list hashing to distinguish paths — UI upload = raw (Meta hashes client-side, don't pre-hash); Marketing API upload = you MUST pre-hash SHA-256. "Never pre-hash" applies to the UI path only. -->
-
