@@ -131,7 +131,7 @@ Creation path: **Ads Manager → Audiences (left nav; under "Assets" in All Tool
 ### 5.2 Customer list
 
 - Upload CSV/TXT; 15 identifier types supported: email, phone, fn, ln, ct, st, zip, country, dob, birth year, gen, mobile advertiser ID, FB app user ID, FB Page user ID, external ID.
-- Meta hashes on upload — do **not** pre-hash. Column headers must match Meta's template exactly.
+- Hashing depends on the path: **UI (Ads Manager) upload — do NOT pre-hash**, Meta normalizes and hashes client-side before sending. **Marketing API upload — you MUST pre-hash**: normalize, then SHA-256 (hex) each identifier yourself. Column headers must match Meta's template exactly.
 - Expect **30–60% match rate**; improve with multiple identifiers per row and fresh (<12-month) data.
 - Minimum **100 matched people** to use; aim for 1,000+.
 - Requires accepting Meta's **Custom Audience Terms** per ad account (lawful basis + consent; no sensitive-category data, no brokered/scraped data).
@@ -280,7 +280,7 @@ Only available as a control when the language isn't common to the selected locat
 6. Assuming the removed residents-only location selector is still available; qualify local serviceability through supported geo inputs and the conversion flow.
 7. Applying a universal purchaser exclusion without considering replenishment, upsell, or acquisition strategy.
 8. Retention windows mismatched to purchase cycle (180d for a 30-day replenishment product).
-9. Pre-hashing customer lists before upload (breaks matching); wrong CSV headers.
+9. Pre-hashing customer lists before a **UI** upload (breaks matching — the UI hashes for you); wrong CSV headers. (For **Marketing API** uploads the opposite holds: you must pre-hash SHA-256.)
 10. Parallel 1%/3%/5% lookalike ad sets in one campaign → self-competition, CPM inflation.
 11. Sensitive-trait audience names → policy risk.
 12. Comparing audience approaches before sufficient delivery and conversion lag have accumulated. Define the required sample and review window from the account rather than imposing 7–14 days universally.
@@ -320,3 +320,6 @@ Only available as a control when the language isn't common to the selected locat
 - Meta's Advantage+ performance stats (33% / 28% / 13% / 7%) are vendor-reported from a 2023 experiment; no newer official benchmark verified.
 - CPA/ROAS comparison numbers in §6.1 are agency stats relayed by Madgicx, not primary sources.
 - Special Ad Category targeting restrictions (housing/employment/credit/social issues) mentioned but full 2025–2026 restriction matrix not detailed here.
+
+<!-- Changelog 2026-08-11 (peer-review, gpt): corrected customer-list hashing to distinguish paths — UI upload = raw (Meta hashes client-side, don't pre-hash); Marketing API upload = you MUST pre-hash SHA-256. "Never pre-hash" applies to the UI path only. -->
+

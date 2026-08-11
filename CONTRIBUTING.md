@@ -4,10 +4,12 @@ Thanks for wanting to add to the library. The bar is simple: a skill should make
 
 ## Anatomy of a skill
 
-Each skill is one directory under [`skills/`](skills/):
+Each skill is one directory under a category in [`skills/`](skills/) (e.g.
+`skills/frontend/`, `skills/security/`, `skills/media-buying/`, `skills/research/`).
+Add to the fitting category, or create a new one:
 
 ```
-skills/<name>/
+skills/<category>/<name>/
 ├── SKILL.md        # required — the playbook
 ├── references/     # optional — deep-dive docs loaded on demand
 └── scripts/        # optional — helper scripts the skill calls

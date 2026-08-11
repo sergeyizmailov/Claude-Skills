@@ -1,0 +1,85 @@
+# 02 — Binom API
+
+Binom v2 is the current major. Two surfaces coexist — know which you're on:
+- LEGACY v1: URL-param API (docs.binom.org/api.php). Auth = `api_key` query/POST
+  param. Reports = append `&api_key=` to a UI report URL.
+- v2 REST: JSON (docs.binom.org/api-v2.php). Auth = `api-key` HTTP HEADER.
+  Swagger at `https://<tracker>/api/doc` (mirror v2.api.binom.org); paths under
+  `public/api/<resource>/...`. Exact paths/payloads UNVERIFIED here — read them
+  off your own /api/doc (no public raw openapi.json).
+Legacy URL-param calls work on both; use them when unsure.
+
+Key (legacy): Settings → API section → copy `api_key=XXXX`.
+
+## Legacy reports
+
+- date: 1 today, 2 yesterday, 3 last7d, 4 last14d, 5 this month, 6 last month,
+  7 this year, 8 last year, 9 all time, 10 custom time
+  (date_s/date_e incl `+%7C+HH%3AMM`), 11 this week, 12 custom date.
+- group1/2/3: 2 paths, 3 offers, 4 landers, 5 rules, 6 ISP, 7 IP, 10 device,
+  15 browser, 17 OS, 19 country, 21 language, 22 aff network, 23 referrer URL,
+  24 referrer domain, 25 weekday, 26 hour, 27 token1, 29 device name,
+  30 connection, 31 by days, 282-290 tokens 2-10.
+- `&val_page=all`, `&fid=N` (saved filter), order_name/order_type.
+- Fields: clicks, leads, cr, lp_ctr, epc, cpc, cost, rev, profit, ROI. Binom
+  "leads" = conversions (whether all-events vs first-per-click is NOT stated in
+  docs — verify per setup).
+
+## Legacy cost update
+
+`?page=save_update_costs&camp_id=ID&date=12&date_s=&date_e=&timezone=-7&cost=170.95&api_key=KEY`
+- order_type 1=total cost, 2=CPC (amount field `cost` or `cpc`). timezone =
+  TRAFFIC-SOURCE offset (-12..12), i.e. the ad account's — this offset form is
+  v1/legacy. token_number/token_value for per-token splits.
+- Binom v2 timezone is a tracker-wide NAMED timezone set by the superadmin (and
+  changing it retroactively shifts old clicks/conversions); the numeric -12..12
+  offset is not the v2 model. Reconcile which timezone the tracker is on before
+  trusting day boundaries.
+
+## Legacy objects (index.php, action=)
+
+offer_get/getall/add/edit/delete/restore; landing_ same set; source_getall only
+(read). No legacy campaign/source create-edit — use v2 REST or UI for
+campaigns/paths/rotations/sources.
+
+## v2 REST capabilities + discovery workflow
+
+Reports, cost updates, and full CRUD on campaigns/offers/landings/sources/paths/
+rotations with per-user permissions — confirmed to exist; exact paths are per
+instance, not public. Discovery workflow (REQUIRED once per tracker before any
+v2 automation):
+1. Open `https://<tracker>/api/doc`; capture the OpenAPI spec its Swagger UI
+   loads (network tab → the `.json` it fetches). Auth = `api-key` header.
+2. Extract path+method+request/response schema for ONLY the ops you need
+   (report pull, cost update, the CRUD you use).
+3. CACHE that schema in gitignored notes, tagged with the tracker version — your
+   reproducible contract; re-verify on a version bump. Never guess paths from
+   another instance (versions/permissions differ).
+
+## Postback / S2S (both)
+
+Path differs by version, params are identical:
+- v1: `https://TRACKER/click.php?cnv_id={clickid}&payout={amount}&cnv_status={status}`
+- v2: `https://TRACKER/click?cnv_id={clickid}&payout={amount}&cnv_status={status}` (no `.php`)
+- `cnv_id` = Binom click id (put `{clickid}` token in the value) — this is the
+  param name, not `clickid`. Optional: cnv_status2, cnv_currency, to_offer,
+  `disable_postback=1`.
+- Statuses are user-defined via Status Schemes (if-then-else, first match).
+  Templates: E-commerce (lead/sale/reject), Subscription.
+- Click-id flow: place `{clickid}` in the offer URL via the network's param
+  (e.g. `&sub1={clickid}`); network returns it in `cnv_id`. Onward to source via
+  `{externalid}` + `{cnv_status}`; status-postback relation routes per status.
+
+## Gotchas
+
+- Drill-down JSON formats numbers with separators/percent — parse as strings,
+  strip before math. Multi-level reports carry a `level` field per row.
+
+<!-- Changelog 2026-08-11: Verified vs docs.binom.org — split LEGACY vs v2 REST
+(current major, api-key header, /api/doc), verified date/grouping codes and cost
+update, added postback/S2S; v2 exact paths UNVERIFIED. Compressed to dense form.
+Peer-review (gpt): postback path is v1 `/click.php` vs v2 `/click` (params
+identical); v2 timezone is a tracker-wide named zone, not the v1 -12..12 offset.
+Added a required v2 REST discovery workflow (pull /api/doc OpenAPI, cache the
+verified per-instance schema) since exact paths aren't public. -->
+
