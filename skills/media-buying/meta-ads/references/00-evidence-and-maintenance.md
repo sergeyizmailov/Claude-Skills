@@ -82,8 +82,7 @@ Review at least quarterly and immediately after a major Meta announcement:
 3. Reclassify every new benchmark and record its scope and methodology.
 4. Replace dead sources; do not silently preserve a claim whose evidence disappeared.
 5. Re-run contradiction searches for universal language: `must`, `always`, `never`, exact learning counts, fixed edit percentages, fixed reporting delays, and fixed frequency limits.
-6. Compare the canonical research directory with the skill reference copies using the sync tool.
-7. Update the review date only after the facts, links, and known gaps have actually been checked.
+6. Update the review date only after the facts, links, and known gaps have actually been checked.
 
 ## 7. Official knowledge map
 
