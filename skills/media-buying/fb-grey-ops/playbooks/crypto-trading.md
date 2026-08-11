@@ -41,7 +41,8 @@ e.g. at a $400 payout and 18% lead→FTD, break-even lead CPL ≈ $72.
 ## Creative concepts & first tests
 
 News/review/quiz angles; "opportunity" framing (NOT get-rich-quick — policy).
-First test 1-3-1 on pre-lander angle; optimise to lead where FTD volume thin,
+First test 1-3-1 (directional screening, not a causal test — see 04) on
+pre-lander angle; optimise to lead where FTD volume thin,
 switch down once it builds. Spy: AdSpy / AdHeart.
 
 ## Common failure modes

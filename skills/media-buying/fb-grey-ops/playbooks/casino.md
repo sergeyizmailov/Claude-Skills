@@ -53,7 +53,8 @@ Pelican $120-250 (no-KYC crypto).
 ## Creative concepts & first tests
 
 Slots gameplay / big-win reactions / bonus offers. App-style creatives for
-PWA/WebView funnels. First test: 2-3 angles 1-3-1; optimise to reg where FTD
+PWA/WebView funnels. First test: 2-3 angles 1-3-1 (directional screening, not a
+causal test — see 04); optimise to reg where FTD
 volume is too thin to optimise on directly, then switch to the deposit event
 once volume builds (fb-grey-ops/04 event-volume lever).
 

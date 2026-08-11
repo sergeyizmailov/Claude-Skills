@@ -5,7 +5,8 @@ description: "Senior grey media-buyer / team-lead operating layer: day-1 operati
 
 # Senior Buyer Ops
 
-The layer above the three adapters. They tell you HOW to buy / survive / count;
+The layer above the four adapters (buy / survive / count / measure). They tell
+you HOW to buy / survive / count / prove-a-result;
 this tells you WHAT to decide as the person accountable for a portfolio and a
 team's numbers. Call the adapters in order; this file owns the decisions between
 them.

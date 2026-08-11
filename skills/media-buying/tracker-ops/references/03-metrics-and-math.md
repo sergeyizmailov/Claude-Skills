@@ -130,8 +130,9 @@ ACTUALLY happened, from the enum (`website`, `app`, `phone_call`, `chat`, `email
 `physical_store`, `business_messaging`, `system_generated`, `other`) — NOT
 `system_generated` for every server postback. `system_generated` is only for
 conversions that occur automatically with no customer interaction (e.g. a
-subscription auto-renewal); a CRM stage that began as a web/app/call action keeps
-that source. CAPI mechanics live in meta-ads/08; this is which status maps to what.
+subscription auto-renewal). Set `action_source` PER EVENT by where THAT stage
+actually happened — don't auto-inherit it from the original lead's source. CAPI
+mechanics live in meta-ads/08; this is which status maps to what.
 
 Choosing the optimization event = reliability × volume × correlation-with-payout:
 - Deeper event (FTD / confirmed sale) is best aligned with revenue but LOW volume

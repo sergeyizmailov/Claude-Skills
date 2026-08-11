@@ -30,8 +30,9 @@ why parallel ABO cells are screening, not causal.
 
 - Fix the window and the decision metric BEFORE launch. Reading daily and
   stopping on the first green crossing manufactures false winners; early leads
-  reverse. Meta's "end test early if a winner is found" is automated peeking —
-  off by default.
+  reverse. Meta's "end test early if a winner is found" reads as automated peeking
+  — leave off unless Meta's sequential decision rule is verified (unpublished, so
+  can't assume it's valid sequential testing).
 - One primary decision metric tied to the payout event. Secondary metrics are
   context, not tie-breakers you reach for when the primary disappoints.
 

@@ -50,7 +50,8 @@ Mobile-first LPs; heavy pre-lander.
 
 Angles: advertorial ("doctor/local-news" story), quiz ("answer 3 questions"),
 before/after avoided in-ad (policy, below) → transformation lives on the LP.
-First test: 2-3 pre-lander angles × 1 broad adset each (1-3-1); optimise LP→lead
+First test: 2-3 pre-lander angles × 1 broad adset each (1-3-1 = directional
+screening, not a causal test — see 04); optimise LP→lead
 before scaling. Spy: AdSpy / Anstrex (Anstrex rips native nutra pre-landers).
 
 ## Common failure modes
