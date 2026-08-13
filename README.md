@@ -35,6 +35,7 @@ layers plus one orchestrator that decides between them.
 |---|---|
 | [**responsive-adapter**](skills/frontend/responsive-adapter) | Adapts existing web interfaces from 320px phones to 2560px+ displays while preserving the original visual system, then verifies across a device matrix. |
 | [**design-stack-picker**](skills/frontend/design-stack-picker) | Selects compatible fonts, icons, components, imagery, motion, and design primitives with a reuse-first approach. |
+| [**normcore-web**](skills/frontend/normcore-web) | Builds sites that read as ordinary, long-running commercial web rather than freshly art-directed product design, across five genre archetypes with measured tokens and a runnable audit. |
 
 ### Security
 
