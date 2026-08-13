@@ -26,7 +26,10 @@ a hospital trust renders **18 images on the whole page** — the inverse of a sh
 | images | **few.** 18–34. Text and links carry the page |
 | photo bands with flat colour fill | occasionally one hero band; not a repeating rhythm |
 
-## Variation axes — measured, pick one point on each
+## Variation axes — measured, roll one point on each
+
+**Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
+top to bottom starting at 0 and apply `(S + k) mod n` to each row's options.
 
 | axis | one real point | the other |
 |---|---|---|

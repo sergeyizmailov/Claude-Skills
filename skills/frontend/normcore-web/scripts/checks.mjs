@@ -16,8 +16,17 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const errors = [], failed = [];
 page.on('console', m => m.type() === 'error' && errors.push(m.text()));
 page.on('requestfailed', r => failed.push(r.url()));
+page.on('response', r => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
 await page.goto(URL, { waitUntil: 'load' });
-await page.waitForTimeout(1500);
+await page.waitForTimeout(1200);
+// trigger lazy-loading before judging images, or loading="lazy" reads as broken
+await page.evaluate(async () => {
+  for (let y = 0; y < document.body.scrollHeight; y += 700) {
+    window.scrollTo(0, y); await new Promise(r => setTimeout(r, 60));
+  }
+  window.scrollTo(0, 0);
+});
+await page.waitForTimeout(600);
 
 const out = [];
 const fail = (name, detail) => out.push({ name, detail });
@@ -29,7 +38,8 @@ const orn = await page.evaluate(() => {
 
   // authored transform ANIMATION — static positioning is allowed, library internals exempt
   r.transformAnim = [...document.querySelectorAll('body *')]
-    .filter(e => /transform/.test(cs(e).transitionProperty)
+    .filter(e => (cs(e).transitionDuration || '').split(',').some(d => parseFloat(d) > 0)
+              && /transform/.test(cs(e).transitionProperty)
               && !/swiper|slick|flickity|glide/i.test(e.className + ' ' + (e.parentElement?.className || '')))
     .map(e => e.tagName + '.' + String(e.className).slice(0, 24)).slice(0, 5);
 
@@ -73,6 +83,23 @@ const orn = await page.evaluate(() => {
       if (m.size > 1) r.twoTone = { size, runs: [...m].map(([c, x]) => `"${x}" ${c}`) };
   } else r.noMark = true;
 
+  // transition-property defaults to "all", so it is only meaningful where a duration is set
+  const active = e => (cs(e).transitionDuration || '')
+    .split(',').some(d => parseFloat(d) > 0);
+  r.transitionAll = [...document.querySelectorAll('body *')]
+    .filter(e => active(e) && /(^|,)\s*all\s*($|,)/.test(cs(e).transitionProperty))
+    .map(e => e.tagName + '.' + String(e.className).slice(0, 24)).slice(0, 5);
+  r.keyframes = (() => {
+    const names = new Set();
+    for (const sh of document.styleSheets) {
+      let rules; try { rules = sh.cssRules; } catch { continue; }   // throws cross-origin
+      for (const rule of rules || [])
+        if (rule.type === CSSRule.KEYFRAMES_RULE)
+          for (const kf of rule.cssRules)
+            if (/transform/.test(kf.style?.cssText || '')) names.add(rule.name);
+    }
+    return [...names];
+  })();
   r.clamp = [...document.querySelectorAll('h1,h2,h3,body,p')]
     .some(e => /clamp/.test(cs(e).fontSize));
   return r;
@@ -83,6 +110,8 @@ if (orn.eyebrow.length)       fail('eyebrow / kicker above a heading', orn.eyebr
 if (orn.buttons.length)       fail('button label uppercased or tracked', orn.buttons);
 if (orn.twoTone)              fail('two-tone wordmark', orn.twoTone);
 if (orn.noMark)               fail('no wordmark found — check by eye', '');
+if (orn.transitionAll.length) fail('transition: all — hides transform behind a shorthand', orn.transitionAll);
+if (orn.keyframes.length)     fail('@keyframes animating transform', orn.keyframes);
 if (orn.clamp)                fail('clamp() on type', 'stepped px per breakpoint instead');
 
 // ─── assets ──────────────────────────────────────────────────────────────────
@@ -92,9 +121,11 @@ const assets = await page.evaluate(() => {
     broken: imgs.filter(i => !i.naturalWidth).map(i => i.getAttribute('src')),
     noDims: imgs.filter(i => !i.getAttribute('width') || !i.getAttribute('height'))
                 .map(i => i.getAttribute('src')).slice(0, 8),
-    noAlt: imgs.filter(i => !i.getAttribute('alt')).map(i => i.getAttribute('src')).slice(0, 8),
+    // alt="" is valid and correct for decorative images; only a MISSING attribute fails
+    noAlt: imgs.filter(i => i.getAttribute('alt') === null).map(i => i.getAttribute('src')).slice(0, 8),
     // 2x is legitimate retina, so only flag beyond 2.5x
-    oversized: imgs.filter(i => i.clientWidth > 0 && i.naturalWidth > i.clientWidth * 2.5)
+    oversized: imgs.filter(i => i.clientWidth > 0 && !/\.svg(\?|$)/i.test(i.currentSrc || i.src || '')
+                             && i.naturalWidth > i.clientWidth * 2.5)
                    .map(i => `${i.getAttribute('src')} ${i.naturalWidth}px in ${i.clientWidth}px`).slice(0, 8),
     hotlinked: [...document.querySelectorAll('img,link,script')]
                  .map(e => e.getAttribute('src') || e.getAttribute('href'))

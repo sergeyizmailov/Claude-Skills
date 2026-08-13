@@ -30,9 +30,10 @@ year it is being run in.
 You build websites for local firms. You have done it for years and you are good at the parts
 the client notices. Your working situation:
 
-**What you reach for.** A plugin for anything non-trivial — carousel, form, cookie notice, phone-prefix field — because
-writing it yourself is billable time nobody approved. A block copied from the last site you
-built and recoloured. Bootstrap's grid when the theme's own is fighting you.
+**What you reach for.** Whatever the project already has. Then an established library for
+genuinely non-trivial functionality — carousel, form, cookie notice, phone-prefix field —
+because writing it yourself is billable time nobody approved. A block copied from the last site
+you built and recoloured.
 
 **What you have never seen.** The list below is what current product design looked like when
 these notes were written. **Whenever you are reading this, substitute what is fashionable in
@@ -73,8 +74,9 @@ carelessness — see "Defects are evidence, not instructions".
 ## How to run this
 
 1. Pick the archetype (table below) and read that one file. Do not read the others.
-1. Fix the build's history — year, platform, bolt-ons, maintainer — and pick a point on each of
-   the archetype's variation axes. Do this **before** laying anything out; it decides the shape.
+1. Roll the build's history — year, platform, bolt-ons, maintainer — and roll a point on each of
+   the archetype's variation axes, using the seed method below. Do this **before** laying
+   anything out; it decides the shape. Show the arithmetic in your report.
 2. Confirm the genre fits — if the brief is only "less AI-looking", stop and use
    `design-taste-frontend` or `impeccable` instead.
 3. Gather real assets first: photographs, logos, an icon font. Nothing is drawn or generated,
@@ -144,6 +146,28 @@ content for, and let the history you fixed above decide the rest.
 | News / publishing | `references/archetypes/news-media.md` | newspapers, trade press, magazines, company newsrooms |
 | Corporate / institutional | `references/archetypes/corporate-institutional.md` | banks, insurers, utilities, universities, hospitals, government, large multi-department firms |
 | Directory / portal | `references/archetypes/directory-portal.md` | listings, member registers, search-first sites |
+
+## Roll the build — do not choose it
+
+**Measured failure:** two runs of one brief, given free choice, picked the same point on six of
+eight axes and even collided on the invented brand name. Free choice converges. So derive the
+choices arithmetically instead — deterministic per project, but different across projects,
+which is the property that matters.
+
+**The seed** is the number of letters in the client's or publication's name, ignoring spaces
+and punctuation. Call it `S`.
+
+For any list of `n` options below, take option number `(S + k) mod n`, counting from 0, where
+`k` is the position of that list on the page (first list `k=0`, second `k=1`, and so on). Work
+top to bottom and write the arithmetic into your report.
+
+If a rolled option is genuinely impossible for the brief — a shop with no promo banners cannot
+roll "carousel" — step to the next option and say why. Do not re-roll until you like it, and do
+not quietly land on the option you would have picked anyway.
+
+The seed also breaks name collisions: if the invented name is the first one that comes to mind,
+it is the one every other run will also produce. Take the brief's own specifics — the region,
+the trade, the founder's surname, the street — and build the name from those instead.
 
 ## Fix the build's history before you start
 
@@ -267,7 +291,9 @@ container     min(100%, 1240px) with 15-25px side padding below 1024
 images        max-width:100%, height:auto, width/height attributes always set
 tables        wrap in overflow-x:auto — never restyle a table into stacked cards
 nav           collapses to a hamburger with a plain stacked panel, no slide-in animation
-touch         44px minimum on every tap target; phone numbers are real tel: links
+touch         44px minimum on primary controls — nav items, buttons, form fields, icon
+              buttons. Not on links inside a dense text list or a headline river, which no
+              real site of this kind sizes up. Phone numbers are real tel: links
 ```
 
 Verify by sweeping every width in `references/verification.md`, not four breakpoints —
@@ -374,7 +400,10 @@ Subject guidance per vertical, including retail and news: `references/photo-subj
 The rendered artefact reads as real: Swiper's arrow-and-dot furniture, an icon font's glyph
 metrics, a country-prefix phone select. Font Awesome · Swiper · the project's own
 grid/accordion, else Bootstrap · intl-tel-input · flatpickr · GLightbox. Keep the project's
-stack, maintained versions only. Never add a dependency for period accuracy.
+stack. **One dependency rule, and it overrides anything that reads otherwise:** reuse the
+project's existing components and its pinned versions; add a dependency only for functionality
+genuinely required, at the latest version compatible with the project — not reflexively the
+newest major; never add one for period accuracy or to serve the role.
 
 ### Defects are evidence, not instructions
 

@@ -20,17 +20,24 @@ and verify the candidate is still in register before comparing against it:
 
 Never skip the comparison because a URL broke. Substitute.
 
-| archetype | in-register references |
-|---|---|
-| professional services | the professional-services reference · an international law firm · a corporate-services firm |
-| shop | a regional electronics chain, in register (best) · a second electronics chain, drifted modern |
-| news | an English regional daily · a Scottish daily |
-| corporate / institutional | a university · a hospital trust |
-| directory | a national business directory · a second national directory |
+**No named URLs here on purpose** — they rot, and a list of them ages worse than a method.
+Find two live references per build with these searches, then qualify them:
 
-Out of register when measured, so do **not** use as targets: a large international chain (commissioned
-typeface, a real design system that merely feels dated), a large energy utility, drifted modern, a national tabloid, drifted modern (both drifted modern).
-Any site can drift — re-apply the usability check above rather than trusting this list.
+| archetype | search for |
+|---|---|
+| professional services | `"company formation" OR "licensing consultancy" site:*.com` · a law or accountancy firm that has traded for 15+ years |
+| shop | a national electronics or tool retailer in a mid-size European market — not the global flagship brands, whose sites are designed |
+| news | a county or regional daily, or a trade weekly · `"est. 18.." newspaper` |
+| corporate / institutional | a regional water or energy utility, an NHS-equivalent hospital trust, a public university |
+| directory | a national business directory, a trades register, a classifieds portal |
+
+> **Qualify the candidate before comparing.** Open it: one workhorse sans (or a serif headline
+> face for news), corners at or near square, nothing that moves on hover, dense text or dense
+> listings, real photographs, no ornament above headings. Fails those → it has been redesigned;
+> search again. A large chain with a commissioned typeface will *feel* dated and still be a real
+> design system — not a target.
+
+Never skip the comparison because you could not find a reference. Search again.
 
 ```bash
 cat > /tmp/board.mjs <<'EOF'
@@ -86,7 +93,7 @@ Answer each out loud. Any "mine" answer that is the tidier one is a failure.
 |---|---|
 | professional services | Is every band full of prose, or does it breathe? Does a CTA row close each photo band? |
 | shop | Is the price the loudest thing in the tile? Is the grid crowded enough to scroll past? Do tiles stay still on hover? |
-| news | Can you count 250+ links? Are river items headline-and-timestamp with no summaries? Are ad slots visibly reserved? |
+| news | Can you count 250+ links? Are river items headline-and-timestamp with no summaries? Are unfilled ad slots collapsed rather than left as blank bands? |
 | corporate / institutional | Does the nav go deep? Is there a notices strip and a dated news list? Is the hero signage rather than a sales pitch? |
 | directory | Is it rows with hairlines rather than cards? Is the search block loud and slightly crude? Numbered pagination? |
 

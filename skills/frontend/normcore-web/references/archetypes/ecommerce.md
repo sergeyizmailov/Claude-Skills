@@ -32,7 +32,10 @@ Images are the page. a regional electronics chain, in register renders **353** o
 numerous — a home page shows 40–80 products across several rails. Text per tile is a
 truncated name, a price, and a stock or delivery line. Nothing breathes.
 
-## Variation axes — measured, pick one point on each
+## Variation axes — measured, roll one point on each
+
+**Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
+top to bottom starting at 0 and apply `(S + k) mod n` to each row's options.
 
 Two references differ on every one of these, so all combinations are authentic:
 

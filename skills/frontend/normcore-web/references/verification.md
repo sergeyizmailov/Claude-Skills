@@ -111,16 +111,12 @@ the other four genres have no paragraph-length target.
 
 ## Function
 
-- **Contrast.** Every text node ≥4.5:1, or 3:1 at ≥24px / ≥18.66px bold. Check the three
+- **Contrast.** Every text node ≥4.5:1, or 3:1 at ≥24px / ≥18.66px bold. Check the
   three contrast traps named under "Cosmetic only, never functional" in `SKILL.md`.
 - **Widths.** Covered by the script (14 widths, 320–1920). Four breakpoints is not enough —
   two offenders appear only between them: a percentage float grid with fixed margins
   (`width:17%; margin-right:25px` × 5 fits at 1440, overflows at 768 — add an intermediate
   breakpoint), and an unbreakable token in a fixed-width box (`overflow-wrap: anywhere`).
-  A carousel's duplicate slides look guilty but are clipped by its own `overflow:hidden`.
-
-  A carousel's duplicate slides look guilty but are clipped by its own `overflow:hidden` —
-  find the real culprit via section `scrollWidth`.
 - **Keyboard.** Everything reachable, sensible order, visible focus ring. The era dropped
   focus rings; this skill does not. Every nav caret opens a real submenu: reachable by
   keyboard, `aria-expanded` maintained, Escape closes it.

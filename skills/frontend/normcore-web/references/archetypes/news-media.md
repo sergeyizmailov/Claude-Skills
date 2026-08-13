@@ -64,7 +64,10 @@ site's history justifies it is correct.
 11. **Fat footer** — every section, contact, advertise with us, terms, ownership, a second
     masthead of sister titles
 
-## Variation axes — measured, pick one point on each
+## Variation axes — measured, roll one point on each
+
+**Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
+top to bottom starting at 0 and apply `(S + k) mod n` to each row's options.
 
 | axis | one real point | the other |
 |---|---|---|
@@ -147,8 +150,8 @@ mean no sizing.
 | under ~200 links on a full home page | 265–424 measured; scale to the content supplied |
 | no timestamps | every item dated; leads show "Updated" |
 | thumbnails all one aspect ratio | lead wide, river small, sidebar none |
-| no ad slots | 5–6 reserved at real IAB sizes with fixed heights |
-| an ad slot filled with a grey "advertisement" box | reserved, empty, unstyled |
+| no ad slots planned at all | 5–6 positions identified at real IAB sizes; filled ones get fixed heights, unfilled ones collapse |
+| a visible empty band where an ad would go, or a grey "advertisement" placeholder | unfilled slots collapsed to an HTML comment naming the IAB size; space reserved only once a real tag fills it |
 | generous whitespace between sections | heading strip, then straight into links |
 | sans headlines | serif headline face over a sans body |
 | no "Most read" or notices block | present |
