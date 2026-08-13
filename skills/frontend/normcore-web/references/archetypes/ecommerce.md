@@ -35,7 +35,7 @@ truncated name, a price, and a stock or delivery line. Nothing breathes.
 ## Variation axes — measured, roll one point on each
 
 **Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
-top to bottom starting at 0 and apply `(S + k) mod n` to each row's options.
+top to bottom starting at 0 and take letter `k` of the name for each row.
 
 Two references differ on every one of these, so all combinations are authentic:
 

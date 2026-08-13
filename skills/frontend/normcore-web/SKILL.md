@@ -154,12 +154,26 @@ eight axes and even collided on the invented brand name. Free choice converges. 
 choices arithmetically instead — deterministic per project, but different across projects,
 which is the property that matters.
 
-**The seed** is the number of letters in the client's or publication's name, ignoring spaces
-and punctuation. Call it `S`.
+**The seed** is the client's or publication's name with spaces and punctuation stripped. Call
+that string of letters `N`.
 
-For any list of `n` options below, take option number `(S + k) mod n`, counting from 0, where
-`k` is the position of that list on the page (first list `k=0`, second `k=1`, and so on). Work
-top to bottom and write the arithmetic into your report.
+For the list or axis numbered `k` — top to bottom, the first is `k=0` — take **letter number
+`k` of `N`**, wrapping back to the start if `N` runs out. Convert that letter to its position
+in the alphabet (a=1 … z=26) and take it `mod n` for a list of `n` options, counting options
+from 0. Work top to bottom and write the arithmetic into your report.
+
+Worked example, `Thornmere Water` → `ThornmereWater`, against eight binary axes:
+
+```
+letter     T    h    o    r    n    m    e    r
+alphabet  20    8   15   18   14   13    5   18
+mod 2      0    0    1    0    0    1    1    0
+```
+
+**Use the letters, not the name's length.** Every axis table is binary, so a length-based
+`(S + k) mod 2` just alternates as `k` increments — which collapses every project in the world
+onto one of two profiles that are exact inverses of each other. Spelling the name out moves the
+axes independently.
 
 If a rolled option is genuinely impossible for the brief — a shop with no promo banners cannot
 roll "carousel" — step to the next option and say why. Do not re-roll until you like it, and do

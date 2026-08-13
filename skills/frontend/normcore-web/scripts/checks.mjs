@@ -89,19 +89,41 @@ const orn = await page.evaluate(() => {
   r.transitionAll = [...document.querySelectorAll('body *')]
     .filter(e => active(e) && /(^|,)\s*all\s*($|,)/.test(cs(e).transitionProperty))
     .map(e => e.tagName + '.' + String(e.className).slice(0, 24)).slice(0, 5);
-  r.keyframes = (() => {
-    const names = new Set();
-    for (const sh of document.styleSheets) {
-      let rules; try { rules = sh.cssRules; } catch { continue; }   // throws cross-origin
-      for (const rule of rules || [])
-        if (rule.type === CSSRule.KEYFRAMES_RULE)
-          for (const kf of rule.cssRules)
-            if (/transform/.test(kf.style?.cssText || '')) names.add(rule.name);
+  // a vendored library stylesheet is full of keyframes nothing on this page uses, so collect
+  // the animation names actually running first and only report those
+  const running = new Set();
+  for (const e of document.querySelectorAll('body, body *'))
+    for (const pseudo of [null, '::before', '::after'])
+      for (const n of (getComputedStyle(e, pseudo).animationName || '').split(','))
+        if (n.trim() && n.trim() !== 'none') running.add(n.trim());
+
+  // computed styles resolve clamp() to a used px value, so this has to read the stylesheet text
+  const clamp = new Set();
+  const keyframes = new Set();
+  const scan = (text, where) => {
+    for (const m of (text || '').matchAll(/([-a-z]+)\s*:\s*[^;}]*clamp\(/g))
+      clamp.add(`${m[1]} (${where})`);
+  };
+  const walk = (rules, where) => {
+    for (const rule of rules || []) {
+      if (rule.type === CSSRule.KEYFRAMES_RULE) {
+        if (running.has(rule.name) &&
+            [...rule.cssRules].some(kf => /transform/.test(kf.style?.cssText || '')))
+          keyframes.add(rule.name);
+        continue;                                    // a keyframe step is not authored type
+      }
+      if (rule.style) scan(rule.style.cssText, where);
+      if (rule.cssRules) walk(rule.cssRules, where);  // @media, @supports, @layer
     }
-    return [...names];
-  })();
-  r.clamp = [...document.querySelectorAll('h1,h2,h3,body,p')]
-    .some(e => /clamp/.test(cs(e).fontSize));
+  };
+  for (const sh of document.styleSheets) {
+    let rules; try { rules = sh.cssRules; } catch { continue; }   // throws cross-origin
+    walk(rules, sh.href ? sh.href.split('/').pop() : 'inline <style>');
+  }
+  for (const e of document.querySelectorAll('[style]'))
+    scan(e.getAttribute('style'), 'style attribute');
+  r.keyframes = [...keyframes];
+  r.clamp = [...clamp].slice(0, 6);
   return r;
 });
 if (orn.transformAnim.length) fail('transform in an authored transition', orn.transformAnim);
@@ -111,8 +133,8 @@ if (orn.buttons.length)       fail('button label uppercased or tracked', orn.but
 if (orn.twoTone)              fail('two-tone wordmark', orn.twoTone);
 if (orn.noMark)               fail('no wordmark found — check by eye', '');
 if (orn.transitionAll.length) fail('transition: all — hides transform behind a shorthand', orn.transitionAll);
-if (orn.keyframes.length)     fail('@keyframes animating transform', orn.keyframes);
-if (orn.clamp)                fail('clamp() on type', 'stepped px per breakpoint instead');
+if (orn.keyframes.length)     fail('@keyframes animating transform, and in use', orn.keyframes);
+if (orn.clamp.length)         fail('clamp() — use stepped px per breakpoint', orn.clamp);
 
 // ─── assets ──────────────────────────────────────────────────────────────────
 const assets = await page.evaluate(() => {
