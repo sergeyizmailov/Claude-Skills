@@ -372,7 +372,7 @@ A caret must open a real submenu — keyboard reachable, `aria-expanded`, Escape
 ### Never generate an asset — source it, or ask
 
 Do not **design or hand-author** icons, illustrations, patterns, dividers or decorative
-graphics — no CSS-drawn stand-in, emoji as icon, gradient rectangle as photo,
+graphics — no CSS-drawn stand-in, gradient rectangle as photo,
 letter-in-a-circle avatar, drawn seal, **no AI-generated image**.
 
 The ban is on invention, not on the SVG format. An official brand logo in SVG, an icon set's

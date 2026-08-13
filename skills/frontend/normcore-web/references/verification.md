@@ -84,7 +84,7 @@ both.
 | a placeholder box, dashed outline or "LOGO / VIDEO" marked slot | a real image — no wireframe furniture anywhere |
 | an empty video player frame | a real photograph in that slot |
 | hotlinked remote image | downloaded locally |
-| icon is CSS shapes, emoji or a drawn path | icon-font class |
+| icon is CSS shapes or a drawn path | icon-font class |
 | logo is typeset text posing as a mark | real file, or company name as header text |
 | "photo" is a gradient or illustration | real photograph |
 | hand-written carousel or accordion | Swiper / project component, configured |
