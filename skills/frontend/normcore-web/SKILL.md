@@ -9,6 +9,10 @@ description: >-
   conventional corporate, page-builder, legacy-agency, retail, or "real company website"
   appearance. Do not trigger merely because a design should look less AI-generated. Not for
   product UI, SaaS app shells, dashboards, portfolios, or editorial brand sites.
+# risk/source are this library's own convention; harmless YAML, but drop them if a
+# stricter validator rejects unknown top-level keys
+risk: safe
+source: self
 ---
 
 # Normcore Web
