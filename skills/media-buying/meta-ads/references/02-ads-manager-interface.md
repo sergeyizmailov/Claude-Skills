@@ -197,6 +197,7 @@ Limits & gotchas:
 - Not available for ads about social issues, elections or politics.
 - Budget-increase rules without a cap can spiral — set max-budget ceilings; add minimum impressions/spend conditions to avoid triggering on noise (e.g. Frequency > 2 AND CTR < x AND Impressions > 8,000).
 - Rules log their actions; review rule history before blaming Meta for budget changes.
+- API-side, cost/ratio conditions (`cpa`, `cost_per_*`, `website_purchase_roas`) are rejected on ADSET- and AD-scoped rules for every action except CHANGE_BUDGET / CHANGE_BID — even NOTIFICATION (error 2703 / subcode 2490336, field-observed 2026-08 on v26.0); campaign scope accepts them, which is why the UI can offer cost conditions at all. An ad-set-level "cost per result > X → pause" must be built as `spent > price x k AND <conversion count> < k+1`. Threshold choice that survives small samples, plus API field/unit gotchas: `senior-buyer-ops/references/04-automated-rules.md`.
 
 ---
 

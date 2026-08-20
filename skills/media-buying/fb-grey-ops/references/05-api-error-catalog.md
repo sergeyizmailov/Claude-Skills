@@ -13,7 +13,7 @@ in Meta's published references, so the string is more stable than the digits.
 
 Any token-death subcode (460 password/security rotation, 463 expired, 467
 invalid — 467 still emits the "user logged out" string in the wild) = mint a new
-token and re-exchange (see 14/02). Grey response:
+token and re-exchange (meta-ads/14 auth section; token lifecycle in 02). Grey response:
 - Regenerate ONCE, exchange to long-lived, stop. Every extra regen during a flag
   pokes the bear (01).
 - Subcode 460 specifically (security rotation) or repeated deaths in a short

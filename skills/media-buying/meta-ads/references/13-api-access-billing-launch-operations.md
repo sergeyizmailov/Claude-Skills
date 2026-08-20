@@ -161,16 +161,53 @@ For Instagram ads, verify all of the following:
 - a paused creative using both identities succeeds.
 
 An Instagram account appearing in `/instagram_accounts` does not prove that it
-is valid as `instagram_actor_id`. The creative is the authoritative probe.
-`Param instagram_actor_id must be a valid Instagram account id` usually points
+is valid as the creative identity. The creative is the authoritative probe.
+`Param instagram_user_id must be a valid Instagram account id` usually points
 to linkage, asset assignment, ID type, token/app relationship, or unsupported
 creative configuration—not audience targeting.
 
-For Page-backed Instagram creative, current official Meta Postman examples use
-`object_story_spec.page_id` plus `instagram_actor_id`. Destination-specific
-flows such as Instagram Direct can additionally require the matching promoted
-object, destination, CTA, and messaging eligibility. Verify against the current
-Marketing API version.
+### Field rename (doc-confirmed, enforced)
+
+`instagram_actor_id` is GONE from v22.0 (2025-01). Legacy → current:
+
+| legacy | current |
+|---|---|
+| `instagram_actor_id` | `instagram_user_id` |
+| `instagram_story_id` | `source_instagram_media_id` |
+| `effective_instagram_story_id` | `effective_instagram_media_id` |
+
+Meta cut the migration deadline to 2025-09-09; no supported version accepts the
+legacy names now. Any snippet, Postman example, or SDK wrapper still passing
+`instagram_actor_id` is pre-v22 and will reject a valid ID — **the rejection is
+not evidence the ID is bad.** Older docs pages still show the legacy name.
+
+### Page-backed Instagram accounts (PBIA) (doc-confirmed)
+
+A Page with **no** Instagram account can still run Instagram placements. The
+Page's PBIA is an auto-derived IG identity (name + profile picture inherited
+from the Page) — this is exactly what the Ads Manager identity picker means by
+"Use Facebook Page".
+
+```
+GET  /{page_id}/page_backed_instagram_accounts   → existing PBIA (data: [] if none)
+POST /{page_id}/page_backed_instagram_accounts   → creates it; returns existing if present
+```
+
+- **Requires a PAGE access token** (`GET /{page_id}?fields=access_token`), with
+  ≥ADVERTISER role. A user/System-User token returns
+  `190 "must be called with a Page Access Token"` — that error means wrong token
+  type, NOT missing PBIA. Helper wrappers that inject a user token silently hit
+  this; call this edge directly.
+- One PBIA per Page, created idempotently.
+- Pass the returned id as **`instagram_user_id`** in `object_story_spec`.
+- Ads-only identity: no organic posts, comments, or likes, and it cannot be
+  logged into. In-feed the profile name renders black and non-clickable rather
+  than a blue link — so ad comment-reply workflows have no account to reply
+  from. Irrelevant for pure direct-response, disqualifying if the plan needs
+  organic IG presence or comment moderation.
+
+Destination-specific flows such as Instagram Direct can additionally require the
+matching promoted object, destination, CTA, and messaging eligibility.
 
 In the EU, account-level choices about personalized or less-personalized ads can
 affect creation eligibility. This is the user's privacy choice: explain the

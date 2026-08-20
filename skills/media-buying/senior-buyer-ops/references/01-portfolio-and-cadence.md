@@ -26,6 +26,9 @@ a finite pool of accounts + budget + creative across testing and scaling.
 
 ## Kill / watch / scale ladder
 
+Automating any of the three: `04-automated-rules.md` (thresholds that hold at
+small counts, and the platform constraints on expressing them).
+
 - KILL: use the threshold from the operating contract, not a built-in default —
   the "no payout event after ~1.5-2× target CPA" figure is a common starting
   heuristic, but the team's contract sets the real number; plus the account

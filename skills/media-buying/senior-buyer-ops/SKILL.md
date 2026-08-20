@@ -15,7 +15,9 @@ Route: buy mechanics → `meta-ads` · infra/launch/survival → `fb-grey-ops` �
 trackers/metrics → `tracker-ops` · is-a-result-real / experiment design →
 `measurement-experimentation-ops` · portfolio & cadence →
 `references/01-portfolio-and-cadence.md` · creative production →
-`references/02-creative-ops.md` · funnel QA → `references/03-funnel-ops.md`.
+`references/02-creative-ops.md` · funnel QA → `references/03-funnel-ops.md` ·
+automated kill/scale rules that survive small samples →
+`references/04-automated-rules.md`.
 
 Before you scale or kill on a difference, confirm it's real, not noise
 (`measurement-experimentation-ops`): the kill/scale ladder and marginal-scaling

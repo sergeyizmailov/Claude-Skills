@@ -43,6 +43,11 @@ without bid_amount (error 1815857, field-observed). Enum:
   FTD/deposit usually → PURCHASE or a custom event; confirm the team's mapping).
 - OUTCOME_SALES reportedly blocks Lead/Submit Application events (error 2446814,
   field-observed) → use OUTCOME_LEADS for lead funnels.
+- Creating an adset under a campaign WITHOUT a budget fails unless
+  `is_adset_budget_sharing_enabled` is sent (field-observed); with CBO it is
+  not needed.
+- Targeting edits REPLACE the whole object (field-observed): a POST carrying
+  one targeting field wipes the rest — always send every field, never one.
 - Creative: object_story_spec{page_id, link_data{link, image_hash, caption
   (display domain), message (primary text), call_to_action{type:LEARN_MORE,
   value:{link}}}}. Advantage+ enhancements: the standard_enhancements
@@ -55,6 +60,22 @@ without bid_amount (error 1815857, field-observed). Enum:
 - Catalog/template creatives ({{product.name}}+product_set_id) skip image upload
   but need catalog access + prebuilt product sets (Commerce Manager; catalog_
   management usually unavailable via API).
+- **IG identity on farmed fan pages — use the PBIA, never drop placements.**
+  Grey fan pages have no real Instagram account, but every Page can mint a
+  page-backed IG identity, so Instagram placements stay available:
+  `POST /{page_id}/page_backed_instagram_accounts` with a PAGE token
+  (`GET /{page_id}?fields=access_token`; a user/SU token gives 190 "must be
+  called with a Page Access Token"), then pass the id as
+  `object_story_spec.instagram_user_id` (NOT `instagram_actor_id` — dead since
+  v22.0; it rejects a valid PBIA and fakes an "invalid id" error).
+  Without it, POST /ads fails `1772103 "Instagram Account Is Missing"` whenever
+  placements include IG. The tempting fix —
+  `targeting.publisher_platforms=["facebook"]` — makes the error vanish while
+  silently killing IG + Audience Network + Messenger inventory for that ad set:
+  a large, invisible reach cut on the cheapest grey placements. Fix the
+  identity, not the placements. PBIA is ads-only (no organic posts/comments,
+  black non-clickable profile name), which for direct-response is a non-issue.
+  Details: meta-ads/13 §5.
 
 ## Scheduling & images
 
@@ -107,6 +128,17 @@ wasting spend:
   window beat many starved ad sets spread thin across accounts.
 - Cost-cap ramp: start COST_CAP ~15-30% above target CPA, tighten as it
   stabilizes; a cap below market just chokes delivery. All %s are heuristics.
+
+## Re-moderation: which edits trigger a new review (field-observed, 2026-08)
+
+Review attaches to the CREATIVE, not the ad set:
+- SAFE at ad-set level: geo, devices, age, placements, budget, bid, schedule,
+  audience — 45 ad sets edited three times in one day, zero status changes.
+- TRIGGERS at ad/creative level: CTA, display link, copy, Multi-advertiser ads,
+  swapping the video — each builds a new creative and a new review.
+- An ad created PAUSED still goes to review; before first approval, swapping
+  the creative restarts first-pass review (safe) — it is not re-moderation.
+- A rejected ad cannot be enabled (2490468, meta-ads/14) — create a new ad.
 
 ## Verification pass
 

@@ -56,6 +56,25 @@ replacement-to-evade as a violation):
   appeals/edits mid-restriction are widely held to extend it — field prior, not
   documented.
 
+## Ban detection loop (own detection, not just response)
+
+Bans and silent stops are found by polling, not by noticing zero spend a day
+late. Two sweeps, both cron-able:
+
+- STATUS sweep (daily, per account): `GET /act_<id>?fields=account_status,
+  disable_reason` — 1=active, 2=disabled, 3=unsettled (= unpaid balance, see
+  billing above — a topup fixes it, not a replacement). Log every change with
+  date + spend at death into the survival log (06) — that log is what makes the
+  forensics and the agency replacement lists possible. Per-ad rejects:
+  `effective_status=DISAPPROVED` on the ads edge.
+- SPEND sweep (daily): yesterday's spend ≈ 0 on an account that was live =
+  silent stop — ASL hit, unpaid balance, or a restriction that hasn't surfaced
+  as a status yet. All child accounts stopping at once is also the earliest
+  BM-level signal (BM restriction, above).
+
+This is the front of the chain: detection (here) → attribution (06) → response
+(05). It feeds the daily kill/watch/scale watchlist in senior-buyer-ops/01.
+
 ## Billing gotchas that affect launches
 
 - A "dead" account may just be an UNPAID BALANCE, not a ban: a failed payment
