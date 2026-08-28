@@ -2,7 +2,7 @@
 
 Code → cause → fix for the Marketing API (v26.0, 2026-08). This is the canonical
 reference; for the grey-ops RESPONSE to these errors (when a code means freeze
-the profile / replace the account / rotate the domain) see `fb-grey-ops/05`.
+the profile / replace the account / rotate the domain) see `meta-grey-ops/05`.
 
 Read `error_user_msg` first; `is_transient:true` = retry with backoff, `false` =
 fix input. Match on numeric code + subcode, not the human string (Meta edits
@@ -56,7 +56,7 @@ long-lived immediately, store in a secrets manager.
   fails ad creation.
 - 2490468 HARD_ERROR: a REJECTED ad cannot be enabled at all — editing does not
   help; the fix is a brand-new ad (grey-ops practice: don't fight rejects,
-  leave them off — fb-grey-ops/05).
+  leave them off — meta-grey-ops/05).
 - 100 / subcode **1772103** "Instagram Account Is Missing" on POST `/ads`: the
   ad set's placements include Instagram and the CREATIVE carries no IG identity.
   It is a creative-identity error, never "this account/Page can't run Instagram"

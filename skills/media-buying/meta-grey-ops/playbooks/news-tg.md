@@ -1,6 +1,6 @@
 # Playbook — News funnels: FB ads → news pre-lander → Telegram subscription
 
-Status: FILLED FROM LIVE WORK (Aug 2026). Benchmarks are one team's, re-verify
+Status (reviewed 2026-08-28): FILLED FROM LIVE WORK (Aug 2026). Benchmarks are one team's, re-verify
 per team. Vertical: "news-style" crypto/finance persona funnels to a TG channel.
 
 ## Funnel anatomy

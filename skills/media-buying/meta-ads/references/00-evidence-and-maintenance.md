@@ -63,6 +63,36 @@ For high-impact recommendations, include the evidence label inline. Exact prices
 | Detailed targeting exclusions | Availability has changed and can depend on campaign state and account rollout. Do not build a strategy that assumes the legacy control exists. | Official: https://www.facebook.com/help/messenger-app/717368264947302/ |
 | EU political, electoral, and social-issue ads | Meta announced that these ads would no longer be delivered in the EU from October 2025. Confirm scope and current policy before planning. | Official: https://about.fb.com/news/2025/07/ending-political-electoral-and-social-issue-advertising-in-the-eu/ |
 
+## 4.1 Marketing API version anchor (2026-08)
+
+Graph API majors ship ~2×/year and a version number goes stale within months — check the changelog
+(§7 map) before asserting "current". Version-bound behavior observed in this corpus:
+
+| Version | What changed | Lives |
+|---|---|---|
+| v22.0 (Jan 2025) | `instagram_actor_id` removed → `instagram_user_id`; single `enable_standard_enhancements` deprecated → per-feature flags via `creative_features_spec` | `13` §5, `04` §6, `14` |
+| v26.0 (2026-08) | Current reference version: the error catalog and field-observed automated-rules API behavior are validated on it | `14` header, `02` §9 |
+
+If any reference names a version, treat the claim as version-bound and re-verify against the current
+major before automating.
+
+## 4.2 Hard limits (cross-file)
+
+Numbers agents hit during setup/automation, consolidated so they drift in one place. A live account
+overrides any row here.
+
+| Limit | Value | Note | Source |
+|---|---|---|---|
+| Automated rules per ad account | 250 | Includes inactive rules | `02` §9 |
+| Ads per ad set | 50 max; Meta discourages >~6 active | Legacy ASC 150-ad cap gone; total-campaign cap [uncertain] | `03` §2.1 |
+| Primary text | ~2,200 stored; ~125 shown ("… more"); 72 on Reels | Write for truncation | `04` §7 |
+| Headline | 40 UI practical / 255 technical | Sources conflict; plan for 40 | `04` §7 |
+| Description | 30 practical / 125 technical | | `04` §7 |
+| Lookalike range | 1–10% similarity | A suggestion, not a control, under conversions optimization | `05` |
+| Learning-phase volume | "~50 events / 7 days per ad set" | Heuristic, never an official threshold | SKILL, `06` §4 |
+| Stories safe zone | top ~14% (~250 px), bottom ~20% (~340 px) | 1080×1920 canvas | `04` §4 |
+| Reels safe zone | top ~14%, bottom ~350 px practical | UI-version dependent | `04` §4 |
+
 ## 5. Claims that always need context
 
 - Cost benchmarks: currency, country, period, objective, optimization event, attribution setting, placement mix, and sample size.

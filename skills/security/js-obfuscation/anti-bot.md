@@ -1,8 +1,6 @@
 # Anti-Bot, Anti-Sandbox & Environment Detection
 
-## Comprehensive Check
-
-Apply BEFORE rendering any sensitive content.
+Apply all checks BEFORE rendering sensitive content.
 
 ```javascript
 (function(){
@@ -62,8 +60,6 @@ Apply BEFORE rendering any sensitive content.
 })();
 ```
 
-## What Each Check Catches
-
 | Check | Catches | Bypass difficulty |
 |-------|---------|-------------------|
 | `navigator.webdriver` | Selenium, Puppeteer, Playwright | Easy (flag removal) |
@@ -93,13 +89,12 @@ def landing(token):
 ```
 
 Block: Google (AS15169, AS396982), Microsoft (AS8075), AWS (AS16509, AS14618), known security vendors.
-Also check User-Agent for: Googlebot, facebookexternalhit, bot, crawler, spider, scanner.
-
-For Cloudflare Workers: use `request.cf.asOrganization` and `request.cf.country`.
+Also check UA for: Googlebot, facebookexternalhit, bot, crawler, spider, scanner.
+Cloudflare Workers: `request.cf.asOrganization`, `request.cf.country`.
 
 ## CAPTCHA Gating (Turnstile)
 
-Turnstile — free, invisible mode, built-in bot filtering.
+Free, invisible mode, built-in bot filtering.
 
 **Client:**
 ```html
@@ -136,4 +131,4 @@ def validate_turnstile(token, ip):
     return r.json().get('success', False)
 ```
 
-Token is single-use, expires in 300s. If valid → return decryption key. If not → 403.
+Token single-use, expires 300s. Valid → return decryption key; invalid → 403.

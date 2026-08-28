@@ -1,13 +1,10 @@
 # ReDoS & WebSocket Security
 
-Event-loop blocking regex (ReDoS) and WebSocket hardening (CSWSH, oversized
-messages, missing origin check, rate limiting).
-
 Related: `express.md` · `auth.md` (JWT for WS auth).
 
 ## ReDoS Prevention
 
-Node.js is single-threaded — a single regex that takes exponential time blocks the entire event loop, freezing all requests. This caused real outages at Stack Overflow (34 minutes) and Cloudflare (global WAF incident).
+Single-threaded Node: one exponential regex blocks the entire event loop. Real outages: Stack Overflow (34 min), Cloudflare (global WAF).
 
 ### Dangerous patterns
 
@@ -33,10 +30,10 @@ const trimmed = input.replace(/^[\s\u200c]+|[\s\u200c]+$/, '');
 ### Safe alternatives
 
 ```javascript
-// Replace regex with string operations
+// String operations instead of regex
 const isLocalhost = host === 'localhost' || host.endsWith('.localhost');
 
-// Use Google RE2 — guaranteed linear time, no backtracking
+// RE2 — guaranteed linear time, no backtracking
 const RE2 = require('re2');
 const safePattern = new RE2('^([a-z]+)+$');
 safePattern.test(userInput);
@@ -58,7 +55,7 @@ npx vuln-regex-detector --dir ./src
 
 ## WebSocket Security
 
-WebSockets are exempt from Same-Origin Policy. If auth relies on cookies and the server doesn't validate Origin, any malicious site can open a WebSocket and the browser attaches the victim's cookies automatically (Cross-Site WebSocket Hijacking — CSWSH).
+WebSockets are exempt from Same-Origin Policy: with cookie auth and no Origin check, any site can open a WS and the browser attaches the victim's cookies (CSWSH).
 
 ### Secure ws implementation
 
@@ -66,8 +63,8 @@ WebSockets are exempt from Same-Origin Policy. If auth relies on cookies and the
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({
   port: 8080,
-  maxPayload: 64 * 1024,      // 64 KB (default is 100 MB — way too large)
-  perMessageDeflate: false     // disable compression (avoids zip bomb attacks)
+  maxPayload: 64 * 1024,      // 64 KB (default 100 MB — way too large)
+  perMessageDeflate: false     // disable compression (zip bomb defense)
 });
 
 const ALLOWED_ORIGINS = ['https://app.example.com'];
@@ -80,7 +77,7 @@ wss.on('connection', (ws, req) => {
     return;
   }
 
-  // 2. Validate auth token (from query string or first message)
+  // 2. Validate auth token (query string or first message)
   const url = new URL(req.url, `http://${req.headers.host}`);
   const token = url.searchParams.get('token');
   if (!verifyJWT(token)) {
@@ -143,10 +140,10 @@ io.use((socket, next) => {
 
 ### Pentest checklist
 
-- Connect from a different origin (CSWSH test)
+- Connect from different origin (CSWSH test)
 - Send oversized messages (memory DoS)
 - Flood messages rapidly (rate limit test)
 - Send malformed JSON / unexpected types
 - Connect without auth token
-- Use expired/tampered JWT
-- Check if `ws://` (unencrypted) accepted in production
+- Expired/tampered JWT
+- `ws://` (unencrypted) accepted in production?

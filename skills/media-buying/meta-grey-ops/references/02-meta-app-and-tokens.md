@@ -23,9 +23,12 @@ levels renamed Standard→Limited, Advanced→Full):
 - **Limited** = default when you add the Marketing API product. Heavily
   rate-limited per ad account, "for development only". Allows: 1 system user +
   1 admin system user.
-- **Full** = via App Review; higher limits, 10 system users + 1 admin. Qualify
-  at ~≥500 MAPI calls / 15 days with <15% errors. Requires **Business
-  Verification**.
+- **Full** = via App Review; higher limits, 10 system users + 1 admin. Qualify at
+  **≥500 MAPI calls in the past 15 days with <15% error rate over the last 500 calls**
+  (threshold was lowered from 1,500). Requires **Business Verification**.
+  [official: developers.facebook.com/docs/marketing-api/overview/rate-limiting, 2026-08-27]
+- **Naming, from 2026-05-04:** the feature is "Marketing API Access Tier"; **Standard → Limited**,
+  **Advanced → Full**. Older docs and forum posts use the old names. [official: Meta developer blog]
 
 Which you need:
 - Managing ad accounts your token user OWNS / has a role on **inside your own

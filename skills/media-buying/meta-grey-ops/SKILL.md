@@ -1,9 +1,9 @@
 ---
-name: fb-grey-ops
-description: "Grey-vertical Meta (FB/IG) buying: antidetect/proxy/session survival, agency accounts, token/session death, API mass-launch, tracker naming, per-vertical playbooks (nutra, gambling, crypto, news...). The infra+survival layer. Clean marketing = meta-ads; metrics = tracker-ops."
+name: meta-grey-ops
+description: "Meta (FB/IG) grey-market buying: antidetect/proxy/session survival, agency accounts, token death, API mass-launch, cloaking/review-layer filters, DLO/catalog/CTM/unicode tricks, verification gates (business/beneficial-owner/identity, category authorization), which verticals have no path at all, location fees, WABA, per-vertical playbooks (nutra, gambling, crypto, news). Infra+survival layer. Clean marketing = meta-ads; metrics = tracker-ops."
 ---
 
-# FB Grey Ops
+# Meta Grey Ops
 
 Launch grey verticals at scale without getting accounts/tokens/sessions killed.
 Vertical-agnostic infra + survival. Boundary: "buy well" → meta-ads ·
@@ -11,10 +11,9 @@ Vertical-agnostic infra + survival. Boundary: "buy well" → meta-ads ·
 "portfolio / TL decisions / creative + funnel ops" → senior-buyer-ops.
 
 Authority (they are NOT one ruleset): this skill governs grey-vertical
-execution; meta-ads' clean-marketing guardrails (no cloaking/bypass/account
-farming) are authoritative for compliant accounts, not for grey work. Route by
-lane; don't merge the two normative stances or treat them as mutually
-authoritative.
+execution; meta-ads' clean-marketing guardrails are authoritative for
+compliant accounts, not for grey work. Route by lane; don't merge the two
+normative stances or treat them as mutually authoritative.
 
 Stack-agnostic: antidetect (Dolphin/AdsPower/GoLogin/Octo/Multilogin),
 proxies, trackers all interchange — the discipline below is what matters, not
@@ -49,7 +48,13 @@ the brand.
 | API mass launch: structures, params, bid strategies, scheduling, images, spend warm-up | `references/04-mass-launch-api.md` |
 | API errors — grey survival response (freeze/replace/rotate); canonical code→fix in meta-ads/14 | `references/05-api-error-catalog.md` |
 | Why accounts die, attributed: hazard-rate forensics, balanced infra tests, anomaly pivots, incident fingerprints | `references/06-portfolio-forensics.md` |
+| Review-layer filters, cloaking, DLO/catalog/unicode/CTM tricks, BM verification | `references/07-review-layer-and-cloaking.md` |
+| Location fees (DST), tz/currency 60d lock, sanctioned targeting, WABA, Meta CBD | `references/08-geo-fees-and-waba.md` |
+| Verification gates: business/beneficial-owner/identity+selfie, SIEP + financial + gambling + crypto authorization, payment verification, pre-clear order | `references/09-verification-gates.md` |
+| **Does this vertical have a path at all** — permission-before-spend list, no-path list, per-vertical status/geo/conditions | `references/10-no-path-and-permissions.md` |
 | Per-vertical playbooks | `playbooks/` |
+
+Declared gaps: no dating or loans playbook, and **no App-campaign/app-install coverage** — `APP_PROMOTION` appears only in the ODAX enum (`04`). `google-grey-ops` covers the Google side of both; do not port its mechanics blindly.
 
 Playbooks: news-tg.md is filled (one team); nutra/casino/crypto-trading carry
 directional vendor benchmarks (dated/sourced) + event ladders — replace the
@@ -58,6 +63,14 @@ ecom, apps, loans, adult...).
 
 ## New-job bootstrap (proven order)
 
+0. **Does the vertical have a path at all?** `10` first — Q1 (permission before spend) and Q2 (no path
+   in any geo). Iterating creatives against a prohibited vertical burns the account for nothing.
+   Then clear the gate: gambling and crypto need authorization filed in the
+   Authorizations & Verifications tab **before any ad exists** — launching without it is a policy
+   violation, not a rejected ad. Financial products need the regulator number (FCA FRN, AFSL) sourced
+   externally. SIEP needs a postal code mailed to a residential address (2–3 weeks). Approvals bind to a
+   **specific portfolio and ad account**, so a replacement account needs a new approval. Gates, proofs
+   and order → `09`.
 1. Collect access (ad account IDs, BM, pages, pixel, tracker campaign URL,
    proxy) → project notes, verbatim, gitignored.
 2. Meta app: Live mode → mint user token in the antidetect profile → exchange
@@ -68,6 +81,7 @@ ecom, apps, loans, adult...).
    (not automatic; tracker-ops mapping contract). Ad name = creative name. Map
    ad → creative.
 5. Launch champions structure (04), scheduled 00:00 account tz.
+   Review layer: cloak **off** until the ad is serving; filter stack in `07`.
 6. Daily sync (Meta spend → tracker cost → report) before the team deadline;
    verify one day manually, then trust it.
 7. Kill rules with the TL in writing: spend-without-lead cap, CPL cap, account

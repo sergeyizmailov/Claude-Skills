@@ -1,5 +1,9 @@
 # 05 — API errors: the grey survival response
 
+Reviewed 2026-08-28. Codes and their canonical meaning are [official] and live in `meta-ads/14`. The
+freeze / replace / rotate mapping in **this** file is practitioner judgment about what an error implies
+for account survival — no Meta source states it.
+
 Canonical code → cause → fix lives in `meta-ads/14` (the API-owner skill). This
 file is the grey-ops RESPONSE layer: what an error MEANS for account/profile
 survival and what to do — freeze, replace, or rotate. Don't duplicate the code

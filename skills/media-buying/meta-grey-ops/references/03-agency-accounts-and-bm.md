@@ -83,11 +83,32 @@ This is the front of the chain: detection (here) → attribution (06) → respon
 - Account Spending Limit (ASL) is a LIFETIME cap across the whole account that
   pauses EVERY ad when hit — a silent full-stop that's easy to forget (distinct
   from ad-set budget and the billing threshold).
-- Fees sit ON TOP of spend, so real CPL > what Ads Manager shows — fold into
-  break-even: Meta "location fees" (a % keyed to the audience's jurisdiction,
-  rolling out ~2026-07, separate invoice line) + VAT (treatment depends on your
-  billing entity / country / VAT status). Rates/countries change — read them off
-  Billing, don't hardcode.
+- Meta location fees (DST) sit ON TOP of spend, on impressions — full table →
+  `08`. Read the invoice line, don't hardcode.
+
+## Card / topup vendors (Meta) 🔺
+
+Agency crypto-topup is the default, but for own-BM setups the card market looks
+like this — directory pricing, vendor-reported (Partnerkin tools index, fetched
+2026-08-27), counterparty risk, not endorsements:
+
+| Vendor | As listed |
+|---|---|
+| Pay2.House | multi-currency, from $5 |
+| AdsCard | Classic $2.5 / VIP $1 per card |
+| Combo Cards | from $1/card |
+| flexcard | from $2, "ADS BINs" |
+| Capitalist | from $2.95 |
+| 4×4.io | $2/issue + 5% on charges |
+| Getsby | €3.99 + 3% + €0.99/mo — marketed for FB |
+| PST.NET / XCards (ex-EPN) | from $10/card |
+| ADVcash / Wallester / Soldo | wallet or licensed-issuer routes, from €0 |
+| Linkpay / Adpos | on request, 2%+ |
+
+"Ad-friendly BIN" claims come with no methodology — judge vendors on
+replacement/refund terms and fund recovery (same test as Google-side resellers:
+what happens on ban), not on BIN marketing. The card stays a linking signal to
+the ad account (`07`).
 
 ## Naming (decide before first launch, never change mid-flight)
 

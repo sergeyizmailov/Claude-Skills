@@ -1,5 +1,10 @@
 # 01 — Infra & identity: antidetect, proxies, sessions
 
+Reviewed 2026-08-28. **Practitioner doctrine, not Meta documentation** — Meta publishes nothing about
+antidetect browsers, proxy hygiene or session scoring, so nothing here can be [official]. Every
+threshold below is an observed prior from operator practice; validate against your own portfolio
+before treating any of it as a rule. Attribution method → `06`.
+
 Chain Meta reads as one "user": FB profile → antidetect profile → proxy (exit
 IP) → agency ad accounts/BM/pages. Inconsistency (two IPs, two devices, odd
 hours) raises security score → checkpoint / session kill / restriction / disable.
@@ -60,8 +65,10 @@ Cadence is signal-driven, not a fixed clock:
   crawlers on the white page, a spam/reputation flag, SSL or blocklist hit, or LP
   CTR collapse with normal clicks (tracker-ops/03). Keep fresh domains
   pre-provisioned (valid SSL, DNS propagated, slightly aged) so rotation is
-  instant; a same-day scramble bleeds spend. Rotate the domain, not the whole
-  funnel, so you can attribute the burn.
+  instant — run each new domain through the pre-flight stack first
+  (google-grey-ops/05: Safe Browsing / VirusTotal / Wayback / WHOIS); a same-day
+  scramble bleeds spend. Rotate the domain, not the whole funnel, so you can
+  attribute the burn.
 - Pixel: it's an asset WITH history — rotating it is costly (new pixel = cold,
   re-learns, custom audiences reset), so don't rotate reactively. The real lever
   is PRE-SEGMENTING to contain blast radius: separate pixels per domain-cluster /
@@ -71,7 +78,7 @@ Cadence is signal-driven, not a fixed clock:
   signal and starves learning. By the time a pixel is flagged it's usually too
   late to save — the decision is upstream.
 - Never rotate domain + pixel + creative + account together — you lose which one
-  actually burned (fb-grey-ops/06 balanced designs).
+  actually burned (meta-grey-ops/06 balanced designs).
 
 ## Where sessions live (current UI)
 

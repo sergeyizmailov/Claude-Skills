@@ -1,57 +1,52 @@
 # Audiences & Targeting in Meta Ads Manager (2025–2026)
 
-Scope: how audience selection works in Ads Manager as of 2025–2026 — Advantage+ audience vs original audiences, detailed targeting after the 2025 consolidation, custom audiences, lookalikes, retargeting structure, exclusions, sizes, and geo/demographic settings. Compiled 2026-07-22.
+Scope: audience selection in Ads Manager 2025–2026 — Advantage+ audience vs original audiences, detailed targeting after the 2025 consolidation, custom audiences, lookalikes, retargeting structure, exclusions, sizes, geo/demographic settings. Compiled 2026-07-22.
 
-> Naming note: Meta now calls the old "Business Manager" a **Business Portfolio**; campaign creation for Sales/Leads/App objectives increasingly uses the streamlined **Advantage+ campaign setup** (2025 rollout). Older articles describing "Advantage+ Shopping Campaign (ASC)" as a separate campaign type are outdated — ASC is being phased into the Advantage+ campaign setup (Jon Loomer, May 2025).
+> Naming note: Meta now calls "Business Manager" a **Business Portfolio**; Sales/Leads/App creation increasingly uses the streamlined **Advantage+ campaign setup** (2025 rollout). "ASC" as a separate campaign type is outdated — folded into Advantage+ campaign setup (Jon Loomer, May 2025).
 
 ---
 
 ## 1. The Big Picture: Targeting Is Now Mostly "Suggestions"
 
-The single most important mental model for 2025–2026:
+- **Audience Controls** = hard constraints Meta won't violate (locations, minimum age, excluded custom audiences, language sometimes).
+- **Audience suggestions** = soft inputs (custom audiences, lookalikes, age range/max, gender, detailed targeting) — delivery AI can exceed them for more performance-goal actions; applies to Advantage+ audience and, via forced expansion under conversions optimization (§3.3), original audiences too.
 
-- **Audience Controls** = hard constraints Meta will not violate (locations, minimum age, excluded custom audiences, language in some cases).
-- **Audience suggestions** = soft inputs (custom audiences, lookalikes, age range/max, gender, detailed targeting). Meta's delivery AI may go beyond any of them if it predicts more of your performance-goal actions.
-
-This applies at both the default Advantage+ audience level and, increasingly, inside "original" audiences via forced expansion products (Advantage detailed targeting / Advantage lookalike) when optimizing for conversions.
-
-Meta's claimed benchmarks for Advantage+ audience (vendor-reported, experiment run March–June 2023, still quoted in the UI warning dialog): 33% lower cost per result; Meta documentation also cites 13% lower median cost per catalog sale, 7% lower median cost per website conversion, 28% lower average cost per click/lead/landing page view (Jon Loomer best-practices guide; LaFactory summary of Meta Help Center figures).
+Meta's claimed Advantage+ audience benchmarks (vendor-reported, March–June 2023 experiment, still quoted in the UI warning dialog): **33%** lower cost/result; **13%** lower median cost/catalog sale; **7%** lower median cost/website conversion; **28%** lower average cost/click-lead-LPV (Jon Loomer; LaFactory summary of Meta Help Center figures).
 
 ---
 
 ## 2. Advantage+ Audience (the default)
 
-Launched August 2023; it is the default targeting method when you create an ad set (Jon Loomer).
+Launched August 2023; default targeting method when you create an ad set (Jon Loomer).
 
 ### 2.1 Audience Controls (hard constraints)
 
-Only these exist as controls:
-
-- **Locations** (current presence behavior and exceptions are described in §10; the old selector is not available for new ad sets)
-- **Minimum age** (the available range can depend on objective, region, and account rollout)
-- **Excluded custom audiences**
-- **Language** (only when the language isn't common to the selected location)
-
-There is **no control for maximum age or gender** under Advantage+ audience. Both are suggestions only.
+Controls only: **Locations** (§10; old selector gone for new ad sets); **Minimum age** (varies by objective/region/rollout); **Excluded custom audiences**; **Language** (only if uncommon to the location). **No control for max age or gender** — suggestions only.
 
 ### 2.2 Audience suggestions
 
-Optional inputs can include custom audiences, lookalikes, age range, gender, and detailed targeting. Meta can use account and conversion signals to find likely responders and expand beyond suggestions. Do not describe that delivery as a deterministic remarketing-first sequence, and do not treat a suggestion as a hard restriction.
+Suggestions: custom audiences, lookalikes, age range, gender, detailed targeting. Meta expands beyond them using account/conversion signals — not a deterministic remarketing-first sequence.
 
 ### 2.3 Advantage+ campaign setup (2025 UI change)
 
-For Sales/Leads/App objectives, the streamlined Advantage+ campaign setup merges controls and suggestions into one view and shows a **Campaign Score** that rewards accepting Meta's defaults (budget, audience, placements). "Switch to original audiences" was replaced by a link labeled **"further limit the reach of your ads"** → **"Switch setup"**. After switching, an "Advantage+ on" badge remains: each input (age range, gender, custom audience, lookalike) is still a *suggestion by default* and only becomes a control when you **uncheck the suggestion checkbox** next to it. Net effect per Loomer's item-by-item comparison: no control is actually lost vs the old original-audiences flow — the steps just moved (Jon Loomer, "Does Meta's Advantage+ Campaign Setup Impact Targeting Control?", May 2025).
+Sales/Leads/App: Advantage+ campaign setup merges controls/suggestions into one view, shows a **Campaign Score** rewarding Meta's defaults (budget, audience, placements). "Switch to original audiences" → **"further limit the reach of your ads"** → **"Switch setup"**. Post-switch, "Advantage+ on" badge stays: each input (age range, gender, custom audience, lookalike) is a suggestion by default, becomes a control only by **unchecking its checkbox**. Net effect: no control lost vs old flow, steps just moved (Jon Loomer, "Does Meta's Advantage+ Campaign Setup Impact Targeting Control?", May 2025).
 
 ### 2.4 When to use Advantage+ audience (practitioner consensus, Loomer)
 
-- **Use it** when broad delivery has a reliable optimization signal and no business or compliance need for tighter demographic control. A recorded purchase can still be low quality because of refunds, fraud, low margin, or poor downstream value; feed the system the closest reliable value signal available.
-- **Avoid/switch** for top-of-funnel performance goals (link clicks, landing page views, post engagement, ThruPlay) where low-quality actions mislead delivery — especially when your real customer is a narrow age/gender group. Also consider switching for lead quality problems falling outside your target demo.
-- Campaign construction consequence: avoid multiple ad sets whose suggestions converge on the same broad pool unless each represents a necessary budget, conversion-location, geography, policy, or experimental distinction. One consolidated ad set is often enough, but it is not a universal campaign rule.
+- **Use** when broad delivery has a reliable signal, no demographic-control need. A recorded purchase can still be low-quality (refunds, fraud, low margin) — feed the closest reliable value signal.
+- **Avoid/switch** for top-of-funnel goals (link clicks, LPV, post engagement, ThruPlay) where low-quality actions mislead delivery, especially with a narrow real customer age/gender; also for lead-quality issues outside target demo.
+- Avoid ad sets whose suggestions converge on the same broad pool without a real budget/geo/policy/experimental distinction — one consolidated ad set is often enough, not universal.
 
 ### 2.5 Independent test data (treat as directional, single-advertiser tests)
 
-- Thread Transfer (May 2025), cross-account tests: Advantage+ audience had ~25% lower CPM and +20% conversion volume, but manual targeting won on CPA ($31.85 vs $34.20), ROAS (3.4x vs 3.2x), and CVR (2.4% vs 2.1%).
-- RKX Advertising (May 2025), 5 ecommerce campaigns / 30 days: Advantage+ CTR 2.3% vs 1.7% original. [uncertain — small internal test]
+| Source | Metric | Advantage+ | Manual/Original |
+|---|---|---|---|
+| Thread Transfer, May 2025 (cross-account) | CPM | ~25% lower | baseline |
+| | Conversion volume | +20% | baseline |
+| | CPA | $34.20 | **$31.85 (won)** |
+| | ROAS | 3.2x | **3.4x (won)** |
+| | CVR | 2.1% | **2.4% (won)** |
+| RKX Advertising, May 2025 (5 ecom campaigns/30d) [uncertain — small test] | CTR | 2.3% | 1.7% |
 
 ---
 
@@ -59,12 +54,11 @@ For Sales/Leads/App objectives, the streamlined Advantage+ campaign setup merges
 
 ### 3.1 How to switch
 
-Ad set → Audience section → link at the bottom of the Advantage+ audience box ("Switch to original audience options", or "further limit the reach of your ads" → "Switch setup" in the new UI). Meta shows a discouraging warning dialog citing its 33% stat; confirm to proceed.
+Ad set → Audience → link at bottom of Advantage+ box ("Switch to original audience options" / "further limit the reach of your ads" → "Switch setup"). Meta warns citing its 33% stat; confirm to proceed.
 
 ### 3.2 What you get back
 
-- Original-audience setup may expose tighter age, gender, language, custom-audience, or location controls. Availability depends on objective, performance goal, region, special category, and rollout; verify each field in the live account.
-- Custom-audience inputs are suggestions in the standard Advantage+ audience flow. Isolation requires a setup that exposes the relevant hard audience control; verify availability for the objective, account, region, and special category.
+May expose tighter age/gender/language/custom-audience/location controls, depending on objective, performance goal, region, special category, rollout — verify live. Custom-audience inputs remain suggestions under standard Advantage+ flow; isolation needs a setup exposing the hard control.
 
 ### 3.3 Expansion products inside original audiences (critical)
 
@@ -74,12 +68,12 @@ Ad set → Audience section → link at the bottom of the Advantage+ audience bo
 | **Advantage lookalike** | Lookalike inputs | Forced ON when optimizing for conversions; toggle available for other performance goals (link clicks, LPV, ThruPlay…) |
 | **Advantage detailed targeting** | Interest/behavior inputs | Forced ON for conversions; Meta announced forced-on for link clicks and landing page views too (not yet rolled out to all accounts per Loomer) |
 
-So "original audiences" no longer means deterministic targeting: with a conversions performance goal, your lookalike and detailed-targeting inputs are expanded automatically with no opt-out. The illusion-of-control trap: advertisers think they're targeting a 1% lookalike while Meta delivers well beyond it.
+So "original audiences" ≠ deterministic: under a conversions goal, lookalike/detailed-targeting inputs auto-expand, no opt-out. Illusion-of-control trap: advertisers think they're targeting a 1% lookalike while Meta delivers well beyond it.
 
 ### 3.4 When original audiences are the right choice (Loomer)
 
-1. Top-of-funnel optimization where you need demographic guardrails.
-2. **True remarketing** — a message that must be seen only by an eligible custom audience (for example, an existing-customer offer). Use a setup that exposes the necessary restriction and verify actual reach. If the message is not audience-exclusive, compare a suggestion-based approach with a separated cell using account data.
+1. Top-of-funnel optimization needing demographic guardrails.
+2. **True remarketing** — message only for an eligible custom audience (e.g. existing-customer offer). Use a setup exposing the restriction, verify reach. If not exclusive, compare suggestion-based vs a separated cell using account data.
 
 ---
 
@@ -87,59 +81,58 @@ So "original audiences" no longer means deterministic targeting: with a conversi
 
 ### 4.1 What changed in 2025 (AdAmigo/Conversios reporting on Meta's updates)
 
-- **March 31, 2025**: Meta began removing **detailed targeting exclusions**; removal completed by June 2025. You can no longer exclude by interest/behavior/demographic attribute at the ad set level. Meta's stated rationale: 22.6% lower median cost per conversion in tests without exclusions.
-- **June 10, 2025**: first consolidation wave — niche sub-interests merged into broad groupings (e.g., "CrossFit", "powerlifting", "bodybuilding" → "Fitness & Exercise").
-- **June 23, 2025**: second wave across Interests, Behaviors, and Demographics.
-- **January 15, 2026**: final deadline — campaigns still using removed interests stop delivering after this date (per Meta's update timeline as reported by AdAmigo/Conversios).
-- Drivers: privacy signal loss (iOS ATT ~50% opt-in by April 2025) and Meta's AI model performance (~5% more ad conversions on Instagram, ~3% on Facebook in Q2 2025 when allowed to optimize beyond manual interests, per Meta internal figures cited by AdAmigo). [uncertain — Meta-reported numbers relayed by a vendor blog]
+- **March 31, 2025**: Meta began removing **detailed targeting exclusions** (completed by June 2025) — no more ad-set-level interest/behavior/demographic exclusions. Rationale: 22.6% lower median cost per conversion without exclusions.
+- **June 10, 2025**: wave 1 — niche sub-interests merged into broad groupings (e.g., "CrossFit"/"powerlifting"/"bodybuilding" → "Fitness & Exercise").
+- **June 23, 2025**: wave 2 — Interests, Behaviors, Demographics.
+- **January 15, 2026**: campaigns still using removed interests stop delivering (per Meta's timeline, AdAmigo/Conversios).
+- Drivers: privacy signal loss; Meta's AI performs better unconstrained (~5% more ad conversions on Instagram, ~3% on Facebook, Q2 2025, per Meta internal figures cited by AdAmigo). [uncertain — Meta-reported numbers relayed by a vendor blog] The "~50% ATT opt-in" figure is **AppsFlyer's**, not Meta's, and is one of two defensible vendor readings — canonical statement and the geo spread that matters more: `tracker-ops/03`.
 
 ### 4.2 What remains in the interface
 
-Ads Manager → ad set → Audience → **Detailed targeting** → **Browse** opens three tabs:
+Ads Manager → ad set → Audience → **Detailed targeting** → **Browse**, three tabs:
 
 - **Demographics**: age, gender, location, language, education, relationship status, life events (birthday, new job, recently moved, newly engaged), work (job titles, industries, employers), financial (limited), parents (by child age).
-- **Interests**: now broad top-level groupings — Business & Industry; Entertainment; Family & Relationships; Fitness & Wellness; Food & Drink; Hobbies & Activities; Home & Garden; News & Politics; Shopping & Fashion; Sports & Outdoors; Technology. Sub-interests still exist under each but are fewer and broader, and the list shifts quarterly — always verify in the interface.
-- **Behaviors**: purchase behavior (engaged shoppers, category buyers), device usage (OS, device model), travel (frequent/international travelers, commuters), digital activities (Page admins, event creators), anniversaries, charitable giving. Third-party-data-based behaviors were reduced; Meta leans on first-party on-platform signals.
+- **Interests**: broad groupings only — Business & Industry; Entertainment; Family & Relationships; Fitness & Wellness; Food & Drink; Hobbies & Activities; Home & Garden; News & Politics; Shopping & Fashion; Sports & Outdoors; Technology. Sub-interests fewer/broader, shift quarterly — verify live.
+- **Behaviors**: purchase behavior (engaged shoppers, category buyers), device usage (OS, device model), travel (frequent/international travelers, commuters), digital activities (Page admins, event creators), anniversaries, charitable giving. Third-party behaviors reduced; Meta leans on first-party on-platform signals.
 
 ### 4.3 When interest targeting still matters
 
-- Under Advantage+ audience, detailed-targeting inputs are suggestions and do not define a hard delivery boundary.
-- Some original-audience and performance-goal combinations still expose detailed targeting or expansion controls; verify the live setup instead of assuming expansion is always forced.
-- Interests can provide a useful starting signal for new accounts, niche products, B2B, or low-volume objectives. Meta's current targeting guidance still describes interest targeting and recommends using it only with a sufficiently broad audience.
-- Avoid large stacks that cannot be interpreted. Test a small number of coherent hypotheses against broad delivery and judge downstream value, not only CPM or CTR.
+- Some original-audience/goal combos still expose detailed-targeting or expansion controls — verify live, don't assume forced expansion.
+- Useful starting signal: new accounts, niche products, B2B, low-volume objectives; pair with a sufficiently broad audience.
+- Avoid uninterpretable large stacks — test few coherent hypotheses, judge downstream value not just CPM/CTR.
 
 ### 4.4 Exclusions after March 2025 — what still works
 
-- **Custom audience exclusions** at the ad set level — now the primary exclusion mechanism (exclude purchasers, unqualified leads, employees).
-- Account-level controls and placement exclusions (e.g., Audience Network).
-- Creative-based filtering (copy that repels the wrong segment).
-- Fix hygiene upstream: clean seed/exclusion lists at the CRM level before upload, since you can't patch with interest exclusions inside Ads Manager anymore (Madgicx).
+- **Custom audience exclusions** at ad-set level — now primary mechanism (exclude purchasers, unqualified leads, employees).
+- Account-level controls, placement exclusions (e.g. Audience Network).
+- Creative-based filtering (copy that repels wrong segment).
+- Clean seed/exclusion lists at CRM level pre-upload — no interest-exclusion patch left in Ads Manager (Madgicx).
 
 ---
 
 ## 5. Custom Audiences
 
-Creation path: **Ads Manager → Audiences (left nav; under "Assets" in All Tools) → Create Audience → Custom Audience** → pick source. Five source types: Website, Customer list, App activity, Engagement, Offline activity.
+**Ads Manager → Audiences (left nav; under "Assets" in All Tools) → Create Audience → Custom Audience** → pick source. Five types: Website, Customer list, App activity, Engagement, Offline activity.
 
 ### 5.1 Website (Meta Pixel)
 
-- Rules: all visitors; visitors of specific pages (URL contains); visitors by time spent; specific pixel events (Purchase, AddToCart, Lead, etc.).
-- Retention: default 30 days; up to **180 days** for standard events; purchase-event audiences extended to **730 days** (Jon Loomer, May 2026 QVT article, notes this was raised from the old 180-day max).
-- Prereq: Pixel installed and firing (verify with Meta Pixel Helper); Conversions API strongly recommended post-ATT.
-- Example (Chipper 2025 guide): `Purchase` event, 180-day window → "Website Purchasers 180d" audience used both for retargeting and for exclusions.
+- Rules: all visitors; specific-page visitors (URL contains); time-spent visitors; pixel events (Purchase, AddToCart, Lead, etc.).
+- Retention: default 30d; up to **180d** standard events; purchase events to **730d** (Jon Loomer, May 2026 QVT — raised from old 180d max).
+- Prereq: Pixel installed/firing (Meta Pixel Helper); CAPI recommended post-ATT.
+- Example (Chipper 2025): `Purchase`, 180d window → "Website Purchasers 180d" — retargeting + exclusions.
 
 ### 5.2 Customer list
 
-- Upload CSV/TXT; 15 identifier types supported: email, phone, fn, ln, ct, st, zip, country, dob, birth year, gen, mobile advertiser ID, FB app user ID, FB Page user ID, external ID.
-- Hashing depends on the path: **UI (Ads Manager) upload — do NOT pre-hash**, Meta normalizes and hashes client-side before sending. **Marketing API upload — you MUST pre-hash**: normalize, then SHA-256 (hex) each identifier yourself. Column headers must match Meta's template exactly.
-- Expect **30–60% match rate**; improve with multiple identifiers per row and fresh (<12-month) data.
-- Minimum **100 matched people** to use; aim for 1,000+.
-- Requires accepting Meta's **Custom Audience Terms** per ad account (lawful basis + consent; no sensitive-category data, no brokered/scraped data).
-- Static — does not auto-refresh; re-upload monthly or sync via CRM integration (Klaviyo/HubSpot/Zapier) or Conversions API.
+- CSV/TXT; 15 identifier types: email, phone, fn, ln, ct, st, zip, country, dob, birth year, gen, mobile advertiser ID, FB app user ID, FB Page user ID, external ID.
+- Hashing: **UI — do NOT pre-hash** (Meta hashes client-side); **Marketing API — MUST pre-hash** (normalize, SHA-256 hex). Headers must match Meta's template exactly.
+- **30–60% match rate**; improve with multiple identifiers/row, fresh (<12mo) data.
+- Min **100 matched**; aim 1,000+.
+- Requires Meta's **Custom Audience Terms** per ad account (lawful basis + consent; no sensitive/brokered/scraped data).
+- Static — re-upload monthly or sync via CRM (Klaviyo/HubSpot/Zapier) or CAPI.
 
 ### 5.3 App activity
 
-- Requires Meta SDK (iOS/Android) or App Events API. Build from standard/custom in-app events (app open, purchase, level complete, content view, add to cart…). Retention up to 180 days.
+Meta SDK (iOS/Android) or App Events API; standard/custom in-app events (app open, purchase, level complete, content view, add to cart…). Retention up to 180d.
 
 ### 5.4 Engagement (on-platform)
 
@@ -156,20 +149,20 @@ Subtypes and max retention windows (AdAmigo, 2026):
 | Events | Responded Interested/Going | 365 days |
 | On-Facebook listings | Marketplace viewers/messagers | 365 days |
 
-- Instagram engagement options (coinis, citing Loomer): "everyone who engaged with your professional account" (broadest); specific actions — liked, saved, shared, commented, carousel swipes, CTA taps, link clicks; people who sent a message (may be unavailable in some European markets); ad interactions.
-- Video viewers: pick watch threshold per intent — 25% = broad pool, 95% = hottest. Can scope to specific videos.
-- Note: these audiences start populating when created (some engagement sources backfill historically; verify per source — [uncertain]).
+- IG engagement (coinis, citing Loomer): "everyone who engaged with your professional account" (broadest); liked/saved/shared/commented/carousel swipes/CTA taps/link clicks; message senders (may be unavailable in some EU markets); ad interactions.
+- Video: 25% = broad pool, 95% = hottest; can scope to specific videos.
+- Populate at creation; some sources may backfill historically — verify per source [uncertain].
 
 ### 5.5 Offline activity
 
-- Send in-store, phone, and CRM events through the standard Conversions API or a supported partner integration. The separate Offline Conversions API was discontinued in May 2025; migrate integrations to datasets.
+In-store/phone/CRM events via standard Conversions API or a supported partner integration. Separate Offline Conversions API discontinued May 2025 — migrate to datasets.
 
 ### 5.6 Sizing and hygiene
 
-- Practical working size for a custom audience: **1,000–50,000** (AdAmigo). Below ~1,000 delivery struggles; above ~50k relevance decays.
-- Naming convention: `[Brand]_[Source/Event]_[Window]` e.g. `Chipper25_Purchase_180d`. Never name audiences with sensitive traits ("Diabetes_Patients") — policy violation.
-- Refresh CRM lists monthly; audit pixel firing; use the **Audience Overlap** tool to detect audiences that make your ad sets bid against each other.
-- Privacy: GDPR consent before pixel/list use; CCPA/CPRA "Do Not Sell or Share" + honor opt-outs (Meta's Limit Data Use feature); Special Ad Categories (housing, employment, credit, social issues/politics) restrict some audience features.
+- Size: **1,000–50,000** (AdAmigo) — below ~1,000 struggles, above ~50k decays.
+- Naming: `[Brand]_[Source/Event]_[Window]`, e.g. `Chipper25_Purchase_180d`. Never sensitive traits ("Diabetes_Patients") — policy violation.
+- Refresh CRM monthly; audit pixel firing; use **Audience Overlap** tool.
+- Privacy: GDPR consent pre-use; CCPA/CPRA opt-outs (Limit Data Use); Special Ad Categories (housing, employment, credit, social/political) restrict features.
 
 ---
 
@@ -177,69 +170,61 @@ Subtypes and max retention windows (AdAmigo, 2026):
 
 ### 6.1 Status in 2025–2026
 
-Still available and still widely used (unlike Google Similar Audiences, fully phased out by 2025). But their role changed: they are now **raw material for Meta's AI rather than a hard boundary**. Inside Advantage+ audience they are suggestions; inside original audiences with conversion optimization, Advantage lookalike expands beyond your chosen percentage automatically.
+Still available, widely used (unlike Google Similar Audiences, phased out by 2025) — but now **raw material for Meta's AI, not a hard boundary**: suggestions inside Advantage+ audience; inside original audiences with conversion optimization, Advantage lookalike auto-expands beyond the chosen percentage.
 
-Reported performance comparisons (vendor/agency figures via Madgicx, treat as directional): Advantage+ audience ~18% lower CPA than classic lookalikes; lookalikes (1–3%) ~32% better CPA than interest targeting; Advantage+ Shopping ~17% lower CPA / +16% ROAS vs manually managed campaigns. [uncertain — secondary citations of agency stats, not Meta-published]
+Performance (vendor/agency via Madgicx, directional): Advantage+ audience ~18% lower CPA than classic lookalikes; lookalikes (1–3%) ~32% better CPA than interest targeting; Advantage+ Shopping ~17% lower CPA / +16% ROAS vs manual. [uncertain — secondary agency stats, not Meta-published]
 
 ### 6.2 Creation
 
 **Ads Manager → Audiences → Create Audience → Lookalike Audience** (or from an existing custom audience → "Create Lookalike"):
 
-1. Choose the source custom audience (value-based sources preferred — e.g., purchase event with value).
-2. If value-based, select the value event (Purchase is default/strongest).
-3. Set location (≥1 country).
-4. Choose number of audiences (up to 6 at once) and **percentage 1–10%** (1% = most similar/smallest; start 1–3%, expand to 3–5% when scaling exhausts the pool).
-5. Create; population takes hours to ~1 day.
+1. Choose source custom audience (value-based preferred, e.g. purchase event with value); if value-based, select the value event (Purchase default/strongest).
+2. Set location (≥1 country).
+3. Choose count (up to 6 at once) and **percentage 1–10%** (1% = smallest/most similar; start 1–3%, expand to 3–5% when scaling exhausts pool).
+4. Create; population takes hours to ~1 day.
 
-Requirements: source needs ≥100 people from a single country (Meta minimum); 1,000+ for stability (practitioner consensus).
+Requirements: source ≥100 people from a single country (Meta minimum); 1,000+ for stability (practitioner consensus).
 
 ### 6.3 Seed quality hierarchy (Balistro 2026 guide)
 
-1. Customer purchase lists (esp. repeat/high-value buyers; 50–70% typical match rate) — gold standard.
-2. Pixel purchase events (ideally 1,000+ purchases in 90 days; self-updating).
+1. Customer purchase lists (repeat/high-value buyers; 50–70% match rate) — gold standard.
+2. Pixel purchase events (ideally 1,000+ purchases/90 days; self-updating).
 3. Value-based customer lists (LTV-weighted).
-Then weaker: website visitors, engagers. Best practice: seed from **top 10–20% of customers by LTV** or 3+ repeat purchasers, refresh monthly — stale seeds cause "audience decay."
+Weaker: website visitors, engagers. Best practice: seed from **top 10–20% by LTV** or 3+ repeat purchasers, refresh monthly — stale seeds cause "audience decay."
 
 ### 6.4 Lookalikes vs Advantage+ — do they still matter?
 
-- Yes for: niche verticals, B2B, low-budget/new accounts without enough conversion data for the algorithm, and as high-quality suggestions inside Advantage+ audience.
-- Hybrid is the 2026 consensus: run broad/Advantage+ for scale, feed it strong seeds; keep manual 1–3% lookalikes where control matters.
-- **Overlap trap**: nested 1%, 3%, and 5% lookalikes can overlap when run in parallel. Do not assume a universal CPM penalty or solve overlap by multiplying campaigns. Test whether separate tiers answer a real question; otherwise consolidate and evaluate after the account's conversion delay and required sample.
+- Yes for: niche verticals, B2B, low-budget/new accounts lacking conversion data, high-quality Advantage+ suggestions.
+- 2026 consensus: hybrid — broad/Advantage+ for scale fed strong seeds, manual 1–3% lookalikes where control matters.
+- **Overlap trap**: nested 1/3/5% lookalikes can overlap in parallel — no universal CPM penalty, don't fix by multiplying campaigns. Test whether tiers answer a real question; else consolidate, evaluate after conversion delay + required sample.
 
 ---
 
 ## 7. Retargeting Structure: Warm/Hot Setup
 
-Standard 2025 practitioner structure (Chipper 2025 guide; AdAmigo):
+Standard 2025 structure (Chipper 2025; AdAmigo):
 
-**Engaged / non-buyers (warm) — build all four:**
-1. Website visitors, last 90 days (pixel).
-2. Catalog/product viewers, last 90 days.
-3. Instagram engagers, last 90 days (or longer, up to 730d).
-4. Email-list non-buyers (CRM upload).
+**Warm (engaged/non-buyers) — build all four:** website visitors, last 90 days (pixel); catalog/product viewers, last 90 days; Instagram engagers, last 90 days (or up to 730d); email-list non-buyers (CRM upload).
 
-**Existing customers (for exclusion + upsell):**
-1. Website purchasers, 180 days (pixel Purchase event).
-2. Customer file purchasers (CSV, refreshed monthly).
-3. Instagram Shop purchasers (if IG Shop connected).
+**Existing customers (exclusion + upsell):** website purchasers, 180 days (pixel Purchase event); customer file purchasers (CSV, refreshed monthly); Instagram Shop purchasers (if IG Shop connected).
 
 **Hot subsets for conversion campaigns:** cart/checkout abandoners 7–14 days, pricing-page visitors, 95% video viewers, lead-form openers who didn't submit (90-day cap).
 
 Rules of thumb:
-- Match the retention window to the purchase cycle — subscription/replenishable product → 28–30 day windows, not 180.
-- Warm audiences usually 90 days: "recent enough to stay warm, not so old it's a cold list."
-- Exclude recent purchasers when the offer is one-time or replenishment timing makes another purchase undesirable. Do not apply a universal 180-day exclusion to subscriptions, consumables, cross-sell, upsell, short replenishment cycles, or acquisition campaigns that deliberately permit existing customers.
-- If optimizing for purchases, you often don't need a separate remarketing ad set at all: Advantage+ audience already prioritizes your converters/engagers before going broad; run "true" isolated remarketing only when the message must be seen exclusively by that group (Loomer).
+- Match retention window to purchase cycle — subscription/replenishable → 28–30 days, not 180.
+- Warm audiences usually 90 days.
+- Exclude recent purchasers only when offer is one-time or replenishment timing makes another purchase undesirable — no universal 180-day exclusion for subscriptions, consumables, cross-sell, upsell, short replenishment, or acquisition campaigns permitting existing customers.
+- Optimizing for purchases often needs no separate remarketing ad set: Advantage+ audience already prioritizes converters/engagers before going broad — isolate "true" remarketing only when the message must be exclusive to that group (Loomer).
 
 ---
 
 ## 8. Recommended Audience Sizes
 
-- Practitioner guides often propose multi-million-person prospecting audiences, and Meta's current general guidance describes 2–10M as a useful broad range. These are not universal limits: viable size depends on geography, objective, budget, conversion rate, and service area.
-- Do not diagnose an audience as too small or too broad from population alone. Check reach, frequency, delivery status, auction cost, conversion volume, and whether the audience is a hard boundary or only a suggestion.
-- Custom audiences: min 100 (Meta hard minimum for lists), effective min ~1,000, sweet spot 1,000–50,000.
-- Lookalike seeds: ≥100 per country required; 1,000+ matched recommended (upload 2,000+ raw contacts if match rate is ~50%).
-- Learning context: automation benefits from accurate outcome signals and sufficient delivery, but no universal `50 conversions/week` or `$50/day` boundary makes manual targeting categorically better. Choose the setup from signal quality, expected result volume, test purpose, and live Delivery status.
+- 2–10M is Meta's general-guidance broad range for prospecting; not a universal limit — depends on geography, objective, budget, conversion rate, service area.
+- Don't diagnose too-small/too-broad from population alone — check reach, frequency, delivery status, auction cost, conversion volume, and control-vs-suggestion status.
+- Custom audiences: min 100 (Meta hard minimum), effective min ~1,000, sweet spot 1,000–50,000.
+- Lookalike seeds: ≥100/country required; 1,000+ matched recommended (upload 2,000+ raw contacts if match rate ~50%).
+- No universal `50 conversions/week` or `$50/day` boundary makes manual targeting categorically better than automation — choose from signal quality, expected result volume, test purpose, live Delivery status.
 
 ---
 
@@ -247,43 +232,42 @@ Rules of thumb:
 
 ### 9.1 Location options and the classic geo mistake
 
-For new ad sets, Meta removed the former location-presence dropdown that separated residents, recent visitors, and travelers. Current delivery generally uses people **living in or recently in** the selected location; legacy ad sets or isolated account surfaces may still show older wording. Do not instruct users to switch to `People living in this location` unless the live account actually exposes that control. (Observed rollout: https://www.jonloomer.com/big-change-to-meta-ads-location-targeting/ and https://searchengineland.com/new-update-to-meta-ads-location-targeting-404124)
+Meta removed the former location-presence dropdown (residents/recent visitors/travelers) for new ad sets. Delivery generally uses people **living in or recently in** the selected location; legacy ad sets/isolated surfaces may still show older wording. Don't switch to `People living in this location` unless the live account exposes that control. (Observed rollout: https://www.jonloomer.com/big-change-to-meta-ads-location-targeting/ and https://searchengineland.com/new-update-to-meta-ads-location-targeting-404124)
 
-For local serviceability, use the smallest supported cities, postcodes, or radii; exclude unsupported locations where available; state the service area in the creative and landing page; and validate postcode/address in the form or checkout. Tourism campaigns must qualify travel intent through message and destination because the old travelers-only selector is generally unavailable.
+Local serviceability: use smallest supported cities/postcodes/radii; exclude unsupported locations; state service area in creative/landing page; validate postcode/address in form/checkout. Tourism campaigns qualify travel intent via message/destination — old travelers-only selector is generally unavailable.
 
 Other geo gotchas:
-- Radius targeting around a pin (min radius ~1 mi / 1 km [uncertain on exact current minimum]) is preferable to city polygons for hyper-local.
-- Exclude specific locations (e.g., target a state, exclude a city) via the location "Exclude" option.
+- Radius targeting around a pin (min ~1 mi/1 km [uncertain on exact current minimum]) preferable to city polygons for hyper-local.
+- Exclude specific locations (e.g., target a state, exclude a city) via location "Exclude".
 - Location is an **Audience Control** — one of the few hard constraints left; Advantage+ won't override it.
-- Country-level targeting for multi-country e-commerce: split high-spend countries into separate ad sets/campaigns rather than lumping disparate economies, so CPMs and learning don't blend.
+- Multi-country e-commerce: split high-spend countries into separate ad sets/campaigns rather than lumping disparate economies, so CPMs/learning don't blend.
 
 ### 9.2 Language
 
-Only available as a control when the language isn't common to the selected location. Don't select a language that is dominant in the geo (it restricts nothing and is just noise); do select it for expat/minority-language targeting.
+Only a control when the language isn't common to the selected location. Don't select a geo-dominant language (restricts nothing, just noise) — do select for expat/minority-language targeting.
 
 ### 9.3 Age and gender
 
-- Advantage+ audience: minimum age is a documented control; maximum age and gender are generally suggestions. Available controls vary by campaign setup, region, and special category.
-- Original audiences / "further limit the reach": full age range and gender as controls (uncheck the suggestion checkbox in the new Advantage+ campaign setup UI).
-- Platform minimums and teen-targeting restrictions vary by country and product; do not assume every ad starts at 18+. Alcohol, gambling, financial products, and other regulated offers can require higher legal ages. Special Ad Categories can remove age/gender controls in affected countries.
-- Common mistake: setting a tight age/gender "for brand fit" while optimizing for purchases — unnecessary; the algorithm finds buyers. Reserve demographic controls for top-of-funnel goals where engagement quality suffers.
+- Advantage+ audience: min age only (§2.1); original audiences / "further limit the reach" exposes full age range + gender as controls (uncheck the suggestion checkbox). Available controls vary by campaign setup, region, special category.
+- Platform minimums/teen-targeting restrictions vary by country/product — don't assume every ad starts at 18+. Alcohol, gambling, financial products, other regulated offers can require higher legal ages. Special Ad Categories can remove age/gender controls in affected countries.
+- Common mistake: tight age/gender "for brand fit" while optimizing for purchases — unnecessary, the algorithm finds buyers. Reserve demographic controls for top-of-funnel goals where engagement quality suffers.
 
 ---
 
 ## 10. Gotchas & Common Mistakes ( consolidated )
 
 1. Treating Advantage+ suggestions as constraints — check "Audience definition" estimates but know delivery will exceed them.
-2. Creating multiple ad sets whose suggestions do not represent distinct hypotheses can fragment delivery. Consolidate redundant cells; retain separate cells when they answer a necessary test or operational constraint.
-3. Assuming every original-audience input is a fixed constraint. Expansion and available controls depend on the selected setup; inspect the live UI.
-4. Still trying to exclude by interest — removed March–June 2025. Use custom-audience exclusions instead.
-5. Campaigns still referencing removed interest categories stopped delivering after **Jan 15, 2026** — audit old ad sets.
-6. Assuming the removed residents-only location selector is still available; qualify local serviceability through supported geo inputs and the conversion flow.
-7. Applying a universal purchaser exclusion without considering replenishment, upsell, or acquisition strategy.
+2. Multiple ad sets with non-distinct suggestions fragment delivery — consolidate redundant cells, keep separate ones only for a necessary test/operational constraint.
+3. Assuming every original-audience input is a fixed constraint — expansion and controls depend on the selected setup, inspect live UI.
+4. Trying to exclude by interest — removed March–June 2025; use custom-audience exclusions instead.
+5. Campaigns referencing removed interest categories stopped delivering after **Jan 15, 2026** — audit old ad sets.
+6. Assuming the removed residents-only location selector still exists — qualify local serviceability through supported geo inputs and conversion flow.
+7. Universal purchaser exclusion without considering replenishment, upsell, or acquisition strategy.
 8. Retention windows mismatched to purchase cycle (180d for a 30-day replenishment product).
-9. Pre-hashing customer lists before a **UI** upload (breaks matching — the UI hashes for you); wrong CSV headers. (For **Marketing API** uploads the opposite holds: you must pre-hash SHA-256.)
+9. Pre-hashing customer lists before a **UI** upload (breaks matching — UI hashes for you); wrong CSV headers. **Marketing API** uploads require the opposite: pre-hash SHA-256.
 10. Parallel 1%/3%/5% lookalike ad sets in one campaign → self-competition, CPM inflation.
 11. Sensitive-trait audience names → policy risk.
-12. Comparing audience approaches before sufficient delivery and conversion lag have accumulated. Define the required sample and review window from the account rather than imposing 7–14 days universally.
+12. Comparing audience approaches before sufficient delivery/conversion lag accumulate — define required sample and review window from the account, not a universal 7–14 days.
 
 ---
 

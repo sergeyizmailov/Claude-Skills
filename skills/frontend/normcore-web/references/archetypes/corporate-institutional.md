@@ -8,13 +8,13 @@ Measured:
 
 ```
 a university     Open Sans + Arial + FontAwesome · 2px/5px · 14 shadows · 0 transform
-              34 images · 261 links · WordPress: TRUE
+               34 images · 261 links · WordPress: TRUE
 a hospital trust   Arial + Open Sans · 2px/10px · 42 shadows · 2 transform
-              18 images · 150 links
+               18 images · 150 links
 a large energy utility, drifted modern      Cabin · 15px ×135 · 28 shadows · 8 transform      <- drifted modern, not a target
 ```
 
-The two in-register sites use **Arial and Open Sans**, 2px corners, and essentially no motion.
+The two in-register sites: **Arial and Open Sans**, 2px corners, essentially no motion.
 a hospital trust renders **18 images on the whole page** — the inverse of a shop.
 
 ## Overrides on the core
@@ -44,18 +44,14 @@ top to bottom starting at 0 and take letter `k` of the name for each row.
 
 ## Density model
 
-150–261 links, 18–34 images. The page is a **routing surface**: its job is to get eleven
-different audiences to eleven different departments. Every audience gets a labelled entry
-point rather than a persuasive argument.
-
-Do not write marketing copy here. Write signage.
+150–261 links, 18–34 images. The page is a **routing surface**: eleven audiences to eleven
+departments, each audience a labelled entry point rather than a persuasive argument. Write
+signage, not marketing copy.
 
 ## Page skeleton
 
-**This skeleton is a menu, not a template.** Pick the blocks the brief has content for and drop
-the rest — at least two. The order below is the conventional one; deviating from it where the
-site's history justifies it is correct.
-
+Menu, not template: drop the blocks the brief has no content for — at least two. Order below
+is conventional; deviations justified by the site's history are correct.
 
 1. **Utility topbar** — audience switcher (For students / For staff / For patients / For
    investors), language, A11y controls (text size, contrast), search toggle
@@ -78,21 +74,21 @@ site's history justifies it is correct.
 
 ## Furniture that carries the genre
 
-An accessibility statement link in the footer · text-size and contrast controls in the topbar
-· a "last reviewed / last updated" date on content · document lists showing `PDF, 240 KB` ·
-a complaints or feedback route · an emergency or out-of-hours contact block · a site map link.
+Accessibility statement link in the footer · text-size and contrast controls in the topbar ·
+a "last reviewed / last updated" date on content · document lists showing `PDF, 240 KB` · a
+complaints or feedback route · an emergency or out-of-hours contact block · a site map link.
 
-None of these are decorative. Their absence is why an institutional page built from instinct
-reads as a startup.
+None decorative. Their absence is why an institutional page built from instinct reads as a
+startup.
 
 ## Traps
 
-- **Do not consolidate the navigation.** Eight top-level items with deep dropdowns is correct;
-  four tidy ones is not.
-- **Do not write a value proposition.** The hero says what the institution is or what is
-  happening now, not why you should choose it.
+- **Do not consolidate the navigation.** Eight top-level items with deep dropdowns is
+  correct; four tidy ones is not.
+- **No value proposition.** The hero says what the institution is or what is happening now,
+  not why you should choose it.
 - **Do not animate the statistics.** Counters ticking up is the strongest single tell here.
-- **Do not delete the notices strip** because it is ugly. It is the most authentic element.
+- **Keep the notices strip** despite ugliness — the most authentic element.
 - Multiple sub-brands with slightly different logo lockups is normal — do not unify them.
 
 ## Verification — this archetype

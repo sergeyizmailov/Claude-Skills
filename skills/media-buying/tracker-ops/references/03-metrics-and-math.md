@@ -22,6 +22,11 @@ basis (postback day) is for FINANCE/cashflow, not for buying decisions.
 - Cross-check: pixel leads ≈ tracker leads (±tolerance is account-specific, set
   from a reconciled baseline — SKILL rule #3). A bigger gap = wrong metric or
   broken tracking → stop and reconcile before reporting.
+- 🔺 Two priors, **not laws** — one practitioner's observed baselines, no published
+  source, never validated across accounts: fresh accounts pay ~2× CPM premium
+  (auction quality); judge click→lead CR on ≥100 clicks before reading a trend.
+  Replace both with your own reconciled numbers as soon as you have them; quoting
+  them to a TL as fact is exactly the error this file's metric rules exist to stop.
 
 ## Reconciliation tree (when Meta ≠ tracker)
 
@@ -51,7 +56,16 @@ Meta always shows fewer — Meta backfills with modeling + view-through, so its
 number can land EITHER side of tracker/backend (same as meta-ads/08: "either side
 can be higher"). What's real: iOS user-level attribution is noisier, and the gap
 is OS/GEO-dependent — larger on iOS-heavy T1 (US/UK/AU), smaller on Android-heavy
-T2/T3. Global ATT opt-in ≈ 35–38% (2025→2026, moving — verify). Implications:
+T2/T3. **Canonical ATT figure for this skill set — quote it with the vendor, never bare.** Primary MMPs
+disagree by *denominator*, not by being wrong: **Adjust ≈ 35% (2025) → 38% (Q1 2026)**, broadest panel;
+**AppsFlyer ≈ 50%**, flat since Q1 2024, counting only users actually *shown* the prompt and weighted to
+large apps with optimized pre-prompts. AppsFlyer's own methodology note drops this to **~30%** once
+system-restricted users and the ~55% of apps that never deploy ATT are folded in. Use **~35–50% global,
+flat-to-rising since 2022**. 🔺 **Geo variance (Germany/Japan ~20–23% vs UAE/Brazil ~47–50%) is wider
+than the vendor gap and wider than vertical variance** — quote a geo before quoting a global number.
+Do **not** cite Singular's ~14–19%: gaming-weighted, per-app-equal-weighted, dragged by casino/trivia.
+Do **not** cite Flurry as current — that tracker has not materially updated since May 2022.
+Implications:
 - Segment Meta-vs-tracker deltas by OS/GEO before reconciling — an iOS-heavy
   campaign's gap is expected noise, but don't presume its DIRECTION.
 - On iOS-heavy traffic treat S2S/postback as the more stable money-truth and
@@ -88,13 +102,6 @@ own mutable state. Why it's worth the trouble:
   status) so a replay can't double-count, and REDACT tokens/PII from the stored
   query — don't keep secrets raw.
 
-## Funnel metrics (what each says)
-
-- CTR(link): creative. CPM: account/auction quality (fresh ~2x premium).
-  LP CTR: pre-lander. click→lead CR: whole funnel (judge on 100+ clicks).
-  reg→deposit / lead→sale: lead QUALITY (what the advertiser judges; cheap
-  low-quality leads lose deals).
-
 ## Cohort nowcasting (decide before the cohort matures)
 
 Today's CPA looks terrible because today's conversions haven't posted back yet
@@ -126,8 +133,8 @@ rule out a tracking break (01) before trusting the projection.
   count, not raw clicks.
 - rising bot_share / proxies: moderation crawlers on the white page; some is
   normal on a cloaked funnel, a rising trend precedes domain/account bans. This
-  is the SIGNAL; the response (domain rotation) is a grey-ops action — see
-  fb-grey-ops/05.
+  is the SIGNAL; the response (domain rotation) is a grey-ops action — Meta
+  `meta-grey-ops/01`, Google `google-grey-ops/03` + cloak stack `google-grey-ops/05`.
 - near-zero LP CTR w/ normal clicks: cloaca over-filtering real users (or black
   page broken) — a tracking fault, not bad traffic; fix the filter, don't kill.
 - empty_referrers spike: stripped/direct traffic — correlate with bot_share.
@@ -151,7 +158,7 @@ single thing that makes per-account/per-ad numbers real):
   ONLY because your URL feeds the campaign name into it — it is not intrinsic
   (01). Per-ad splits need `{{ad.id}}`→sub_id_N mapped; confirm before assuming
   per-ad analysis.
-- FB naming discipline IS the tracking plan (fb-grey-ops/03): campaign name =
+- FB naming discipline IS the tracking plan (meta-grey-ops/03): campaign name =
   ad account, ad name = creative — so the contract above resolves cleanly.
 - Pin the payout `status` in the contract too — optimization event, tracker
   status, and payout event must line up or CPL/ROI is measuring the wrong thing.
@@ -201,6 +208,72 @@ Choosing the optimization event = reliability × volume × correlation-with-payo
   optimization signal also feeds Meta's quality modeling — noisy/fake events
   degrade delivery, not just reporting.
 
+## Telegram Mini App / bot — CAPI without a pixel
+
+Telegram WebView is not a reliable Pixel jar (`senior-buyer-ops/03`). Server CAPI
+is the path. The failure mode is stuffing `fbclid` into the Telegram deep link.
+
+Two Telegram payloads, different limits — pick one and keep the token **short**:
+
+| Link | Where it lands | Limit | Charset |
+|---|---|---|---|
+| `t.me/<bot>?start=<token>` | Bot `/start <token>` | **64 bytes** (`START_PARAM_TOO_LONG`) | A–Z a–z 0–9 `_` `-` |
+| `t.me/<bot>/<app>?startapp=<token>` | Mini App `start_param` / `tgWebAppStartParam` | **512** | `^[\w-]{0,512}$` |
+
+`fbclid` is **case-sensitive**, often longer than 64 bytes, and not a `[\w-]`-safe
+opaque key. **Never put it in `start` / `startapp`.** Store it on the tracker
+click; put the tracker click id (or a shorter alias) in the Telegram param.
+
+```
+Meta ad Website URL
+  → tracker (captures fbclid, issues token)
+  → 302 t.me/<bot>/<app>?startapp=<token>
+Mini App / bot reads start_param
+  → lookup token → fbclid + subids
+  → on Lead / Purchase: CAPI below
+```
+
+Ad dest is still an **HTTPS hop you own**. Direct `t.me` as the ad URL skips the
+capture step. `action_source` = where **this** event happened — Mini App HTTPS
+page = `website` (then `event_source_url` + `client_user_agent` are **required**);
+bot-only with no page = `other` or `chat`, not a fake `website`.
+
+**Do not send Telegram’s webhook IP as `client_ip_address`.** Only the user’s IP
+from **your** Mini App HTTPS request. No user IP → omit the field. Same for UA.
+
+**Do not invent `fbp`.** `_fbp` is a first-party cookie on **your** domain. Bot-only
+events have none — omit. Mini App on your origin may mint `_fbp` there; otherwise
+omit. Official: send `fbp`/`fbc` when available; server-built `fbc` without a
+cookie uses subdomainIndex **1**.
+
+`fbc` = `fb.1.<unix_ms_when_fbclid_first_seen>.<fbclid>` — do not hash, do not
+rewrite case. `external_id` = the same token you put in `startapp` (hashing
+recommended; same format on every channel). Pixel never fires → no Pixel
+dedup pair; still send a stable `event_id` so retries don’t double-count.
+
+```bash
+curl -sS -X POST "https://graph.facebook.com/v21.0/${DATASET_ID}/events" \
+  -d access_token="${CAPI_TOKEN}" \
+  --data-urlencode data='[{
+    "event_name": "Lead",
+    "event_time": 1712248396,
+    "event_id": "CLICKTOKEN-lead",
+    "action_source": "website",
+    "event_source_url": "https://app.example.com/",
+    "user_data": {
+      "fbc": "fb.1.1712248000123.IwAR2F4-dbP0l7Mn1IawQQGCINEz7PYXQvwjNwB_qa2ofrHyiLjcbCRxTDMgk",
+      "external_id": ["CLICKTOKEN"],
+      "client_ip_address": "203.0.113.10",
+      "client_user_agent": "Mozilla/5.0 ... Telegram"
+    }
+  }]'
+```
+
+Pin Graph version to whatever Events Manager shows — `v21.0` here is an example,
+not a freeze. Test-events code goes in `test_event_code` until the payload is
+green. Purchase still needs `custom_data.value` + `currency`. Which tracker
+status maps to `Lead` vs `Purchase` is the contract above, not this curl.
+
 ## Daily routine (automate)
 
 For YESTERDAY (account tz): pull Meta spend/impr/clicks per live account → push
@@ -212,5 +285,4 @@ date arg).
 ## Reporting upward
 
 Use the team's lead definition + their timezone (ask which the sheet uses).
-Never report a metric not reconciled once against a second source. Keep a dated
-stats log; correct by appending, not rewriting.
+Never report a metric not reconciled once against a second source.

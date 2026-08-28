@@ -1,248 +1,199 @@
 # Meta Ads Manager — Interface & Navigation (2025–2026)
 
-Scope: the Ads Manager web UI as of 2025–2026. Covers layout, the Campaign/Ad set/Ad hierarchy, campaign creation flow, table controls, metrics/columns, breakdowns, date ranges, reporting, automated rules, drafts/publish, billing, spending limit, and account quality.
+Scope: Ads Manager web UI, 2025–2026 — layout, Campaign/Ad set/Ad hierarchy, creation flow, table controls, metrics/columns, breakdowns, date ranges, reporting, automated rules, drafts/publish, billing, spending limit, account quality.
 
-Access points:
-- Direct: `adsmanager.facebook.com`
-- Via Meta Business Suite / Business Portfolio: `business.facebook.com` → Ads Manager in the menu
-- Mobile: Meta Ads Manager app (iOS/Android) — supports turning campaigns on/off, creating/editing ads, tracking performance, managing budgets and schedules, but is not feature-complete vs desktop.
-
----
+Access: direct `adsmanager.facebook.com`; via Business Suite menu; mobile app exists, not feature-complete vs desktop.
 
 ## 1. Overall layout
 
-When you open Ads Manager you typically land on either **Account Overview** or the **Campaigns** table view.
-
-- **Account Overview** — dashboard-style summary: charts of spend and results over time, aggregate stats (reach, impressions, link clicks, conversions), active-campaign trends. Date range adjustable; charts downloadable.
-- **Campaigns / Ad sets / Ads tabs** — the main work area. A table organized into three tabs matching the three levels of the account structure. Drill down (click a campaign row to see its ad sets, an ad set to see its ads) or jump between tabs.
-
-Key navigation elements:
-- **Left sidebar / hamburger ("All tools", three horizontal lines, top left)** — links to Ads Reporting, Audiences, Automated Rules, Billing, Events Manager, and other tools. Also where you switch between ad accounts (account dropdown at top) if you manage several.
-- **Search and filters bar** — find campaigns/ad sets/ads by name; filter by delivery status (e.g. show only Active) or objective. Essential at dozens of campaigns.
-- **Top-right controls**: date-range picker, **Breakdown** dropdown, **Columns** dropdown, **Reports** (save/export).
-- **Editing pane**: selecting a row's checkbox and clicking **Edit** (or clicking into an item) opens an editing pane where the item's settings are changed; changes can be reviewed before publishing (see §10). [uncertain — exact pane behavior/placement varies by rollout; not fully verified against official docs]
-
-Outdated-UI warning: older guides (pre-2018) describe a top nav with "Power Editor", an "All Campaigns" dropdown, and old objective names (Clicks to Website, Page Likes, etc.). Power Editor was merged into Ads Manager in 2017–2018 and objectives were consolidated into ODAX in 2021–2022. Any screenshot showing Power Editor or 11 objectives is outdated.
+Outdated-UI warning: any guide/screenshot showing Power Editor or 11 objectives is stale (Power Editor merged 2017–2018; objectives consolidated into ODAX 2021–2022). Editing pane opens via row checkbox + **Edit** [uncertain — exact pane behavior/placement varies by rollout].
 
 ---
 
 ## 2. The three levels: Campaign / Ad set / Ad
 
-Meta's account structure has three levels. Over-segmentation (too many ad sets splitting budget) starves the learning phase — a common structural mistake.
+Three-level account structure. Over-segmentation (too many ad sets splitting budget) starves the learning phase — common structural mistake.
 
 ### Campaign level
-Configured here:
-- **Objective** (ODAX, six options — see §3)
-- **Buying type**: Auction (default, flexible) or Reservation (predictable delivery/reach, available to eligible accounts)
-- **Special Ad Categories** declaration: financial products/services, employment, housing, and social issues/elections/politics. Targeting and feature restrictions vary by category, country, and current campaign flow.
-- **Advantage campaign budget** (formerly CBO, Campaign Budget Optimization): budget set at campaign level; Meta auto-distributes across ad sets
-- **A/B test** toggle (creates a split test from the campaign)
-- Campaign name; Advantage+ campaign vs manual campaign choice
+- **Objective** (ODAX, six options — §3)
+- **Buying type**: Auction (default) or Reservation (predictable delivery, eligible accounts only)
+- **Special Ad Categories**: financial products/services, employment, housing, social issues/elections/politics — targeting/feature restrictions vary by category/country/flow
+- **Advantage campaign budget** (formerly CBO) — set at campaign level, auto-distributed across ad sets
+- **A/B test** toggle
+- Campaign name; Advantage+ vs manual campaign
 
 ### Ad set level
-Configured here:
-- **Performance goal** / conversion event (e.g. maximize conversions, link clicks, landing page views, reach, impressions — options depend on objective)
-- **Budget & schedule** (if Advantage campaign budget is OFF): daily or lifetime budget, start date, optional end date. Daily budgets are averaged across a week — Meta may spend up to ~75% more than the daily budget on high-opportunity days (per Shopify's guide; treat the exact flex percentage as [uncertain], Meta does not guarantee a fixed daily spend)
-- **Audience**: Advantage+ audience (AI-driven, your inputs are "suggestions"), Custom audiences, Lookalike audiences (1–10% similarity), and/or detailed targeting (age, gender, location, language, interests, demographics, behaviors). An estimated audience size appears in a side column during setup.
-- **Placements**: Advantage+ placements (automatic across Facebook, Instagram, Messenger, Audience Network, Threads) or Manual placements
-- **Optimization & delivery**: attribution setting (default 7-day click / 1-day view), bid/cost controls, ad scheduling (lifetime budgets only)
+- **Performance goal**/conversion event (maximize conversions, link clicks, LPV, reach, impressions — varies by objective)
+- **Budget & schedule** (if Advantage campaign budget OFF): daily/lifetime, start/end date. Daily budgets average across a week — Meta may spend up to **~75% more** on high-opportunity days (Shopify; [uncertain], not guaranteed)
+- **Audience**: Advantage+ audience (AI-driven, inputs are "suggestions"), Custom, Lookalike (1–10% similarity), detailed targeting (age/gender/location/language/interests/demographics/behaviors). Estimated audience size shown in side column.
+- **Placements**: Advantage+ (auto: FB/IG/Messenger/Audience Network/Threads) or Manual
+- **Optimization & delivery**: attribution setting (default 7-day click/1-day view), bid/cost controls, ad scheduling (lifetime budgets only)
 
 ### Ad level
-Configured here:
-- **Identity**: Facebook Page + Instagram account the ad runs from
+- **Identity**: FB Page + IG account the ad runs from
 - **Format**: single image/video, carousel, collection; flexible format
-- **Creative**: media, primary text, headline(s), description, call-to-action button, destination URL + UTM parameters; multiple text/headline options supported (Meta rotates them)
+- **Creative**: media, primary text, headline(s), description, CTA, destination URL + UTM; multiple text/headline options (Meta rotates them)
 - **Tracking**: pixel event / URL parameters
-- Placement-level preview shown in a sidebar during creation
+- Placement-level preview in sidebar
 
 ---
 
 ## 3. "+ Create" button and campaign creation flow
 
-Entry: **Ads Manager → Campaigns tab → green "+ Create" button** (top-left of the table).
+Entry: **Ads Manager → Campaigns tab → green "+ Create"** (top-left of table).
 
-Creation modes:
-- **Guided creation** — step-by-step wizard; recommended for new advertisers.
-- **Quick creation** — shell campaign + bulk ad sets/ads filled in later via the table; for experienced advertisers creating many items.
+Modes:
+- **Guided creation** — step-by-step, for new advertisers
+- **Quick creation** — shell campaign + bulk ad sets/ads via table, for experienced advertisers
 
-Guided flow screens (in order):
-
-1. **Choose a campaign objective** — six ODAX objectives:
-   - **Awareness** — max reach/impressions, brand recall
-   - **Traffic** — link clicks / landing page views to site, app, or Messenger
-   - **Engagement** — reactions/comments/shares, video views, messages
-   - **Leads** — instant forms, website conversions, calls
-   - **App promotion** — installs and in-app events
-   - **Sales** — purchases and other conversion events (website or catalog)
-   Also on this screen: buying type (Auction/Reservation), and an option to build an **Advantage+ campaign** (end-to-end automation: audience, placements, budget, creative, destination). Meta claims Advantage+ sales campaigns improve cost per action ~20% (Meta data cited by Shopify, 2026) [uncertain — vendor-reported]. "Single-step Advantage+" applies automation to one component only (audience, placement, budget, creative, or destination).
-2. **Campaign settings** — campaign name, Special Ad Category declaration, A/B test on/off, Advantage campaign budget on/off (+ campaign budget amount if on).
-3. **Ad set** — performance goal/conversion location (website, app, Messenger, etc.), pixel + conversion event, budget & schedule, audience, placements.
-4. **Ad** — identity, format, creative, copy, CTA, destination, tracking. Live preview per placement in the sidebar.
-5. **Review and publish** — final check, then **Publish**. Ads go to Meta's review; approval typically takes minutes to a few hours, officially up to 24 hours (per Shopify, 2026).
+Guided flow:
+1. **Choose objective** — six ODAX: **Awareness** (reach/impressions/recall), **Traffic** (clicks/LPV to site/app/Messenger), **Engagement** (reactions/comments/shares/video views/messages), **Leads** (instant forms/website conversions/calls), **App promotion** (installs/in-app events), **Sales** (purchases/conversions, website or catalog). Also: buying type, **Advantage+ campaign** (full automation: audience/placements/budget/creative/destination) — Meta claims ~**20%** better cost per action for Advantage+ sales (Shopify citing Meta, 2026) [uncertain — vendor-reported]. "Single-step Advantage+" automates one component only.
+2. **Campaign settings** — fields per §2 Campaign level, + amount if Advantage campaign budget on.
+3. **Ad set** — fields per §2 Ad set level, + conversion location and pixel/conversion event.
+4. **Ad** — fields per §2 Ad level; live preview per placement.
+5. **Review and publish** — final check → **Publish**. Review typically minutes to hours, officially **up to 24 hours** (Shopify, 2026).
 
 Gotchas:
-- Objective determines which destinations, performance goals, events, and metrics are available downstream. Exact combinations and breakdowns vary by conversion location and rollout; verify them in the live creation flow.
-- Meta identifies some edits as significant and those edits can return an ad set to learning. Do not assume every edit has the same effect; inspect Delivery status after publishing.
-- Special Ad Category campaigns have restricted targeting and feature availability. Verify the selected category, country, and live UI instead of applying one global feature matrix.
+- Objective determines available destinations/goals/events/metrics downstream — verify combinations in the live flow.
+- Some edits are "significant" and return an ad set to learning — inspect Delivery status after publishing, don't assume uniform effect.
+- Special Ad Category campaigns have restricted targeting/features — verify category, country, live UI.
 
 ---
 
 ## 4. Campaigns table — key buttons and controls
 
-The table toolbar (appears above the rows; some buttons require selecting a row checkbox):
-
-- **"+ Create"** — new campaign (see §3)
-- **On/off toggle** — per-row switch in the table; pauses/resumes delivery without deleting. Toggling an upper level affects everything below it (campaign off → its ad sets and ads off).
-- **Duplicate** — copies the selected campaign/ad set/ad (optionally into another campaign, with/without results). Standard workflow for A/B tests: Duplicate → choose "New A/B test" (per HubSpot, 2025).
-- **Edit** — opens the editing pane for the selected item(s); supports bulk edits across selected rows.
-- **Delete** (trash icon / three-dot menu) — deleted items stop delivery and generally cannot be re-enabled; their historical data remains in reports. Turn things off instead of deleting when you may want them back.
-- **A/B Test** button in the main toolbar — launches an experiment from a selected campaign/ad set (also via the three-dot menu → Duplicate → New A/B test). Managed under the **Experiments** tool; results shown with statistical confidence and a declared winner if conclusive.
-- **Rules** — dropdown on selected items → "Create a new rule" or manage existing; links to Automated Rules (§8).
-- **More / three-dot (…)** menu per row — additional actions (duplicate variants, view history/changelog, share a link, etc.).
-- **Delivery column** — status per row: Active, In review, Scheduled, Not delivering, Rejected, Completed, Learning, etc. **Learning** and **Learning limited** describe ad-set delivery state. Current official guidance does not publish exactly 50 weekly events as a universal threshold; treat that number as a legacy planning heuristic and use the live status.
+Toolbar (some buttons need a row checkbox):
+- **"+ Create"** — new campaign (§3)
+- **On/off toggle** — per-row, pauses/resumes without deleting. Upper-level toggle cascades down (campaign off → ad sets/ads off).
+- **Duplicate** — copies campaign/ad set/ad (optionally into another campaign, with/without results). A/B test workflow: Duplicate → "New A/B test" (HubSpot, 2025).
+- **Edit** — editing pane, bulk edit across selected rows.
+- **Delete** — stops delivery, generally cannot be re-enabled (historical data stays in reports). Turn off instead if you may want it back.
+- **A/B Test** button — launches experiment from selected campaign/ad set (also via ⋯ → Duplicate → New A/B test). Managed under **Experiments**; results show statistical confidence + declared winner if conclusive.
+- **Rules** — dropdown on selected items → create/manage rules (§9).
+- **⋯ (More)** per row — duplicate variants, history/changelog, share link, etc.
+- **Delivery column**: Active, In review, Scheduled, Not delivering, Rejected, Completed, Learning, Learning limited, etc. No official universal "50 weekly events" threshold published — legacy heuristic; use live status.
 
 ---
 
 ## 5. Columns and metrics
 
 ### Customizing columns
-Path: **Columns dropdown → Customize Columns**. Search/add metrics, drag to reorder, **save as preset** (checkbox when applying) for reuse. Built-in column presets include: Performance, Performance and clicks, Delivery, Engagement, Video engagement, App engagement, plus others (preset list varies by rollout).
+**Columns dropdown → Customize Columns** — search/add, drag to reorder, **save as preset**. Built-in presets: Performance, Performance and clicks, Delivery, Engagement, Video engagement, App engagement, + others (varies by rollout).
 
-### Metric gotchas (definitions assumed; these are the Meta-specific traps)
-- **Results** shows a DIFFERENT event per campaign (purchase/lead/link click/ThruPlay by objective) — check what "result" means for that row before comparing rows.
-- **Frequency** fatigue watched above ~5–8 (AdManage: risk above 8–9; "optimal" 3–7, campaign-length dependent).
-- **CPM** driven by targeting breadth/competition/seasonality (Q4 spikes 50–100% commonly reported).
-- **"CPC (all)" / "CTR (all)"** include reactions/comment clicks and look deceptively cheap — use the LINK-click variants for creative evaluation. Indicative placement CTR (AdManage 2025-11): FB Feed ~0.9%, IG Feed ~0.5%, Stories ~0.3%.
-- **ROAS** needs supported conversion-value measurement for the conversion location (web = Pixel/CAPI; app/shop differ); note "Purchase ROAS" vs "Website purchase ROAS" variants.
-- **LPV < link clicks**: a large click→LPV drop = slow landing page, not a creative problem.
-- **Quality / Engagement / Conversion-rate rankings** — per-ad diagnostics vs competitors for the same audience (Above / Average / Below).
+### Metric gotchas
+- **Results**: DIFFERENT event per campaign (purchase/lead/link click/ThruPlay by objective) — check what "result" means per row.
+- **Frequency**: fatigue above ~5–8 (AdManage: risk above 8–9; "optimal" 3–7, campaign-length dependent).
+- **CPM**: driven by targeting breadth/competition/seasonality (Q4 spikes **50–100%** commonly reported).
+- **"CPC (all)"/"CTR (all)"**: include reaction/comment clicks, look deceptively cheap — use LINK-click variants for creative evaluation. Placement CTR (AdManage 2025-11): FB Feed ~0.9%, IG Feed ~0.5%, Stories ~0.3%.
+- **ROAS**: needs supported conversion-value measurement per conversion location (web = Pixel/CAPI; app/shop differ); "Purchase ROAS" ≠ "Website purchase ROAS".
+- **LPV < link clicks**: large click→LPV drop = slow landing page, not creative.
+- **Quality/Engagement/Conversion-rate rankings**: per-ad vs competitors for same audience (Above/Average/Below).
 
-### Benchmarks (WordStream/LocaliQ 2025 study; US campaigns, Apr 2024–Jun 2025; medians)
-- Traffic campaigns (n=554): CTR 1.71%, CPC $0.70
-- Leads campaigns (n=726): CTR 2.59%, CPC $1.92, conversion rate 7.72%, cost per lead $27.66
-- Industry spread (traffic): Shopping/Collectibles & Gifts CTR 4.13% / CPC $0.34 (best); Travel CTR 2.76% / CPC $0.51; Finance & Insurance CTR 0.98% / CPC ~$1.22 (expensive)
-- Alternative averages (Birch data via Shopify, 2026): CPM $13.86, CPC $0.74, CPE $0.07, CPL $13.39, CPI $2.30 — treat as rough cross-source reference; methodology differs
-- Never compare a traffic-objective CPC to a leads-objective CPL; they are benchmarks for different optimization goals.
+### Benchmarks (WordStream/LocaliQ 2025 study; US, Apr 2024–Jun 2025; medians)
+- Traffic (n=554): CTR 1.71%, CPC $0.70
+- Leads (n=726): CTR 2.59%, CPC $1.92, conversion rate 7.72%, cost/lead $27.66
+- Industry spread (traffic): Shopping/Collectibles & Gifts CTR 4.13%/CPC $0.34 (best); Travel CTR 2.76%/CPC $0.51; Finance & Insurance CTR 0.98%/CPC ~$1.22 (expensive)
+- Alternative averages (Birch via Shopify, 2026): CPM $13.86, CPC $0.74, CPE $0.07, CPL $13.39, CPI $2.30 — rough cross-source reference, methodology differs
+- Never compare traffic-objective CPC to leads-objective CPL.
 
-Recommended starter column set: Results, Cost per result, Amount spent, CTR (link), CPC (link), CPM, Frequency, Reach, Impressions, + ROAS / Cost per purchase for sales campaigns.
+Starter column set: Results, Cost per result, Amount spent, CTR (link), CPC (link), CPM, Frequency, Reach, Impressions, + ROAS/Cost per purchase for sales campaigns.
 
 ---
 
 ## 6. Breakdowns and filters
 
 ### Breakdown dropdown (next to Columns)
-Seven categories plus options (per Jon Loomer, 2025-12):
+Seven categories (Jon Loomer, 2025-12):
 - **Time**: Day, Week, 2 Weeks, Month
-- **Demographics**: Age, Gender, Age and Gender, Audience segments (Engaged audience / Existing customers / New audience — Sales campaigns only; requires defining segments in Advertising settings)
+- **Demographics**: Age, Gender, Age and Gender, Audience segments (Engaged/Existing customers/New audience — Sales campaigns only, requires defined segments)
 - **Geography**: Country, Region, ...
 - **Delivery**: Placement, Placement and device, Platform, Device platform, Time of day...
 - **Action**: Conversion device, Destination, Carousel card, Post reaction type, Video view type, Video sound, Brand, Category, Messaging purchase source, Messaging outcome destination
-- **Dynamic creative element**: Image/video/slideshow, Text, Headline — shows per-format and per-text-option performance
+- **Dynamic creative element**: Image/video/slideshow, Text, Headline
 - **Creative**
-- **Bonus checkboxes**: Value rules (shows when bid-adjustment value rules applied), Attribution (breakdown by attribution setting; breakdown by conversion count — First conversions vs All other conversions)
+- Bonus: Value rules (bid-adjustment), Attribution (breakdown by attribution setting; First conversions vs All other conversions)
 
 High-value uses (Loomer):
-- Placement breakdown exposes junk distribution: Audience Network inflating cheap link clicks; Audience Network Rewarded Video inflating ThruPlays (results > reach is the tell); "Ads on Facebook Reels" soaking Awareness-reach budgets.
-- Age/Gender breakdown reveals Meta over-spending on cheap-action demographics when optimizing for non-purchase goals (his example: 70% of budget on 55+ for registration optimization; fixed with value rules, cutting it to 17%).
-- Country breakdown when multi-country targeting — Meta allocates by cheapest results, not evenly.
+- Placement breakdown exposes junk distribution: Audience Network inflating cheap link clicks; Audience Network Rewarded Video inflating ThruPlays (results > reach = tell); "Ads on Facebook Reels" soaking Awareness-reach budgets.
+- Age/Gender exposes over-spend on cheap-action demographics for non-purchase goals (example: 70% of budget on 55+ for registration optimization; value rules cut it to 17%).
+- Country breakdown: Meta allocates multi-country budget by cheapest results, not evenly.
 
-Limitations: only one breakdown applies in the main table at a time (Ads Reporting allows cross-segmentation, e.g. Age × Gender, per AdManage); breakdowns don't backfill cleanly across all metrics [uncertain].
+Limits: only one breakdown at a time in main table (Ads Reporting allows cross-segmentation, e.g. Age × Gender); breakdowns don't backfill cleanly across all metrics [uncertain].
 
 ### Filters
-- Filter by name/ID (search box), delivery status, objective, and metric thresholds ("Selection" filter: e.g. Cost per result > X).
-- Saved filters available; filtering does not change the data, only the visible rows.
+Name/ID search, delivery status, objective, metric thresholds ("Selection" filter, e.g. Cost per result > X). Saved filters available; filtering only hides rows, doesn't alter data.
 
 ---
 
 ## 7. Date presets and charts
 
-Date picker (top right) presets: Today, Yesterday, Last 7 days, Last 14 days, Last 30 days, This month, Last month, Lifetime, Custom range (exact preset list varies slightly by rollout).
-- **Compare** toggle — compare two ranges (e.g. this week vs last week); table shows % change with green/red arrows per metric.
-- Default view is typically Last 7 days — a classic misreading: judging performance on too-short windows. Practitioners recommend ≥2 weeks before decisions (Shopify, 2026).
-- Charts: Account Overview and Ads Reporting render spend/results/reach/frequency over time; in Ads Reporting you can build bar/line/pie charts and pivot tables, choose up to two axes/metrics, download charts as images.
+Preset list UI-trivial (rollout-dependent); **Compare** toggle shows % change per metric. Gotcha: default Last 7 days view is a classic misread — judge on **≥2 weeks** before decisions (Shopify, 2026).
 
 ---
 
 ## 8. Custom reports (Ads Reporting)
 
-Path: **All tools (hamburger) → Ads Reporting** (also reachable from the Reports control in the table).
-- Build custom reports: pick metrics, add breakdowns, choose visualization (table, bar, line, pie) or pivot-table layout.
-- Save reports with names; reload anytime; share via link (recipients need ad account access).
-- **Export** any view as CSV/Excel; charts as images.
-- **Schedule email delivery** of saved reports to yourself/teammates on a recurring basis (per AdManage, 2025-11).
-- Ads Reporting supports combining two breakdowns (cross-segmentation) unlike the main table.
+Path: **All tools → Ads Reporting** (also via Reports control in table).
+- Pick metrics, add breakdowns, choose visualization (table/bar/line/pie) or pivot layout.
+- Save/reload reports; share via link (recipients need ad account access).
+- **Export** as CSV/Excel; charts as images.
+- **Schedule email delivery** of saved reports, recurring (AdManage, 2025-11).
+- Supports combining two breakdowns (cross-segmentation), unlike main table.
 
 ---
 
 ## 9. Automated rules
 
-Paths:
-- **Ads Manager → All tools → Automated Rules** (direct URL: `facebook.com/ads/manager/rules`, per Cropink, 2026)
-- From the table: select item(s) → **Rules** dropdown → Create a new rule.
+Paths: **Ads Manager → All tools → Automated Rules** (direct: `facebook.com/ads/manager/rules`, Cropink 2026); or table: select → **Rules** → Create a new rule.
 
-Structure: every rule = **Apply to** (asset scope) + **Action** + **Condition(s)** + **Schedule** + **Notification subscriber**.
+Structure: rule = **Apply to** (scope) + **Action** + **Condition(s)** + **Schedule** + **Notification subscriber**.
 
-Scope: All active campaigns / All active ad sets / All active ads, or selected items. A rule applies to one level only — campaigns OR ad sets OR ads; mixing levels requires separate rules (Netpeak, 2025-03).
+Scope: All active campaigns/ad sets/ads, or selected items. One level per rule — campaigns OR ad sets OR ads; mixing levels needs separate rules (Netpeak, 2025-03).
 
-Actions (per Netpeak, 2025-03):
-- Campaign-level: turn off, turn on, send notification only
-- Ad set level: turn off, turn on, send notification only, increase/decrease daily budget by (%), increase/decrease lifetime budget by, increase/decrease bid by, scale bid by target field, scale daily budget by target field
+Actions (Netpeak, 2025-03):
+- Campaign: turn off, turn on, notify only
+- Ad set: turn off, turn on, notify only, increase/decrease daily budget (%), increase/decrease lifetime budget, increase/decrease bid, scale bid by target field, scale daily budget by target field
 
-Conditions: any metric threshold — Cost per result, Results, CPC, CPM, CTR, Frequency, ROAS, spend, impressions, pixel-event costs (cost per add to cart / initiate checkout / purchase / lead / registration / add payment info), plus time-based conditions ("Current time between …" for dayparting-style on/off scheduling). Multiple conditions are ANDed — all must be met; for OR logic, create separate rules.
+Conditions: any metric threshold — Cost per result, Results, CPC, CPM, CTR, Frequency, ROAS, spend, impressions, pixel-event costs (cost per add-to-cart/initiate-checkout/purchase/lead/registration/add-payment-info), plus time-based ("Current time between…" for dayparting). ANDed; for OR logic use separate rules.
 
-Schedule: Continuous (checks ~every 30 min [uncertain — exact interval]), Daily, or Custom (days/times).
+Schedule: Continuous (~every 30 min [uncertain]), Daily, or Custom.
 
 Limits & gotchas:
-- Max 250 rules per ad account, including inactive ones (Netpeak).
-- Not available for ads about social issues, elections or politics.
-- Budget-increase rules without a cap can spiral — set max-budget ceilings; add minimum impressions/spend conditions to avoid triggering on noise (e.g. Frequency > 2 AND CTR < x AND Impressions > 8,000).
-- Rules log their actions; review rule history before blaming Meta for budget changes.
-- API-side, cost/ratio conditions (`cpa`, `cost_per_*`, `website_purchase_roas`) are rejected on ADSET- and AD-scoped rules for every action except CHANGE_BUDGET / CHANGE_BID — even NOTIFICATION (error 2703 / subcode 2490336, field-observed 2026-08 on v26.0); campaign scope accepts them, which is why the UI can offer cost conditions at all. An ad-set-level "cost per result > X → pause" must be built as `spent > price x k AND <conversion count> < k+1`. Threshold choice that survives small samples, plus API field/unit gotchas: `senior-buyer-ops/references/04-automated-rules.md`.
+- **Max 250 rules per ad account**, including inactive (Netpeak). Consolidated limits table: `00` §4.2.
+- Not available for social issues/elections/politics ads.
+- Uncapped budget-increase rules can spiral — set max-budget ceilings; add minimum impressions/spend conditions to avoid noise-triggering (e.g. Frequency > 2 AND CTR < x AND Impressions > 8,000).
+- Rules log actions — check rule history before blaming Meta for budget changes.
+- API-side: cost/ratio conditions (`cpa`, `cost_per_*`, `website_purchase_roas`) are rejected on ADSET/AD-scoped rules for every action except CHANGE_BUDGET/CHANGE_BID — even NOTIFICATION (error 2703/subcode 2490336, field-observed 2026-08 on v26.0); campaign scope accepts them (why the UI can offer cost conditions at all). Ad-set-level "cost per result > X → pause" must be built as `spent > price x k AND <conversion count> < k+1`. Threshold choice for small samples + API field/unit gotchas: `senior-buyer-ops/references/04-automated-rules.md`.
 
 ---
 
 ## 10. Drafts and review/publish flow
 
-- Unpublished work in Ads Manager is held as a **draft**; a drafts indicator appears when you have unpublished changes (badge on the review control). Bulk uploads/imports also land as paused drafts for review (Ads Uploader, 2026).
-- Path: make edits (creation flow, editing pane, bulk edit) → **Review and publish** (button, typically top area with a count of pending changes) → review the itemized change list → **Publish**. **Discard** reverts unpublished changes.
-- Nothing goes live until Publish is clicked — safe to build in drafts. [uncertain — the auto-save/review behavior has shifted across 2024–2025 rollouts; some accounts see edits auto-applied without the drafts step for minor changes]
-- After Publish, ads enter Meta's review: typically minutes to a few hours, officially up to 24 hours. Status shows "In review" → "Active" or "Rejected" (with a policy reason; appeal from the ad or via Account Quality).
-- Creative Hub / mockup sharing (share ad preview links for client approval before launch) is a separate tool for pre-launch review (Jon Loomer, updated 2025-03).
+- Unpublished work held as a **draft** (badge on review control). Bulk uploads/imports also land as paused drafts (Ads Uploader, 2026).
+- Path: edit → **Review and publish** (pending-change count) → itemized change list → **Publish**. **Discard** reverts unpublished changes.
+- Nothing goes live until Publish — safe to build in drafts. [uncertain — auto-save/review behavior shifted 2024–2025; some accounts see minor edits auto-applied without a drafts step]
+- After Publish: review typically minutes to hours, officially **up to 24 hours**. Status "In review" → "Active"/"Rejected" (policy reason; appeal from the ad or Account Quality).
+- **Creative Hub** — separate tool for sharing ad preview links, client approval pre-launch (Jon Loomer, updated 2025-03).
 
 ---
 
 ## 11. Billing, account spending limit, account quality
 
 ### Billing
-Path: **Ads Manager → All tools (hamburger) → Billing** → **Payment settings** (also `business.facebook.com/billing_hub`). Contains: payment methods, payment activity/charges, billing thresholds, and the account spending limit.
+Path: **Ads Manager → All tools → Billing → Payment settings** (also `business.facebook.com/billing_hub`). Contains payment methods, activity/charges, billing thresholds, account spending limit.
 
 ### Account spending limit
-Path: **Billing → Payment settings → Account spending limit** section → three-dot menu → **Set limit** / manage (Graphed, 2025-12).
-- It is a **lifetime cap** on total spend across all campaigns in the ad account — not monthly, not per campaign (Meta Help Center definition, cited by Agrowth, 2026-01).
-- When reached, all ads pause but stay listed as Active (editable, resumable); a progress bar shows spend toward the limit.
+Path: **Billing → Payment settings → Account spending limit → ⋯ → Set limit**/manage (Graphed, 2025-12).
+- **Lifetime cap** on total ad-account spend — not monthly, not per campaign (Meta Help Center, cited by Agrowth, 2026-01).
+- At limit: ads pause but stay listed Active (editable/resumable); progress bar shows spend toward cap.
 - Not available for manual-payment (prepaid) accounts.
-- Distinct from: campaign budgets (per campaign), daily/lifetime budgets (per ad set), and Meta-imposed billing thresholds (auto-charge points) — and from Meta's own risk-based spending caps on new accounts, which lift with billing history (typically months).
-- Gotcha: exhausted $0-limit accounts look "banned" — check here first before assuming a restriction (ADS Infra, 2026).
+- Distinct from campaign budgets, ad-set daily/lifetime budgets, Meta billing thresholds (auto-charge points), and Meta's risk-based new-account caps (lift with billing history, typically months).
+- Gotcha: exhausted $0-limit accounts look "banned" — check here before assuming restriction (ADS Infra, 2026).
 
 ### Account quality / status
-Path: **`business.facebook.com/accountquality`** (direct link; also reachable via Business Support Home). Shows status of your ad accounts, Pages, business portfolio, and user account: active restrictions, rejected ads, reasons, and **Request review** appeal buttons. Check the "My accounts" view for per-asset status when multiple accounts exist (Dolphin Anty, 2025-02).
-- If ads won't run with no visible ban, Account Quality is the first place to check.
-- Common restriction triggers (practitioner consensus): repeated policy-violating rejections, payment/risk flags (payment method country mismatch, suspicious activity), sudden activity spikes on new accounts, and running ads from restricted Pages.
-
----
-
-## 12. Common mistakes checklist
-
-- Judging "Results" without checking what the result event is for that objective.
-- Reading "CTR (all)"/"CPC (all)" as link-click performance.
-- Deleting instead of toggling off (loses re-activation ability).
-- Making significant edits without checking their delivery impact or allowing for conversion lag.
-- Judging performance on a window too short for the account's volume, conversion delay, and weekly pattern; ignoring date comparison.
-- No breakdowns — missing Audience Network/Rewarded Video junk inflating cheap results.
-- Over-segmented structure (many small ad sets) starving the learning phase.
-- Missing or incorrect measurement for the selected conversion location. Pixel and CAPI are common for website events, but the required sources depend on whether the destination is a website, app, shop, messaging flow, instant form, or calls.
-- Confusing account spending limit / billing threshold / campaign budget / daily budget.
-- Assuming a $0 spend = ban when the account spending limit was simply hit.
+Path: `business.facebook.com/accountquality` (also via Business Support Home). Shows status of ad accounts, Pages, portfolio, user account: active restrictions, rejected ads, reasons, **Request review** buttons. "My accounts" view for per-asset status (Dolphin Anty, 2025-02).
+- If ads won't run with no visible ban — check here first.
+- Common triggers (practitioner consensus): repeated policy-violating rejections, payment/risk flags (payment method country mismatch, suspicious activity), sudden activity spikes on new accounts, ads from restricted Pages.
 
 ---
 

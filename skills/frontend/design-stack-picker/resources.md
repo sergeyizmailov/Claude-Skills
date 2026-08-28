@@ -1,76 +1,64 @@
 # Resource catalog
 
-The full library of ready-made resources, grouped by axis. **Pick one per axis per project.** Each entry: what it is · when to reach for it. House defaults are ⭐. Pricing/status verified June 2026 — pricing is volatile [V], re-check before buying.
+Pick **one per axis per project**. House defaults ⭐. Pricing/status verified June 2026 — volatile [V], re-check before buying.
 
-**Licensing shorthand:** OFL = SIL Open Font License (modify/redistribute OK) · ITF-FFL = free commercial use but **cannot modify/redistribute/self-host-repackage** (Fontshare originals) · CC0 = public domain · CC-BY = attribution required.
+**Licensing:** OFL = SIL Open Font License (modify/redistribute OK) · ITF-FFL = free commercial but **no modify/redistribute/self-host-repackage** (Fontshare originals) · CC0 = public domain · CC-BY = attribution.
 
----
-
-## How to use this catalog
-
-This file is a **menu**, not an install list. Keep the broad catalog intact so there is choice, but select narrowly:
-
-1. Read the current project first: framework, existing design system, dependencies, assets, and constraints.
-2. Pick **one resource per axis** only when the project does not already have a good answer.
-3. Prefer resources that fit the framework already in use.
-4. Do not add a package if a local component, current dependency, or static asset solves the need cleanly.
-5. Re-check pricing, license, and maintenance before paid or high-dependency choices.
-
-Fast routing:
+**Method:** this is a menu, not an install list. Read the project first (framework, existing design system, deps, constraints); pick one resource per axis only where the project lacks a good answer; prefer framework-fit; don't add a package if a local component/dependency/static asset suffices; re-check pricing/license/maintenance before paid or high-dependency picks.
 
 | Situation | Start here |
 |---|---|
-| Existing Astro/static site | Current local components first; `astro:assets` for images; HyperUI/Preline as layout references, not mandatory dependencies. |
-| Existing React/Next app | Current UI library first; shadcn/Radix when complex interactive primitives are missing. |
-| Ecommerce/catalog | Product data/media sources, image optimization, stable card patterns, category/search UX. |
+| Existing Astro/static site | Local components first; `astro:assets` for images; HyperUI/Preline as layout references, not deps. |
+| Existing React/Next app | Current UI library first; shadcn/Radix when complex interactive primitives missing. |
+| Ecommerce/catalog | Product data/media, image optimization, stable card patterns, category/search UX. |
 | Admin/dashboard | Tables, forms, filters, density, focus states; avoid decorative illustration-heavy choices. |
-| Marketing page | Fonts, imagery/video, section blocks, motion, and image performance. |
-| One-off prototype | Smallest working choice; avoid adding a full design system unless it will continue. |
+| Marketing page | Fonts, imagery/video, section blocks, motion, image performance. |
+| One-off prototype | Smallest working choice; no full design system unless it continues. |
 
 ---
 
 ## 1. Icons — never hand-draw
 
 **Meta-library (use first):**
-- ⭐ **Iconify** — https://iconify.design · search https://icon-sets.iconify.design — 200k+ icons / 150+ sets, one API. Works in Astro (`astro-icon`), React (`@iconify/react`), web component, CSS, Tailwind.
+- ⭐ **Iconify** — https://iconify.design · search https://icon-sets.iconify.design — 200k+ icons / 150+ sets, one API. Astro (`astro-icon`), React (`@iconify/react`), web component, CSS, Tailwind.
 
 **House set:**
-- ⭐ **Solar** — https://icon-sets.iconify.design/solar/ — huge, consistent, multiple styles (Linear/Outline/Bold/Broken/Duotone). Default to `-linear`. Install `@iconify-json/solar`.
+- ⭐ **Solar** — https://icon-sets.iconify.design/solar/ — huge, consistent, multiple styles (Linear/Outline/Bold/Broken/Duotone). Default `-linear`. `@iconify-json/solar`.
 - ⭐ **Simple Icons** — https://simpleicons.org — brand/logo marks only. `@iconify-json/simple-icons`.
 
-**Swap the whole set to fit aesthetic (never mix sets):**
+**Swap whole set to fit aesthetic (never mix sets):**
 - **Lucide** — https://lucide.dev — 1500+ outline; React/shadcn default; clean SaaS.
 - **Phosphor** — https://phosphoricons.com — 6 weights; playful-but-refined.
 - **Tabler** — https://tabler.io/icons — 5000+; widest coverage.
-- **Heroicons** — https://heroicons.com — Tailwind team's MIT set; smaller but very polished, with outline/solid/mini sizes.
-- **Remix Icon** — https://remixicon.com — neutral system symbols, outline + filled; strong general-purpose UI/app choice.
-- **Iconoir** — https://iconoir.com — elegant 24px outline set; good when Lucide feels too generic but you still want open source.
-- **Radix Icons** — https://www.radix-ui.com/icons — crisp 15×15 icons; best for dense React/admin controls, less ideal for large marketing UI.
-- **Bootstrap Icons** — https://icons.getbootstrap.com — broad, practical SVG/sprite/font library; usable without Bootstrap.
-- **Hugeicons** — https://hugeicons.com — large modern family; free + paid, good when broad coverage matters.
-- **Material Symbols** — https://fonts.google.com/icons — variable icon font with multiple axes; best for Google/Material-adjacent products.
-- **Font Awesome** — https://fontawesome.com — huge ecosystem and brand recognition; use when compatibility/coverage matters more than distinctiveness.
+- **Heroicons** — https://heroicons.com — Tailwind team's MIT set; smaller but very polished; outline/solid/mini.
+- **Remix Icon** — https://remixicon.com — neutral system symbols, outline + filled; strong general UI/app choice.
+- **Iconoir** — https://iconoir.com — elegant 24px outline; when Lucide feels too generic but open source wanted.
+- **Radix Icons** — https://www.radix-ui.com/icons — crisp 15×15; dense React/admin controls, not large marketing UI.
+- **Bootstrap Icons** — https://icons.getbootstrap.com — broad, practical SVG/sprite/font; usable without Bootstrap.
+- **Hugeicons** — https://hugeicons.com — large modern family; free + paid; broad coverage.
+- **Material Symbols** — https://fonts.google.com/icons — variable icon font, multiple axes; Google/Material-adjacent products.
+- **Font Awesome** — https://fontawesome.com — huge ecosystem; compatibility/coverage over distinctiveness.
 
-**Premium / team-scale sets (check license before use):**
-- **Streamline** — https://www.streamlinehq.com — very large professional library with many families/styles; good for teams needing breadth.
-- **Nucleo** — https://nucleoapp.com — large icon bundle + manager; useful for product teams maintaining custom icon workflows.
+**Premium / team-scale (check license):**
+- **Streamline** — https://www.streamlinehq.com — very large professional library, many families/styles; team breadth.
+- **Nucleo** — https://nucleoapp.com — large bundle + manager; product teams with custom icon workflows.
 
-**Niche / expressive sets (use intentionally):**
-- **Pikaicons** — https://pikaicons.com — more characterful than Lucide/Heroicons; good for playful/product-led UI.
+**Niche / expressive (use intentionally):**
+- **Pikaicons** — https://pikaicons.com — more characterful than Lucide/Heroicons; playful/product-led UI.
 - **Mage Icons** — https://mageicons.com — clean open-source interface icons.
-- **Flowbite Icons** — https://flowbite.com/icons — Tailwind/Flowbite-adjacent set; practical if already using Flowbite.
+- **Flowbite Icons** — https://flowbite.com/icons — Tailwind/Flowbite-adjacent; if already using Flowbite.
 
-**Decision shortcut:** default to Solar for expressive retail/consumer UI, Lucide for clean SaaS, Heroicons for Tailwind-style marketing, Remix/Iconoir for a less-common neutral set, Radix for tiny dense controls, Tabler/Material/Font Awesome when coverage beats personality.
+**Shortcut:** Solar for expressive retail/consumer, Lucide for clean SaaS, Heroicons for Tailwind-style marketing, Remix/Iconoir for less-common neutral, Radix for tiny dense controls, Tabler/Material/Font Awesome when coverage beats personality.
 
 ---
 
 ## 2. Fonts — distinctive display + refined body
 
-### Where to get them
+### Sources
 - ⭐ **Fontsource** — https://fontsource.org — self-host OFL/Apache fonts as npm (`@fontsource-variable/<name>`). Best for builds: no external request, version-locked, no tracking.
 - **Google Fonts** — https://fonts.google.com — 1800+ OFL; easiest `<link>`. (CDN logs IPs — self-host or proxy for EU.)
-- **Fontshare** — https://www.fontshare.com — highest-quality free fonts by Indian Type Foundry (Satoshi, Clash Display, General Sans…). ⚠️ Most are **ITF-FFL, not OFL** → can't self-host via Fontsource or modify; use their CDN or static files.
-- **Bunny Fonts** — https://fonts.bunny.net — GDPR-safe Google Fonts CDN drop-in.
+- **Fontshare** — https://www.fontshare.com — highest-quality free fonts by Indian Type Foundry (Satoshi, Clash Display, General Sans…). ⚠️ Mostly **ITF-FFL, not OFL** → can't self-host via Fontsource or modify; use their CDN/static files.
+- **Bunny Fonts** — https://fonts.bunny.net — GDPR-safe Google Fonts drop-in.
 
 **Independent / editorial free foundries (distinctive, OFL):**
 - **Velvetyne** — https://velvetyne.fr — experimental French libre foundry (Pilowlava, Karrik).
@@ -79,25 +67,25 @@ Fast routing:
 - **The League of Moveable Type** — https://www.theleagueofmoveabletype.com — League Gothic, League Mono.
 - **Open Foundry** — https://open-foundry.com — curated OFL discovery.
 
-### Trending 2026 typefaces (pick one display + one body)
-*Display / headline (free unless noted):*
+### Trending 2026 typefaces (one display + one body)
+*Display (free unless noted):*
 - ⭐ **Unbounded** (house) · **Bricolage Grotesque** (OFL, strongest-growing free face) · **Instrument Serif** (OFL — "free Canela alternative") · **Clash Display** (ITF-FFL) · **Cabinet Grotesk** (ITF-FFL) · **Boska** (ITF-FFL Didone) · **Tanker / Nippo** (ITF-FFL) · **Fraunces** (OFL, variable "wonk" axis). *Premium:* **Neue Montreal**, **Monument Extended**, **Editorial New** (Pangram Pangram), **Canela** (Commercial Type).
 
-*Body / UI sans (screen, variable preferred):*
+*Body/UI sans (screen, variable preferred):*
 - ⭐ **Onest** (house, OFL) · **Geist** (Vercel, OFL) · **Inter** (OFL — fine as body when display carries personality) · **DM Sans** · **Plus Jakarta Sans** · **Figtree** · **Manrope** · **Albert Sans** · **Satoshi / General Sans** (ITF-FFL).
 
 *Serif (editorial/luxury):* **Fraunces** · **Cormorant Garamond** · **EB Garamond** · **Newsreader**. *Premium:* **Editorial New**, **Canela**, **Tiempos** (Klim).
 
 *Mono (techy/data):* **Geist Mono** · **JetBrains Mono** · **Commit Mono** · **Fira Code** (ligatures) · **Fragment Mono** · **Martian Mono**. *Premium:* **Berkeley Mono** (usgraphics.com, ~$75).
 
-**Premium foundries (worth paying for distinctive brand work):** Pangram Pangram (best price/quality, free-to-try), Klim, Grilli Type, Commercial Type, Displaay (Roobert), OH no Type (Degular), ABC Dinamo (Monument Grotesk), Frere-Jones. Multi-foundry stores: Type Network, Future Fonts (early-access).
+**Premium foundries (distinctive brand work):** Pangram Pangram (best price/quality, free-to-try), Klim, Grilli Type, Commercial Type, Displaay (Roobert), OH no Type (Degular), ABC Dinamo (Monument Grotesk), Frere-Jones. Multi-foundry stores: Type Network, Future Fonts (early-access).
 
 ### Pairing & scale tools
-- **Fontpair** — https://www.fontpair.co (curated, all free fonts) · **Fontjoy** — https://fontjoy.com (ML generator + contrast slider) · **Typewolf** — https://www.typewolf.com (what real sites ship — trend signal) · **Fonts In Use** — https://fontsinuse.com · **Beautiful Web Type** — https://beautifulwebtype.com (best OFL specimens).
+- **Fontpair** — https://www.fontpair.co (curated, all free) · **Fontjoy** — https://fontjoy.com (ML generator + contrast slider) · **Typewolf** — https://www.typewolf.com (what real sites ship — trend signal) · **Fonts In Use** — https://fontsinuse.com · **Beautiful Web Type** — https://beautifulwebtype.com (best OFL specimens).
 - **Type scale:** ⭐ **Utopia** — https://utopia.fyi (fluid type+space `clamp()` tokens) · **type-scale.com** (fixed modular) · **fluid-type-scale.com** (named fluid tokens).
 
 ### Self-hosting performance
-WOFF2 only · prefer **variable fonts** (one file replaces 4–8 weights) · `font-display: swap` + metric-adjusted fallback (`size-adjust`/`ascent-override`) · `<link rel=preload as=font crossorigin>` the one critical weight · subset with **subfont** (static sites) or **glyphhanger** · cache `immutable, max-age=31536000`.
+WOFF2 only · prefer **variable fonts** (one file = 4–8 weights) · `font-display: swap` + metric-adjusted fallback (`size-adjust`/`ascent-override`) · `<link rel=preload as=font crossorigin>` the one critical weight · subset with **subfont** (static sites) or **glyphhanger** · cache `immutable, max-age=31536000`.
 
 ---
 
@@ -129,47 +117,45 @@ WOFF2 only · prefer **variable fonts** (one file replaces 4–8 weights) · `fo
 ## 4. Imagery — real assets, one consistent style
 
 ### SVG illustrations & scenes (recolor to brand)
-Use these for empty states, onboarding, editorial blocks, feature sections, and friendly brand moments. Do not use them
-as product substitutes in ecommerce; product/category pages need real product imagery first.
+For empty states, onboarding, editorial blocks, feature sections — never product substitutes in ecommerce (product/category pages need real product imagery first).
 
-Free-source rule: prefer sources with clear free/no-attribution pages. For freemium marketplaces, link directly to
-free sections, verify the asset-level license and export format, and do not use watermarked previews.
+Free-source rule: prefer clear free/no-attribution pages; on freemium marketplaces link directly to free sections, verify asset-level license + export format, no watermarked previews.
 
-- ⭐ **unDraw** — https://undraw.co — open-source SVG illustrations, easy color matching, no attribution.
+- ⭐ **unDraw** — https://undraw.co — open-source SVG, easy color matching, no attribution.
 - ⭐ **Storyset** — https://storyset.com — customizable SVG scenes, multiple styles, optional animation.
-- **DrawKit** — https://www.drawkit.com — free + premium SVG illustration packs across business, tech, family, finance, etc.
-- **Blush** — https://blush.design — customizable illustration collections by many artists; good for distinctive character styles.
+- **DrawKit** — https://www.drawkit.com — free + premium packs across business/tech/family/finance.
+- **Blush** — https://blush.design — customizable collections by many artists; distinctive character styles.
 - **Open Peeps** — https://openpeeps.com — hand-drawn character system; warm, informal, startup-friendly.
-- **Humaaans** — https://humaaans.com — mix-and-match people illustrations; useful for team/people sections.
-- **ManyPixels Gallery** — https://www.manypixels.co/gallery — free SVG/PNG illustrations with several styles.
-- **IRA Design archive** — https://github.com/ira-design/ira-illustrations — old MIT illustration pack; the original `iradesign.io` site may be empty/offline, so treat this as archived material only.
-- **Icons8 free icons** — https://icons8.com/icons — large free icon catalog; free use requires Icons8 attribution unless covered by a paid/open-source arrangement.
-- **Icons8 free illustrations / Ouch!** — https://icons8.com/illustrations — free clipart/illustrations in SVG/PNG; attribution rules apply.
-- **Icons8 free animated icons** — https://icons8.com/animated-icons — animated GIF icons are marked free; Lottie/AEP formats may be paid.
+- **Humaaans** — https://humaaans.com — mix-and-match people; team/people sections.
+- **ManyPixels Gallery** — https://www.manypixels.co/gallery — free SVG/PNG, several styles.
+- **IRA Design archive** — https://github.com/ira-design/ira-illustrations — old MIT pack; `iradesign.io` may be empty/offline — archived material only.
+- **Icons8 free icons** — https://icons8.com/icons — large free catalog; free use requires Icons8 attribution unless paid/OSS arrangement.
+- **Icons8 free illustrations / Ouch!** — https://icons8.com/illustrations — free SVG/PNG clipart; attribution rules apply.
+- **Icons8 free animated icons** — https://icons8.com/animated-icons — animated GIF icons marked free; Lottie/AEP may be paid.
 - **Icons8 free license** — https://icons8.com/license — attribution requirements for free use.
-- **IconScout free illustrations** — https://iconscout.com/free-illustrations — free-only entry point; verify the asset license before download.
-- **IconScout free icons** — https://iconscout.com/free-icons — free icon entry point; avoid paid marketplace previews and watermark files.
-- **IconScout freebies** — https://iconscout.com/freebies — rotating free assets; verify terms and available formats per item.
-- **IconScout free 3D icons** — https://iconscout.com/free-3d-icons — free 3D entry point; check whether the needed format is included.
-- **IconScout license** — https://iconscout.com/licenses — reference for asset-level terms.
-- **SVG Repo** — https://www.svgrepo.com — large open-licensed SVG/vector search; useful for specific objects, but style consistency varies.
+- **IconScout free illustrations** — https://iconscout.com/free-illustrations — free-only entry; verify asset license before download.
+- **IconScout free icons** — https://iconscout.com/free-icons — avoid paid marketplace previews/watermarks.
+- **IconScout freebies** — https://iconscout.com/freebies — rotating; verify terms/formats per item.
+- **IconScout free 3D icons** — https://iconscout.com/free-3d-icons — check whether needed format is included.
+- **IconScout license** — https://iconscout.com/licenses — asset-level terms reference.
+- **SVG Repo** — https://www.svgrepo.com — large open-licensed SVG search; style consistency varies.
 
-**Illustration decision shortcut:** unDraw = safest generic SaaS; Storyset = customizable scenes/animation; DrawKit = polished packs; Blush/Open Peeps/Humaaans = people/character tone; SVG Repo/IconScout free pages = search when you need a specific object and can verify the license. Pick one visual style per project.
+**Shortcut:** unDraw = safest generic SaaS; Storyset = customizable scenes/animation; DrawKit = polished packs; Blush/Open Peeps/Humaaans = people/character tone; SVG Repo/IconScout free pages = specific object when license verified. One visual style per project.
 
 ### Stock photos (free, commercial OK, no attribution)
-- ⭐ **Unsplash** — https://unsplash.com · **Pexels** — https://pexels.com · **Pixabay** — https://pixabay.com. (All proprietary-but-free licenses; can't resell raw or use to train models.)
+- ⭐ **Unsplash** — https://unsplash.com · **Pexels** — https://pexels.com · **Pixabay** — https://pixabay.com. (Proprietary-but-free licenses; can't resell raw or use to train models.)
 
 ### Stock VIDEO (hero backgrounds)
-- ⭐ **Pexels Video** — https://www.pexels.com/videos/ (no attribution, 4K) · ⭐ **Coverr** — https://coverr.co (purpose-built, web-optimized; ⚠️ free tier needs attribution, Coverr+ removes it) · **Mixkit** — https://mixkit.co (no attribution; ⚠️ music can't be used in broadcast/games; check per-clip Free vs Restricted) · **Pixabay Video** · **Dareful** — https://dareful.com (free 4K cinematic, CC-BY attribution). Pattern: mute + autoplay + loop, encode WebM+MP4 ~1080p.
+- ⭐ **Pexels Video** — https://www.pexels.com/videos/ (no attribution, 4K) · ⭐ **Coverr** — https://coverr.co (web-optimized; ⚠️ free tier needs attribution, Coverr+ removes it) · **Mixkit** — https://mixkit.co (no attribution; ⚠️ music not for broadcast/games; check per-clip Free vs Restricted) · **Pixabay Video** · **Dareful** — https://dareful.com (free 4K cinematic, CC-BY). Pattern: mute + autoplay + loop, WebM+MP4 ~1080p.
 
-### 3D / interactive (depth that beats flat sections)
-- ⭐ **Spline** — https://spline.design (no-code 3D, embed via `<spline-viewer>` web component) · **Rive** — https://rive.app (interactive state-machine animations, GPU, KB-light; runtime MIT, ⚠️ `.riv` export needs $9/mo Cadet since Oct 2025) · **Sketchfab** (embed models, per-model license). CC0 GLB packs for Three.js/R3F: **Kenney** — https://kenney.nl · **Quaternius** · **Poly.pizza** · **market.pmnd.rs**. PNG 3D render sets: **3Dicons** (CC0), **Shapefest**, **Handz**.
+### 3D / interactive
+- ⭐ **Spline** — https://spline.design (no-code 3D, `<spline-viewer>` web component embed) · **Rive** — https://rive.app (interactive state-machine animations, GPU, KB-light; runtime MIT, ⚠️ `.riv` export needs $9/mo Cadet since Oct 2025) · **Sketchfab** (embed models, per-model license). CC0 GLB packs for Three.js/R3F: **Kenney** — https://kenney.nl · **Quaternius** · **Poly.pizza** · **market.pmnd.rs**. PNG 3D render sets: **3Dicons** (CC0), **Shapefest**, **Handz**.
 
 ### Mockup generators (hero/device shots)
 - ⭐ **Shots.so** — https://shots.so (browser/device beautify, free tier) · **Screely** — https://screely.com (free, local) · **Mockup World** — https://www.mockupworld.co (free PSD/Figma aggregator) · **Mockuuups Studio** (API) · **Mockuphone** (OSS). ⚠️ **Smartmockups** shut down Sep 2024.
 
 ### Placeholders & avatars (generated — no AI-image filler)
-- **Placeholders:** ⭐ **picsum.photos** (real photos, `…/seed/x/800/600`) · **placehold.co** (color/label blocks). ⚠️ `placeholder.com` / `via.placeholder.com` are **dead** — don't use.
+- **Placeholders:** ⭐ **picsum.photos** (real photos, `…/seed/x/800/600`) · **placehold.co** (color/label blocks). ⚠️ `placeholder.com` / `via.placeholder.com` **dead** — don't use.
 - **Avatars:** ⭐ **DiceBear** — https://dicebear.com (40+ styles, API; check per-style license) · **Boring Avatars** (use the `boring-avatars` **npm** — hosted API went paid) · **pravatar.cc** (real faces, CC0) · **ui-avatars.com** (initials) · **Robohash** · **Gravatar** (email-linked, now SHA256).
 
 ---
@@ -177,53 +163,53 @@ free sections, verify the asset-level license and export format, and do not use 
 ## 5. Color — use a system, not random hex
 
 - ⭐ **Radix Colors** — https://www.radix-ui.com/colors (12-step accessible scales, light+dark, APCA) · **Open Color** · Tailwind/Material ramps.
-- **Prefer OKLCH** over HSL for palettes (perceptually uniform lightness; P3 gamut). Pickers: **oklch.com**, **Evil Martians OKLCH picker**. Tint with `color-mix(in oklch, …)`.
-- **Generators/preview:** ⭐ **Realtime Colors** — https://realtimecolors.com (preview on a real UI) · **Coolors** · **Huemint** (AI palettes by role) · **Leonardo** (contrast-target).
+- **Prefer OKLCH** over HSL (perceptually uniform lightness; P3 gamut). Pickers: **oklch.com**, **Evil Martians OKLCH picker**. Tint with `color-mix(in oklch, …)`.
+- **Generators/preview:** ⭐ **Realtime Colors** — https://realtimecolors.com (preview on real UI) · **Coolors** · **Huemint** (AI palettes by role) · **Leonardo** (contrast-target).
 - **Rule:** semantic 3-tier tokens (primitive → semantic → component); one dominant brand + one sharp accent; AA contrast on text + states.
 
 ---
 
 ## 6. Shadows & depth
 - ⭐ **Josh Comeau Shadow Palette** — https://www.joshwcomeau.com/shadow-palette/ (layered, hue-tinted scale) · **Smooth Shadows** — https://smoothshadows.com.
-- Technique: stack 3–6 `box-shadow` layers (rising offset, low alpha); tint the shadow hue toward the surface/brand color. Never a single harsh `0 4px 6px rgba(0,0,0,.5)`.
+- Technique: stack 3–6 `box-shadow` layers (rising offset, low alpha); tint hue toward surface/brand. Never a single harsh `0 4px 6px rgba(0,0,0,.5)`.
 
 ---
 
 ## 7. Motion & animation — restrained, accessible
-- **CSS-first** (plain HTML): staggered page-load reveals; native **scroll-driven** (`animation-timeline: view()`); `@starting-style`; **View Transitions API**. Always guard `prefers-reduced-motion`.
-- ⭐ **Motion** — https://motion.dev (ex-Framer Motion; package `motion`, import `motion/react`; React UI) · **GSAP** — https://gsap.com (now **100% free** incl. ScrollTrigger/SplitText/MorphSVG; complex timelines/scroll) · **Auto-Animate** — https://auto-animate.formkit.com (one-line list animations) · **Lenis** (smooth scroll).
+- **CSS-first** (plain HTML): staggered load reveals; native **scroll-driven** (`animation-timeline: view()`); `@starting-style`; **View Transitions API**. Always guard `prefers-reduced-motion`.
+- ⭐ **Motion** — https://motion.dev (ex-Framer Motion; package `motion`, import `motion/react`; React UI) · **GSAP** — https://gsap.com (**100% free** incl. ScrollTrigger/SplitText/MorphSVG; complex timelines/scroll) · **Auto-Animate** — https://auto-animate.formkit.com (one-line list animations) · **Lenis** (smooth scroll).
 - **Drop-in CSS:** **Animista** (keyframe generator) · **Animate.css** · **Hover.css** · **react-fast-marquee**. Easing: **easings.net**, **linear() spring generators**, **cubic-bezier.com**.
 - One orchestrated load reveal > scattered micro-interactions. GSAP is overkill for a fade — prefer CSS.
 
 ---
 
-## 8. Backgrounds & texture — atmosphere over flat color
+## 8. Backgrounds & texture
 - ⭐ **fffuel** — https://fffuel.co — 30+ free SVG/CSS generators: **gggrain** (grainy gradients), **ffflux/uuunion** (mesh), **nnnoise** (noise), **ssshape** (blobs), **nnneon** (glow), **pppalette**.
-- ⭐ **Haikei** — https://haikei.app (blobs, waves, stacked layers, blurry gradients) · **Hero Patterns** — https://heropatterns.com (SVG tiles) · **Pattern Monster** — https://pattern.monster (320+ SVG patterns).
-- **SVG Backgrounds** — https://www.svgbackgrounds.com — customizable SVG backgrounds/patterns; useful for section texture.
+- ⭐ **Haikei** — https://haikei.app (blobs, waves, layers, blurry gradients) · **Hero Patterns** — https://heropatterns.com (SVG tiles) · **Pattern Monster** — https://pattern.monster (320+ SVG patterns).
+- **SVG Backgrounds** — https://www.svgbackgrounds.com — customizable SVG backgrounds/patterns; section texture.
 - **Gradients:** **gradient.style** (Argyle, conic/CSS4) · **Coolhue** · **Hypercolor** (Tailwind gradient classes) · mesh tools above.
 - **Blobs/shapes:** **Blobmaker** — https://blobmaker.app · **Blobs.app**.
 - **Animated JS backgrounds:** **Vanta.js** — https://vantajs.com · **Particles** (tsParticles).
-- **Glassmorphism:** **css.glass** — https://css.glass (use `backdrop-filter` + translucent bg + subtle border).
+- **Glassmorphism:** **css.glass** — https://css.glass (`backdrop-filter` + translucent bg + subtle border).
 
 ---
 
 ## 9. Modern CSS techniques (2026) — pro vs generic
-Production-ready (broad support, use freely): `clamp()` fluid type (always include a `rem` term for zoom/WCAG) · **OKLCH** + `color-mix()` · `@property` (animate gradients/colors via custom props) · `@starting-style` (enter animations from `display:none`, no JS) · container queries · `text-wrap: balance` (headings) / `pretty` (body) · **View Transitions** same-document (`document.startViewTransition?.()`) · layered shadows · CSS Subgrid.
+Production-ready: `clamp()` fluid type (always include a `rem` term for zoom/WCAG) · **OKLCH** + `color-mix()` · `@property` · `@starting-style` · container queries · `text-wrap: balance`/`pretty` · **View Transitions** same-document (`document.startViewTransition?.()`) · layered shadows · CSS Subgrid.
 Progressive-enhance (guard with `@supports`): **scroll-driven animations** (`animation-timeline: view()` — no Firefox yet; IntersectionObserver fallback) · cross-document View Transitions (Chromium) · CSS anchor positioning.
-See `patterns.md` for copy-paste snippets.
+Snippets: `patterns.md`.
 
 ---
 
 ## 10. Image performance — quality = perceived speed
 - **Optimize:** **Sharp** (Node build pipelines) · **SVGO** (strip SVG cruft). Avoid Imagemin (stale).
-- **Formats:** ship **AVIF with WebP fallback** via `<picture>` (~50% smaller than JPEG). Always set `width`/`height` (prevents layout shift); `fetchpriority="high"` + eager on the LCP/hero image; lazy-load the rest.
+- **Formats:** **AVIF with WebP fallback** via `<picture>` (~50% smaller than JPEG). Always `width`/`height`; `fetchpriority="high"` + eager on LCP/hero; lazy the rest.
 - **Framework built-ins:** `next/image` (enable AVIF in config) · Astro `astro:assets` `<Picture>` (Sharp, build-time) · `@nuxt/image` `<NuxtPicture>`.
-- **Free CDN if dynamic:** **ImageKit** (generous free tier) or **Cloudinary**. See `patterns.md` for the `<picture>` snippet.
+- **Free CDN if dynamic:** **ImageKit** (generous free tier) or **Cloudinary**.
 
 ---
 
-## 11. Templates & starters — when you need a whole site fast
+## 11. Templates & starters — whole site fast
 - **Free:** **Vercel Templates** — https://vercel.com/templates (official Next.js/Astro starters) · **Astro Themes** — https://astro.build/themes (375+) · **Open SaaS** — https://opensaas.sh (full free SaaS).
 - **Premium:** **Tailwind Plus** — https://tailwindcss.com/plus (500+ blocks + Catalyst, $299) · **Cruip** (~$79 landing/SaaS) · **ShipFast** ($199, ship-in-a-weekend) · **Supastarter** (multi-tenant).
 
@@ -231,57 +217,43 @@ See `patterns.md` for copy-paste snippets.
 
 ## 12. Inspiration, UX patterns & design QA
 
-Use these before designing from a blank page. Pull patterns, not decoration: identify layout, hierarchy, spacing,
-content density, mobile behavior, CTA placement, and interaction states.
+Pull patterns, not decoration: layout, hierarchy, spacing, density, mobile behavior, CTA placement, interaction states.
 
 ### Website / landing inspiration
-- ⭐ **Land-book** — https://land-book.com — hand-picked websites with filters, including ecommerce, product pages, portfolios, blogs.
-- ⭐ **Lapa Ninja** — https://www.lapa.ninja — large landing page archive with categories, colors, full-page screenshots, and page recordings.
-- **One Page Love** — https://onepagelove.com — one-page websites plus section examples/templates; good for focused landing pages.
-- **Landingfolio** — https://www.landingfolio.com — curated landing pages, templates, components; useful for SaaS/product pages.
-- **Godly** — https://godly.website — bold, high-polish web inspiration; use for visual direction, not copy-paste complexity.
-- **Awwwards** — https://www.awwwards.com/websites — craft-level websites; good for visual ideas, but avoid overbuilding award-site effects.
+- ⭐ **Land-book** — https://land-book.com — hand-picked sites with filters incl. ecommerce, product pages, portfolios, blogs.
+- ⭐ **Lapa Ninja** — https://www.lapa.ninja — large landing archive: categories, colors, full-page screenshots, page recordings.
+- **One Page Love** — https://onepagelove.com — one-page sites + section examples/templates.
+- **Landingfolio** — https://www.landingfolio.com — curated landings, templates, components; SaaS/product pages.
+- **Godly** — https://godly.website — bold, high-polish; visual direction, not copy-paste complexity.
+- **Awwwards** — https://www.awwwards.com/websites — craft-level; avoid overbuilding award-site effects.
 
 ### Product UI / real app patterns
 - ⭐ **Mobbin** — https://mobbin.com — searchable mobile/web app screenshots and flows; best for real UX patterns, onboarding, settings, commerce, forms.
-- **UXArchive** — https://uxarchive.com — mobile user flows; useful for onboarding, purchase, search, account flows.
+- **UXArchive** — https://uxarchive.com — mobile flows; onboarding, purchase, search, account.
 - **Refero** — https://refero.design — product UI references and flow inspiration.
-- **Pageflows** — https://pageflows.com — recorded user flows; useful for seeing interactions beyond static screenshots.
+- **Pageflows** — https://pageflows.com — recorded user flows; interactions beyond static screenshots.
 
 ### Focused UI galleries
-- **Footer.design** — https://www.footer.design — footer patterns.
-- **Navbar Gallery** — https://www.navbar.gallery — navigation/header references.
-- **CTA.gallery** — https://www.cta.gallery — call-to-action patterns.
-- **Deck Gallery** — https://deck.gallery — decks/slides; useful for visual storytelling and section rhythm.
+- **Footer.design** — https://www.footer.design · **Navbar Gallery** — https://www.navbar.gallery · **CTA.gallery** — https://www.cta.gallery · **Deck Gallery** — https://deck.gallery (decks/slides; visual storytelling, section rhythm).
 
 ### Fast polish / CSS generators
-- **CSSTools.io** — https://csstools.io — gradients, shadows, filters, clip paths, glass effects.
-- **HYPE4 Glassmorphism** — https://hype4.academy/tools/glassmorphism-generator — glass UI generator; use sparingly.
-- **Get Waves** — https://getwaves.io — simple SVG wave separators.
-- **Clippy** — https://bennettfeely.com/clippy — CSS clip-path generator.
-- **Cubic Bezier** — https://cubic-bezier.com — custom easing curves.
+- **CSSTools.io** — https://csstools.io — gradients, shadows, filters, clip paths, glass.
+- **HYPE4 Glassmorphism** — https://hype4.academy/tools/glassmorphism-generator (use sparingly).
+- **Get Waves** — https://getwaves.io (SVG wave separators) · **Clippy** — https://bennettfeely.com/clippy (clip-path) · **Cubic Bezier** — https://cubic-bezier.com (easing curves).
 
 ### Product and app mockups
-- ⭐ **Shots.so** — https://shots.so — fast browser/device mockups for product shots and app previews.
-- **Device Shots** — https://deviceshots.com — free device mockups for websites/apps.
-- **Mockuuups Studio** — https://mockuuups.studio — large realistic device/mockup library with Figma/desktop workflow.
-- **Placeit** — https://placeit.net — broad marketing/product mockups; good for ecommerce/POD and social assets.
+- ⭐ **Shots.so** — https://shots.so · **Device Shots** — https://deviceshots.com (free device mockups) · **Mockuuups Studio** — https://mockuuups.studio (large realistic library, Figma/desktop workflow) · **Placeit** — https://placeit.net (broad marketing/product mockups; ecommerce/POD, social assets).
 
 ### Quality checks
-- **PageSpeed Insights** — https://pagespeed.web.dev — performance, LCP/CLS/image issues.
-- **WebPageTest** — https://www.webpagetest.org — deeper performance waterfalls and filmstrips.
-- **WAVE** — https://wave.webaim.org — accessibility scan.
-- **Contrast Grid** — https://contrast-grid.eightshapes.com — check text/background contrast combinations.
-- **Responsively** — https://responsively.app — multi-device visual checks.
+- **PageSpeed Insights** — https://pagespeed.web.dev (performance, LCP/CLS/image) · **WebPageTest** — https://www.webpagetest.org (waterfalls, filmstrips) · **WAVE** — https://wave.webaim.org (a11y) · **Contrast Grid** — https://contrast-grid.eightshapes.com (text/bg contrast combos) · **Responsively** — https://responsively.app (multi-device visual checks).
 
-**Research workflow:** pick 3-5 references for the same page type, extract concrete patterns, then implement with the
-project's existing components/tokens. Do not clone a reference wholesale.
+**Workflow:** pick 3-5 references of the same page type, extract concrete patterns, implement with the project's components/tokens. Never clone a reference wholesale.
 
 ---
 
 ## 13. Discovery & reference
 - **Awesome lists:** **awesome-shadcn-ui** (github.com/birobirobiro/awesome-shadcn-ui) · **awesome-tailwindcss** (aniftyco) · **awesome-react-components** (brillout) · **awesome-css** · **awesome-web-animation**.
-- **Design-engineering reading (pro technique):** Josh Comeau (joshwcomeau.com) · Adam Argyle (nerdy.dev) · Ahmad Shadeed (ishadeed.com + defensivecss.dev) · Piccalilli (piccalil.li) · Modern CSS (moderncss.dev) · web.dev/learn/css · every-layout.dev.
+- **Design-engineering reading:** Josh Comeau (joshwcomeau.com) · Adam Argyle (nerdy.dev) · Ahmad Shadeed (ishadeed.com + defensivecss.dev) · Piccalilli (piccalil.li) · Modern CSS (moderncss.dev) · web.dev/learn/css · every-layout.dev.
 
 ---
 

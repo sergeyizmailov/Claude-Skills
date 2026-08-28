@@ -26,8 +26,6 @@ export const theme = { breakpoints, media };
 ## styled-components usage
 
 ```tsx
-import styled from 'styled-components';
-
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -59,7 +57,7 @@ const gridStyle = (theme) => css`
 `;
 ```
 
-## Helper for prop-driven responsive (styled-components)
+## Prop-driven helper (styled-components)
 
 ```ts
 import { css, DefaultTheme } from 'styled-components';
@@ -100,9 +98,7 @@ const CardLayout = styled.div`
 `;
 ```
 
-Container queries work seamlessly — they're just CSS strings.
-
-## Fluid type via clamp() (no breakpoint switching needed)
+## Fluid type via clamp() — lowest-maintenance, no breakpoint juggling
 
 ```tsx
 const Heading = styled.h1`
@@ -112,11 +108,7 @@ const Heading = styled.h1`
 `;
 ```
 
-This is the lowest-maintenance approach — no theme breakpoint juggling.
-
-## Component-level adaptation pattern
-
-For SaaS components (cards, widgets) that need to render correctly in any slot:
+## Component-level adaptation (renders correctly in any slot)
 
 ```tsx
 const Widget = styled.article`
@@ -140,12 +132,10 @@ const Widget = styled.article`
 `;
 ```
 
-## Critical: SSR + responsive
-
-If using SSR (Next.js, Remix, etc.):
-- **DO** prefer pure CSS media/container queries (above) — they work the same SSR and client.
-- **DON'T** use `useMediaQuery` for layout — produces hydration mismatch flash (renders mobile on server then switches client-side).
-- For the `<Dialog>` vs `<Drawer>` swap pattern (one of the few legit JS-driven cases): render both in DOM and toggle visibility with CSS, OR use `useIsClient()` + accept a one-frame flash.
+## SSR (Next.js, Remix, etc.) — critical
+- DO: pure CSS media/container queries — identical SSR and client.
+- DON'T: `useMediaQuery` for layout — hydration mismatch flash (server renders mobile, client switches).
+- Dialog/Drawer swap (one of few legit JS cases): render both, toggle via CSS; or `useIsClient()` + accept one-frame flash.
 
 ```tsx
 // SSR-safe responsive component swap
@@ -157,37 +147,29 @@ const ResponsiveModal = ({ children }) => (
 );
 ```
 
-## Bad patterns
+## Bad vs good patterns
 
 ```tsx
-// BAD — re-renders all consumers on window resize, hydration mismatch
+// BAD — re-renders on resize, hydration mismatch
 const isMobile = window.innerWidth < 768;
 const Card = styled.div`
   padding: ${isMobile ? '1rem' : '2rem'};
 `;
-
 // BAD — props-based pixel value
 <Card padding={isMobile ? 16 : 32} />
-
 // BAD — useMediaQuery for layout (SSR flash)
 const isMobile = useMediaQuery('(max-width: 768px)');
 return isMobile ? <MobileLayout /> : <DesktopLayout />;
-```
 
-## Good patterns
-
-```tsx
 // GOOD — pure CSS media query
 const Card = styled.div`
   padding: 1rem;
   @media (min-width: 768px) { padding: 2rem; }
 `;
-
 // GOOD — fluid via clamp
 const Card = styled.div`
   padding: clamp(1rem, 4vw, 2rem);
 `;
-
 // GOOD — container query (component-self-aware)
 const Card = styled.div`
   container-type: inline-size;
@@ -197,17 +179,7 @@ const Card = styled.div`
 ```
 
 ## Library-specific notes
-
-**styled-components v6+**: dropped the "babel-plugin-styled-components" — but if you want SSR + class names that match the theme, use `--theme-X` CSS custom properties on the theme provider.
-
-**Emotion v11+**: prefer the `css` prop API for one-off styles; `styled` for reusable components. Both support all CSS features identically.
-
-**vanilla-extract**: zero-runtime, type-safe CSS-in-TS. Treat as vanilla CSS with TS types — see `vanilla-css.md`. Use `style({ '@media': {...} })` and `style({ '@container': {...} })`.
-
-**stitches** (deprecated 2024): if you have legacy code, migrate to vanilla-extract or styled-components v6.
-
-## Sources
-- styled-components.com/docs/basics#getting-started
-- emotion.sh/docs/introduction
-- vanilla-extract.style
-- web.dev/articles/baseline-in-action-container-queries
+- **styled-components v6+**: dropped babel-plugin; for SSR + theme-matching class names use `--theme-X` CSS custom properties on the theme provider.
+- **Emotion v11+**: `css` prop for one-offs, `styled` for reusable — both support CSS features identically.
+- **vanilla-extract**: zero-runtime, type-safe CSS-in-TS — treat as vanilla CSS with TS types (see `vanilla-css.md`). Use `style({ '@media': {...} })` and `style({ '@container': {...} })`.
+- **stitches** (deprecated 2024): migrate to vanilla-extract or styled-components v6.

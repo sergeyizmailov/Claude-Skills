@@ -1,8 +1,5 @@
 # File Uploads & Path Traversal
 
-Multer config, MIME/magic-byte validation, random filenames, EXIF stripping,
-and path traversal defense.
-
 Related: `express.md` · `ssrf.md` (for fetched URLs that produce files).
 
 ## File Upload
@@ -35,14 +32,12 @@ const upload = multer({
 ```
 
 Rules:
-- Random filenames (never use original name)
-- Validate MIME type AND file extension
-- Check magic bytes (file signature), not just extension — `file.mimetype`
-  comes from the client, easily spoofed. Use `file-type` (npm) on the
-  buffer after upload
+- Random filenames (never original name)
+- Validate MIME type AND extension
+- Check magic bytes, not just extension — `file.mimetype` comes from the client, easily spoofed; use `file-type` (npm) on the buffer after upload
 - Store outside web root, serve via separate route
-- Set file size limits
-- Strip EXIF metadata after upload (`exiftool -all=` or sharp's `.rotate()` chain)
+- Size limits
+- Strip EXIF after upload (`exiftool -all=` or sharp's `.rotate()` chain)
 
 ## Path Traversal Prevention
 
@@ -66,7 +61,5 @@ Bypass attempts:
 - `..%252f` (double encoding)
 - `....//....//etc/passwd` (filter bypass)
 - `path.normalize` does NOT prevent traversal by itself
-- Absolute paths: `/etc/passwd` — `path.resolve(SAFE_DIR, '/etc/passwd')`
-  returns `/etc/passwd` (the check above catches it)
-- Symlinks: a user-uploaded symlink inside SAFE_DIR can still escape via
-  `fs.realpath` — for sensitive ops, also check `realpath` stays in SAFE_DIR
+- Absolute paths: `path.resolve(SAFE_DIR, '/etc/passwd')` returns `/etc/passwd` (the check above catches it)
+- Symlinks: user-uploaded symlink inside SAFE_DIR escapes via `fs.realpath` — for sensitive ops, also check `realpath` stays in SAFE_DIR

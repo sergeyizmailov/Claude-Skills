@@ -1,6 +1,6 @@
 # Playbook — Nutra (weight-loss / skin / health, incl. COD)
 
-Status: directional vendor benchmarks (dated below) + verified Meta policy.
+Status (reviewed 2026-08-28): directional vendor benchmarks (dated below) + verified Meta policy.
 NOT this team's live data — replace numbers with your own once you have them.
 
 Funnel: FB/IG ad → pre-lander (advertorial / quiz) → offer page. Lead = CPA
@@ -15,12 +15,9 @@ orders** (NOT submitted-lead CPL). Don't confuse with payout ÷ confirmed orders
 delay: confirm happens hours–days after the order, so today's lead volume is
 provisional; judge on the confirmed cohort, not same-day submits.
 
-## Economics (directional priors — NOT individually source-verified)
+## Economics
 
-Cross-vendor bands seen across affiliate/tracker blogs (2025-26: TrafficManager,
-RichAds, Affmaven, Cpamatica, Triple Whale). Treat as rough sanity ranges, not
-audited figures — a cited article may discuss the topic without stating the exact
-number. Confirm against your network before relying; replace with live data.
+Vendor-band numbers are directional priors — replace with your live data (SKILL.md).
 Keep the metrics separate — they are NOT the same number:
 
 | Metric (what it is) | Range |

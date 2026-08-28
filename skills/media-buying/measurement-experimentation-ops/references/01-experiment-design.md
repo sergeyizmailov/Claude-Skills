@@ -11,6 +11,21 @@ is only the media-buying-specific application and the traps that actually bite.
   and decide the answer's worth it first.
 - An underpowered "no difference" = INCONCLUSIVE, not negative (below).
 
+### Worked sizing (the gate is arithmetic, not vibes)
+
+Two-proportion rule of thumb at α=0.05, power 80%: `clicks/arm ≈ 16 · p(1−p) / δ²`, where p = base
+rate and δ = ABSOLUTE MDE.
+
+- **Feasible:** 5,000 clicks/day, payout CVR 2%, you'd act only on +20% relative (δ=0.004):
+  16·0.0196/0.000016 ≈ 19,600 clicks/arm ≈ 392 conversions/arm. At 100 payout events/day split
+  50/50 → ~8 days per arm, plus the lag window → run it.
+- **Infeasible:** same offer at 300 clicks/day (6 events/day, 3/arm): 392/3 ≈ 130 days per arm —
+  the account fatigues or dies first → say so, drop to geo holdout or screening, label it
+  directional (SKILL gate).
+- p is the PAYOUT-event rate, matured — never the front-end lead rate — and the window must still
+  cover the lag (tracker-ops/03). Leverage: halving the relative MDE you'd accept quadruples the
+  sample; that trade is the whole decision.
+
 ## SRM — the first thing to check, before the metric
 
 SRM is about the RANDOMIZED-UNIT counts vs the planned split, nothing else. If a
@@ -28,6 +43,30 @@ why parallel ABO cells are screening, not causal.
   unless Meta's sequential decision rule is verified (unpublished, so don't assume
   it's valid). Pre-set the window and ONE decision metric tied to the payout event
   (secondary metrics are context, not tie-breakers).
+- **DIY valid stopping rule (gambler's-ruin sequential test, Evan Miller — source
+  verified live 2026-08-27):** size the test as usual to N = TOTAL SUCCESSSES of
+  the decision metric across BOTH arms. Track T and C (successes so far per arm).
+  Stop and declare a winner the moment `|T − C| ≥ 2.25·√N` (two-sided 5%;
+  `2·√N` one-sided). If `T + C` reaches N first → no winner. Valid under constant
+  peeking, ignores failure counts entirely (runs on raw tracker postbacks), no
+  free parameters. Trade-off: a null test runs LONGER than fixed-sample; real
+  wins land 25–50% earlier. Works when `1.5·p + lift < 36%` (p = baseline CVR);
+  above that, fixed-sample wins.
+
+## Comparing two assets on small counts (better, not just "bad")
+
+The Poisson ladder (senior-buyer-ops/04) answers "provably bad"; this answers
+"challenger vs control — which one wins". Closed form (Evan Miller, source
+verified live 2026-08-27), with α = successes+1, β = failures+1 per arm:
+
+`Pr(p_B > p_A) = Σ_{i=0..α_B−1} B(α_A+i, β_B+β_A) / ((β_B+i)·B(1+i,β_B)·B(α_A,β_A))`
+
+No log-beta in the environment? Draw ~10⁵ samples from each Beta(α,β) and count
+— same number. Decision use: promote a challenger at `Pr > 0.90–0.95`, chosen by
+the cost of a wrong promotion — same decision-parameter logic as the ladder's
+confidence level. It changes the STOPPING rule, not the validity requirements:
+no contamination, matured cohorts, ONE decision metric — everything above still
+applies.
 
 ## Contamination (why two "isolated" cells aren't)
 
@@ -63,4 +102,4 @@ volume mid-lag systematically punishes the newest (still-maturing) variant.
 ## Cross-refs
 
 Meta tool mechanics & incrementality options → 02. Cohort/nowcast math for the
-lag window → tracker-ops/03. Infra-isolation designs → fb-grey-ops/06.
+lag window → tracker-ops/03. Infra-isolation designs → meta-grey-ops/06.

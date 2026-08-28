@@ -1,16 +1,11 @@
 # Mobile Menus & Drawers — 2026 Patterns
 
-## Pure-CSS approaches — AVOID in 2026
+## Pure-CSS approaches — NOT production-grade for accessible nav in 2026
+- **Checkbox hack:** label not predictably focusable; SR announces "checkbox" not "menu button".
+- **`:target`:** changes URL hash, breaks back button, conflicts with anchors.
+- **`<details>/<summary>`:** not announced as expanded on iOS VoiceOver + Safari; NVDA + Chrome inconsistent; no focus-trap or Escape.
 
-- **Checkbox hack:** Label not focusable predictably. SR announces "checkbox" instead of "menu button". Use only for ultra-low-JS marketing pages with a11y caveats.
-- **`:target`:** Changes URL hash, breaks browser back, conflicts with anchor links.
-- **`<details>/<summary>`:** Not announced as expanded on iOS VoiceOver + Safari. NVDA + Chrome inconsistent. No built-in focus-trap or Escape.
-
-**Verdict:** pure-CSS menus are NOT production-grade for accessible navigation in 2026.
-
----
-
-## Minimal-JS approach (≤15 lines)
+## Minimal-JS disclosure (≤15 lines)
 
 ```html
 <button aria-expanded="false" aria-controls="nav" id="nav-btn">Menu</button>
@@ -35,10 +30,7 @@
   });
 </script>
 ```
-
-Heydon Pickering's disclosure-widget pattern. Nav links are a list of links, not a `role="menu"` (which is for desktop-app menubars).
-
----
+Heydon Pickering disclosure-widget pattern. Nav links = list of links, NOT `role="menu"` (desktop-app menubars only).
 
 ## Native `<dialog>` drawer (RECOMMENDED 2026)
 
@@ -76,19 +68,9 @@ Heydon Pickering's disclosure-widget pattern. Nav links are a list of links, not
 @keyframes slide { from { translate: 100% 0; } }
 ```
 
-`showModal()` provides AUTOMATICALLY:
-- Focus management (moves to first focusable / `autofocus`)
-- Escape key closes
-- Focus trapping (modal mode)
-- Top-layer rendering (escapes z-index hell)
-- `::backdrop`
-- `inert` on rest of page
+`showModal()` gives FREE: focus management (first focusable / `autofocus`), Escape close, focus trapping, top-layer rendering (escapes z-index hell), `::backdrop`, `inert` on rest of page. WCAG 2025 guidance no longer mandates manual focus-trapping inside `<dialog>` — UA handles it.
 
-WCAG 2025 guidance no longer mandates manual focus-trapping inside `<dialog>` — UA handles it.
-
----
-
-## Bottom-sheet skeleton (mobile-preferred)
+## Bottom sheet (mobile-preferred)
 
 ```css
 .sheet {
@@ -103,10 +85,7 @@ WCAG 2025 guidance no longer mandates manual focus-trapping inside `<dialog>` �
 .sheet[open] { animation: rise .25s cubic-bezier(.32, .72, 0, 1); }
 @keyframes rise { from { translate: 0 100%; } }
 ```
-
-For drag-to-dismiss: use Vaul (`vaul.emilkowal.ski`) or roll your own with `onDragEnd` velocity threshold ≈500.
-
----
+Drag-to-dismiss: Vaul (`vaul.emilkowal.ski`) or own `onDragEnd` velocity threshold ≈500.
 
 ## View Transitions enhancement (Baseline Oct 2025)
 
@@ -130,31 +109,22 @@ function toggleDrawer() {
 }
 ```
 
----
-
-## Accessibility checklist (apply to every drawer)
-
-- Trigger has `aria-expanded`, `aria-controls`, `aria-label` (or visible "Menu" text)
-- On open: focus moves to first focusable element (or close button)
-- Escape closes (FREE with `<dialog>.showModal()`)
-- Focus returns to trigger on close
-- Rest of page is `inert` (FREE with `showModal()`; manual otherwise)
-- Visible focus styles via `:focus-visible` — never remove without replacing
-- 44×44 minimum target on close (×) button
-- Don't `aria-label="Hamburger"` — describe purpose (`"Open navigation"`)
-
----
+## A11y checklist (every drawer)
+- Trigger: `aria-expanded`, `aria-controls`, `aria-label` or visible text
+- Open → focus to first focusable (or close button); close → focus back to trigger
+- Escape closes (free with `showModal()`)
+- Rest of page `inert` (free with `showModal()`; manual otherwise)
+- Visible `:focus-visible` styles — never remove without replacement
+- Close (×) button ≥ 44×44
+- Label purpose, not appearance: `"Open navigation"`, never `"Hamburger"`
 
 ## UX variants
+- **Slide-in** — overlay + backdrop dim; primary nav
+- **Push-aside** — content shifts; janky on mobile, AVOID
+- **Fade overlay** — full-screen menu; marketing sites, large targets
+- **Bottom sheet** — thumb reach; mobile-preferred
 
-- **Slide-in** — drawer overlays content; backdrop dims. Use for primary nav.
-- **Push-aside** — content shifts. Janky on mobile, AVOID.
-- **Fade overlay** — full-screen menu. Marketing sites with large hit targets.
-- **Bottom sheet** — slides up from bottom. Mobile-preferred (thumb reach).
-
----
-
-## When to use which (decision table)
+## Decision table
 
 | Context | Pattern | Why |
 |---------|---------|-----|
@@ -163,14 +133,3 @@ function toggleDrawer() {
 | Filter / action sheet on mobile | `<dialog>` bottom-sheet | Thumb reach |
 | Settings panel on desktop | Side-sheet (not modal) | Doesn't block context |
 | Confirmation prompt | `<dialog>` centered modal | Forces decision |
-
----
-
-## Sources
-- inclusive-components.design/menus-menu-buttons (Heydon Pickering)
-- scottohara.me/code (Scott O'Hara accessibility)
-- css-tricks.com/there-is-no-need-to-trap-focus-on-a-dialog-element
-- schalkneethling.com/posts/html-dialog-native-solution-for-accessible-modal-interactions
-- developer.chrome.com/blog/view-transitions-in-2025
-- nngroup.com/articles/bottom-sheet
-- m3.material.io/components/bottom-sheets/overview

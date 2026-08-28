@@ -1,6 +1,6 @@
 # Tailwind Responsive Patterns (v3 + v4)
 
-## Default breakpoint system (mobile-first)
+## Default breakpoints (mobile-first)
 
 | Prefix | Min width | Class |
 |--------|-----------|-------|
@@ -11,21 +11,19 @@
 | `xl:`  | 1280px    | Desktop |
 | `2xl:` | 1536px    | Large desktop |
 
-Mobile-first principle: write base styles first (no prefix), then override at breakpoints upward. Never use `max-*:` breakpoints when `sm:`/`md:`/`lg:` would do — desktop-first cascade is harder to maintain.
+Write base styles unprefixed, override upward. Never `max-*:` when `sm:`/`md:`/`lg:` suffice — desktop-first cascade harder to maintain.
 
 ## Cross-platform breakpoint override (Material 3-aligned)
 
-In `tailwind.config.js` (v3) or `@theme` (v4):
-
 ```js
-// tailwind.config.js
+// tailwind.config.js (v3)
 module.exports = {
   theme: {
     screens: {
-      sm: '390px',   // iPhone baseline
-      md: '600px',   // M3 Compact→Medium
-      lg: '840px',   // M3 Medium→Expanded
-      xl: '1200px',  // M3 Expanded→Large
+      sm: '390px',    // iPhone baseline
+      md: '600px',    // M3 Compact→Medium
+      lg: '840px',    // M3 Medium→Expanded
+      xl: '1200px',   // M3 Expanded→Large
       '2xl': '1600px' // M3 Large→Extra-large
     }
   }
@@ -43,87 +41,66 @@ module.exports = {
 }
 ```
 
-## Container queries (Tailwind v4 native, v3 via `@tailwindcss/container-queries`)
+## Container queries (v4 native; v3 via `@tailwindcss/container-queries`)
 
 ```html
 <div class="@container">
   <div class="grid @md:grid-cols-2 @lg:grid-cols-3">
-    <!-- adapts to its container, not viewport -->
+    <!-- adapts to container, not viewport -->
   </div>
 </div>
 ```
-
-Named containers:
+Named:
 ```html
 <div class="@container/card">
   <div class="@md/card:grid-cols-2">...</div>
 </div>
 ```
-
-Container query units: `cqi`, `cqw`, `cqh`, `cqb`, `cqmin`, `cqmax`. In Tailwind: `text-[clamp(0.875rem,3cqi,1.5rem)]`.
+Units `cqi/cqw/cqh/cqb/cqmin/cqmax` work in arbitrary values: `text-[clamp(0.875rem,3cqi,1.5rem)]`.
 
 ## Patterns
 
-### Stack → row at breakpoint
 ```html
+<!-- Stack → row at breakpoint -->
 <div class="flex flex-col md:flex-row gap-4">
   <div class="flex-1">A</div>
   <div class="flex-1">B</div>
 </div>
-```
 
-### Grid columns adapt
-```html
+<!-- Grid columns adapt -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-```
 
-### Auto-fit RAM pattern (the 320px-safe grid)
-```html
+<!-- Auto-fit RAM pattern (320px-safe grid) -->
 <div class="grid gap-4
             [grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr))]">
-```
 
-### Show/hide based on viewport
-```html
+<!-- Show/hide by viewport -->
 <nav class="hidden md:flex">...desktop nav...</nav>
 <button class="md:hidden">menu</button>
-```
 
-### Fluid spacing & type
-```html
+<!-- Fluid spacing & type -->
 <section class="py-[clamp(2rem,5vw,6rem)] px-[clamp(1rem,4vw,3rem)]">
   <h1 class="text-[clamp(2rem,1rem+4vw,4rem)] leading-tight">
-```
 
-### Container width pattern
-```html
+<!-- Container width -->
 <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-```
-
-Or with `min()`:
-```html
+<!-- or with min() -->
 <div class="mx-auto w-[min(100%-2rem,80rem)]">
-```
 
-### Safe-area aware mobile nav
-```html
+<!-- Safe-area mobile nav -->
 <nav class="fixed inset-x-0 bottom-0
             pb-[max(0.75rem,env(safe-area-inset-bottom))]
             bg-white border-t">
-```
 
-### Mobile drawer with `<dialog>`
-```html
+<!-- Mobile drawer with <dialog> -->
 <dialog class="ml-auto m-0 h-dvh w-[85vw] max-w-[20rem]
                border-0 p-4 open:translate-x-0
                backdrop:bg-black/50">
   <button autofocus formmethod="dialog">×</button>
   <nav>...</nav>
 </dialog>
-```
 
-### Sticky table with first-column lock
-```html
+<!-- Sticky table with first-column lock -->
 <div role="region" tabindex="0" class="overflow-x-auto focus:outline-2">
   <table class="min-w-full">
     <thead class="bg-gray-50">
@@ -136,40 +113,25 @@ Or with `min()`:
 </div>
 ```
 
-## Arbitrary values — when to use
+## Arbitrary values
+One-off fluid scaling only: `text-[clamp(...)]`, `py-[clamp(...)]`, `w-[min(100%-2rem,80rem)]`, `h-[100dvh]`, `gap-[clamp(0.75rem,2vw,1.5rem)]`. Repeated values → promote to `theme.extend` tokens.
 
-Use arbitrary values for one-off fluid scaling:
-- `text-[clamp(...)]` — fluid font-size
-- `py-[clamp(...)]` — fluid padding
-- `w-[min(100%-2rem,80rem)]` — capped fluid container
-- `h-[100dvh]` — dynamic viewport
-- `gap-[clamp(0.75rem,2vw,1.5rem)]` — fluid gap
+## Common sins
+- `w-screen` full-bleed → `100vw` includes scrollbar. Use `w-full` in `w-[min(100vw,100%)]` parent, or `w-full` + `margin-inline: calc(50% - 50vw)` breakout.
+- `h-screen` hero → `100vh`. Use `h-svh` / `min-h-dvh` (v3.4+).
+- `text-xs` inputs → 12px → iOS zoom. Minimum `text-base` / `text-[16px]`.
+- `hidden md:block` on critical CTA → gone on mobile; keep mobile alternative.
+- `space-y-4` on responsive flex/grid that changes direction → breaks; use `gap-4` everywhere.
+- `lg:p-12` without unprefixed padding → 0 padding on mobile.
 
-Don't use arbitrary values for values you'll repeat — promote to design tokens in `theme.extend` instead.
-
-## Common Tailwind sins (don't do)
-
-- `w-screen` for full-bleed → uses `100vw` which includes scrollbar. Use `w-full` inside a `w-[min(100vw,100%)]` parent, or `w-full` + breakout via `margin-inline: calc(50% - 50vw)`.
-- `h-screen` for hero → uses `100vh`. Use `h-svh` / `min-h-dvh` (Tailwind v3.4+).
-- `text-xs` on inputs → 12px → iOS zoom. Use `text-base` minimum, or `text-[16px]`.
-- `hidden md:block` on critical CTA → button disappears on mobile. Make sure mobile has alternative.
-- `space-y-4` on responsive flex/grid that changes direction → spacing breaks. Use `gap-4` everywhere.
-- `lg:p-12` without smaller-screen baseline padding → mobile gets 0 padding from missing class.
-
-## Plugins worth using
-- `@tailwindcss/container-queries` (Tailwind v3; v4 has it built in)
-- `@tailwindcss/forms` — sane defaults for form controls (16px font, proper sizing)
-- `@tailwindcss/aspect-ratio` (v3; v4 has `aspect-*` built in)
-- `tailwind-utopia` — Utopia fluid type/space scale as utilities
+## Plugins
+- `@tailwindcss/container-queries` (v3; v4 built in)
+- `@tailwindcss/forms` — 16px fonts, proper control sizing
+- `@tailwindcss/aspect-ratio` (v3; v4 has `aspect-*`)
+- `tailwind-utopia` — Utopia fluid type/space scale utilities
 
 ## Tailwind v4 highlights
 - Native container queries (no plugin)
 - CSS-first config via `@theme {}`
 - `@variant` for custom variants
-- Improved JIT compile
-- `dvh`/`svh`/`lvh` units built into `h-*` / `min-h-*` / `max-h-*` utilities
-
-## Sources
-- tailwindcss.com/docs/responsive-design
-- tailwindcss.com/docs/container-queries
-- tailwindcss.com/docs/v4
+- `dvh`/`svh`/`lvh` built into `h-*` / `min-h-*` / `max-h-*`

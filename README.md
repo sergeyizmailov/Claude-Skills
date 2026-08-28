@@ -16,18 +16,34 @@ category (or a new category); the tooling discovers any `skills/**/SKILL.md`.
 
 ## Catalog
 
-### Media buying — Meta (Facebook/Instagram)
+### Skill router
 
-A connected set for running Meta ads across clean and grey verticals: four domain
-layers plus one orchestrator that decides between them.
+[**skill-router**](skills/skill-router) is the entry point for this collection. It lives
+directly under `skills/`, one level shallower than every other skill here, each of which is
+nested inside a category folder. A runtime that doesn't discover skills two levels deep will
+still find `skill-router` — read it first: it indexes the categories below and routes a task
+to the right skill by name, without needing to be kept in sync with each skill's own detail.
+
+### Media buying — Meta & Google
+
+Eight skills covering Meta and Google ads together, layered by concern rather than by
+platform: buy mechanics (`meta-ads`, `google-ads`), survival infrastructure (`meta-grey-ops`,
+`google-grey-ops`), the retail data layer (`google-feed-ops`), counting (`tracker-ops`),
+experiment validity (`measurement-experimentation-ops`), and portfolio orchestration
+(`senior-buyer-ops`) sitting on top of all of them. The set cross-references itself by skill
+name, so install it together — a single skill installed alone will point at files you don't
+have.
 
 | Skill | Purpose |
 |---|---|
 | [**meta-ads**](skills/media-buying/meta-ads) | Clean-marketing reference: plan, launch, audit, diagnose, and optimize Meta ads — objectives/ODAX, budgets & bidding, targeting, pixel/CAPI, policy, and a canonical Marketing API error catalog. |
-| [**fb-grey-ops**](skills/media-buying/fb-grey-ops) | Infrastructure & survival layer for grey verticals: antidetect/proxy/session discipline, agency accounts, token/session death, API mass-launch, portfolio forensics, and per-vertical playbooks (nutra, iGaming, crypto, news). |
-| [**tracker-ops**](skills/media-buying/tracker-ops) | Affiliate tracker operations: Keitaro & Binom APIs, postback/S2S, metric discipline (payout event, timezones, CPL), cohort nowcasting, the Meta↔tracker mapping & backend-optimization contract, and the daily spend-sync. |
-| [**measurement-experimentation-ops**](skills/media-buying/measurement-experimentation-ops) | Decide whether a result is real before acting: testing-mode selection (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag), and Meta's measurement tools — A/B Test, `ad_study` API, Conversion Lift, GeoLift, Robyn/MMM. |
-| [**senior-buyer-ops**](skills/media-buying/senior-buyer-ops) | Senior-buyer / team-lead operating layer: the day-1 operating contract, portfolio allocation, kill/watch/scale + marginal-scaling ladder, creative-intelligence pipeline, and end-to-end funnel QA — orchestrates the adapters above. |
+| [**meta-grey-ops**](skills/media-buying/meta-grey-ops) | Infrastructure & survival layer for Meta grey verticals: antidetect/proxy/session survival, agency accounts, token death, API mass-launch, cloaking/review-layer filters, DLO/catalog/CTM/unicode tricks, verification gates (business/beneficial-owner/identity), and per-vertical playbooks (nutra, gambling, crypto, news). |
+| [**google-ads**](skills/media-buying/google-ads) | Senior single-account layer for Google Ads: plan, launch, audit, diagnose, and scale across Search, PMax, Demand Gen, and Shopping, with AI Max, Smart Bidding, RSA, tCPA/tROAS, and OCI tracking wired in. |
+| [**google-grey-ops**](skills/media-buying/google-grey-ops) | Infrastructure & survival layer for Google Ads grey verticals: agency/MCC account supply, identity/payment infra, AdsBot cloaking and review-layer filters, RSA/unicode/path tricks, selfie/BOV verification, geo isolation, enforcement tracks, and per-vertical playbooks (gambling, finance/crypto, nutra, dating, loans, apps). |
+| [**google-feed-ops**](skills/media-buying/google-feed-ops) | The retail data layer: feed spec and attributes, the Merchant API, feed rules and supplemental feeds, title optimization, GTIN/`custom_label` schema, and diagnosing Merchant Center suspensions and free-listings eligibility. |
+| [**tracker-ops**](skills/media-buying/tracker-ops) | Affiliate tracker operations across Keitaro and Binom APIs: postback/S2S wiring, payout-event-vs-all-conversions metric discipline, timezone and CPL math, the daily spend-sync, and Google's gclid → offline conversion import chain. |
+| [**measurement-experimentation-ops**](skills/media-buying/measurement-experimentation-ops) | Decide whether a result is real before scaling it: testing-mode selection (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag, multiple testing), and platform tools — Meta's A/B Test, `ad_study` API, Conversion Lift, GeoLift, Robyn, and Google's Experiments, Conversion Lift, and Meridian MMM. |
+| [**senior-buyer-ops**](skills/media-buying/senior-buyer-ops) | Portfolio-orchestration layer for senior buyers and team leads across Meta and Google: the day-1 operating contract, cross-platform allocation (test/scale/reserve), kill/watch/scale plus marginal scaling, the creative-intelligence pipeline, and end-to-end funnel QA — routes into the seven skills above by name. |
 
 ### Frontend
 
@@ -49,6 +65,7 @@ layers plus one orchestrator that decides between them.
 | Skill | Purpose |
 |---|---|
 | [**deep-research**](skills/research/deep-research) | Traceable multi-source research with primary-source prioritization, verification, confidence labels, and explicit knowledge gaps. |
+| [**web-scraping**](skills/research/web-scraping) | Mass crawling and scraping past anti-bot defenses (Cloudflare, Akamai, DataDome, PerimeterX): Crawl4AI for scale (`arun_many`, dispatchers, deep crawl, LLM-ready markdown) and Camoufox for fingerprint evasion. |
 
 ## Install
 
@@ -87,8 +104,8 @@ skills/<category>/<name>/
 
 Only `name` and `description` load for discovery; the body and supporting files load when the
 skill is selected. The media-buying skills also cross-reference each other by name (e.g.
-`senior-buyer-ops` routes into `meta-ads` / `fb-grey-ops` / `tracker-ops` /
-`measurement-experimentation-ops`).
+`senior-buyer-ops` routes into `meta-ads` / `meta-grey-ops` / `google-ads` / `google-grey-ops` /
+`google-feed-ops` / `tracker-ops` / `measurement-experimentation-ops`).
 
 ## Contributing
 

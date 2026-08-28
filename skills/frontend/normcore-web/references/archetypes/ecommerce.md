@@ -1,20 +1,20 @@
 # Archetype — shop / catalogue
 
 Retail, wholesale, parts, any priced inventory. Generator: a product catalogue plus a
-merchandiser filling promo slots. **Trust comes from catalogue density, visible prices, stock
-and delivery terms — not from prose.**
+merchandiser filling promo slots. **Trust = catalogue density, visible prices, stock and
+delivery terms — not prose.**
 
-Measured: a regional electronics chain, in register (in register), a second electronics chain, drifted modern (drifting modern),
-a large international chain (out — commissioned typeface `MMHeadline`, 175 × 8px radii, a real design
-system that merely feels dated; do not use as a target).
+Measured: a regional electronics chain (in register), a second electronics chain (drifted
+modern), a large international chain (out — commissioned typeface `MMHeadline`, 175 × 8px
+radii, a real design system that merely feels dated; not a target).
 
 ```
 a regional electronics chain, in register      Lato only · radius 2px dominant · 28 shadows · 3 transform · 353 images
 a second electronics chain, drifted modern   Poppins+Roboto · 4px ×136 · 9 shadows · 53 transform · 121 images
 ```
 
-a regional electronics chain, in register is the model: **one Google workhorse face, 2px corners, near-zero motion, and
-an enormous number of images.**
+a regional electronics chain, in register is the model: **one Google workhorse face, 2px
+corners, near-zero motion, an enormous number of images.**
 
 ## Overrides on the core
 
@@ -28,16 +28,16 @@ an enormous number of images.**
 
 ## Density model
 
-Images are the page. a regional electronics chain, in register renders **353** of them. Product tiles are small and
-numerous — a home page shows 40–80 products across several rails. Text per tile is a
-truncated name, a price, and a stock or delivery line. Nothing breathes.
+Images are the page — 353 on the reference. Product tiles small and numerous: a home page
+shows 40–80 products across several rails. Text per tile is a truncated name, a price, and a
+stock or delivery line. Nothing breathes.
 
 ## Variation axes — measured, roll one point on each
 
 **Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
 top to bottom starting at 0 and take letter `k` of the name for each row.
 
-Two references differ on every one of these, so all combinations are authentic:
+The two references differ on every axis — all combinations are authentic:
 
 | axis | older / plainer | newer / slicker |
 |---|---|---|
@@ -50,22 +50,20 @@ Two references differ on every one of these, so all combinations are authentic:
 | price block | price only | price + was-price + `%` badge + monthly finance line |
 | rails | 4-across static grids with "see all" | horizontally scrolling carousels |
 
-A 2013-era shop with a left category rail and static banner grid looks nothing like a 2019 one
-with a centred search and carousel. Both pass.
+A 2013 left-rail + static-banner shop looks nothing like a 2019 centred-search + carousel
+one. Both pass.
 
 ## Page skeleton
 
-**This skeleton is a menu, not a template.** Pick the blocks the brief has content for and drop
-the rest — at least two. The order below is the conventional one; deviating from it where the
-site's history justifies it is correct.
-
+Menu, not template: drop the blocks the brief has no content for — at least two. Order below
+is conventional; deviations justified by the site's history are correct.
 
 1. **Utility topbar** — store finder, order tracking, help, account, language. Dense, ~13px
 2. **Header** — logo left, a wide search field taking the centre (search is the primary
    navigation), basket and account right with counts
 3. **Category mega-menu** — full-width dropdown, multi-column, plain text links, no imagery
-4. **Promo carousel** — full-bleed merchandiser banners with baked-in typography. These are
-   supplied image files, not composed in CSS. Arrows and dots
+4. **Promo carousel** — full-bleed merchandiser banners with baked-in typography. Supplied
+   image files, not composed in CSS. Arrows and dots
 5. **Reassurance strip** — 3–5 icon+label items: free delivery over X, N-day returns,
    warranty, price guarantee, click and collect
 6. **Category tiles** — a grid of 6–12, image plus name, no description
@@ -94,21 +92,20 @@ rating: filled/empty stars from the icon font + a review count in brackets
 one button: solid accent, full tile width, sentence case
 ```
 
-Hover: a colour change on the border or the button. **Nothing lifts, scales or shadows in.**
-This is the single hardest place to resist motion and the most obvious tell if you do not.
+Hover: a colour change on the border or the button. **Nothing lifts, scales or shadows in** —
+the single hardest place to resist motion and the most obvious tell if you do not.
 
 ## Traps
 
-- **Do not equalise the tiles into a perfect grid of identical heights** by truncating
-  everything to the same line count. Real grids have ragged names and some tiles taller.
-- **Do not put the price in a muted small caption.** Price is the loudest element.
+- **No equalised tile heights** via truncating to the same line count. Real grids have ragged
+  names and some tiles taller.
+- **Price is never a muted small caption** — the loudest element in the tile.
 - **Do not design the promo banners.** Real shops ship supplied JPEGs with the type baked in.
-  Where the client has none: use a real photograph as the slide and put the headline and
-  button over it as HTML text. That is allowed and is the correct fallback. What is banned is
-  *manufacturing the artwork* — a CSS gradient, an abstract shape, a composed graphic standing
-  in for a photograph. A real photo with an HTML overlay passes; an invented banner does not.
-- **Do not reduce the reassurance strip to three tasteful icons with airy spacing.** It is
-  cramped, 13px, and sits directly under the header or carousel.
+  Fallback where the client has none: a real photograph as the slide with headline and button
+  as HTML text over it — allowed and correct. Banned is *manufacturing the artwork*: CSS
+  gradient, abstract shape, composed graphic standing in for a photograph.
+- Reassurance strip stays cramped, 13px, directly under the header or carousel — not three
+  tasteful icons with airy spacing.
 - Badges ("NEW", "-30%", "FREE DELIVERY") are solid rectangles, not pills.
 
 ## Verification — this archetype
@@ -126,7 +123,7 @@ This is the single hardest place to resist motion and the most obvious tell if y
 | search is a small header afterthought | a wide field, the primary navigation |
 | infinite scroll on a category page | numbered pagination |
 
-**Product imagery.** Never stock photography and never generated. Product shots come from the
-client's catalogue export, a vendor or distributor feed, or the manufacturer's press/media
-asset pages. If none is supplied, build the grid against the real assets you can obtain for
-genuine products, or ask for the feed — do not fill a shop with Unsplash.
+**Product imagery.** Never stock photography and never generated. Source: the client's
+catalogue export, a vendor or distributor feed, or the manufacturer's press/media asset
+pages. None supplied → build the grid against real assets you can obtain for genuine
+products, or ask for the feed — do not fill a shop with Unsplash.

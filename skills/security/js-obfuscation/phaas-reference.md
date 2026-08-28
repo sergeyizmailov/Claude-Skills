@@ -1,7 +1,5 @@
 # PhaaS Kits: Techniques Reference (2025-2026)
 
-## Kit Comparison Table
-
 | Kit | Key techniques |
 |-----|---------------|
 | Tycoon2FA | Invisible Unicode encoding, Proxy get-trap execution, custom canvas CAPTCHA (replaced Turnstile), AES+LZString compression, multi-layer nesting |
@@ -16,59 +14,51 @@
 | Greatness | AES with PBKDF2 key derivation via CryptoJS, encrypted config/payload/exfil |
 | GlassWorm | Variation Selectors (U+FE00-FE0F) for encoding, Solana transaction memos for C2 |
 
-## Techniques by Category
-
-### Payload Encoding
+## Payload Encoding
 - **Invisible Unicode** (Tycoon2FA): Hangul fillers U+FFA0/U+3164 as binary 0/1, decoded via Proxy get-trap
 - **Variation Selectors** (GlassWorm): U+FE00-FE0F as nibbles, 50% smaller than Hangul
 - **XOR + Base64** (Salty2FA): Static key `684c985a29c67596b5e66d6028bdad6d`, runtime decryption
 - **AES + PBKDF2** (Greatness): CryptoJS `__g()` function, derived key
 - **AES + LZString** (Tycoon2FA): Compression under encryption, multi-layer nesting
 
-### Anti-Analysis
+## Anti-Analysis
 - **Anti-DevTools** (Sneaky2FA): debugger trap + timing + window size + keyboard blocking
 - **Infinite debugger** (JScrambler-style): `Function.constructor('debugger')` — resists regex removal
 - **HTML filler noise** (Salty2FA): Random quotes as HTML comments between code
 - **Near-zero font-size** (Rockstar 2FA): Invisible words between visible text break keyword matching
 - **WOFF font cipher**: Custom font remaps glyphs, source text is garbled
 
-### Bot Detection
+## Bot Detection
 - **Turnstile gate** (Mamba, Salty2FA, Sneaky2FA, FlowerStorm): CAPTCHA before any content
 - **Custom canvas CAPTCHA** (Tycoon2FA): Replaced Turnstile to avoid Cloudflare dependency
 - **FingerprintJS** (FlowerStorm): Canvas, WebGL, AudioContext before content loads
 - **IP/ASN filtering** (Salty2FA, CoGUI): Block security vendors, cloud providers
 - **navigator.webdriver** (Tycoon2FA, EvilProxy, CoGUI): Redirect bots to legit site
 
-### Infrastructure
+## Infrastructure
 - **Rotating subdomains** (Salty2FA): Pre-computed dictionary pools, session-triggered assignment
 - **Dynamic subdomains** (GhostFrame): Random per-visit, cross-origin iframe validation
 - **Cloudflare Workers** (Tycoon2FA, FlowerStorm): workers.dev reputation, serverless
 - **Multi-hop redirects** (FlowerStorm): Open redirect abuse on legit sites (Indeed, Upwork)
 - **Long random URL paths** (Sneaky2FA): 150+ chars, defeats pattern-based blocklisting
 
-### Visual Deception
+## Visual Deception
 - **BitB popups** (Sneaky2FA): Fake browser window with OS-adaptive themes
 - **Auto corporate branding** (Mamba): Logo/colors from victim's email domain
 - **Blob URI rendering** (GhostFrame): Screenshot as blob image, invisible overlaid inputs
 - **postMessage manipulation** (GhostFrame): Parent title/favicon changes from iframe
 
-### Exfiltration
+## Exfiltration
 - **Socket.IO** (Mamba): Real-time bidirectional, lower latency than HTTP
 - **AJAX/Fetch** (Whisper 2FA, Cephas): Lightweight, no reverse proxy needed
 - **Telegram bots** (SessionShark, Astaroth, Mamba, Salty2FA, Greatness): Instant delivery
 - **Blockchain C2** (GlassWorm): Solana transaction memos, Google Calendar backup
 
-## Multi-Layer Nesting Pattern (Tycoon2FA, ~90% of samples)
-
-```
-Layer 1: Invisible Unicode encoding (stealth — looks like whitespace)
-  └─ Layer 2: Base64
-      └─ Layer 3: Encryption (XOR / AES-256-CBC / CryptoJS)
-          └─ Optional: gzip compression to normalize size anomalies
-```
+## Multi-Layer Nesting (Tycoon2FA, ~90% of samples)
+`Invisible Unicode → Base64 → Encryption (XOR / AES-256-CBC / CryptoJS)`, optional gzip to normalize size anomalies.
 
 ## Stats (2025-2026)
-- 48% of high-volume campaigns use URL obfuscation, MFA bypass, or CAPTCHA abuse
+- 48% of high-volume campaigns: URL obfuscation, MFA bypass, or CAPTCHA abuse
 - 90% of high-volume phishing uses commercial PhaaS kits
 - 36% of malicious pages use runtime assembly (polymorphic/LLM)
 - 20% generate unique code per deployment

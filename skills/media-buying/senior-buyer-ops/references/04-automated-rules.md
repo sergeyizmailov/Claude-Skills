@@ -102,11 +102,7 @@ not a verdict.
 
 ## Practitioner cross-check
 
-Vendor guidance lands at ~2-3× target CPA before pausing (AnyTrack states 2×,
-2026; Adamigo, Wevion, 2026), plus a minimum-spend floor so one early expensive
-conversion can't trip the rule. The k=0 rung at 3× target sits at the patient
-end of that field range, and the ladder extends the same logic to k>0, where
-practitioner guidance is silent and where naive rules do their damage.
+Field guidance lands at ~2-3× target CPA before pausing (AnyTrack, 2026) plus a minimum-spend floor so one early expensive conversion can't trip the rule. The k=0 rung at 3× target sits at the patient end of that field range, and the ladder extends the same logic to k>0, where vendor guidance is silent and naive rules do their damage.
 
 ## Meta platform reality (Marketing API v26.0, 2026-08)
 
@@ -178,30 +174,29 @@ separate choice, and pause is the bluntest one — these keep more assets alive:
   cost field (the UI lists per-pixel-event costs — meta-ads/02 §9; API-side
   availability unverified), so when the two differ, soft kill can only run on
   the optimization event; the ladder stays the instrument for everything else.
-  Field pattern converges on exactly this (Wevion, TheOptimizer, Adamigo, 2026
-  — often gated on ~48h over target). A bleeding asset slows and keeps learning
+  Field pattern: gated on ~48h over target. A bleeding asset slows and keeps learning
   instead of dying; if lagged conversions land there is nothing to relaunch —
   no LIFETIME stickiness, no lost history. Daily cadence, not SEMI_HOURLY:
   budget steps re-enter learning (traps below).
 - **Kill the cause, not the symptom.** A fatiguing creative reads as expensive
-  only after the damage; `frequency > X AND ctr < Y → pause` fires earlier
-  (AnyTrack, TopGrowth, 2026). Calibrate X/Y off the account's own winner
+  only after the damage; `frequency > X AND ctr < Y → pause` fires earlier.
+  Calibrate X/Y off the account's own winner
   baseline, not a blog number; fatigue diagnosis itself lives in 02.
 - **Gate the verdict on delivery existing.** Add an `impressions` floor to each
   rung so a CPM-spike night or a starved asset isn't read as a quality verdict.
   A separate CPM-spike ALERT (notify at ~2× baseline) routes auction anomalies
-  to manual review (TopGrowth, adlibrary, 2026) instead of letting the ladder
+  to manual review instead of letting the ladder
   price them.
 - **External engine as the ceiling.** The field's favourite qualifier — "over
-  target for N CONSECUTIVE days" (Wevion 48h, TopGrowth 3d, 2026) — is not
+  target for N CONSECUTIVE days" (field range 48h–3d) — is not
   expressible in native rules: no consecutive-check memory, no tracker-truth
   counts, no cohort-maturity adjustment, which are exactly the fixes for the
   undercount and lag traps below. A cron script over the Insights API can do
   all three (nowcasting: tracker-ops/03); keep native rules as the always-on
   guardrail and let the script be the brain. Vendor platforms sell this layer
-  if building isn't an option (Birch/Revealbot, 2026: 15-min checks, per-rule
+  if building isn't an option (15-min checks, per-rule
   attribution windows, relative period comparisons); the stack here already
-  has the API tooling (fb-grey-ops/04).
+  has the API tooling (meta-grey-ops/04).
 
 ## Traps that void the math
 
@@ -225,9 +220,13 @@ separate choice, and pause is the bluntest one — these keep more assets alive:
   arming (tracker-ops reconciliation tree).
 - **Event overcount is the mirror.** "All conversions" counts duplicate
   submissions, so the rule keeps assets it should kill.
-- **Rule conflicts.** Overlapping rules fight — one raises budget while another
-  cuts it, or one pauses an asset before a second can act. Keep one owner per
-  decision and review the whole set together (LeadEnforce, 2026).
+- **Clustered arrivals break the independence assumption.** Batch-confirmed
+  payouts (call-center confirm, COD waves, KYC batches) clump in time; a Poisson
+  silence window reads clumping as failure and over-kills the early rungs. Run
+  the ladder on an event that arrives one-by-one (front-end), carry the payout
+  verdict on cohorts — or loosen k=0/1 below 95% on batch-confirmed funnels
+  (negative-binomial territory).
+- **Rule conflicts.** Overlapping rules fight — one owner per decision, review the whole set together.
 - **Budget-step rules.** Large budget jumps CAN re-enter learning — Meta
   publishes no universal % (01, meta-ads/06); practitioner cap is ~20% per
   step, evaluated daily rather than continuously. Scaling rules and kill rules

@@ -6,76 +6,63 @@ Scope: Ads Manager budget mechanics (daily vs lifetime), minimum budgets, bid st
 
 ## 1. Daily vs Lifetime Budgets
 
-Set at the ad set level: **Ads Manager → Ad set → Budget & schedule → Budget → dropdown "Daily budget" / "Lifetime budget"**. With **Advantage campaign budget** (the current name for Campaign Budget Optimization / CBO), the budget moves to the campaign level: **Campaign → Advantage campaign budget toggle → Campaign budget**.
+Set at ad-set level: **Ads Manager → Ad set → Budget & schedule → Budget → "Daily budget" / "Lifetime budget"**. With **Advantage campaign budget** (current name for CBO), budget moves to campaign level: **Campaign → Advantage campaign budget toggle → Campaign budget**.
 
 ### Daily budget
-- An *average* per day, not a hard cap. Meta can spend up to ~75% over the daily amount on high-opportunity days, but will not exceed 7× your daily budget per calendar week (Sun–Sat). (Older documentation said 25% daily overshoot; practitioners now observe the 75% swing — Foxwell Digital via LaFactory, 2026.)
-- Best for: always-on campaigns, ongoing lead gen / e-commerce, anything you want to scale up or down day to day, and active reallocation between ad sets.
-- Easier to scale: change the number and pacing adjusts immediately. Default recommendation for most advertisers.
+- *Average* per day, not a hard cap. Meta can spend ~75% over on high-opportunity days, not more than 7× daily budget/calendar week (Sun–Sat). (Older docs said 25% overshoot; practitioners now observe 75% — Foxwell Digital via LaFactory, 2026.)
+- Best for: always-on, ongoing lead gen/e-commerce, day-to-day scaling, active reallocation between ad sets. Default recommendation — easier to scale, pacing adjusts immediately.
 
 ### Lifetime budget
-- A total amount across a fixed date range (requires an end date). It is a spending **cap over the schedule, not a guarantee of full spend** — Meta paces spend unevenly (some days more, some less) and optimizes for results within the cap; thin auctions, tight cost/bid caps, or narrow targeting can leave it underspent. Back-loaded spending (slow start, rush at the end) is normal, not a bug.
-- The only budget type that unlocks **ad scheduling (dayparting)** — running ads only at specific hours/days, e.g. weekdays 9:00–17:00. Option appears under Budget & schedule only when lifetime is selected.
-- Best for: fixed-window promotions (holiday sale, event, product drop) and dayparting needs.
+- Total amount over a fixed date range (requires end date). A spending **cap, not a guaranteed spend** — Meta paces unevenly, optimizes within the cap; thin auctions, tight cost/bid caps, or narrow targeting can leave it underspent. Back-loaded spending (slow start, end rush) is normal.
+- Only budget type unlocking **ad scheduling (dayparting)** — specific hours/days, e.g. weekdays 9:00–17:00; appears only when lifetime selected.
+- Best for: fixed-window promotions (holiday sale, event, product drop) and dayparting.
 
 ### Gotchas (practitioner-observed, Tribe Up Academy / Jason Gan, Sep 2025)
-- **Budget type is locked after publishing.** You cannot switch an ad set from daily to lifetime (or back). Fix: duplicate the ad set and set the correct type on the copy.
-- **Extending a lifetime campaign often hurts performance.** Rolling a finished lifetime campaign into a new period tends to disrupt delivery learning; the extension frequently underperforms the original run. Recommended: launch the extension as a fresh daily-budget campaign.
-- **Mid-flight lifetime increases require manual math** — you must recompute the total yourself (e.g., +20% of remaining days); easy to get slightly wrong.
+- **Budget type locked after publishing** — can't switch daily↔lifetime. Fix: duplicate with the correct type.
+- **Extending a lifetime campaign often hurts performance** — disrupts delivery learning, extension often underperforms original. Launch a fresh daily-budget campaign instead.
+- **Mid-flight lifetime increases require manual math** — recompute total yourself (e.g., +20% of remaining days); easy to get slightly wrong.
 
 ---
 
 ## 2. Minimum Budgets Meta Requires
 
-Meta enforces minimum budgets according to currency, billing event, objective, and account setup. Practitioner sources frequently quote `$1/day` for impression-optimized campaigns and `$5/day` for clicks or lower-frequency events, but current interfaces can accept different amounts. Treat the validation shown in the live budget field as authoritative.
+Meta enforces minimums by currency, billing event, objective, account setup. Practitioner sources frequently quote `$1/day` for impression-optimized campaigns, `$5/day` for clicks/lower-frequency events — interfaces can accept different amounts, treat the live budget field's validation as authoritative.
 
-The frequently quoted `daily budget ≥ 5× cost-per-result goal` is a delivery heuristic for constrained bidding, not a universal technical minimum. A tight cost goal with too little budget can suppress delivery, but increasing budget does not guarantee the target CPA.
+`Daily budget ≥ 5× cost-per-result goal` is a delivery heuristic for constrained bidding, not a technical minimum. A tight cost goal with too little budget suppresses delivery; more budget doesn't guarantee the target CPA.
 
 ### Volume-planning heuristic
 
-Older Meta guidance and many practitioner playbooks use this planning model:
-
 > **Illustrative daily budget = (Target CPA × 50) ÷ 7**
 
-- This estimates the spend needed to buy 50 events at the target CPA; it does not prove that 50 events are the current threshold or that the target CPA is achievable.
-- Use it as a capacity check, then size the test from available budget, expected CPA range, conversion delay, acceptable loss, and the number of independent cells.
-- A common failure is fragmenting a fixed budget across redundant ad sets until none receives enough results to evaluate. Consolidate based on observed delivery, not an arbitrary account-wide ad-set count.
+- Estimates spend to buy 50 events at target CPA — doesn't prove 50 is the current threshold or the CPA is achievable.
+- Use as a capacity check; size the test from available budget, expected CPA range, conversion delay, acceptable loss, number of independent cells.
+- Common failure: fragmenting budget across redundant ad sets until none gets enough results to evaluate. Consolidate based on observed delivery, not an arbitrary ad-set count.
 
 ---
 
 ## 3. Bid Strategies (current UI naming)
 
-Location: **Ad set → Optimization & delivery → Bid strategy** (with Advantage campaign budget ON, the strategy is set once at campaign level and applies to all ad sets). Older sources say "Optimization & Delivery → Cost Control / Bid Control" — same section, older labels.
+Location: **Ad set → Optimization & delivery → Bid strategy** (Advantage campaign budget ON → set once at campaign level, applies to all ad sets). Older sources: "Optimization & Delivery → Cost Control / Bid Control" — same section, older labels.
 
 | Current UI label | Old name | What it does | When to use |
 |---|---|---|---|
-| **Highest volume** (default) | Lowest cost | Spends your full budget getting the maximum number of results; no cost constraint | Default for ~most advertisers, most of the time. Prospecting, testing, any time you lack a proven CPA benchmark |
-| **Cost per result goal** | Cost cap | You set a target average cost per result (e.g., $10/purchase); Meta aims to keep the *average* at/under it. Individual results can cost more or less. It is a goal, not a guarantee | When you know your break-even CPA and want stability while scaling. Set it realistically (near recent actual CPA) — too low and delivery chokes, learning phase drags, budget stops spending |
-| **Bid cap** | Bid cap | Ceiling on Meta's auction bid, not a CPA ceiling | Advanced teams with a bidding model that connects impression value, estimated action rate, and allowable acquisition cost. `AOV ÷ target ROAS` estimates allowable purchase CPA, not the correct auction bid cap. An aggressive cap can suppress delivery |
-| **Highest value** | (Value optimization) | With "Maximize value of conversions" performance goal: prioritizes high-value purchases over volume. Requires pixel/CAPI purchase events with value | E-commerce with variable basket sizes and enough value-event volume |
-| **ROAS goal** | Minimum ROAS | With value optimization: Meta spends toward a target return (e.g., entering 1.100 = 110% ROAS target). Full budget delivery is **not** guaranteed | Mature purchase campaigns where profitability floor matters more than volume. Set a realistic goal or spend stalls |
+| **Highest volume** (default) | Lowest cost | Full budget for max results; no cost constraint | Default for most advertisers/most of the time; prospecting, testing, no proven CPA benchmark yet |
+| **Cost per result goal** | Cost cap | Target average cost/result (e.g., $10/purchase); Meta keeps the *average* at/under it — a goal, not a guarantee, individual results vary | Known break-even CPA, want stability while scaling. Set realistically (near actual CPA) — too low chokes delivery, drags learning, stops spend |
+| **Bid cap** | Bid cap | Ceiling on Meta's auction bid, not a CPA ceiling | Advanced teams with a model linking impression value, action rate, acquisition cost. `AOV ÷ target ROAS` estimates allowable CPA, not the bid cap itself. Aggressive cap can suppress delivery |
+| **Highest value** | (Value optimization) | "Maximize value of conversions" goal: prioritizes high-value purchases over volume. Requires pixel/CAPI purchase events with value | E-commerce, variable basket sizes, enough value-event volume |
+| **ROAS goal** | Minimum ROAS | Value optimization: spends toward a target return (e.g., 1.100 = 110% ROAS). Full delivery **not** guaranteed | Mature purchase campaigns where profit floor matters more than volume; set realistically or spend stalls |
 
-Key behavior notes (Jon Loomer, Meta Help Center via LaFactory 2026):
-- Goals are **averages over time**, not per-result caps; expect swings.
-- All constrained strategies (cost per result goal, bid cap, ROAS goal) **slow or block delivery** if set aggressively, and make the learning phase harder to exit.
-- "Don't get cute": setting caps unrealistically low doesn't trick the auction — you simply get no distribution.
-- Not every strategy is available for every optimization event. Cost-per-result goal works for conversions, leads, link clicks, landing page views, app installs, engagement, video views, etc. Bid cap is available for most optimizations. ROAS goal requires value optimization.
-- **2026 consensus default:** leave Highest volume + broad/Advantage+ audience; add cost controls only when scaling demands cost discipline (Andromeda-era practice — see §7).
+Key notes (Jon Loomer, Meta Help Center via LaFactory 2026): goals are **averages over time**, not per-result caps — expect swings. All constrained strategies (cost per result goal, bid cap, ROAS goal) **slow or block delivery** if set aggressively, harder to exit learning. Unrealistically low caps don't trick the auction — just no distribution. Not every strategy fits every optimization event: cost-per-result goal works for conversions, leads, link clicks, LPV, app installs, engagement, video views, etc.; bid cap available for most; ROAS goal requires value optimization. **2026 consensus default:** Highest volume + broad/Advantage+ audience; add cost controls only when scaling demands cost discipline (Andromeda-era practice, §7).
 
 ---
 
 ## 4. Learning Phase
 
-- Meta documents that ad sets enter learning, that performance is less stable during it, and that insufficient results can produce `Learning limited`. Current official delivery-status guidance does not publish `50 events in 7 days` or a universal `20–40%` CPA penalty.
-- **Delivery column states:** "Learning" → "Learning limited" (not getting enough events) → active. Hover the Delivery column in Ads Manager for the exact status.
-- `50/7` remains a useful legacy capacity heuristic. Meta has tested other thresholds, including a practitioner-observed `10 events in up to 3 days`; use the live Delivery status rather than asserting either threshold as current for every account.
-- Meta says significant edits can return delivery to preparing or learning. Targeting, optimization, creative, bid, schedule, and budget changes can qualify, but Meta does not publish a universal 20% or 30% budget threshold. Check the live status after editing.
-- **How to exit faster:**
-  - Ensure the ad set has enough budget and time to generate a decision-useful number of results; use the legacy formula only as a scenario, not a requirement.
-  - **Consolidate:** fewer ad sets, more events each (account consolidation is the core 2025–2026 structural advice).
-  - If purchases are too rare, consider a higher-frequency event only when it remains meaningfully connected to business value; test against purchase optimization because cheaper proxy events can reduce buyer quality.
-  - Minimize nonessential edits and observe at least one representative conversion-delay window. Seven days is a common starting window, not a universal waiting period.
-  - Use Advantage+ / Advantage campaign budget to let Meta pool learning across audiences.
+- Ad sets enter learning with less-stable performance; insufficient results can produce `Learning limited`. Current official guidance does not publish `50 events in 7 days` or a universal 20–40% CPA penalty.
+- **Delivery states:** "Learning" → "Learning limited" (not enough events) → active. Hover the Delivery column for exact status.
+- `50/7` is a useful legacy heuristic; Meta has tested other thresholds, incl. a practitioner-observed `10 events in up to 3 days` — use live status, don't assert either as current for every account.
+- Significant edits (targeting, optimization, creative, bid, schedule, budget) can return delivery to preparing/learning — no universal 20%/30% threshold published. Check live status after editing.
+- **To exit faster:** give enough budget/time for a decision-useful result count (legacy formula is a scenario, not a requirement); **consolidate** — fewer ad sets, more events each (core 2025–2026 structural advice); if purchases are too rare, use a higher-frequency event only if still tied to business value, test against purchase optimization since cheaper proxy events can reduce buyer quality; minimize nonessential edits, observe at least one conversion-delay window (seven days is a common start, not universal); use Advantage+/Advantage campaign budget to pool learning across audiences.
 
 ---
 
@@ -91,8 +78,7 @@ Sample: 1,000+ US campaigns (554 traffic, 726 leads), data window **April 1, 202
 | Conversion rate | — | 7.72% (down from 8.67%) |
 | Cost per lead | — | **$27.66** (up 20.9% from $22.87) |
 
-Industry extremes (same study): CPL from **$3.16** (Restaurants & Food) to **$76.71** (Dentists & Dental Services) — a 24× spread, so "average cost" without an industry qualifier is meaningless. Traffic CPC from **$0.34** (Shopping/Collectibles/Gifts) to **$1.22** (Finance & Insurance).
-Do not conclude that Meta is categorically cheaper than Google from cross-platform averages: channel intent, attribution, industries, lead definitions, and sample populations differ. Use the figures only for their stated US campaign sample.
+Industry extremes (same study): CPL **$3.16** (Restaurants & Food) to **$76.71** (Dentists & Dental Services) — 24× spread, "average cost" without an industry qualifier is meaningless. Traffic CPC **$0.34** (Shopping/Collectibles/Gifts) to **$1.22** (Finance & Insurance). Don't conclude Meta is categorically cheaper than Google from cross-platform averages — channel intent, attribution, industries, lead definitions, sample populations differ; figures valid only for their stated US sample.
 
 ### 5.2 Instagram-specific 2026 directional ranges
 
@@ -114,97 +100,86 @@ Source: adlibrary.com, April 2026, aggregating other publications without a disc
 | Feed | $10–16 | $0.70–2.00 | Highest CPM but highest purchase intent; often best CPA |
 | Advantage+ placements blend | ~$7–11 CPM | — | Meta shifts budget to cheapest-result placement |
 
-A second vendor dataset (AdAmigo, 2026, methodology undisclosed) reports substantially different placement costs. Other publications range from roughly `$7` to `$15+` Instagram CPM. This disagreement is evidence that objective, geography, date, optimization, and placement mix dominate any platform-wide average; do not select or remove a placement from these values alone.
+A second vendor dataset (AdAmigo, 2026, undisclosed methodology) reports substantially different placement costs; other publications range roughly `$7`–`$15+` Instagram CPM — objective/geography/date/optimization/placement mix dominate any platform average, don't add/drop a placement from these values alone.
 
 ### 5.4 E-commerce / global panels
 - Triple Whale (~35,000 brands, 2025 data, via AdMake AI, June 2026): global median **CPM $13.48–14.19 (+20% YoY)**; e-commerce **CPA (purchase) $38.17 (+1% YoY)**.
 - US CPM estimates $20–23 (Madgicx/SuperAds 2025–2026 via AdMake AI).
 
 ### 5.5 By geography (AdAmigo, July 2026 — vendor-compiled "projections for 2026 based on late-2025 industry data"; methodology not disclosed, treat as directional [uncertain])
-| Market tier | Country | Avg CPM | Avg CPC |
-|---|---|---|---|
-| Tier 1 | United States | $23.00 | $2.69 |
-| Tier 1 | Australia | $18.50 | $2.10 |
-| Tier 1 | Canada | $13.40 | $1.75 |
-| Tier 1 | United Kingdom | $10.31 | $1.95 |
-| Tier 1 | Germany | $10.05 | $1.45 |
-| Tier 2 | France | $8.05 | $1.15 |
-| Tier 2 | Spain | $5.80 | $0.85 |
-| Tier 2 | Poland | $5.50 | $0.75 |
-| Tier 2 | UAE | $6.50 | $1.40 |
-| Tier 3 | Brazil | $4.20 | $0.35 |
-| Tier 3 | Mexico | $4.50 | $0.45 |
-| Tier 3 | India | $2.60 | $0.20 |
-| Tier 3 | Indonesia | $2.80 | $0.18 |
-| Tier 3 | Nigeria | $1.50 | $0.12 |
 
-The table's claimed global average CPM is `$6.59`, but its methodology is undisclosed. Do not extrapolate that Kazakhstan, Uzbekistan, Ukraine, or another market behaves like a generic tier. No reliable CIS-specific panel was found. Meta suspended ads in Russia and ads targeting Russia in March 2022, so current Russia-market buying benchmarks are not comparable.
+| Tier | Countries | CPM | CPC |
+|---|---|---|---|
+| 1 | US, AU, CA, UK, DE | $10–23 (US highest $23.00) | $1.45–2.69 (US highest $2.69) |
+| 2 | FR, ES, PL, UAE | $5.50–8.05 | $0.75–1.40 |
+| 3 | BR, MX, IN, ID, NG | $1.50–4.50 | $0.12–0.45 |
+
+Claimed global average CPM $6.59 — methodology undisclosed; don't extrapolate to unlisted markets (no reliable CIS panel found). Meta suspended Russia/Russia-targeting ads March 2022 — current Russia benchmarks not comparable.
 
 ---
 
 ## 6. What Affects Costs
 
-1. **The auction itself.** Meta describes delivery in terms of bid, estimated action rate, and ad quality ("total value"). The highest bid does not necessarily win. Creative affects predicted response and quality, but no universal CPM multiplier applies to a weak hook.
-2. **Campaign objective.** Reach/awareness = cheapest CPM (US ~$10–15); traffic mid; leads/sales highest (US lead gen $25–40 CPM, sales $20–30) because Meta targets a smaller, higher-value pool. Choosing the wrong objective is a structural cost mistake.
-3. **Seasonality.** Q4 (Oct–Dec) CPMs rise **40–80%** (adlibrary) / 60%+ (AdAmigo) as retail floods the auction; January resets lower (global median CPM $25.22 Nov 2025 → $15.74 Jan 2026 per AdAmigo). US election years add political spend shocks (2024: $3B+ digital political ads, half in the final 30 days). Counter-move: start holiday campaigns before Black Friday peak pricing. Note BFCM itself can paradoxically show cheaper CPMs on some datasets (Gupta Media observed 12–27% cheaper Instagram CPMs during BFCM 2024) — the *weeks around* it are the expensive part.
-4. **Placement.** Reels often buys cheaper impressions than Feed in third-party datasets, but the gap and downstream CPA vary by account. Judge placement on the optimized event and quality, not CPM alone.
-5. **Creative quality & fatigue.** Monitor hook/hold metrics, CTR, conversion efficiency, frequency, and control-vs-challenger performance. No single frequency or monthly creative count defines fatigue for every account.
-6. **Audience breadth.** Narrow audiences can cost more and redundant ad sets can reduce learning opportunities, but the effect depends on auction, relevance, geography, and objective. Test broad delivery against coherent audience hypotheses rather than assuming one universal size threshold.
-7. **Competition & industry.** Finance/insurance, dental, B2B SaaS auctions are inherently expensive (see CPL spread §5.1).
-8. **Tracking quality.** iOS/SKAdNetwork gaps undercount conversions → the algorithm under-optimizes → phantom CPA inflation. Mitigation: Conversions API (CAPI). Broken pixel/CAPI data raises effective CPM.
-9. **Geo quality.** Low-cost traffic can differ materially in fraud, intent, language, payment access, and serviceability. Validate downstream outcomes and fraud signals per market; do not assign a universal bot-rate premium to a geographic tier.
+1. **The auction.** Meta weighs bid, estimated action rate, ad quality ("total value") — highest bid doesn't necessarily win. Creative affects predicted response/quality, but no universal CPM multiplier applies to a weak hook.
+2. **Campaign objective.** Reach/awareness cheapest CPM (US ~$10–15); traffic mid; leads/sales highest (US lead gen $25–40 CPM, sales $20–30) — smaller, higher-value pool. Wrong objective is a structural cost mistake.
+3. **Seasonality.** Q4 (Oct–Dec) CPMs rise **40–80%** (adlibrary) / **60%+** (AdAmigo); January resets lower (global median CPM $25.22 Nov 2025 → $15.74 Jan 2026, AdAmigo). Election years add shocks (2024: $3B+ digital political ads, half in final 30 days). Start holiday campaigns before Black Friday peak pricing. BFCM itself can show cheaper CPMs on some datasets (Gupta Media: 12–27% cheaper Instagram CPMs during BFCM 2024) — the *weeks around* it are the expensive part.
+4. **Placement.** Reels often cheaper than Feed in third-party datasets, but gap/downstream CPA vary by account — judge on the optimized event/quality, not CPM alone.
+5. **Creative quality & fatigue.** Monitor hook/hold metrics, CTR, conversion efficiency, frequency, control-vs-challenger — no single frequency or monthly creative count defines fatigue for every account.
+6. **Audience breadth.** Narrow audiences can cost more; redundant ad sets reduce learning opportunities — depends on auction, relevance, geography, objective. Test broad delivery against coherent hypotheses, not one universal threshold.
+7. **Competition & industry.** Finance/insurance, dental, B2B SaaS auctions inherently expensive (CPL spread §5.1).
+8. **Tracking quality.** iOS/SKAdNetwork gaps undercount conversions → algorithm under-optimizes → phantom CPA inflation. Mitigation: CAPI. Broken pixel/CAPI data raises effective CPM.
+9. **Geo quality.** Low-cost traffic can differ in fraud, intent, language, payment access, serviceability — validate downstream outcomes/fraud per market, don't assign a universal bot-rate premium to a geo tier.
 
 ---
 
 ## 7. Scaling Strategies
 
 ### Vertical scaling (raise budget on winners)
-- Practitioner playbooks commonly use 10–30% increments separated by several days. Meta does not document a universal safe percentage; treat this as a controlled-change heuristic.
-- Scale only after performance covers a representative conversion-delay and business cycle, tracking is trustworthy, and marginal CPA/ROAS remains acceptable.
-- Example paths such as `$100 → $130 → $170` illustrate gradual changes, not an endorsed schedule.
-- Duplicating at a higher budget preserves the original configuration but starts a new delivery instance and can create overlap. It does not preserve learning or guarantee the winner's performance.
+- Practitioner playbooks commonly use 10–30% increments, several days apart — no Meta-documented universal safe percentage, treat as a controlled-change heuristic.
+- Scale only after performance covers a representative conversion-delay/business cycle, tracking is trustworthy, marginal CPA/ROAS stays acceptable.
+- Example paths like `$100 → $130 → $170` illustrate gradual change, not an endorsed schedule.
+- Duplicating at a higher budget preserves config but starts a new delivery instance, can create overlap — doesn't preserve learning or guarantee the winner's performance.
 
 ### Horizontal scaling (add new surfaces)
-- Duplicate winners to **new audiences/geos**, new placements (Reels, Stories), new creator/UGC variants, new offers — not stacked narrow interests.
-- 2025–2026 framing: horizontal = new *creative angles* and *markets*, since audiences are mostly broad/Advantage+ now. "Signals over segments."
+Duplicate winners to **new audiences/geos**, new placements (Reels, Stories), new creator/UGC variants, new offers — not stacked narrow interests. 2025–2026 framing: horizontal = new *creative angles* and *markets* since audiences are mostly broad/Advantage+ now. "Signals over segments."
 
 ### Current best practice with Advantage+ (2025–2026 consensus)
-- **Consolidate.** Use the fewest campaigns and ad sets needed for distinct objectives, geographies, policy requirements, budgets, or experiments. Published percentage splits and "three campaigns max" are practitioner templates, not universal architecture.
-- Meta-reported or vendor-reported Advantage+ improvements apply to specific test populations. Compare automation with an appropriate account-level baseline rather than assuming a fixed 10–20% CPA benefit or a minimum conversion threshold.
-- Advantage campaign budget (CBO) by default; let Meta allocate between ad sets instead of micro-managing ABO budgets — unless you need fixed per-set spend for clean tests.
-- Keep a **10–20% "R&D" carve-out** for creative testing (Tailored Edge Marketing, 2025): Explore (small ABO tests, judge hooks/CTR/ATC) → Prove (Meta Experiments A/B across one purchase cycle) → Scale (move winners into broad/Advantage+).
-- Hybrid model is the norm: gradual vertical ramp + controlled horizontal expansion + automated rules.
-- Value rules (launched June 2025) let you adjust bids by age/gender/geo/placement segments *without* fragmenting into separate ad sets — the modern replacement for manual geo-split scaling. Note they raise CPM on up-weighted segments by design.
+- **Consolidate.** Fewest campaigns/ad sets needed for distinct objectives, geographies, policy, budgets, experiments. Published splits and "three campaigns max" are practitioner templates, not universal architecture.
+- Meta/vendor-reported Advantage+ improvements apply to specific test populations — compare against an account-level baseline, don't assume a fixed 10–20% CPA benefit or minimum conversion threshold.
+- Advantage campaign budget (CBO) by default; let Meta allocate between ad sets instead of micro-managing ABO — unless fixed per-set spend is needed for clean tests.
+- Keep a **10–20% "R&D" carve-out** (Tailored Edge Marketing, 2025): Explore (small ABO tests, judge hooks/CTR/ATC) → Prove (Meta Experiments A/B across one purchase cycle) → Scale (move winners into broad/Advantage+).
+- Hybrid norm: gradual vertical ramp + controlled horizontal expansion + automated rules.
+- Value rules (launched June 2025): adjust bids by age/gender/geo/placement *without* fragmenting into separate ad sets — modern replacement for manual geo-split scaling. Raises CPM on up-weighted segments by design.
 
 ---
 
 ## 8. How Much Budget to Start Testing
 
-Derive test budget from business economics and uncertainty rather than a global monthly minimum:
+Derive test budget from business economics/uncertainty, not a global monthly minimum:
 
-1. Compute break-even CPA/CPL and the target range from margin, refunds, close rate, repeat value, and operating constraints.
-2. Estimate a plausible CPA range from the account's own history or a closely matched benchmark.
-3. Choose how many independent cells the test truly needs.
+1. Compute break-even CPA/CPL and target range from margin, refunds, close rate, repeat value, operating constraints.
+2. Estimate plausible CPA range from account history or a closely matched benchmark.
+3. Choose how many independent cells the test needs.
 4. Fund enough expected outcomes to distinguish a useful signal while capping acceptable loss.
-5. Observe at least the conversion delay plus enough weekday/weekend or purchase-cycle coverage for the business.
+5. Observe at least the conversion delay plus weekday/weekend or purchase-cycle coverage.
 
-`$1,000–3,000/month`, `(target CPA × 50) ÷ 7`, seven days, and `3× target CPA with zero results` are common practitioner scenarios. They are not universal minimums or automatic kill rules. When the budget cannot support the desired outcome, first simplify the test, improve measurement/offer/landing page, or accept wider uncertainty; changing to a proxy event can change lead or buyer quality.
+`$1,000–3,000/month`, `(target CPA × 50) ÷ 7`, seven days, `3× target CPA with zero results` are common practitioner scenarios — not universal minimums or kill rules. If budget can't support the outcome: simplify the test, improve measurement/offer/landing page, or accept wider uncertainty — a proxy event can change lead/buyer quality.
 
 ---
 
 ## Gotchas & Common Mistakes (quick list)
 
-- Budget type (daily/lifetime) and optimization event are **locked after publish** — duplicate to change.
+- Budget type (daily/lifetime) and optimization event **locked after publish** — duplicate to change.
 - Lifetime budget can back-load spend; extending one often kills performance.
-- Cost per result goal / ROAS goal set too tight → delivery stops. It's an average goal, not a guarantee.
-- Significant edits can return delivery to preparing or learning; there is no guaranteed seven-day clock for every ad set.
-- Learning-phase CPA is often less stable, but no universal 20–40% inflation factor is established.
+- Cost per result goal/ROAS goal too tight → delivery stops. Average goal, not a guarantee.
+- Significant edits can return delivery to preparing/learning — no guaranteed seven-day clock for every ad set.
+- Learning-phase CPA often less stable, but no universal 20–40% inflation factor established.
 - Too many ad sets on a small budget → everything stuck in Learning Limited.
-- Large budget changes can alter delivery; use controlled increments and watch marginal economics rather than relying on a universal 30% cutoff.
-- Comparing your blended CPM to benchmarks without matching objective + placement + geo mix (Reels-heavy accounts look "cheap"; Feed-heavy US lead gen looks "expensive" — both can be healthy).
+- Large budget changes can alter delivery — use controlled increments, watch marginal economics rather than a universal 30% cutoff.
+- Comparing blended CPM to benchmarks without matching objective + placement + geo mix (Reels-heavy accounts look "cheap"; Feed-heavy US lead gen looks "expensive" — both can be healthy).
 - Optimizing for link clicks in Tier-3 geos → bot traffic.
-- Assuming a $50/day CPA holds at $500/day — warm audiences exhaust first; scale gradually.
-- UI naming drift: "Lowest cost"/"Cost cap"/"Minimum ROAS" in pre-2024 sources = "Highest volume"/"Cost per result goal"/"ROAS goal" now; "CBO" = "Advantage campaign budget"; "Advantage+ shopping" = former ASC.
+- Assuming a $50/day CPA holds at $500/day — warm audiences exhaust first, scale gradually.
+- UI naming drift: "Lowest cost"/"Cost cap"/"Minimum ROAS" (pre-2024) = "Highest volume"/"Cost per result goal"/"ROAS goal" now; "CBO" = "Advantage campaign budget"; "Advantage+ shopping" = former ASC.
 
 ## Sources
 

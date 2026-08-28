@@ -1,8 +1,5 @@
 # Authentication, Sessions & Access Control
 
-Password hashing (Argon2id), JWT (`jose`), sessions, RBAC/ownership middleware,
-timing-safe comparison, and JWT attack prevention.
-
 Related: `express.md` (rate limit auth endpoints) · `db.md` ·
 `headers-and-csp.md` (cookie flags).
 
@@ -25,7 +22,7 @@ async function verifyPassword(hash, password) {
 }
 ```
 
-Fallback (if argon2 native build fails): `bcrypt` with cost 12+.
+Fallback if argon2 native build fails: `bcrypt` with cost 12+.
 
 ## JWT (jose library)
 
@@ -58,7 +55,7 @@ Rules:
 - Always set `algorithms` whitelist (never allow `none`)
 - Short-lived access tokens (15m), longer refresh tokens (7d) in httpOnly cookie
 - Rotate keys periodically
-- Use RS256 (asymmetric) over HS256 for microservices
+- RS256 (asymmetric) over HS256 for microservices
 
 ## Session Security
 
@@ -89,7 +86,7 @@ function regenerateSession(req) {
 
 app.post('/login', async (req, res) => {
   // ... verify credentials ...
-  await regenerateSession(req);
+  await regenerateSession(req); // prevent session fixation
   req.session.userId = user.id;
   res.json({ ok: true });
 });
@@ -140,13 +137,11 @@ function safeCompare(a, b) {
 }
 ```
 
-Use for: API keys, webhook signatures, TOTP codes. Not needed for: `argon2.verify`, `bcrypt.compare` (built-in).
+Use for: API keys, webhook signatures, TOTP codes. Not needed for `argon2.verify` / `bcrypt.compare` (built-in).
 
 ## JWT Attack Prevention
 
 ```javascript
-const { SignJWT, jwtVerify } = require('jose');
-
 const { payload } = await jwtVerify(token, publicKey, {
   algorithms: ['RS256'],
   issuer: 'your-app',
@@ -154,12 +149,12 @@ const { payload } = await jwtVerify(token, publicKey, {
 });
 ```
 
-JWT attacks:
-- `alg: "none"` — remove signature entirely, some libs accept it
+Attacks:
+- `alg: "none"` — signature removed, some libs accept it
 - `alg: "HS256"` with RS256 public key — algorithm confusion
 - Weak secret brute-force: `hashcat -m 16500 jwt.txt rockyou.txt`
 - `kid` injection: `"kid": "../../dev/null"` → empty key → forge any token
-- `jku`/`x5u` injection: point to attacker's JWK Set URL
-- Expired token replay: server doesn't check `exp` claim
+- `jku`/`x5u` injection — point to attacker's JWK Set URL
+- Expired token replay — server doesn't check `exp`
 
-Defense: `jose` library with explicit `algorithms`, verify `iss`, `aud`, `exp` claims.
+Defense: `jose` with explicit `algorithms`; verify `iss`, `aud`, `exp`.

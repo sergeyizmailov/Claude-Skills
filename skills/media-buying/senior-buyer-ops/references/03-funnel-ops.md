@@ -23,17 +23,22 @@ where the chain silently breaks.
 
 ## WebView / in-app browser / Telegram / PWA
 
-- Ads open in the platform's IN-APP WebView (FB/IG), and TG links open TG's own
-  in-app browser. WebViews often strip third-party cookies / referrers → a JS
-  pixel or cookie-based tracker misfires. Prefer S2S/postback attribution; don't
-  rely on client-side pixels inside WebViews.
+- Ads open in the platform's IN-APP WebView (FB/IG). **Query string (`fbclid`)
+  survives IAB** — Meta appends it; field logs show `FBAN/FBIOS` / `FB_IAB/FB4A`
+  with `?fbclid=`. What does **not** survive is the **cookie jar**: WKWebView ≠
+  Safari/Chrome. `_fbc` stays in the WebView; “Open in Safari” is a new session.
+  Prefer S2S/CAPI (`fbc` from the query string) over a JS pixel that needs cookies.
+  iOS Link Tracking Protection (17+) strips `fbclid`/`gclid` in Mail, Messages,
+  Safari Private — Apple, not Meta. Do not put `fbclid={fbclid}` in Keitaro URL
+  Parameters (placeholder blocks capture).
 - PWA is WEB, not a native app: Pixel + CAPI + tracker postbacks + web
   attribution all apply — a PWA "install" is an add-to-home-screen, not a
   store install. Track it like web (carry fbclid/subid through, fire web events).
   An MMP/SDK is needed ONLY for a real native app or an app-store WebView wrapper
   — don't reach for MMP just because it's called a "PWA app" (casino playbook).
-- TG bot funnels: the join/deposit events come from the bot/backend postback,
-  not the browser — confirm that postback path, not the landing pixel.
+- TG bot / Mini App: Pixel inside Telegram WebView is unreliable. CAPI from the
+  bot/backend is the path. Short token in `start`/`startapp`, **never raw
+  `fbclid`** (64-byte / charset limits). Payload → `tracker-ops/03`.
 
 ## Domain / transport health (rotating grey domains)
 

@@ -18,7 +18,8 @@ maximum, so reserve a fixed EXPLORE quota (e.g. ~20-30% of test budget, a lever)
 - EXPLOIT (iterate winners): CONTROL (current best) vs CHALLENGERS descended
   from proven winners — same angle, new hook/format. Change ONE variable per
   variant (hook OR first frame OR CTA OR proof) so a win is attributable and
-  iterable. Promote only on the payout metric, not CTR.
+  iterable. Promote only on the payout metric, not CTR (small-sample promote
+  rule: measurement-experimentation-ops/01 § Comparing two assets).
 - EXPLORE (new concepts): a genuinely new angle changes hook + visual +
   narrative + proof at once — that's expected, don't force one-variable here.
   You're testing the ANGLE bet, not isolating a cause; isolate later if it wins.
@@ -61,7 +62,7 @@ budget and a higher bar; kill early stages fast, protect late-stage winners.
 Leading signals, per ad on the same audience: rising frequency with CTR / CVR
 decaying and CPA climbing = fatigue, not auction noise. Rotate to the next
 challenger from the backlog BEFORE the winner craters; don't edit the winning
-ad (a significant edit can re-enter learning, fb-grey-ops/04) — launch the
+ad (a significant edit can re-enter learning, meta-grey-ops/04) — launch the
 successor.
 
 ## Backlog & briefs (throughput is the bottleneck)
@@ -75,14 +76,20 @@ successor.
   playbook). A precise brief is the difference between one usable cut and ten
   rejects.
 
+## Comment ops (the comment thread is creative)
+
+On Meta, comments are a conversion surface, not a cleanup chore (practitioner
+practice, Comdrop-class tools): seed threads that EXTEND the creative —
+mini-stories, Q&A objection handling, controlled debate — and pin the answer the
+ad didn't give. A sterile thread (all negatives deleted) reads fake and wastes
+the surface. Native-post variant: run without the CTA button, link in the first
+pinned comment (sweeps technique; ~10× organic/viral reach claimed on product
+content [single source]). Budget comment ops as a production line item, same as
+cutting variants.
+
 ## Spy / creative intel (current 2026)
 
 - AdSpy — deepest FB/IG DB (comment + affiliate-network filters); best for grey.
 - AdHeart — FB/IG, strong in CIS grey scene.
-- BigSpy — multi-platform, free tier (budget recon).
-- PowerAdSpy — 7+ platforms in one.
 - Anstrex — native + push, rips landing/pre-lander pages (nutra pre-landers).
-- Meta Ad Library — free, official, but no spend/performance and no cloaked or
-  rejected ads → baseline recon only, not competitive truth.
-Use spy for angle discovery and prelander teardown; the winning execution is
-still yours to test.
+- Meta Ad Library — official, no spend/performance, no cloaked/rejected ads → baseline recon only.

@@ -1,9 +1,5 @@
 # SSRF & Prototype Pollution
 
-Server-side request forgery prevention (URL parsing, DNS resolution,
-private IP blocking, redirect handling) and prototype pollution defense
-(safe deep merge, `Object.create(null)`).
-
 Related: `express.md` · `uploads.md`.
 
 ## SSRF Prevention
@@ -37,19 +33,18 @@ function isPrivateIP(ip) {
 }
 ```
 
-SSRF bypass techniques attackers use:
+Bypass techniques:
 - `http://0x7f000001` (hex IP) → 127.0.0.1
 - `http://0177.0.0.1` (octal) → 127.0.0.1
 - `http://2130706433` (decimal) → 127.0.0.1
 - `http://localtest.me` → resolves to 127.0.0.1
 - `http://[::1]` → IPv6 loopback
-- Redirect-based: URL passes check, then 302 redirects to internal IP
+- Redirect-based: URL passes check, then 302 → internal IP
 - DNS rebinding: first resolve = public IP, second = 127.0.0.1
 - `http://evil.com@127.0.0.1` → userinfo bypass
 
 Defense: resolve DNS, check IP, disable redirects, re-check on every socket connect.
-For production: use a dedicated egress proxy (Smokescreen, ssrfproxy) that
-performs IP validation at connect-time — application-layer checks are racy.
+Production: dedicated egress proxy (Smokescreen, ssrfproxy) with connect-time IP validation — application-layer checks are racy.
 
 ## Prototype Pollution Prevention
 
@@ -80,12 +75,12 @@ function safeDeepMerge(target, source) {
   return target;
 }
 
-// SAFEST: use Object.create(null) for lookup objects
+// SAFEST: Object.create(null) for lookup objects
 const config = Object.create(null);
 ```
 
-Prototype pollution → RCE chain (real attacks):
+Pollution → RCE chain (real attacks):
 1. Pollute `__proto__.shell` or `__proto__.NODE_OPTIONS`
-2. Trigger child_process.spawn/exec/fork
+2. Trigger `child_process.spawn/exec/fork`
 3. Injected property overrides defaults → arbitrary command execution
 4. CVE-2026-33660 (n8n): prototype pollution in XML parser → RCE

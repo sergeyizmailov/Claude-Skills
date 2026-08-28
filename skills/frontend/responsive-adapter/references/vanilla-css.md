@@ -1,6 +1,7 @@
 # Vanilla CSS / CSS Modules — Responsive Patterns
 
-## Breakpoint strategy (CSS custom properties)
+## Breakpoint strategy (em in media queries)
+`em` in `@media` resolves against the BROWSER default font size (rem/px don't) — user font-size prefs scale breakpoints too.
 
 ```css
 :root {
@@ -11,11 +12,8 @@
   --bp-2xl: 100em;    /* 1600px — M3 Large→Extra-large */
 }
 
-/* Use in @media queries via PostCSS preset-env or manually */
 @media (min-width: 37.5em) { /* md */ }
 ```
-
-Use `em` for media queries (not `rem` or `px`) — `em` in a `@media` resolves against the browser default font size, so user font-size preferences scale breakpoints too.
 
 ## Reset / foundation (drop-in)
 
@@ -45,7 +43,7 @@ img, picture, video, canvas, svg {
 
 input, button, textarea, select {
   font: inherit;
-  font-size: 16px; /* iOS zoom prevention */
+  font-size: 16px;      /* iOS zoom prevention */
   min-block-size: 44px; /* touch target */
 }
 
@@ -61,7 +59,7 @@ p { text-wrap: pretty; max-inline-size: 65ch; }
 :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 ```
 
-## Container pattern (one-liner)
+## Container one-liner (no media queries)
 
 ```css
 .container {
@@ -69,10 +67,9 @@ p { text-wrap: pretty; max-inline-size: 65ch; }
   margin-inline: auto;
 }
 ```
+Narrow: `100% - 2rem` (32px gutters). Wide: caps at `75rem` (1200px).
 
-No media queries needed. At narrow viewports it's `100% - 2rem` (32px horizontal gutters). At wide viewports it caps at `75rem` (1200px).
-
-## Auto-fit RAM grid (the 320px-safe pattern)
+## Auto-fit RAM grid (320px-safe)
 
 ```css
 .grid {
@@ -81,8 +78,7 @@ No media queries needed. At narrow viewports it's `100% - 2rem` (32px horizontal
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 ```
-
-`min(100%, 16rem)` is the magic — at viewports narrower than 16rem (256px) the min collapses to 100%, eliminating horizontal scroll.
+`min(100%, 16rem)` — below 16rem (256px) min collapses to 100%, killing horizontal scroll.
 
 ## Container queries
 
@@ -91,13 +87,11 @@ No media queries needed. At narrow viewports it's `100% - 2rem` (32px horizontal
   container-type: inline-size;
   container-name: card;
 }
-
 @container card (min-width: 32rem) {
   .card { display: grid; grid-template-columns: 12rem 1fr; }
   .card__title { font-size: clamp(1.25rem, 4cqi, 1.75rem); }
 }
 ```
-
 Use `cqi` (not `cqw`) for writing-mode safety.
 
 ## Fluid type scale (Utopia-style)
@@ -123,18 +117,16 @@ h6 { font-size: var(--step-1); }
 small { font-size: var(--step--1); }
 ```
 
-## Sidebar layout (responsive grid)
+## Sidebar layout
 
 ```css
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
-
 @media (min-width: 64em) {  /* 1024px */
   .layout { grid-template-columns: 18rem minmax(0, 1fr); }
 }
-
 @media (max-width: 63.99em) {
   .sidebar {
     position: fixed;
@@ -149,25 +141,22 @@ small { font-size: var(--step--1); }
   .sidebar[data-open] { transform: translateX(0); }
 }
 ```
+Accessible drawer → prefer `<dialog>` — see `menus-drawers.md`.
 
-For accessible drawer behavior, prefer `<dialog>` — see `menus-drawers.md`.
-
-## Heydon Pickering's "every-layout" primitives
-
-Composable building blocks (every-layout.dev):
+## Every-layout primitives (Heydon Pickering, every-layout.dev) — responsiveness without media queries
 
 ```css
 /* Stack — vertical rhythm */
 .stack > * + * { margin-block-start: var(--space, 1rem); }
 
-/* Cluster — wrap inline items with consistent gap */
+/* Cluster — wrapping inline items */
 .cluster {
   display: flex; flex-wrap: wrap;
   gap: var(--gap, 1rem);
   align-items: center;
 }
 
-/* Switcher — switch to single column at threshold */
+/* Switcher — single column below 30rem threshold */
 .switcher {
   display: flex; flex-wrap: wrap;
   gap: var(--gap, 1rem);
@@ -175,7 +164,7 @@ Composable building blocks (every-layout.dev):
 .switcher > * {
   flex-grow: 1;
   flex-basis: calc((30rem - 100%) * 999);
-  /* once container < 30rem, basis goes negative-huge, forces wrap */
+  /* container < 30rem → basis goes negative-huge, forces wrap */
 }
 
 /* Center */
@@ -186,7 +175,7 @@ Composable building blocks (every-layout.dev):
   padding-inline: 1rem;
 }
 
-/* Sidebar — main + sidebar that stacks below threshold */
+/* Sidebar — stacks below threshold */
 .sidebar-layout { display: flex; flex-wrap: wrap; gap: 1rem; }
 .sidebar-layout > :first-child {
   flex-basis: 16rem;
@@ -199,9 +188,7 @@ Composable building blocks (every-layout.dev):
 }
 ```
 
-These primitives encode responsiveness without media queries.
-
-## When to reach for `@media` vs `@container`
+## `@media` vs `@container`
 
 | Use `@media` for | Use `@container` for |
 |------------------|----------------------|
@@ -211,10 +198,4 @@ These primitives encode responsiveness without media queries.
 | Print styles | Widget showing/hiding sub-views |
 | Image `srcset` `sizes` (no `@container` option) | Component-internal grid switches |
 
-Heuristic: if removing the component from the page would change what styles apply → `@container`. If only resizing the browser would → `@media`.
-
-## Sources
-- every-layout.dev (Heydon Pickering)
-- moderncss.dev (Stephanie Eckles)
-- ishadeed.com/article/responsive-design
-- web.dev/learn/css/container-queries
+Heuristic: removing component from page changes applicable styles → `@container`; only browser resize does → `@media`.

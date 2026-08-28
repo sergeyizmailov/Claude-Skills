@@ -1,71 +1,59 @@
 # Code patterns
 
-Copy-paste, framework-agnostic starting points, generalized from a real production storefront. Adapt token
-values to the chosen aesthetic — keep the *structure*.
-
----
+Copy-paste starting points. Adapt token values to the chosen aesthetic — keep the structure.
 
 ## Existing project integration
 
-Before pasting any pattern, map it to the current codebase:
+Map each pattern to the codebase first:
 
-- If tokens already exist, extend/rename these variables to match the project instead of adding a parallel token set.
-- If an icon wrapper already exists, add names to that wrapper instead of installing a second icon system.
-- If fonts already load in the root layout, update that flow instead of adding extra `<link>` tags in components.
-- If images already go through a framework pipeline, use that pipeline instead of raw `<picture>` snippets.
-- If the project is Astro/static, prefer `.astro` components plus scoped CSS and small progressive scripts over React-only primitives.
-- If the project already has Tailwind/theme tokens, translate these CSS variables into that system rather than mixing approaches.
+- Existing tokens → extend/rename these variables, never a parallel set.
+- Existing icon wrapper → add names to it, never a second icon system.
+- Fonts load in root layout → update that flow, no extra `<link>` in components.
+- Images go through a framework pipeline → use it, not raw `<picture>`.
+- Astro/static project → `.astro` + scoped CSS + small progressive scripts over React-only primitives.
+- Existing Tailwind/theme tokens → translate these CSS vars into that system, don't mix.
 
-Use these patterns as a **shape**, not as a forced visual theme.
+Use as **shape**, not forced theme.
 
 ---
 
 ## Tokens — semantic CSS custom properties
 
-Define once on `:root`; reference everywhere. Semantic names (surface/ink/brand/line/state), not raw colors.
-One dominant brand color + a sharp accent. Fluid scales via `clamp()`.
+Define once on `:root`; semantic names (surface/ink/brand/line/state), not raw colors. One dominant brand + sharp accent. Fluid scales via `clamp()`.
 
 ```css
 :root {
-  /* Surfaces (background layers, light → slightly darker) */
+  /* Surfaces (light → darker) */
   --bg: #ffffff;
   --bg-soft: #f6f7f9;
   --bg-card: #f3f4f6;
   --bg-card-hover: #eef0f3;
-
-  /* Ink (text, strong → faint) */
+  /* Ink (strong → faint) */
   --ink: #1f2430;
   --ink-2: #565d6d;
   --ink-3: #9aa1ae;
-  --on-brand: #ffffff;       /* text on top of the brand color */
-
-  /* Brand: ONE dominant + gradient + soft tint */
+  --on-brand: #ffffff;
+  /* Brand: ONE dominant + gradient + tint */
   --brand: #ff6b6b;
   --brand-strong: #fb5a5f;
   --brand-soft: #ffecec;
   --brand-grad: linear-gradient(135deg, #ff8e8e 0%, #fb5a5f 100%);
-
   /* Lines */
   --line: #e9ebef;
   --line-strong: #dde0e6;
-
-  /* Shadows — layered + brand-tinted (see Shadows section) */
+  /* Shadows — layered + brand-tinted (see Shadows) */
   --shadow-sm: 0 1px 2px rgba(31, 36, 48, 0.04);
   --shadow:    0 8px 28px -14px rgba(31, 36, 48, 0.18);
   --shadow-lg: 0 24px 60px -24px rgba(31, 36, 48, 0.28);
   --shadow-brand: 0 14px 30px -12px rgba(251, 90, 95, 0.5);
-
   /* State */
   --ok: #1fae6a;  --ok-soft: #e6f6ee;
   --warn: #d9892b; --warn-soft: #fbf0df;
-
-  /* Radii scale */
+  /* Radii */
   --r-xs: 8px; --r-sm: 12px; --r: 18px; --r-lg: 26px; --r-pill: 999px;
-
   /* Type */
   --font-sans: "Onest Variable", system-ui, sans-serif;     /* body */
   --font-display: "Unbounded", var(--font-sans);            /* headings */
-
   /* Fluid layout (Utopia-style) */
   --container: 1340px;
   --gutter: clamp(16px, 4vw, 48px);
@@ -73,7 +61,7 @@ One dominant brand color + a sharp accent. Fluid scales via `clamp()`.
 }
 ```
 
-For a full fluid type+space scale, generate tokens at https://utopia.fyi and paste them here.
+Full fluid type+space scale: generate at https://utopia.fyi, paste here (keep min/max in `rem` so zoom works).
 
 ---
 
@@ -106,7 +94,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 ## Icons — thin semantic wrapper (NEVER hand-draw)
 
-Map friendly names → library icon ids in one place, so usage stays clean and the set is swappable.
+Map friendly names → library icon ids in one place; set stays swappable.
 
 ### Astro (`astro-icon` + Iconify)
 
@@ -122,19 +110,17 @@ export default defineConfig({ integrations: [icon()] });
 
 ```astro
 ---
-// src/components/Icon.astro — UI/device icons from Solar (linear); brand marks from Simple Icons. No custom icons.
+// UI/device icons: Solar (linear); brand marks: Simple Icons. No custom icons.
 import { Icon as Iconify } from "astro-icon/components";
 interface Props { name: string; size?: number; class?: string; }
 const { name, size = 24, class: cls = "" } = Astro.props;
 const map: Record<string, string> = {
-  // brand marks
   telegram: "simple-icons:telegram", instagram: "simple-icons:instagram",
-  // UI / devices — Solar linear
   search: "solar:magnifer-linear", menu: "solar:hamburger-menu-linear",
   cart: "solar:cart-large-2-linear", check: "solar:check-circle-linear",
   "arrow-right": "solar:arrow-right-linear", chat: "solar:chat-round-linear",
 };
-const iconName = map[name] ?? name; // pass-through allows raw "solar:..." ids too
+const iconName = map[name] ?? name; // pass-through allows raw "solar:..." ids
 ---
 <Iconify name={iconName} class={`icon ${cls}`} width={size} height={size} />
 ```
@@ -165,7 +151,7 @@ export function Icon({ name, size = 24, className = "" }:
 <iconify-icon icon="solar:magnifer-linear" width="24" height="24"></iconify-icon>
 ```
 
-> Browse/copy icon ids at https://icon-sets.iconify.design/solar/. Stay in one set.
+> Browse/copy ids: https://icon-sets.iconify.design/solar/. Stay in one set.
 
 ---
 
@@ -178,7 +164,7 @@ npm i @fontsource-variable/onest @fontsource/unbounded
 ```
 
 ```js
-// import once in the root layout — only the weights you use
+// import once in root layout — only the weights you use
 import "@fontsource-variable/onest/index.css"; // variable: all weights, one file
 import "@fontsource/unbounded/400.css";
 import "@fontsource/unbounded/600.css";
@@ -193,7 +179,7 @@ import "@fontsource/unbounded/700.css";
   href="https://fonts.bunny.net/css?family=onest:400,500,600|unbounded:400,600,700&display=swap">
 ```
 
-Then wire them into `--font-sans` / `--font-display` tokens above.
+Wire into `--font-sans` / `--font-display`.
 
 ---
 
@@ -204,8 +190,6 @@ h1 { font-size: clamp(2rem, 1.2rem + 4vw, 3.5rem); }       /* min, fluid, max */
 .section { padding-block: clamp(40px, 6vw, 72px); }
 .section-head h2 { font-size: clamp(1.5rem, 3.2vw, 2.1rem); }
 ```
-
-Generate a full coherent scale at https://utopia.fyi (keep min/max in `rem` so zoom still works).
 
 ---
 
@@ -231,7 +215,7 @@ Generate a full coherent scale at https://utopia.fyi (keep min/max in `rem` so z
 }
 .badge-ok { color: var(--ok); background: var(--ok-soft); }
 
-/* eyebrow: small uppercase display label above a heading — adds editorial polish */
+/* eyebrow: small uppercase display label above a heading */
 .eyebrow {
   font-family: var(--font-display); font-size: .72rem; font-weight: 600;
   letter-spacing: .16em; text-transform: uppercase; color: var(--brand-strong);
@@ -242,13 +226,13 @@ Generate a full coherent scale at https://utopia.fyi (keep min/max in `rem` so z
 
 ## Shadows — layered + brand-tinted
 
-Flat single shadows look cheap. Stack layers and tint slightly toward the brand for depth.
+Never a single flat shadow; tint toward brand.
 
 ```css
-.card { box-shadow: var(--shadow); }            /* token from :root */
+.card { box-shadow: var(--shadow); }
 .card:hover { box-shadow: var(--shadow-lg); }
 
-/* layered example (generate at joshwcomeau.com/shadow-palette) */
+/* layered (generate at joshwcomeau.com/shadow-palette) */
 .elevated {
   box-shadow:
     0 0.5px 0.6px rgba(31,36,48,0.10),
@@ -265,7 +249,7 @@ Flat single shadows look cheap. Stack layers and tint slightly toward the brand 
 ```css
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .reveal { animation: rise .6s cubic-bezier(.22, 1, .36, 1) both; }
-/* stagger a hero/section: */
+/* stagger: */
 .reveal:nth-child(1) { animation-delay: .00s; }
 .reveal:nth-child(2) { animation-delay: .08s; }
 .reveal:nth-child(3) { animation-delay: .16s; }
@@ -279,7 +263,7 @@ Flat single shadows look cheap. Stack layers and tint slightly toward the brand 
 }
 ```
 
-For scroll reveals without JS, use native scroll-driven animations:
+Scroll reveals without JS — native scroll-driven animations:
 
 ```css
 @media (prefers-reduced-motion: no-preference) {
@@ -287,13 +271,13 @@ For scroll reveals without JS, use native scroll-driven animations:
 }
 ```
 
-React: use **Motion** (`motion.dev`). Scroll storytelling / SVG morph: **GSAP** (free).
+React: **Motion** (`motion.dev`). Scroll storytelling / SVG morph: **GSAP** (free).
 
 ---
 
 ## Ecommerce product card stability
 
-Catalog cards need stable dimensions so mixed product names and image aspect ratios do not shift the grid.
+Stable dimensions so mixed names/aspect ratios don't shift the grid.
 
 ```css
 .product-grid {
@@ -301,7 +285,6 @@ Catalog cards need stable dimensions so mixed product names and image aspect rat
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: clamp(14px, 2vw, 24px);
 }
-
 .product-card {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -311,46 +294,19 @@ Catalog cards need stable dimensions so mixed product names and image aspect rat
   background: var(--bg);
   overflow: hidden;
 }
-
 .product-media {
   aspect-ratio: 1 / 1;
   padding: clamp(12px, 2vw, 18px);
   background: var(--bg-card);
 }
-
-.product-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.product-body {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  padding: 16px;
-}
-
-.product-title {
-  min-width: 0;
-  font-weight: 650;
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.product-spec {
-  color: var(--ink-3);
-  font-size: 0.9rem;
-}
-
-.product-price {
-  margin-top: auto;
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-}
+.product-media img { width: 100%; height: 100%; object-fit: contain; }
+.product-body { display: grid; align-content: start; gap: 8px; padding: 16px; }
+.product-title { min-width: 0; font-weight: 650; line-height: 1.25; overflow-wrap: anywhere; }
+.product-spec { color: var(--ink-3); font-size: 0.9rem; }
+.product-price { margin-top: auto; font-weight: 750; font-variant-numeric: tabular-nums; }
 ```
 
-Test with long product names, missing images, different price lengths, and uneven grid counts.
+Test with: long names, missing images, varied price lengths, uneven grid counts.
 
 ---
 
@@ -379,10 +335,10 @@ Always set `width`/`height` (no layout shift); eager-load only the hero/LCP imag
   <img src="hero-800.jpg" alt="…" width="800" height="600"
     fetchpriority="high" decoding="async">
 </picture>
-<!-- non-hero images: add loading="lazy", drop fetchpriority -->
+<!-- non-hero: loading="lazy", drop fetchpriority -->
 ```
 
-Astro: `<Picture formats={['avif','webp']} priority />` from `astro:assets`. React/Next: `next/image` with `formats: ['image/avif','image/webp']` in config. Build batch: **Sharp**.
+Astro: `<Picture formats={['avif','webp']} priority />` (`astro:assets`). React/Next: `next/image` + `formats: ['image/avif','image/webp']` in config. Build batch: **Sharp**.
 
 ---
 
@@ -390,17 +346,17 @@ Astro: `<Picture formats={['avif','webp']} priority />` from `astro:assets`. Rea
 
 ### OKLCH tokens (perceptually uniform) + tinting
 ```css
-:root { --brand: oklch(0.62 0.19 18); }                 /* L chroma hue */
+:root { --brand: oklch(0.62 0.19 18); }
 .btn-soft { background: color-mix(in oklch, var(--brand) 14%, white); }
 ```
 
-### Balanced headings (one line, big win)
+### Balanced headings
 ```css
-h1, h2, h3 { text-wrap: balance; }   /* prevents ugly single-word last lines */
-p, li      { text-wrap: pretty; }    /* progressive enhancement */
+h1, h2, h3 { text-wrap: balance; }   /* no single-word last lines */
+p, li      { text-wrap: pretty; }
 ```
 
-### Animated gradient via @property (CSS can't interpolate raw gradients without this)
+### Animated gradient via @property (raw gradients can't interpolate without this)
 ```css
 @property --stop { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
 .cta { background: linear-gradient(120deg, var(--brand) var(--stop), var(--brand-strong));
@@ -414,7 +370,7 @@ p, li      { text-wrap: pretty; }    /* progressive enhancement */
 @starting-style { .popover { opacity: 0; transform: translateY(-8px); } }
 ```
 
-### Glassmorphism (use sparingly, needs a busy bg behind it)
+### Glassmorphism (sparingly; needs busy bg behind it)
 ```css
 .glass {
   background: color-mix(in srgb, var(--bg) 55%, transparent);
@@ -423,7 +379,7 @@ p, li      { text-wrap: pretty; }    /* progressive enhancement */
 }
 ```
 
-### Same-document View Transition (morph between states) — progressive
+### Same-document View Transition — progressive
 ```js
 function update(dom) {
   if (!document.startViewTransition) return dom();   // graceful fallback

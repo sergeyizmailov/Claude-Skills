@@ -1,6 +1,6 @@
 ---
 name: meta-ads
-description: "Senior Meta (FB/IG) ads: plan, launch, audit, diagnose, optimize. Clean-marketing layer — grey infra/survival is fb-grey-ops, trackers/metrics are tracker-ops."
+description: "Senior Meta (FB/IG) ads: plan, launch, audit, diagnose, optimize. Clean-marketing layer — grey infra/survival is meta-grey-ops, trackers/metrics are tracker-ops."
 ---
 
 # Meta Ads
@@ -109,24 +109,20 @@ eligibility/billing -> delivery -> auction -> attention -> click quality
 
 ## Guardrails
 
-- Pixel remains the web data source; datasets group events.
-- Do not assume the retired location-presence selector exists.
-- Special Ad Audiences are discontinued.
-- Interests/lookalikes and Advantage+ availability vary; verify the live flow.
-- `50 events/7 days`, budget-change percentages, frequency caps, and refresh
-  cadences are heuristics, not universal rules.
-- “Warmed” assets do not guarantee approval or payment trust.
-- Card verification, balance, payment eligibility, and restriction are
-  separate states.
-- Portfolio membership, ownership, and creation quota are separate. `Leave`
-  does not equal deletion. Support may enforce a profile-specific lifetime
-  creation quota; preserve Page/Instagram, inspect profile Account Status, and
-  use support or a real authorized colleague rather than replacement profiles.
-- Treat support replies as account-specific evidence. Escalate contradictions
-  between support, public documentation, and the live UI instead of inventing a
-  universal rule.
-- System User tokens are bearer secrets. Never expose them in chat, URLs,
-  screenshots, repositories, or logs.
+Tripwires that must fire before any reference is read:
+
+- Do not assume the retired location-presence selector exists; Special Ad Audiences are
+  discontinued (full retired-concepts table → `00` §4).
+- Pixel is the web data source; datasets group events (`08`). Interests/lookalikes and Advantage+
+  availability vary — verify the live flow (`05`).
+- `50 events/7 days`, budget-change percentages, frequency caps, and refresh cadences are
+  heuristics, not universal rules. Hard limits consolidated in `00` §4.2.
+- Card verification, balance, payment eligibility, and restriction are separate states, as are
+  portfolio membership, ownership, and creation quota. `Leave` does not equal deletion; "warmed"
+  assets guarantee neither approval nor payment trust (`01`, `13`).
+- Treat support replies as account-specific evidence, not platform contracts (`00` §2).
+- System User tokens are bearer secrets. Never expose them in chat, URLs, screenshots,
+  repositories, or logs.
 - Do not delete/rebuild assets or profiles to evade enforcement.
 
 ## Output
@@ -136,5 +132,6 @@ correct level, measurement window, stop/rollback conditions, and remaining
 uncertainty. Use cases as mechanism analogies, not outcome promises.
 
 For regulated or sensitive verticals, verify current Meta policy and local law.
-Never recommend cloaking, account farming, fabricated identities, or bypassing
-review, billing, or enforcement.
+Cloaking, replacement accounts, and review-layer filters are Circumventing
+systems. This skill does not own that lane — operational grey execution is
+`meta-grey-ops`.

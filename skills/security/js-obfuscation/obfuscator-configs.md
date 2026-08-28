@@ -1,14 +1,8 @@
 # javascript-obfuscator Configs & CLI
 
-## Install
+Install: `npm install javascript-obfuscator -g`
 
-```bash
-npm install javascript-obfuscator -g
-```
-
-## Pipeline: Terser → javascript-obfuscator
-
-Always minify first, then obfuscate. Cleaner input = better output.
+Pipeline: Terser first, then obfuscate — cleaner input = better output.
 
 ```bash
 npx terser input.js --compress --mangle --output minified.js
@@ -60,7 +54,7 @@ javascript-obfuscator input.js --output out.js \
 
 ## Maximum (anti-reversing, anti-analysis)
 
-~3-5x runtime slowdown, ~200% file size increase. `rc4` is 30-50% slower than `base64` but much harder to reverse.
+~3-5x runtime slowdown, ~200% file size increase. `rc4` encoding: 30-50% slower than `base64`, much harder to reverse.
 
 ```javascript
 {

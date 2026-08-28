@@ -83,6 +83,10 @@ Common scopes:
 | Read connected Instagram professional identity | `instagram_basic` |
 | Catalog commerce work | `catalog_management`, only when needed |
 
+**Naming, from 2026-05-04:** the feature is "Marketing API Access Tier";
+**Standard → Limited**, **Advanced → Full**. Both names appear below and in Meta's
+own older docs — they are the same two tiers. [official: Meta developer blog]
+
 Permission names and combinations are product- and version-dependent. Do not
 request every available permission “just in case.” For an app managing only its
 own business's ad accounts, Meta's official Marketing API collection states
@@ -97,20 +101,7 @@ make token automation easier.
 
 ## 3. Token security
 
-- Never paste a live token into chat, a prompt, source code, shell history,
-  screenshots, issue trackers, URLs, or query strings.
-- Store it in an OS keychain, encrypted secret manager, or protected runtime
-  variable. Prefer `Authorization: Bearer ...` over `access_token=` in a URL.
-- Do not print tokens, request headers, environment dumps, paging URLs, or full
-  API responses that may echo credentials.
-- Generate separate tokens per integration when practical so one can be rotated
-  without breaking everything.
-- Use the shortest workable lifetime. A non-expiring token needs an owner,
-  inventory, access review, rotation procedure, and incident response.
-- If a token was exposed, revoke/rotate it before spend. Check dependencies
-  first: `Revoke tokens` can affect more than the token currently visible.
-- Never place real tokens, app secrets, card data, or personal identifiers in
-  this skill or its examples.
+Generic token hygiene (never paste/print/expose tokens; store in a secret manager) is in SKILL.md guardrails — not repeated here. Non-generic: generate separate tokens per integration when practical so one can be rotated without breaking everything; if a token was exposed, revoke/rotate it before spend — and check dependencies first, since `Revoke tokens` can affect more than the token currently visible.
 
 ## 4. Readiness tests
 
@@ -306,8 +297,9 @@ in Account Quality and by a paused write probe.
    timestamps, and screenshots. Record only the card's last four digits.
 4. Correct the underlying issue before requesting review.
 5. Use the review/contact path shown for that asset. Avoid duplicate requests.
-6. If support calls the decision final, preserve the case and do not bypass it
-   with replacement accounts, identities, cloaking, or asset hopping.
+6. If support calls the decision final, preserve the case. Clean lane: do not
+   bypass it from this skill. Replacement / cloaking / asset hopping is
+   `meta-grey-ops`.
 
 Treat support replies as official for the named account, not as universal
 product documentation. Automated or first-line replies can conflict with the
@@ -372,26 +364,7 @@ details, legal declarations, or unrestricted spend.
 
 ## 12. Observed post-mortem
 
-**Evidence: account-specific operational observation, not a universal Meta rule.**
-
-- A new owned portfolio connected a Page, Instagram professional account,
-  dataset, app, System User, and token. Paused campaign objects could be partly
-  prepared.
-- A card/top-up attempt failed. A later replacement card was verified and made
-  default, while Billing showed zero balance/no payment due.
-- The ad account remained restricted, API writes still failed, and support
-  reported that the payment method was not eligible for self-verification.
-- Repeated token regeneration did not solve the asset/account restriction.
-
-Transferable lessons:
-
-1. Verify payment-method eligibility and Account Quality before building the
-   full campaign.
-2. Run a minimal paused write and Instagram-identity probe early.
-3. Separate a failed transaction, payable balance, card verification, and
-   account restoration.
-4. Preserve paused drafts while resolving access; refresh schedules afterward.
-5. Do not keep swapping cards or rebuilding portfolios to bypass enforcement.
+Full post-mortem → `10-practical-case-library.md` §6G (technical-readiness pattern; that section's workflow pointer returns here).
 
 ## 13. Sources and uncertainty
 

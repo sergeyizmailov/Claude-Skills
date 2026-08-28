@@ -1,269 +1,155 @@
 ---
 name: responsive-adapter
-description: Take an existing landing page, admin panel, dashboard, or any web page that is not responsive (or only partially responsive) and make it fully adaptive across every real viewport width from 320px phones up to 2560px+ widescreens — without changing the visual design or brand. Triggers on requests to make a page responsive, fix mobile layout, fix breakpoints, adapt a landing or admin to phones / tablets / desktops / widescreens, or symptom descriptions like horizontal scroll, elements overflowing, text unreadable on mobile, sidebar broken on tablet, empty space on widescreen. Use even when the user only describes the symptom and never says the word "responsive" — adapting layouts to viewports is what this skill does. Performs a static anti-pattern scan, applies fixes using modern CSS primitives (clamp, container queries, dvh/svh/lvh, aspect-ratio, grid auto-fit), then verifies in a real browser at the device matrix and reports remaining issues.
+description: Make an existing landing page, admin panel, dashboard, or any non-responsive page work at every viewport from 320px to 2560px+ without changing the visual design. Triggers on requests to make a page responsive, fix mobile layout or breakpoints, adapt a landing or admin to phones / tablets / widescreens, and on symptoms alone — horizontal scroll, elements overflowing, text unreadable on mobile, sidebar broken on tablet, empty space on widescreen — even when the word "responsive" is never used.
+risk: low
+source: custom
+date_added: "2026-05-12"
 ---
 
 # Responsive Adapter
 
-You are a **responsive-layout engineer**. Your job: take a page that someone already designed and built, and make it work at every real viewport width from **320px to 2560px+** without changing the visual identity. "Works" has measurable criteria — see Phase 4 verification checklist.
+> `$SKILL_DIR` = this SKILL.md's directory; set once per session. All script paths are relative to it.
 
-The visual *style* (colors, typography choices, brand, hierarchy, decorative elements that fit the screen) stays. The *layout* adapts: stacks columns on mobile, collapses sidebars to drawers, switches dense tables to cards or scroll, fluid-scales typography, and uses modern CSS primitives (`clamp`, container queries, `dvh`/`svh`, `aspect-ratio`, `grid auto-fit`) to avoid hard-coded breakpoint hell.
+The desktop visual is the source of truth; every other width is a graceful adaptation — layout adapts, style does not. Fixing what wasn't broken on responsiveness grounds is scope creep — report it, don't touch it.
 
-## Core principle: preserve, don't redesign
-
-**The desktop visual is the source of truth. Every other width is a graceful adaptation of it.** Never re-pick fonts, never change the color system, never invent new components, never reflow content the designer wouldn't recognize. You are not redesigning — you are making the existing design hold up under stress at every viewport.
-
-If you find yourself "improving" something that wasn't broken on responsiveness grounds, stop. That's scope creep. Mention it in the report, don't touch it.
-
-## What you may and may not change
+## Allowed vs forbidden
 
 | Allowed | Forbidden |
 |---|---|
 | Any CSS / Tailwind utility class | Color palette, brand colors |
 | Adding `<meta name="viewport">` if missing | Font families |
-| Wrapping elements (`<div class="overflow-x-auto">` around a wide table) | Iconography, illustrations, content |
-| Adding `hidden md:block` / `md:hidden` toggle for an off-canvas menu | New components, redesigns of existing ones |
-| A small hamburger toggle (≤15 lines, or native `<dialog>`) | Replacing established UI library with another |
-| Restructuring grid columns (`grid-cols-3` → `grid-cols-1 md:grid-cols-3`) | Removing sections that "don't fit" — adapt them instead |
-| Replacing fixed `px` widths with fluid units | Changing copy / wording |
-| Adding `aria-label` where mobile UX needs it for an icon button | Heavy refactor beyond what responsiveness demands |
+| Wrapping elements (`overflow-x-auto` around a wide table) | Iconography, illustrations, content, copy |
+| `hidden md:block` / `md:hidden` toggles for off-canvas menu | New components or redesigns of existing ones |
+| A small hamburger toggle (≤15 lines, or native `<dialog>`) | Swapping the established UI library |
+| Restructuring grid columns (`grid-cols-3` → `grid-cols-1 md:grid-cols-3`) | Removing sections that "don't fit" — adapt them |
+| Replacing fixed `px` widths with fluid units | Refactor beyond what responsiveness demands |
+| `aria-label` where mobile UX needs it for an icon button | |
 
-Rule of thumb: if someone takes a desktop screenshot before and after, they should be indistinguishable except where you intentionally stacked or collapsed.
+Desktop screenshots before and after must be indistinguishable except where you intentionally stacked or collapsed.
 
-## Recommended breakpoint set (Material 3-aligned)
+## Breakpoints (Material 3-aligned)
 
 ```
-xs:  320px   — ultra-small, foldable cover
-sm:  390px   — iPhone baseline (covers iPhone 12-16)
-md:  600px   — M3 Compact→Medium (iPad mini portrait, large phone landscape)
-lg:  840px   — M3 Medium→Expanded (iPad portrait, foldable inner)
-xl:  1200px  — M3 Expanded→Large (laptop / large tablet landscape)
-2xl: 1600px  — M3 Large→Extra-large (desktop)
+xs 320  — ultra-small, foldable cover
+sm 390  — iPhone baseline (12–16)
+md 600  — M3 Compact→Medium (iPad mini portrait, phone landscape)
+lg 840  — M3 Medium→Expanded (iPad portrait, foldable inner)
+xl 1200 — M3 Expanded→Large (laptop)
+2xl 1600 — M3 Large→XL (desktop)
 ```
 
-If the project already uses a different breakpoint system (default Tailwind 640/768/1024/1280/1536, or Bootstrap-style), **extend it, don't replace it**. Introducing a second parallel system creates a maintenance nightmare. Adapt the recommended logic to whatever exists.
+If the project already has a system (Tailwind 640/768/1024/1280/1536, Bootstrap), **extend it, never run a second one in parallel**.
 
-## Workflow (5 phases — run in order)
+## Phase 1 — Discover
 
-Each phase has a clear exit criterion. Finish the phase, then move to the next. Don't interleave.
+1. Identify project root; ask once if unstated.
+2. Detect stack per file — `.html` + `.css` → vanilla (`references/vanilla-css.md`); `tailwind.config.*` / `@tailwind` / `md:` classes → Tailwind (`references/tailwind.md`); `styled-components` / `@emotion` / `.styled.ts` → CSS-in-JS (`references/css-in-js.md`); `*.module.css` → treat as vanilla. Mixes are common.
+3. Enumerate pages/routes in scope.
+4. Note the existing breakpoint conventions.
+5. Open at 1440px via `agent-browser` and capture the **baseline screenshot** — the visual contract.
 
-### Phase 1 — Discover
+**Exit:** stack per file, file list, breakpoint conventions, baseline screenshot.
 
-Detect what you're working with before you touch anything.
-
-1. **Identify the project root.** If the user didn't say, ask once.
-2. **Detect the stack.** Look at file extensions, `package.json`, imports:
-   - `.html` + `<style>` or `<link>` to `.css` → **vanilla** → read `references/vanilla-css.md`
-   - `tailwind.config.*`, `@tailwind`, or `class="... md:..."` patterns → **Tailwind** → read `references/tailwind.md`
-   - `styled-components`, `@emotion`, `.styled.ts` → **CSS-in-JS** → read `references/css-in-js.md`
-   - `*.module.css` → CSS Modules (treat as vanilla)
-   - Mix is common — record what each file uses.
-3. **Enumerate pages/components in scope.** For a single HTML file: just that file. For a Next.js project: `app/` or `pages/` routes. For an admin: each route under the panel.
-4. **Note the existing breakpoint system** if any. Don't introduce a parallel one — extend the existing one.
-5. **Open the page in a browser** (via the `agent-browser` skill or a dev server the user is running) at desktop width 1440px and capture a **baseline screenshot**. This is the visual contract — every later screenshot must preserve its spirit.
-
-**Exit criterion:** you can list (a) stack per file, (b) every file you will touch, (c) the existing breakpoint conventions, (d) you have a desktop baseline screenshot.
-
-### Phase 2 — Static scan
-
-Before fixing anything, find every anti-pattern in the code. The bundled script does most of the grep work:
+## Phase 2 — Static scan
 
 ```bash
-bash ~/.claude/skills/responsive-adapter/scripts/scan.sh <project-root>
+bash $SKILL_DIR/scripts/scan.sh <project-root>
 ```
 
-It outputs a structured issue list grouped by severity (CRITICAL / MAJOR / MINOR) with file:line references. Read `references/anti-patterns.md` for the full catalog explaining each pattern and its fix.
+Outputs issues by severity with file:line. Full catalog and fixes: `references/anti-patterns.md`.
 
-Critical things the scan catches:
+Caught: **A1** missing/broken viewport meta · **A2** `maximum-scale=1` / `user-scalable=no` (WCAG 1.4.4) · **A3** fixed `width: Npx` / large `min-width` · **A4** inputs `font-size < 16px` (iOS Safari auto-zoom, still present in iOS 18) · **A5** `100vh` without `dvh`/`svh` · **A8** no fluid-image baseline · **A9** bottom-fixed without `safe-area-inset-bottom` · **A13** `100vw` (includes scrollbar) · **A14** `overflow: hidden` on body.
 
-- **A1** — missing/broken `<meta name="viewport">`
-- **A2** — `maximum-scale=1` / `user-scalable=no` (WCAG 1.4.4 violation)
-- **A3** — fixed `width: Npx` / large `min-width` blocking shrinkage
-- **A4** — inputs with `font-size < 16px` (iOS Safari auto-zoom on focus, still broken as of iOS 18)
-- **A5** — `100vh` without `dvh`/`svh` fallback (mobile URL-bar issue)
-- **A8** — no fluid-image baseline rule
-- **A9** — `position: fixed` bottom without `safe-area-inset-bottom`
-- **A13** — `100vw` (includes scrollbar — may overflow)
-- **A14** — `overflow: hidden` on body (masking root cause)
+Inspect manually: tables without an `overflow-x: auto` ancestor; sidebars always rendered open; hover-only menus without `:focus-within`; tap targets (WCAG 2.2 SC 2.5.8 AA floor 24×24, ship target 44×44 — `references/touch-targets.md`).
 
-In addition, manually inspect for:
+**Exit:** written issue list by severity with file:line.
 
-- Tables not wrapped in `overflow-x: auto` ancestor
-- Sidebars/nav always rendered open
-- Hover-only menus without `:focus-within` fallback (touch device hostility)
-- Tap targets — WCAG 2.2 SC 2.5.8 AA floor is 24×24 CSS px; ship target is 44×44 (matches HIG / WCAG 2.5.5 AAA). See `references/touch-targets.md` for the full nuance (inline-link exception, spacing exception, MD3 48dp).
+## Phase 3 — Apply fixes
 
-**Exit criterion:** written issue list grouped by severity with file:line references.
+**Rule A:** modern primitives, not breakpoint salad — `clamp()`, `min()`/`max()`, container queries, `dvh/svh/lvh`, `aspect-ratio`, `grid auto-fit/minmax` (`references/modern-primitives.md`).
+**Rule B:** follow the idioms of each file's stack reference from Phase 1.
 
-### Phase 3 — Apply fixes
+Order matters — earlier fixes prevent later breakage:
 
-Two rules govern the fixes:
+1. **Foundation** — viewport meta with `viewport-fit=cover`, `box-sizing: border-box`, `-webkit-text-size-adjust: 100%`, base `font-size: 100%`, `overflow-x: clip` on html (never `hidden`, see A14), `img, svg, video { max-inline-size: 100%; block-size: auto; }`.
+2. **Fluid type** — `clamp(MIN_rem, fluid_with_rem_component, MAX_rem)`, WCAG-safe `MAX ≤ 2.5 × MIN`. Never pure `vw` in the middle term — it stops responding to zoom: `clamp(1rem, 0.875rem + 1vw, 2rem)`. Formula and scales: `references/fluid-typography.md`.
+3. **Containers** — `width: Npx` → `max-width: Npx; width: 100%` + `padding-inline`; centered: `inline-size: min(100% - 2rem, 1280px)`.
+4. **Layout primitives** — `grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));` — the `min(100%, …)` is what makes 320px safe.
+5. **Breakpoint adaptations** — stack columns, hide decorative side elements, sidebar → off-canvas drawer (`references/menus-drawers.md`), tables → scroll wrapper or cards (`references/admin-patterns.md`).
+6. **Mobile nav** — prefer native `<dialog>` + `showModal()`: focus management, Escape, focus trap, top layer, `::backdrop` for free.
+7. **Touch** — tap targets ≥44px at touch widths, inputs ≥16px.
+8. **Safe areas** — `max(12px, env(safe-area-inset-bottom))` on bottom-fixed elements; requires `viewport-fit=cover`. See `references/platform-quirks.md`.
+9. **Edge widths** — cap main content (`max-w-[1400px] mx-auto`) so ≥1920px isn't empty stretch; at 320px verify no `min-width > viewport − 2 × padding`.
+10. **Query choice** — `@media` for app shell, OS preferences, `srcset sizes`, print. `@container` for reusable components adapting to their slot. Heuristic: moving the component to another slot changes styles → `@container`.
 
-**Rule A: use modern primitives, not breakpoint salad.** Modern CSS lets you solve most adaptivity with `clamp()`, `min()`/`max()`, container queries, `dvh/svh/lvh`, `aspect-ratio`, `grid auto-fit/minmax` — *without* writing five media queries per component. See `references/modern-primitives.md`.
+Then diff your own changes against the forbidden list. Anything that matches — revert.
 
-**Rule B: stack-appropriate patterns.** Open the reference for the stack each file uses (Tailwind / vanilla / CSS-in-JS — see Phase 1) and follow its idioms.
+**Exit:** every Phase-2 issue fixed or marked "won't fix — <reason>", no forbidden changes.
 
-Order of fixes (earlier fixes prevent later breakage):
+## Phase 4 — Browser verification
 
-1. **Foundation** — viewport meta with `viewport-fit=cover`, `box-sizing: border-box`, `-webkit-text-size-adjust: 100%`, base `font-size: 100%` (16px), `overflow-x: clip` on html (NOT hidden — see anti-patterns A14), fluid-image rule `img, svg, video { max-inline-size: 100%; block-size: auto; }`.
+Static scans miss computed layouts, JS-driven UI, font fallbacks, real iOS behavior — non-negotiable: CSS that diffs clean is not a page that works at 320px.
 
-2. **Fluid typography** — replace hard-coded heading sizes with `clamp(MIN_rem, fluid_with_rem_component, MAX_rem)`. WCAG-safe rule: `MAX ≤ 2.5 × MIN`. See `references/fluid-typography.md` for the canonical formula and Utopia-style scales.
+Serve the page (`python3 -m http.server 8000` or dev script), screenshot via `agent-browser` at the minimum matrix (full list: `references/device-matrix.md`):
 
-3. **Container sizing** — replace any `width: Npx` with `max-width: Npx; width: 100%;` and sensible `padding-inline`. Use `inline-size: min(100% - 2rem, 1280px)` for centered containers (one-liner replaces `max-width + padding` + media queries).
+| 360×780 | 390×844 | 393×852 | 430×932 | 768×1024 | 1024×768 | 1440×900 | 1920×1080 |
+|---|---|---|---|---|---|---|---|
+| Android | iPhone 12–14 | iPhone 15/16 | Pro Max | iPad portrait | iPad landscape | designer baseline | Full HD |
 
-4. **Layout primitives** — wrap flex/grid with sane wrapping. Switch fixed grids to:
-   ```css
-   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-   ```
-   `min(100%, 280px)` is the magic that makes 320px viewports safe.
+Thorough QA adds 320, 884–984 (foldable inner — frequent breakage), 1280/1366, 1536, 2560/3440.
 
-5. **Breakpoint adaptations** — at small viewports: stack columns, hide decorative side elements (`hidden md:block`), collapse sidebar to off-canvas drawer (preferably native `<dialog>` — see `references/menus-drawers.md`), switch tables to scroll wrapper or card transformation (see `references/admin-patterns.md`).
+Check each screenshot for:
 
-6. **Mobile nav** — if there's no mobile toggle, prefer native `<dialog>` + `showModal()`. It gives you focus management, Escape, focus trap, top-layer rendering, and `::backdrop` for free. See `references/menus-drawers.md` for the drop-in pattern.
+| Category | Checks |
+|---|---|
+| Layout | No horizontal scrollbar, no bleed past viewport, nothing cut off behind another element |
+| Typography | Body ≥14px effective, inputs ≥16px, heading hierarchy intact |
+| Tap targets | ≥24×24 with ≥8px gap (AA floor); 44×44 at ≤1024. Inline text links exempt |
+| Density | Columns stacked, sidebar collapsed ≤768, tables scrolling or carded |
+| ≥1920 | Content not stretched edge-to-edge, no vast empty regions |
+| 320 | No `min-width > viewport − 2 × padding`; hero text not gigantic from clamp overshoot |
+| Interactive | Open modal/menu/drawer at mobile widths and re-screenshot; confirm Escape, backdrop click, and close button all work |
 
-7. **Touch & tap** — ensure tap targets ≥ 44 px on touch widths. Inputs ≥ 16 px font-size. See `references/touch-targets.md`.
+Also re-screenshot 1440px and compare to the Phase-1 baseline — a mobile-focused request must not regress desktop.
 
-8. **Safe areas** — pad bottom-fixed elements with `max(12px, env(safe-area-inset-bottom))`. Requires `viewport-fit=cover` in viewport meta. See `references/platform-quirks.md`.
+**Exit:** a screenshot per matrix width, with annotated issues for failures.
 
-9. **Edge widths** — at ultra-wide (≥1920px) the page often looks empty. Use `max-width` on main content (e.g. `max-w-[1400px] mx-auto`) so content doesn't stretch infinitely. At 320px verify nothing has `min-width` larger than `viewport - 2 × padding`.
-
-10. **Component-level vs page-level queries:**
-    - **`@media`** for app shell, OS preferences (`prefers-color-scheme`, `prefers-reduced-motion`), image `srcset sizes`, print.
-    - **`@container`** for reusable components (cards, widgets, sidebars) that need to adapt to their slot, not the viewport.
-    - Heuristic: if removing the component from the page would change what styles apply → `@container`. If only resizing browser would → `@media`.
-
-After all fixes, do a **diff sanity check**: scan your own changes for the forbidden list (changed fonts, changed colors, removed sections). If you find any, revert.
-
-**Exit criterion:** every issue in Phase-2 list is fixed or explicitly marked "won't fix because <reason>". No forbidden changes introduced.
-
-### Phase 4 — Browser verification
-
-Static scans miss runtime issues (computed layouts, JS-driven UI, font fallbacks, real iOS Safari behavior). Verify in a real browser.
-
-Use the `agent-browser` skill to:
-
-1. **Start a local server** for the page if not running:
-   - Static HTML: `python3 -m http.server 8000` (or `npx serve`)
-   - Project: run its dev script
-2. **Take screenshots at the device matrix.** Read `references/device-matrix.md` for the full list. Always include the **minimum 8-width matrix**:
-
-   | Width × Height | Class |
-   |---|---|
-   | 360 × 780 | Android baseline |
-   | 390 × 844 | iPhone 12-14 |
-   | 393 × 852 | iPhone 15/16 |
-   | 430 × 932 | iPhone Pro Max |
-   | 768 × 1024 | iPad portrait (sm/md handoff) |
-   | 1024 × 768 | iPad landscape / small laptop |
-   | 1440 × 900 | Designer's baseline |
-   | 1920 × 1080 | Full HD desktop |
-
-   For thorough QA, add the extended matrix: 320 (smallest), 884-984 (foldable inner — often breaks), 1280/1366 (cheap laptops), 1536 (Windows scaling), 2560/3440 (large/ultrawide).
-
-3. **For each width, examine the screenshot for:**
-
-   | Category | Specific checks |
-   |---|---|
-   | Layout integrity | No horizontal scrollbar. Nothing bleeds past viewport. No content cut off behind another element. |
-   | Typography | Body text ≥ 14px effective. Inputs ≥ 16px (iOS zoom). Heading hierarchy still visible. |
-   | Tap targets | Buttons/links ≥ 24×24 (WCAG 2.5.8 AA floor) with ≥ 8px gap; ship target 44×44 on widths ≤ 1024. Inline text links exempt. |
-   | Content density | Multi-column layouts stacked correctly. Sidebar collapsed ≤ 768. Tables in scroll wrapper or cards. |
-   | Ultra-wide (≥1920) | Content not stretched edge-to-edge. No vast empty regions. |
-   | 320px specifically | Nothing has `min-width > viewport - 2 × padding`. Hero text not gigantic from clamp overshoot. |
-   | Interactive state | If page has modal/menu/drawer, open it at mobile widths and re-screenshot. |
-
-4. **If a JS-driven mobile menu exists,** click it on a mobile screenshot to confirm it opens, covers the screen, can be closed (Escape + backdrop click + close button).
-
-**Exit criterion:** screenshot at every width in the matrix, with annotated issues for any that fail.
-
-### Phase 5 — Report
-
-Output a structured report. Use this exact format:
+## Phase 5 — Report
 
 ```
 # Responsive Adaptation Report
 
 ## Stack detected
-- <stack summary per file group>
-
-## Files modified
-- <path>:<line range> — <one-line reason>
-- ...
-
-## Anti-patterns fixed
-- [CRITICAL] <name> (×N occurrences) — <how fixed>
-- [MAJOR]    <name> (×N) — <how fixed>
-- [MINOR]    <name> (×N) — <how fixed>
-
-## Verification results
-| Width | Status | Issues |
-|-------|--------|--------|
-| 360   | PASS   | — |
-| 390   | PASS   | — |
-| 393   | PASS   | — |
-| 430   | PASS   | — |
-| 768   | PASS   | — |
-| 1024  | PASS   | — |
-| 1440  | PASS   | — |
-| 1920  | PASS   | — |
-
-## Screenshots
-- <relative path per width>
-
-## Won't-fix items
-- <issue> — <reason>
-
+## Files modified — <path>:<lines> — <reason>
+## Anti-patterns fixed — [SEVERITY] <name> (×N) — <how>
+## Verification results — | Width | Status | Issues | for every matrix width
+## Screenshots — path per width
+## Won't-fix — <issue> — <reason>
 ## Remaining concerns
-- <anything the user should know>
 ```
 
-If any breakpoint failed verification, **don't claim done**. Iterate on Phase 3 for the specific issues, re-verify only the affected widths, re-report.
+Done = PASS at every matrix width, desktop visually equivalent to baseline, no forbidden changes, report + screenshots delivered. Any failing width → iterate Phase 3, re-verify affected widths only, re-report. Can't reach PASS → list failing widths and blockers. Never claim done otherwise.
 
-## Reference files
+## Execution rules
 
-Read these only when the workflow phase points to them — don't read all upfront.
+- Surgically adapt existing CSS, however ugly. Never rewrite the page from scratch.
+- Never add a CSS framework the project doesn't use.
+- CSS over JS: modern primitives cover ~90% of cases; `useMediaQuery`-style hooks also cause SSR hydration flashes. Legit JS: `ResizeObserver` for canvas/charts, virtualized tables, dynamic font measurement.
+- Stay in scope — don't gate work on dark mode, RTL, or reduced motion.
 
-| File | When to read |
-|------|--------------|
-| `references/anti-patterns.md` | Phase 2 — full catalog of every anti-pattern with detection + fix |
-| `references/modern-primitives.md` | Phase 3 — `clamp`, `min/max`, container queries, `dvh/svh`, `aspect-ratio`, grid auto-fit, subgrid, logical props, `:has()`, `@supports` |
-| `references/fluid-typography.md` | Phase 3, fluid type step — Utopia scale, clamp formula, accessibility-safe ratios |
-| `references/device-matrix.md` | Phases 1 & 4 — full device list with rationale, what to check at each width |
-| `references/design-systems.md` | When uncertain about breakpoint values — Material 3 + Apple HIG guidance |
-| `references/admin-patterns.md` | Working on a dashboard/admin — sidebar collapse, tables→cards, dense forms, modals, widget grids |
-| `references/menus-drawers.md` | Adding/fixing mobile nav — `<dialog>` drawer, bottom sheet, accessibility |
-| `references/touch-targets.md` | Verifying tap targets — WCAG 2.5.8 vs 2.5.5, MD3 vs HIG |
-| `references/platform-quirks.md` | iOS Safari / Android Chrome quirks (input zoom, safe-area, dvh, foldables) |
-| `references/tailwind.md` | Stack is Tailwind |
-| `references/vanilla-css.md` | Stack is vanilla CSS / CSS Modules |
-| `references/css-in-js.md` | Stack is styled-components / Emotion / vanilla-extract |
+## References
 
-## Bundled scripts
+Read only when a phase points to them.
 
-- `scripts/scan.sh <project-root>` — static anti-pattern scanner. Run in Phase 2.
-
-## Anti-patterns in *your own* execution
-
-Things to NOT do while running this skill:
-
-- **Don't rewrite the page from scratch.** Even if existing CSS is ugly, surgically adapt it.
-- **Don't add a CSS framework** the project doesn't use. Vanilla CSS project → don't pull in Tailwind.
-- **Prefer CSS over JS for layout adaptation.** `clamp`, container queries, `dvh/svh`, RAM grid, `:has()` cover ~90% of cases without `react-responsive`/`useMediaQuery`-style hooks (which also produce SSR hydration flashes). Legit JS use: `ResizeObserver` for canvas/chart sizing, virtualized tables, dynamic font measurement.
-- **Don't write 12 media queries when 1 `clamp()` does the job.** Modern primitives over breakpoint salad.
-- **Don't claim done after fixing CSS without running Phase 4.** A page that "looks right in the diff" is not a page that works on 320px. Verification is non-negotiable.
-- **Don't silently regress widths outside the user's stated focus.** If they say "make it work on mobile", the desktop visual must still render correctly — re-screenshot at 1440px after your changes and compare to the Phase-1 baseline.
-- **Don't gate work on `prefers-reduced-motion`, dark mode, RTL, or other tangentially related things.** Stay in scope.
-- **Don't use `overflow: hidden` on body to mask overflow.** Find the root cause. Use `overflow-x: clip` on `html` only if you truly can't fix the source.
-- **Don't add `maximum-scale=1` / `user-scalable=no`** to "fix" iOS input zoom. Fix input font-size instead (A4).
-- **Don't use pure `vw` for fluid type** (`clamp(1rem, 4vw, 2rem)` — middle doesn't move on zoom). Always mix `rem` into middle: `clamp(1rem, 0.875rem + 1vw, 2rem)`.
-
-## When to stop
-
-You're done when:
-
-1. Phase-5 report shows PASS at every width in the device matrix.
-2. Desktop baseline screenshot from Phase 1 and post-adaptation desktop screenshot are visually equivalent (same hierarchy, colors, fonts, components).
-3. No forbidden changes were introduced.
-4. The user has the report and the screenshots.
-
-If you can't reach PASS at every width, say so explicitly — list the failing widths and what's blocking. Don't pretend.
+| File | For |
+|---|---|
+| `anti-patterns.md` | Phase 2 — full catalog, detection + fix |
+| `modern-primitives.md` | Phase 3 — clamp, min/max, container queries, dvh/svh, aspect-ratio, auto-fit, subgrid, logical props, `:has()`, `@supports` |
+| `fluid-typography.md` | Phase 3 — Utopia scale, clamp formula, safe ratios |
+| `device-matrix.md` | Phases 1 & 4 — full device list, what to check where |
+| `design-systems.md` | Breakpoint values — Material 3 + Apple HIG |
+| `admin-patterns.md` | Dashboards — sidebar collapse, tables→cards, dense forms, widget grids |
+| `menus-drawers.md` | Mobile nav — `<dialog>` drawer, bottom sheet, a11y |
+| `touch-targets.md` | WCAG 2.5.8 vs 2.5.5, MD3 vs HIG |
+| `platform-quirks.md` | iOS Safari / Android Chrome — input zoom, safe-area, dvh, foldables |
+| `tailwind.md` / `vanilla-css.md` / `css-in-js.md` | Per detected stack |

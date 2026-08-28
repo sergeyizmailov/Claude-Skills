@@ -1,7 +1,6 @@
 # Photo subjects by vertical
 
-Literal and occupational — the work being done or the object handled, never a metaphor or an
-abstract texture. Search these terms directly and download.
+Literal and occupational — the work done or object handled, never a metaphor or abstract texture. Search these terms directly and download.
 
 | vertical | hero band | content bands |
 |---|---|---|
@@ -20,5 +19,4 @@ abstract texture. Search these terms directly and download.
 | **Institutional** | the building, or people using the service | departments at work, equipment, a service desk |
 | **Directory** | usually none | listings carry a small supplied logo at most |
 
-Holds across verticals: the hero photo is wide and mid-tone so a flat fill still leaves the
-subject readable; split-block photos are close-range and cluttered, not clean product shots.
+Holds across verticals: hero photo wide and mid-tone so a flat fill still leaves the subject readable; split-block photos close-range and cluttered, not clean product shots.

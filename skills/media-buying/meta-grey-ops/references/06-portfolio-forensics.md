@@ -1,5 +1,8 @@
 # 06 — Portfolio forensics (why accounts die, attributed)
 
+Reviewed 2026-08-28. **Method, not measurement.** The statistics are standard survival analysis; no
+figure here is Meta-sourced or benchmarked, and none is meant to be quoted as one.
+
 senior-buyer-ops/01 says "diagnose which cause" for a ban-rate spike. This is the
 HOW: turn a pile of dead accounts into an attributed hazard so you fix the real
 driver instead of superstitiously changing everything at once.
@@ -23,9 +26,7 @@ shows the most deaths simply because it ran most. Two rates, don't conflate them
 - Exposure-adjusted rate = deaths ÷ account-days AT RISK, censoring accounts still
   alive — separates "dies fast" from "dies eventually" that the cumulative rate
   blurs. For the shape over account age, use Kaplan–Meier or a discrete-time
-  hazard model.
-  Reach for this once you have enough history — it separates "dies fast" from
-  "dies eventually" that the cumulative rate blurs.
+  hazard model, once you have enough history.
 Set a minimum-exposure floor before trusting either: 3 accounts at 100% death
 outranks a 200-account batch at 30% but is noise — need enough accounts (and
 account-days) on a dimension before its rate means anything. Survival TIME is the

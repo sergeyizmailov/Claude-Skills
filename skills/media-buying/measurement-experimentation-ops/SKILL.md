@@ -1,6 +1,6 @@
 ---
 name: measurement-experimentation-ops
-description: "Decide whether a media-buying result is real before scaling it: testing-mode choice (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag, multiple testing), and Meta's measurement tools (A/B Test, ad_study API, Conversion Lift, GeoLift, Robyn/MMM). Pairs with the media-buying set."
+description: "Decide whether a media-buying result is real before scaling it: testing-mode choice (causal / screening / infrastructure), validity traps (SRM, peeking, contamination, lag, multiple testing), and the platforms' measurement tools — Meta (A/B Test, ad_study API, Conversion Lift, GeoLift, Robyn) and Google (Experiments, Conversion Lift, Meridian MMM, brand-search incrementality). Pairs with the media-buying set."
 ---
 
 # Measurement & Experimentation Ops
@@ -10,8 +10,7 @@ is real or noise before they do.
 
 ## Pick the testing mode by the decision at stake
 
-Three modes, different evidence bars — match the mode to what a wrong answer
-costs, don't default to whatever's easy:
+Three modes, different evidence bars — match to the cost of being wrong:
 
 1. **Causal**: estimates incrementality (no design *proves* causality without
    assumptions). Two sub-modes — a randomized experiment (one treatment vs a
@@ -27,7 +26,7 @@ costs, don't default to whatever's easy:
 3. **Infrastructure** (isolate infra variance): hold the CREATIVE fixed, vary one
    infra axis (domain / proxy cluster / account batch) across a balanced set to
    attribute delivery/ban/CPM differences to infra, not creative. The grey
-   inversion of a normal test — see fb-grey-ops/06.
+   inversion of a normal test — see meta-grey-ops/06.
 
 ## Feasibility gate (grey reality — check BEFORE promising a clean test)
 
@@ -61,7 +60,21 @@ honest weaker method beats a "causal" test that's silently contaminated.
 |---|---|
 | Sizing (MDE/power as decision rules), SRM, peeking, contamination, lag, inconclusive handling | `references/01-experiment-design.md` |
 | Meta tools: A/B Test, `ad_study` API, Conversion Lift, Brand Lift, GeoLift, Robyn/MMM, Andromeda implication | `references/02-meta-measurement-tools.md` |
+| Google tools: Experiments/drafts, PMax experiments, Conversion Lift, Meridian MMM, brand-search incrementality | `references/03-google-measurement-tools.md` |
 
 Buy mechanics → meta-ads (its /09 owns single-account diagnosis & test-design
-intake; this skill owns the validity/incrementality layer above it). Counting &
+intake) or google-ads (its /08 owns the diagnostic tree and unit economics); this
+skill owns the validity/incrementality layer above both. Counting &
 cohort truth → tracker-ops. Portfolio decisions on the result → senior-buyer-ops.
+
+## Two 2026 confounders that invalidate naive reads on Google
+
+Check both before attributing any Google result to your own change:
+
+1. **Market-level auction supply.** Optmyzr measured eligible auction impressions **−12.3% YoY** across
+   21,425 accounts (Q1 2025 → Q1 2026). A pre/post spanning that shift measures the market, not your
+   treatment.
+2. **The 2026-08-17 budget-limited target enforcement.** Every tCPA/tROAS campaign flagged "Limited by
+   budget" changed behavior on that date. A test straddling it has a structural break in the middle.
+
+Neither surfaces as anything but a performance change. See `google-ads/02` and `/08`.

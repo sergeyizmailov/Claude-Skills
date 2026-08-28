@@ -1,7 +1,12 @@
 # Playbook — iGaming / Casino / Betting
 
-Status: directional vendor benchmarks (dated below) + verified Meta policy.
+Status (reviewed 2026-08-28): directional vendor benchmarks (dated below) + verified Meta policy.
 NOT this team's live data — replace with your own numbers.
+
+**Gate before anything here:** A&V authorization + per-jurisdiction licence, filed **before any ad
+exists**, with intent declared per new territory. **19 markets take no gambling ads at any authorization
+level** — named list and the social-casino carve-out in `references/10-no-path-and-permissions.md`.
+Approvals bind to a specific portfolio and ad account, so a replacement account needs a new one (`09`).
 
 Funnel: FB/IG ad → pre-lander (bonus/winner story, app-style) → casino landing
 or PWA/WebView app. Common grey bridge: FB → Telegram bot → deposit. Lead =
@@ -14,11 +19,10 @@ rebills/RevShare. Primary KPI = CPA per FTD (or qualified FTD), not per reg.
 Quality delay: FTD can lag registration by hours–days; reg→FTD and CPA mature on
 a cohort — judge on click-date cohorts (tracker-ops 01), not same-day.
 
-## Economics (directional priors — NOT individually source-verified)
+## Economics
 
-Cross-vendor bands (2025-26: Partnerkin, BigBetty, OptiKPI, RedClaw, irev).
-Rough sanity ranges, not audited — confirm per program/GEO, replace with live
-data. THREE DIFFERENT metrics people conflate — keep them apart:
+Vendor-band numbers are directional priors — replace with your live data (SKILL.md).
+THREE DIFFERENT metrics people conflate — keep them apart:
 
 Conversion rates:
 | rate | band |
@@ -56,7 +60,7 @@ Slots gameplay / big-win reactions / bonus offers. App-style creatives for
 PWA/WebView funnels. First test: 2-3 angles 1-3-1 (directional screening, not a
 causal test — see 04); optimise to reg where FTD
 volume is too thin to optimise on directly, then switch to the deposit event
-once volume builds (fb-grey-ops/04 event-volume lever).
+once volume builds (meta-grey-ops/04 event-volume lever).
 
 ## Common failure modes
 
@@ -74,6 +78,8 @@ once volume builds (fb-grey-ops/04 event-volume lever).
   burn; plan the replacement pipeline.
 - Tracking: PWA/H5/web-checkout = WEB (tracker postback + Pixel/CAPI; carry
   fbclid through the smart-link) — the common grey path, no app-store gate.
+  FB → Telegram Mini App / bot: no Pixel; CAPI from the bot with a **short
+  token**, not raw fbclid (`tracker-ops/03`).
   Native app = MMP (AppsFlyer/Adjust) SDK → S2S postbacks to Meta (needs UA+IP
   for CAPI); app-promo campaigns need the app registered + a Meta SDK/certified
   MMP source with events mapped. Pin which event = FTD in the MMP, mirror to the

@@ -3,6 +3,15 @@
 Single-account diagnosis lives in meta-ads; this is the layer above: allocating
 a finite pool of accounts + budget + creative across testing and scaling.
 
+## 2026 market facts (perishable — re-verify by 2026-10-01)
+
+- **Auction supply contracted ~12.3% YoY** (45.9B → 40.25B) across 21,425 accounts (Optmyzr, Q1 2025 →
+  Q1 2026; their text misstates it as 11%). Flat
+  impressions at flat spend is not necessarily degradation. Do not kill on it.
+- **Since 2026-08-17, budget-limited tCPA/tROAS campaigns drive toward the literal target**
+  (`google-ads/02`). Any account that was quietly overperforming a loose target is now exposed.
+  Audit targets before setting scale expectations with a TL.
+
 ## Budget allocation (test / scale / reserve)
 
 - Split the daily pool into buckets, not one blob: TESTING (new accounts/creos
@@ -22,7 +31,7 @@ a finite pool of accounts + budget + creative across testing and scaling.
   spike has SEVERAL possible causes: infra (IP/persona/device), a bad account
   batch from the agency, a creative/policy pattern tripping review, a burned
   domain, a billing/asset issue, or the whole bundle. Attribute the cause before
-  reacting — hazard-rate forensics in fb-grey-ops/06 (reactions in 01/05).
+  reacting — hazard-rate forensics in meta-grey-ops/06 (reactions in 01/05).
 
 ## Kill / watch / scale ladder
 
@@ -37,7 +46,7 @@ small counts, and the platform constraints on expressing them).
   metric hasn't matured yet (judge on the click-date cohort, tracker-ops/01).
 - SCALE: proven account+creo → vertical (~+20-30%/day is a team heuristic —
   large jumps CAN re-enter learning, but Meta guarantees no universal %,
-  fb-grey-ops/04) or horizontal (duplicate the winner to reserve accounts).
+  meta-grey-ops/04) or horizontal (duplicate the winner to reserve accounts).
   Migrate winners to fresh accounts before the old one fatigues/dies.
 
 ## Marginal scaling (never scale on blended CPA)

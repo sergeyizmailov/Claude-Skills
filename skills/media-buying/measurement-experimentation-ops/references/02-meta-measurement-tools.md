@@ -24,7 +24,7 @@ enums per release.
 ## Marketing API — `AdStudy` node (programmatic tests)
 
 - Node `ad_study`; the reference example served v25.0 at check, but the current
-  Marketing API is **v26.0** (align with fb-grey-ops/02) — pin your version and
+  Marketing API is **v26.0** (align with meta-grey-ops/02) — pin your version and
   re-verify enums per release. [OFFICIAL:
   developers.facebook.com/docs/marketing-api/reference/ad-study]
 - Study `type` enum includes: `SPLIT_TEST`, `LIFT`, `CONTINUOUS_LIFT_CONFIG`,

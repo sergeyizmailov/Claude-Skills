@@ -1,7 +1,5 @@
 # Anti-DevTools Protection
 
-Layered detection — each method catches different scenarios.
-
 ## Full Implementation (7 methods)
 
 ```javascript
@@ -65,8 +63,6 @@ Layered detection — each method catches different scenarios.
 })();
 ```
 
-## What Each Method Catches
-
 | Method | Catches | Bypass |
 |--------|---------|--------|
 | Debugger timing trap | DevTools open (Sources panel) | `--disable-javascript` then override |
@@ -79,7 +75,7 @@ Layered detection — each method catches different scenarios.
 
 ## npm Alternative
 
-`disable-devtool` — comprehensive detection library.
+`disable-devtool` library:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
@@ -89,8 +85,5 @@ Detection modes: RegToString, DefineId, Size, DateToString, FuncToString, Debugg
 
 ## Where to Apply
 
-- Landing pages with forms
-- Tracking scripts
-- Any page with sensitive JS logic
-
+Apply to: landing pages with forms, tracking scripts, any page with sensitive JS logic.
 Don't apply to: server-side code, proxied content, CSS/HTML.

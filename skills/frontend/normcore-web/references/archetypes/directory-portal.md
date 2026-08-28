@@ -3,11 +3,9 @@
 Listings, business registers, member directories, classifieds, property and job boards,
 search-first sites. Generator: **a database with a search form on it.**
 
-Measured: a national business directory — Open Sans + Source Sans 3 · radius 5px · **1 shadow** · 2 transform ·
-**10 images** · 173 links.
-
-Ten images and one shadow on the entire page. This is the plainest archetype of the five, and
-the one where restraint is easiest to get right and hardest to make look intentional.
+Measured: a national business directory — Open Sans + Source Sans 3 · radius 5px ·
+**1 shadow** · 2 transform · **10 images** · 173 links. Ten images and one shadow on the
+entire page: the plainest archetype of the five.
 
 ## Overrides on the core
 
@@ -20,22 +18,20 @@ the one where restraint is easiest to get right and hardest to make look intenti
 
 ## Density model
 
-The page is a **form plus rows**. Two numbers matter: the search controls above the fold, and
-the number of result rows below it. Everything else is subordinate.
+Page = **form plus rows**. Two numbers matter: the search controls above the fold and the
+number of result rows below. Everything else subordinate.
 
 ## Page skeleton
 
-**This skeleton is a menu, not a template.** Pick the blocks the brief has content for and drop
-the rest — at least two. The order below is the conventional one; deviating from it where the
-site's history justifies it is correct.
-
+Menu, not template: drop the blocks the brief has no content for — at least two. Order below
+is conventional; deviations justified by the site's history are correct.
 
 1. **Utility topbar** — add your business, advertise, log in
 2. **Header** — wordmark, then the search block, which is the page
 3. **Search block** — two or three fields side by side: what, where, and often a category
-   select. A solid accent submit button. This sits highest and is visually loudest
+   select. A solid accent submit button. Sits highest and is visually loudest
 4. **Popular categories** — a dense multi-column list of plain text links, 20–60 of them.
-   Not tiles, not cards. This is where most of the link count comes from
+   Not tiles, not cards. Source of most of the link count
 5. **Results or featured listings** — repeated rows, see below
 6. **Location list** — every town or region as a link, in columns
 7. **A–Z index** — letters as links across a strip
@@ -44,32 +40,31 @@ site's history justifies it is correct.
 
 ## Results page — the other template
 
-The skeleton above is the front page. A results page keeps the chrome and swaps the category
-columns for the result set:
+Keeps the front page's chrome and swaps the category columns for the result set:
 
 1. Utility topbar and header **unchanged**, with the search block still loud and still at the
    top — pre-filled with the current query, never shrunk to a small header input
 2. Breadcrumb — `Home / Category / Place`
-3. H1 stating the query in words (`Plumbers in Marlport`), with the result count beneath
-   (`Showing 1–15 of 62 results`) and a sort dropdown on the same line, right-aligned
+3. H1 stating the query in words (`Plumbers in Marlport`), result count beneath
+   (`Showing 1–15 of 62 results`), sort dropdown on the same line, right-aligned
 4. Filter sidebar left or above — plain checkboxes with counts in brackets
 5. The result rows
 6. Numbered pagination
 7. **A trimmed related-searches strip** — nearby towns, adjacent categories, "plumbers near
-   Marlport". Real directories keep this on results pages; it is SEO interlinking and it is
-   correct here. Drop the front page's full A–Z index and location list
+   Marlport". Real directories keep this; it is SEO interlinking and correct here. Drop the
+   front page's full A–Z index and location list
 8. One short SEO paragraph, then the fat footer
 
-Link count lands around 90–120 against the front page's ~173 — the categories wall is gone but
-the chrome and the related-searches strip remain.
+Link count lands around 90–120 against the front page's ~173 — the categories wall is gone
+but the chrome and the related-searches strip remain.
 
 ## Variation axes — roll one point on each
 
 **Roll these, do not choose them** — see "Roll the build" in `SKILL.md`. Number the axes
 top to bottom starting at 0 and take letter `k` of the name for each row.
 
-Only one reference was measured (a national business directory), so these come from the genre's common variants
-rather than a second measured site — treat them as plausible, not verified:
+Only one reference was measured (a national business directory) — these are the genre's
+common variants, plausible not verified:
 
 | axis | one way | the other |
 |---|---|---|
@@ -93,24 +88,24 @@ star rating + review count from the icon font
 right side: one solid accent action button, plus a plain text secondary link
 ```
 
-Rows are **not equal height.** Some have a logo, some do not; some have three tags, some
-none. Do not normalise them into identical cards — the raggedness is the genre.
+Rows are **not equal height** — some have a logo, some do not; some have three tags, some
+none. Do not normalise them into identical cards; the raggedness is the genre.
 
 ## Furniture
 
-Pagination as numbered page links with Previous / Next, never infinite scroll · a result
-count ("1–25 of 1,340") · sort dropdown · a filter sidebar of plain checkboxes with counts in
-brackets · breadcrumb above the results · a map panel, if any, as a static embed rather than
-an interactive canvas.
+Pagination as numbered page links with Previous / Next, never infinite scroll · result count
+("1–25 of 1,340") · sort dropdown · filter sidebar of plain checkboxes with counts in
+brackets · breadcrumb above the results · map panel, if any, as a static embed rather than an
+interactive canvas.
 
 ## Traps
 
-- **Do not turn listings into cards on a grid.** Rows in one column with hairline separators.
-- **Do not hide the phone number behind a "show number" button** unless the client asked —
-  full text is the older, more trustworthy pattern.
-- **Do not replace pagination with infinite scroll.** Numbered pages are the tell.
-- **Do not make the category lists into tiles with icons.** Plain text links in columns.
-- The search block is loud and slightly crude. Do not refine it into a tasteful single input.
+- **No listings as cards on a grid.** Rows in one column with hairline separators.
+- **No "show number" button on phone numbers** unless the client asked — full text is the
+  older, more trustworthy pattern.
+- **No infinite scroll.** Numbered pages are the tell.
+- **No category lists as tiles with icons.** Plain text links in columns.
+- The search block is loud and slightly crude — do not refine it into a tasteful single input.
 
 ## Verification — this archetype
 

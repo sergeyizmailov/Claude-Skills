@@ -1,8 +1,14 @@
 # Playbook — Crypto / trading / finance
 
-Status: directional vendor benchmarks (dated below) + verified Meta policy.
+Status (reviewed 2026-08-28): directional vendor benchmarks (dated below) + verified Meta policy.
 NOT this team's live data — replace with your own. Heavily overlaps news-tg when
 the pre-lander is a fake news article.
+
+**Gate before anything here:** written permission via A&V + a recognized regulator licence **per
+targeted country** (~25 have a named path; unlisted = treat as unsupported). **ICOs are prohibited
+outright.** Affiliate/solicitation sites need the same permission — no affiliate exemption. Exemption
+boundary (NFTs, storage-only wallets, mining hardware, education) and the licence list →
+`references/10-no-path-and-permissions.md`. 🔺 Forex specifically is **unresolved** in Meta's own text.
 
 Funnel: FB/IG ad → pre-lander (news / review / quiz) → broker/exchange
 registration → deposit. Lead = registration; paying gate = FTD (first deposit),
@@ -15,10 +21,9 @@ Primary KPI = CPA per FTD (or CRG cost-per-deposit). Quality delay + heavy scrub
 brokers validate deposits and reject low-quality — cohort by click date, reconcile
 to the advertiser's validated count (tracker-ops 01).
 
-## Economics (directional priors — NOT individually source-verified)
+## Economics
 
-Cross-vendor bands (2025-26: HotForexLead, Triple Whale/Sovran, Affroom). Rough
-sanity ranges, not audited — confirm per broker/GEO, replace with live data.
+Vendor-band numbers are directional priors — replace with your live data (SKILL.md).
 Keep payout, conversion, and your media cost separate:
 
 Affiliate PAYOUT per FTD (what you EARN):

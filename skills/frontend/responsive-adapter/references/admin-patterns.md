@@ -1,7 +1,5 @@
 # Admin / Dashboard Responsive Patterns
 
-The hard cases that landing-page advice doesn't cover.
-
 ## Sidebar navigation across widths
 
 | Width | Pattern | Width spec | Examples |
@@ -11,8 +9,9 @@ The hard cases that landing-page advice doesn't cover.
 | 600-904px | Modal drawer / sheet | Off-canvas | Most SaaS |
 | <600px | Hamburger + sheet OR bottom nav | full-width | Stripe mobile |
 
-- Sidebar items: 36px tall on desktop (mouse precision), 44px on tablet for touch.
-- Bottom-nav vs hamburger on mobile: bottom nav for ≤5 high-frequency sections (Stripe, banking apps). Hamburger for deep hierarchies (Notion).
+- Items: 36px tall desktop, 44px tablet (touch).
+- Bottom-nav vs hamburger: bottom nav for ≤5 high-frequency sections (Stripe, banking); hamburger for deep hierarchies (Notion).
+- Accessible mobile drawer → `<dialog>` — see `menus-drawers.md`.
 
 ```css
 .app { display: grid; grid-template-columns: auto 1fr; }
@@ -31,11 +30,7 @@ The hard cases that landing-page advice doesn't cover.
 }
 ```
 
-For accessible mobile drawer, use `<dialog>` — see `menus-drawers.md`.
-
-## Data tables → mobile
-
-Five strategies. Pick based on **how the user reads the data**.
+## Data tables → mobile (pick by how user reads the data)
 
 | Strategy | Use when | Implementation |
 |----------|----------|----------------|
@@ -74,7 +69,7 @@ Five strategies. Pick based on **how the user reads the data**.
 
 @container (max-width: 640px) {
   table, thead, tbody, th, td, tr { display: block; }
-  thead { position: absolute; left: -9999px; } /* visually hide but keep semantics */
+  thead { position: absolute; left: -9999px; } /* visually hide, keep semantics */
   tr {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -95,17 +90,14 @@ Five strategies. Pick based on **how the user reads the data**.
   }
 }
 ```
-Requires `<td data-label="Date">` on each cell.
-
-Semantics: keep `<table>`. `role="grid"` is for editable spreadsheet-style widgets, NOT display tables.
+Requires `<td data-label="Date">` per cell. Keep `<table>` semantics; `role="grid"` is for editable spreadsheet widgets only.
 
 ## Dense forms on mobile
-
-- **Always single column below ~500px.** NN/g studies: 15.4s faster completion.
-- **Top labels universally on mobile.** Left labels save space but break tap-flow and i18n.
-- **Floating labels** — fine for sparse forms; problematic with autofill (state desyncs).
-- **Inline validation** — on blur, not keystroke. Success passive, errors active. Push messages **below** field (not right — gets clipped).
-- **Inputs that must NOT shrink:** `<input type="date">` (date picker), `<input type="file">` (system picker), color picker. Set `min-width` and let them push width via container.
+- Single column below ~500px — NN/g: 15.4s faster completion.
+- Top labels universally on mobile; left labels break tap-flow + i18n.
+- Floating labels: fine sparse; problematic with autofill (state desync).
+- Inline validation on blur, not keystroke; success passive, errors active; messages BELOW field (right gets clipped).
+- Inputs that must NOT shrink: `<input type="date">`, `<input type="file">`, color picker — `min-width`, let container push width.
 
 ```css
 .form-grid {
@@ -129,12 +121,11 @@ label {
 }
 ```
 
-## Charts / data visualization
-
-- **One question per screen.** Don't shrink desktop dashboard — re-author.
-- Limits: bar ≤7 bars, pie ≤7 slices (better: don't use pie), line ≤3 series.
-- **Aspect ratio matters more than width.** Force 16:9 or 4:3 via `aspect-ratio`; never shorter than 200px tall.
-- Below ~400px container: swap chart type. Stacked-bar → grouped-bar → sparkline → single KPI number.
+## Charts / data viz
+- One question per screen — re-author, don't shrink desktop dashboard.
+- Limits: bar ≤7 bars, pie ≤7 slices (prefer no pie), line ≤3 series.
+- Aspect ratio > width: force 16:9 or 4:3 via `aspect-ratio`; never < 200px tall.
+- Below ~400px container: swap chart type — stacked-bar → grouped-bar → sparkline → single KPI number.
 - Pinch-zoom + swipe-pan beat shrinking.
 
 ```css
@@ -143,10 +134,7 @@ label {
   aspect-ratio: 16 / 9;
   min-block-size: 200px;
 }
-.chart-wrap svg {
-  width: 100%;
-  height: 100%;
-}
+.chart-wrap svg { width: 100%; height: 100%; }
 
 @container (max-width: 25rem) {
   .chart-full { display: none; }
@@ -155,8 +143,7 @@ label {
 ```
 
 ## Modal / dialog adaptations
-
-The 2026 consensus: **Drawer-on-mobile, Dialog-on-desktop swap** (Vaul / shadcn `Drawer`):
+2026 consensus: Drawer-on-mobile, Dialog-on-desktop swap (Vaul / shadcn `Drawer`):
 
 ```tsx
 const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -169,16 +156,14 @@ return isDesktop ? <Dialog>...</Dialog> : <Drawer>...</Drawer>;
 | Bottom sheet | <768px | Action sheets, filters, forms | Swipe down, backdrop |
 | Side drawer | Any | Detail views, settings | Esc, backdrop, swipe |
 
-Bottom sheets: `pointer-events: none` on backdrop when scrollable inside; respect `safe-area-inset`.
+Scrollable bottom sheets: `pointer-events: none` on backdrop; respect `safe-area-inset`.
 
-## Toolbars and action bars
+## Toolbars / action bars
+- Overflow collapse: visible actions sized by container; rest in `MoreHorizontal` dropdown. Measure with `ResizeObserver`, not media queries. Radix `DropdownMenu` for overflow.
+- Sticky bottom action bar on mobile (Save/Submit/Pay): `position: sticky; bottom: 0; padding-block-end: env(safe-area-inset-bottom)`. Desktop: inline at form end.
+- Anti-pattern: FAB on web (Android-only convention) — only with Material Design lineage.
 
-- **Overflow menu collapse:** visible actions sized by container; rest go into `MoreHorizontal` → dropdown. Measure with `ResizeObserver`, not media queries. Radix `DropdownMenu` for overflow.
-- **Sticky bottom action bar on mobile:** primary actions (Save, Submit, Pay) glued to bottom with `position: sticky; bottom: 0; padding-block-end: env(safe-area-inset-bottom)`. Desktop puts them inline at form end.
-
-**Anti-pattern:** Floating action button (FAB) on web. Mobile-Android convention that confuses web users — use only if your dashboard has Material Design lineage.
-
-## Layout-aware widget grid (the dashboard primitive)
+## Widget grid (the dashboard primitive)
 
 ```css
 .dashboard-grid {
@@ -196,13 +181,4 @@ Bottom sheets: `pointer-events: none` on backdrop when scrollable inside; respec
   .widget__sparkline { display: none; }
 }
 ```
-
-Same widget renders as stacked at 280px, side-by-side at 480px, with chart at 720px+ — driven entirely by its own width, not the viewport.
-
-## Sources
-- ishadeed.com/article/css-container-query-guide
-- ui.shadcn.com/docs/components/radix/sidebar, Drawer
-- m3.material.io/components/navigation-rail/guidelines, navigation-drawer/guidelines
-- css-tricks.com/responsive-data-tables (Chris Coyier classic)
-- nngroup.com (form best practices)
-- vercel.com/blog (Vercel dashboard architecture)
+Same widget: stacked at 280px, side-by-side at 480px, chart at 720px+ — driven by own width, not viewport.

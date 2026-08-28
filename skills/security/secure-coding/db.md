@@ -1,9 +1,5 @@
 # Database: SQL Safety & Race Conditions (TOCTOU)
 
-Parameterized queries, atomic SQL, row locking, distributed locks for
-concurrency. Node.js is single-threaded but not single-tasked — every
-`await` is a yield point where another request can race.
-
 Related: `express.md` · `auth.md`.
 
 ## SQL / Database
@@ -19,12 +15,12 @@ const user = await prisma.user.findUnique({ where: { email } });
 const user = await db.select().from(users).where(eq(users.email, email));
 ```
 
-Never concatenate user input into SQL strings. ORM methods listed above
-are parameterized by design; raw `$queryRaw` / `db.execute(string)` is not.
+Never concatenate user input into SQL strings. ORM methods above are
+parameterized by design; raw `$queryRaw` / `db.execute(string)` is not.
 
 ## Race Conditions / TOCTOU
 
-Node.js is single-threaded but not single-tasked. Between `await` statements, other requests execute. This creates classic check-then-act windows where concurrent requests can exploit stale state.
+Node is single-threaded but not single-tasked — every `await` is a yield point where other requests execute. Check-then-act windows let concurrent requests exploit stale state.
 
 ### The classic double-spend
 
@@ -41,7 +37,7 @@ app.post('/transfer', async (req, res) => {
     await db.query('UPDATE accounts SET balance = balance + $1 WHERE id = $2', [amount, to]);
   }
 });
-// Attack: send 10 concurrent requests with full balance → negative balance
+// Attack: 10 concurrent requests with full balance → negative balance
 ```
 
 ### Fix 1: Atomic SQL (best for simple cases)
@@ -126,8 +122,8 @@ app.post('/transfer', async (req, res) => {
 
 ### Pentest checklist
 
-- Send N identical requests simultaneously (`curl --parallel`, Turbo Intruder, race-the-web)
-- Target: balance transfers, coupon redemption, vote/like endpoints, account creation
-- Look for any read-then-write pattern in state-changing endpoints
-- Test with same idempotency key and different keys
-- Check if DELETE + CREATE sequences can be raced
+- N identical requests simultaneously (`curl --parallel`, Turbo Intruder, race-the-web)
+- Targets: balance transfers, coupon redemption, vote/like endpoints, account creation
+- Any read-then-write pattern in state-changing endpoints
+- Same idempotency key and different keys
+- DELETE + CREATE sequences raced

@@ -1,63 +1,52 @@
 # Campaign Objectives & Structure for Instagram-Focused Meta Ads (2025–2026)
 
-Scope: the six ODAX objectives, Advantage+ vs manual campaign setup, campaign budgets vs ad-set budgets, special ad categories, naming conventions, and testing-to-scaling account structure. UI details were reviewed 2026-07-22. Treat current Meta documentation or the live account as authoritative; practitioner sources are explicitly labeled as heuristics.
+Scope: six ODAX objectives, Advantage+ vs manual setup, campaign vs ad-set budgets, special ad categories, naming conventions, testing-to-scaling structure. UI reviewed 2026-07-22. Treat Meta's current documentation or the live account as authoritative; practitioner sources are labeled as heuristics.
 
 ---
 
 ## 1. The Six ODAX Objectives
 
+**The objective is a delivery signal, not a funnel label.** Meta optimizes toward the event you name,
+so it decides who your ad reaches. Picking "Traffic" when the goal is purchases buys click-prone users
+and starves the purchase model — the single most expensive objective error, and it does not surface as
+a rejection or a warning, only as bad economics. Choose by the event you want, never by where the
+campaign sits in a funnel diagram.
+
 ### 1.1 Background: what ODAX changed
 
-- ODAX = "Outcome-Driven Ad Experiences." Announced on the Meta for Developers blog **December 21–22, 2021**; rolled out through 2022; became the **exclusive campaign-creation path in 2023**. (Source: MB Adv ODAX guide, Jun 2026; Meta for Developers via secondary citation.)
-- Consolidated **11 legacy objectives** under 3 funnel banners (Awareness / Consideration / Conversion) into **6 flat outcomes**: **Awareness, Traffic, Engagement, Leads, App promotion, Sales**.
-- The old three-banner funnel framing no longer exists anywhere in the UI. Any article describing a "consideration campaign" is pre-2023 and outdated.
-- Legacy → ODAX mapping (important when reading older tutorials):
-  - Brand Awareness, Reach → **Awareness**
-  - Traffic → **Traffic** (unchanged)
-  - Engagement, Video Views, **Messages** → **Engagement** (this is the big one: Messenger / Instagram Direct / WhatsApp campaigns now live under Engagement)
-  - Lead Generation → **Leads**
-  - App Installs → **App promotion**
-  - Conversions, Catalog Sales → **Sales** (many-to-one; the catalog vs website distinction moved into ad-set conversion-location settings)
-  - Store Traffic → **sunset** (new campaigns disabled Jan 2024, delivery halted H2 2024; no ODAX replacement)
-- **The objective cannot be edited after launch.** Other settings may be editable, but some edits create a new ad, trigger review, or cause delivery to re-enter preparing/learning. Changing objective requires a new campaign. Treat the objective as a delivery signal, not merely a funnel label.
-- Marketing API: legacy objective constants (`BRAND_AWARENESS`, `LINK_CLICKS`, `CONVERSIONS`, `APP_INSTALLS`, etc.) now return 400 errors for new campaigns; use `OUTCOME_AWARENESS`, `OUTCOME_TRAFFIC`, `OUTCOME_ENGAGEMENT`, `OUTCOME_LEADS`, `OUTCOME_APP_PROMOTION`, `OUTCOME_SALES`. Some third-party dashboards still label Sales as "Conversions" — legacy label, same thing. (Source: pipeboard-co/meta-ads-mcp GitHub, 2026.)
+- ODAX = "Outcome-Driven Ad Experiences." Announced Meta for Developers blog **Dec 21–22, 2021**; rolled out through 2022; **exclusive campaign-creation path since 2023**. (MB Adv ODAX guide, Jun 2026; Meta for Developers via secondary citation.)
+- Consolidated **11 legacy objectives** (3 funnel banners: Awareness/Consideration/Conversion) into **6 flat outcomes**: **Awareness, Traffic, Engagement, Leads, App promotion, Sales**. Banner framing is gone from the UI — any "consideration campaign" article is pre-2023.
+- Legacy → ODAX map: Brand Awareness/Reach → **Awareness**. Traffic → **Traffic** (unchanged). Engagement/Video Views/**Messages** → **Engagement** (Messenger/IG Direct/WhatsApp campaigns live here now). Lead Generation → **Leads**. App Installs → **App promotion**. Conversions/Catalog Sales → **Sales** (catalog vs website moved into ad-set conversion-location settings). Store Traffic → **sunset** (new campaigns disabled Jan 2024, delivery halted H2 2024, no replacement).
+- **Objective locks after launch** — some edits create a new ad, trigger review, or reset learning; changing it needs a new campaign.
+- Marketing API: legacy constants (`BRAND_AWARENESS`, `LINK_CLICKS`, `CONVERSIONS`, `APP_INSTALLS`, etc.) 400-error on new campaigns; use `OUTCOME_AWARENESS/TRAFFIC/ENGAGEMENT/LEADS/APP_PROMOTION/SALES`. Some dashboards still label Sales "Conversions" (legacy, same thing). (pipeboard-co/meta-ads-mcp GitHub, 2026.)
 
 ### 1.2 Per-objective breakdown
 
-| Objective | Optimizes for | Conversion locations / sub-goals | Best for |
-|---|---|---|---|
-| **Awareness** | Reach, impressions, ad recall lift, ThruPlay, 2-sec continuous video views | None (visibility only) | Brand launches, video distribution, max reach |
-| **Traffic** | Link clicks, landing page views | Website, App, Instagram profile, calls | Sending qualified clicks off-platform; building retargeting pools |
-| **Engagement** | Post interactions, messaging conversations, video views, page activity | On-post, Messenger, **Instagram Direct**, WhatsApp, on-video, on-event | DM conversations, social proof, content interaction, page/profile growth |
-| **Leads** | Instant Form submits, website lead events, Messenger conversations, calls | Instant Forms, Website, Messenger, Calls, App | Service businesses, B2B, list-building, high-ticket |
-| **App promotion** | App installs, in-app events, in-app purchase value | Mobile app only | Any install/in-app goal — closed mandate, no other objective supports installs |
-| **Sales** | Purchase, Add to Cart, Initiate Checkout, catalog sales, messaging conversions, value (ROAS) | Website, App, Website+App, Messenger/WhatsApp | E-commerce purchases, subscriptions, bottom-funnel revenue |
-
-Notes per objective:
-
-- **Awareness** — the only objective with no conversion location. Optimization goals (~5): Reach, Impressions, Ad recall lift (users likely to remember the ad within 2 days), ThruPlay (≥15s video views or full video if shorter), 2-second continuous video views (≥50% pixels on screen). Wrong choice whenever any downstream action is the goal. (Source: MB Adv 2026; Get-Ryze 2026.)
-- **Traffic** — optimizes for clicks, not what happens after the click. ~5 goals: link clicks, landing page views, Messenger conversations, **Instagram profile visits**, calls. Instagram profile visits as a Traffic conversion location is the closest "official" lever for follower growth (see §1.3). Common failure mode: using Traffic as the permanent campaign type when sales is the goal — Meta finds the cheapest clickers, not buyers.
-- **Engagement** — absorbed the legacy Messages objective. This is where **click-to-DM ads (Messenger / Instagram Direct / WhatsApp)** now live. Also the objective for social proof (likes/comments accumulate on the post) and video views.
-- **Leads** — Instant Forms are native in-feed forms (no website needed, cheaper CPL, lower lead quality); Website conversion location needs a working Pixel lead event (better data); **Conversion leads** optimization goal requires CRM + Conversions API integration to feed qualified-lead signals back to Meta. Median CPL benchmark: **$23.10** (WordStream 2026 panel; CPC $1.92, CVR 8.25%).
-- **App promotion** — closed mandate: ~3 goals (installs, app events, value). If the conversion event is an install, this objective is non-negotiable.
-- **Sales** — website-purchase optimization needs a working web event source, while app, shop, catalog, and messaging purchase flows have different event requirements. Optimize for the business outcome whenever it is measurable. Moving temporarily to a higher-frequency event can increase volume but may train delivery toward weaker intent, so test it rather than treating it as the default fix. Catalog ads (formerly "Catalog Sales" / DPA) are configured inside Sales.
+| Objective | Optimizes for (~goal count) | Conversion locations / sub-goals | Best for | Key trap / requirement |
+|---|---|---|---|---|
+| **Awareness** | ~5: Reach, Impressions, Ad recall lift (recall within 2 days), ThruPlay (≥15s or full video if shorter), 2-sec continuous views (≥50% pixels onscreen) | None (visibility only) | Brand launches, video distribution, max reach | Only objective with no conversion location; wrong choice if any downstream action is the goal. (MB Adv 2026; Get-Ryze 2026.) |
+| **Traffic** | ~5: link clicks, landing page views, Messenger conversations, **Instagram profile visits**, calls | Website, App, Instagram profile, calls | Sending qualified clicks off-platform; building retargeting pools | Optimizes clicks, not the post-click outcome. Profile visits = closest official follower-growth lever (§1.3) |
+| **Engagement** | Post interactions, messaging conversations, video views, page activity | On-post, Messenger, **Instagram Direct**, WhatsApp, on-video, on-event | DM conversations, social proof, content interaction, page/profile growth | Absorbed legacy Messages objective; home of **click-to-DM ads**; also covers social proof (post likes/comments) |
+| **Leads** | Instant Form submits, website lead events, Messenger conversations, calls | Instant Forms, Website, Messenger, Calls, App | Service businesses, B2B, list-building, high-ticket | Instant Forms = native, cheap, lower quality; Website needs a working Pixel lead event; **Conversion leads** needs CRM + Conversions API feedback. Median CPL **$23.10** (WordStream 2026 panel; CPC $1.92, CVR 8.25%) |
+| **App promotion** | ~3: installs, app events, value | Mobile app only | Any install/in-app goal | Closed mandate — non-negotiable if the conversion event is an install |
+| **Sales** | Purchase, Add to Cart, Initiate Checkout, catalog sales, messaging conversions, value (ROAS); event requirements differ by app/shop/catalog/messaging flow | Website, App, Website+App, Messenger/WhatsApp | E-commerce purchases, subscriptions, bottom-funnel revenue | A temporary shift to a higher-frequency event can raise volume but train toward weaker intent — test, don't default. Catalog ads (formerly "Catalog Sales"/DPA) configure here |
 
 ### 1.3 Picking an objective for typical Instagram goals
 
 | Goal | Recommended objective | Why / caveats |
 |---|---|---|
-| **More Instagram followers** | Traffic → conversion location "Instagram profile" (Instagram profile visits), or Engagement | There is no "follows" optimization event. Meta cannot bill/optimize directly on follows; profile visits are the proxy. Expect modest follow-through; creative (why to follow) does the real work. [uncertain: availability of the IG-profile conversion location varies by account/region in 2025–26 rollouts] |
-| **DMs (Instagram Direct / Messenger / WhatsApp)** | **Engagement** → messaging conversion location ("Messaging apps") | This is the post-ODAX home of click-to-message ads. Leads objective also supports Messenger/IG Direct as a lead location with automated Q&A flows. Engagement = conversations; Leads = contact capture with qualification questions. |
-| **Website sales (e-commerce)** | **Sales** with Purchase event via Pixel + CAPI | Do not substitute Traffic "to be safe" — Meta will find clickers, not buyers. |
+| **More Instagram followers** | Traffic → "Instagram profile" location, or Engagement | No "follows" optimization event exists; profile visits are the proxy, so expect modest follow-through — creative does the real work. [uncertain: IG-profile location availability varies by account/region, 2025–26] |
+| **DMs (Instagram Direct / Messenger / WhatsApp)** | **Engagement** → "Messaging apps" location | Post-ODAX home of click-to-message ads; Leads also supports Messenger/IG Direct with automated Q&A (conversations vs qualified contact capture). |
+| **Website sales (e-commerce)** | **Sales** with Purchase event via Pixel + CAPI | Don't substitute Traffic "to be safe" — finds clickers, not buyers. |
 | **Lead forms** | **Leads** → Instant Forms (volume) or Website lead event (quality) | Conversion-leads optimization needs CAPI + CRM feedback. |
 | **App installs** | **App promotion** | Only objective that supports installs. |
 
-Common mistakes (consensus across Get-Ryze 2026, MB Adv 2026):
-1. Choosing Sales for cold audiences with zero pixel history → starved learning phase. Counter-view from practitioners: even new brands should often start on Sales if tracking is set up, because Awareness trains nothing useful (Koro 2026 guide).
-2. Using Traffic when the real goal is leads/sales → window shoppers.
+Common mistakes (Get-Ryze 2026, MB Adv 2026):
+1. Sales for cold zero-pixel audiences → starved learning. Counter-view: even new brands should often start on Sales if tracking is set up — Awareness trains nothing useful (Koro 2026).
+2. Traffic when the real goal is leads/sales → window shoppers.
 3. Switching objectives mid-flight → learning reset (and it's not even possible — requires a new campaign).
-4. Creative misaligned with objective (hard-sell creative in Awareness campaigns).
-5. Underfunding or fragmentation: budget must support the outcome, conversion delay, and decision being made. No universal `50 conversions/week` or `$5–10/day` rule applies across objectives, markets, and account economics.
+4. Creative misaligned with objective (hard-sell in Awareness campaigns).
+5. Underfunding/fragmentation: budget must fit the outcome, conversion delay, and decision size. No universal `50 conversions/week` or `$5–10/day` rule across objectives, markets, economics.
 
 ---
 
@@ -65,33 +54,34 @@ Common mistakes (consensus across Get-Ryze 2026, MB Adv 2026):
 
 ### 2.1 The 2025 restructuring — what actually changed
 
-- **Advantage+ Shopping Campaigns (ASC) are gone.** In 2025 Meta renamed/replaced them with **Advantage+ Sales campaigns**, and folded Sales, Leads, and App promotion objectives into a single streamlined **"Advantage+ campaign setup"** flow. (Source: Jon Loomer, "Advantage+ Campaign Creation: A Complete Guide," Jun 23, 2025; "Advantage+ Sales Replaces Advantage+ Shopping," Mar 6, 2025.)
-- The old ASC distinguishing features did **not** carry over: no targeting inputs, locked placements, single ad set, up to 150 ads, existing-customer budget cap. Loomer's summary: an Advantage+ Sales campaign is best described as "a manual Sales campaign using the prior approach, but without making any significant edits to defaults."
-- New flow specifics (Loomer, Jun 2025):
-  - The initial "automated vs manual" prompt at campaign creation is **removed**; you go straight into creation.
-  - Advantage+ applies to **Sales, Leads, App promotion** objectives only; other objectives keep the older tailored flow.
-  - Whether a campaign counts as "Advantage+" is determined by three elements: **Budget** (Advantage campaign budget on), **Audience** (Advantage+ audience with suggestions), **Placements** (Advantage+ placements). Leave defaults untouched → Advantage+ stays "on." Restrictive edits turn it "off," which also lowers the in-UI **Campaign Score / Opportunity score** (0–100).
-  - **Advantage campaign budget is now ON by default** in the streamlined flow (it was off by default in the old manual flow).
-  - Ad limits: max 50 ads per ad set (Meta discourages more than ~6 actively); the old ASC 150-ad cap no longer applies. [Birch 2026 guide cites "max 150 ads total, 50 per ad set" — treat total-campaign cap as uncertain.]
-  - Sept 21, 2025: Meta launched a **unified API structure for Advantage+ campaigns** across sales, app, and leads objectives (PPC Land, 2026 timeline).
+- **ASC is gone.** In 2025 Meta renamed/replaced Advantage+ Shopping Campaigns with **Advantage+ Sales campaigns** inside one streamlined **"Advantage+ campaign setup"** flow (scope in table below). (Jon Loomer, "Advantage+ Campaign Creation: A Complete Guide," Jun 23, 2025; "Advantage+ Sales Replaces Advantage+ Shopping," Mar 6, 2025.)
+- Old ASC features did **not** carry over: no targeting inputs, locked placements, single ad set, existing-customer budget cap. Loomer: effectively a manual Sales campaign that never touches the defaults.
+
+| Element | Old (ASC / manual) | New (Advantage+ setup, 2025) |
+|---|---|---|
+| Creation prompt | Automated-vs-manual choice upfront | Removed — straight into creation |
+| Scope | ASC only | **Sales, Leads, App promotion** only; other objectives keep the older tailored flow |
+| "Advantage+" toggle basis | N/A | 3 elements: **Budget** (Advantage campaign budget on), **Audience** (Advantage+ audience with suggestions), **Placements** (Advantage+ placements). Untouched defaults = "on"; restrictive edits = "off" + lower **Campaign/Opportunity score** (0–100) |
+| Advantage campaign budget default | Off | **On** |
+| Ad cap | 150 ads total (ASC) | Max 50/ad set (Meta discourages >~6 active); old total cap gone. [Birch 2026 cites "150 total, 50/set" — total-campaign cap uncertain] |
+| API | — | Sept 21, 2025: **unified API structure for Advantage+** across sales/app/leads (PPC Land, 2026) |
 
 ### 2.2 Pros / cons
 
 Advantage+ (default/automated) pros:
-- Less setup; Meta's aggregate data shows advertisers using defaults get better results on average. Meta reports Advantage+ Shopping/Sales surpassed a **$20B annual revenue run rate, ~70% YoY growth (Q3 2024 earnings)** — that's where Meta invests.
-- Best with sufficient conversion volume (~50+/week), diverse creative (5–10+ variants), clean Pixel + CAPI tracking.
-- Budget flows to what works in real time (combined with Advantage campaign budget).
+- Less setup; Meta's aggregate data favors advertisers using defaults. Advantage+ Shopping/Sales surpassed a **$20B annual revenue run rate, ~70% YoY growth (Q3 2024 earnings)** — where Meta invests.
+- Best with ~50+/week conversion volume, 5–10+ creative variants, clean Pixel + CAPI.
+- Budget flows to what works in real time (with Advantage campaign budget).
 
 Cons / where manual still wins:
-- Reduced diagnostic visibility: harder to tell which audience/placement drove results.
-- Broad-by-default can waste spend before the algorithm finds buyers — practitioner Fer Rivero (via Birch 2026): running Advantage+ with minimal input produced "complete randomness in terms of CPR"; he uses automation to scale proven winners, not to discover them.
-- Creative testing reads are muddy — Advantage+ doesn't give equal spend per ad.
-- Special Ad Categories restrict specific targeting controls by category and country. Do not assume that all Advantage+ automation is unavailable; verify the options exposed in the actual campaign flow.
+- Reduced diagnostic visibility — harder to isolate which audience/placement drove results.
+- Broad-by-default can waste spend before the algorithm finds buyers — Fer Rivero (via Birch 2026): minimal-input Advantage+ produced "complete randomness in terms of CPR"; he scales proven winners with automation, not discovers them.
+- Creative-testing reads muddy — no equal spend per ad. Special Ad Categories restrict targeting by category/country; verify options in the live flow rather than assuming automation is unavailable.
 
 ### 2.3 Current best practice (2025–2026 consensus)
 
-- A mixed manual/Advantage+ structure can preserve controlled testing while using automation for delivery, but it is not universally required. Choose the minimum structure that answers the current test or scaling question without fragmenting data. [practitioner strategy]
-- Trust automation for budget scaling on winners; keep human control over creative testing and offer strategy. "Creative is the new targeting" — inside a broad/Advantage+ structure, creative variation is what segments the audience.
+- Mixed manual/Advantage+ preserves controlled testing while automating delivery — not universal; pick the minimum structure that answers the current question without fragmenting data. [practitioner strategy]
+- Trust automation for budget scaling; keep human control over creative testing and offer strategy — "creative is the new targeting" inside a broad/Advantage+ structure.
 - Consolidate: fewer campaigns, fewer ad sets, more ads per ad set (see §5).
 
 ---
@@ -100,13 +90,13 @@ Cons / where manual still wins:
 
 ### 3.1 Naming and mechanics
 
-- **Advantage campaign budget** (formerly Campaign Budget Optimization / CBO; Meta UI also shows "Advantage+ campaign budget"): one budget at campaign level; Meta distributes it across ad sets in real time toward best predicted results.
-- **Ad set budgets** = ABO ("Ad Set Budget Optimization"); toggle Advantage campaign budget OFF at campaign level. ABO is still called ad set budgets in the UI.
-- Meta's own aggregate claim: Advantage campaign budget can **decrease CPA by ~4.6% on average** vs ad-set budgets (Meta marketing figure, treat directionally). (Source: Capconvert 2026, citing Meta Help Center.)
-- Eligibility requirements: every ad set in the campaign must share the **same budget type** (daily vs lifetime), **same bid strategy**, and **standard delivery**. (Source: Capconvert 2026, citing Meta Help Center; Jon Loomer "Advantage Campaign Budget Best Practices," Mar 2025.)
-- Gotcha from the new default-on flow (Loomer, Jun 2025): with Advantage campaign budget on, some ad-set-level options disappear — e.g., **Cost Per Result Goal and budget scheduling move to campaign level**. Confusing if you only wanted one ad set.
-- **Ad set spend limits** (min/max) under Advantage campaign budget: the max is an **average limit, not a hard daily cap** — Meta can exceed it on any given day as long as the average holds. Overusing minimums "defeats the whole purpose" (Loomer): if you don't trust the algorithm to allocate, use ad set budgets instead.
-- Budget edits can change delivery or re-enter learning when Meta treats them as significant. Fixed 20% or 30% thresholds are practitioner heuristics, not published universal cutoffs; use the live delivery status and controlled increments.
+- **Advantage campaign budget** (formerly CBO; UI also shows "Advantage+ campaign budget"): one campaign-level budget, distributed across ad sets toward best predicted results.
+- **Ad set budgets** = ABO; toggle Advantage campaign budget OFF at campaign level. Still labeled "ad set budgets" in the UI.
+- Meta's aggregate claim: Advantage campaign budget **decreases CPA ~4.6% on average** vs ad-set budgets (treat directionally). (Capconvert 2026, citing Meta Help Center.)
+- Eligibility: every ad set must share the **same budget type** (daily vs lifetime), **same bid strategy**, **standard delivery**. (Capconvert 2026; Jon Loomer "Advantage Campaign Budget Best Practices," Mar 2025.)
+- Gotcha (Loomer, Jun 2025): with it on, **Cost Per Result Goal and budget scheduling** move from ad-set to campaign level — confusing for single-ad-set campaigns.
+- **Ad set spend limits** (min/max): the max is an **average, not a hard daily cap** — Meta can exceed it on any day if the average holds. Overusing minimums "defeats the whole purpose" (Loomer) — use ad set budgets instead if you don't trust the algorithm to allocate.
+- Budget edits reset learning only when Meta deems them significant; 20%/30% thresholds are practitioner heuristics, not published cutoffs — use live delivery status and controlled increments.
 
 ### 3.2 When to use which (practitioner framework — Ads Uploader 2026, corroborated by Segwise 2026, Adamigo 2026)
 
@@ -119,31 +109,16 @@ Cons / where manual still wins:
 | Failure mode | Losses compound if creative hit rate is low | Can starve promising ad sets after a few hours on small budgets; can't fix weak creative |
 
 - **Hybrid trick**: CBO + per-ad-set **minimum daily spend** for ~1 week (forces initial testing fairness), then **remove the minimums** and let CBO optimize. Keeping minimums forever = ABO with extra steps.
-- Practitioner sizing heuristics include daily budget near 2× target CPA for an ABO test and `(target CPA × 50) ÷ 7` as a legacy volume-planning model. Neither guarantees learning completion. Size the structure from acceptable test risk, conversion delay, expected variance, and the number of decisions the test must support.
-- Benchmark claim: CBO campaigns average **~27% lower cost per result** than ABO in multi-audience setups (Adamigo research summary, Jul 2026 — third-party figure, treat as directional).
+- Sizing heuristics: daily budget ~2× target CPA for an ABO test; `(target CPA × 50) ÷ 7` as a legacy volume-planning model. Neither guarantees learning completion — size from acceptable test risk, conversion delay, expected variance, and decisions the test must support.
+- Benchmark claim: CBO averages **~27% lower cost per result** than ABO in multi-audience setups (Adamigo, Jul 2026 — directional).
 
 ---
 
 ## 4. Special Ad Categories
 
-### 4.1 The categories (current, 2025–2026)
+Four categories, **self-declared at campaign level** (dropdown at the top of campaign creation): **Financial Products and Services** (renamed/broadened from "Credit" **Oct 2024**), **Employment**, **Housing**, **Social Issues, Elections, or Politics**. Declaring when applicable is mandatory — failure to declare is itself a policy violation. **EU:** all social-issue/election/political ads blocked since Oct 2025 (TTPA) — `00` §4.
 
-Declared at **campaign level** in Ads Manager (a "Special Ad Category" dropdown/checkbox at the top of campaign creation). Failing to declare when applicable is itself a policy violation → ad rejections, and on repeat, account restrictions.
-
-1. **Financial products and services** — renamed from "Credit" and expanded in **October 2024** (US advertisers or ads targeting US audiences). Now covers credit cards, loans, financing, plus banking, insurance, investment products, payment platforms.
-2. **Employment** — job listings, internships, professional certification programs, job fairs, employment agencies.
-3. **Housing** — sale/rental listings, real estate services, homeowners insurance, mortgage, housing repair. (General home goods — furniture, decor — excluded.)
-4. **Social issues, elections or politics** — ads by/about candidates, parties, elections, or advocacy on debated social issues. Requires ad authorization (ID verification) and "Paid for by" disclaimers. **EU: Meta blocked all social issue/election/political ads from October 2025** under the EU TTPA regulation (PPC Land, Oct 8, 2025) — political ads are simply unavailable in the EU now.
-
-Background: categories introduced 2019 after US civil-rights settlements; expanded 2022 under the HUD settlement. (Source: Pix-Vu, Apr 2026; WordJack, Nov 2024; Faraday, Dec 2024.)
-
-### 4.2 Targeting restrictions once a category is declared
-
-The restriction matrix depends on category, advertiser/target country, and current Meta implementation. Affected housing, employment, and financial-product flows can limit age, gender, postcode/radius, location exclusions, detailed targeting, lookalikes, saved audiences, or form questions. The 15-mile radius rule is specific to documented US anti-discrimination implementations and must not be generalized worldwide.
-
-**Special Ad Audiences are not a replacement:** Meta sunset them in 2022 and confirmed discontinuation in 2023. Custom audiences and other controls may remain available subject to anti-discrimination rules, but inspect the declared campaign rather than assuming a universal feature set. (Official: https://about.fb.com/news/2022/06/expanding-our-work-on-ads-fairness/ and https://about.fb.com/news/2023/01/an-update-on-our-ads-fairness-efforts/)
-
-Sensitive-data-source classifications can also affect event sharing or optimization availability. Verify the live Events Manager and campaign flow before naming a restricted event. Additional authorization, Page, identity, or 2FA requirements are feature- and country-dependent. Failure to declare an applicable category can cause rejection or enforcement.
+**The full treatment is canonical in `07` §4**: the restriction matrix by category/country, the 15-mile US-only caveat, authorization + "Paid for by" + 7-year Ad Library rules, the 2025-01-13 data-sharing restrictions, and the Special Ad Audiences discontinuation. Route there; do not re-derive the matrix here.
 
 ---
 
@@ -151,17 +126,17 @@ Sensitive-data-source classifications can also affect event sharing or optimizat
 
 Consensus structure (Adamigo naming guide, Jul 2026; AdLibrary naming system, May 2026; DataAlly, Feb 2026):
 
-- **Campaign**: `[Brand/Client]_[Objective]_[Theme/Offer]_[Date]` → `Acme_Sales_WinterSale_Dec2025`. Funnel prefixes for sorting: `1_TOF`, `2_MOF`, `3_BOF` (or `1_Awareness`…`3_Conversion`). Agencies prepend a 3–4 char client code: `[CLIENT]_[OBJ]_[AUD]_[PLACEMENT]_[PERIOD]`. Quarter-tag (`2026Q2`) or month (`MAY26`) for time-series filtering.
-- **Ad set**: `[Audience]_[Geo]_[Placement]_[Bid strategy]` → `LAL1%_US_Feed_CostCap`; encode retargeting windows in the token (`RET-WEB-7D` vs `RET-WEB-30D`), budget tier or `_CBO`/`_ABO` flag, `Adv+` flag for automated variants.
-- **Ad**: `[Hook]_[Format]_[Offer]_[Variant]` → `Testimonial_Video_20%Off_V1`. Format codes: V/S/C/Coll (video/static/carousel/collection); aspect ratio `9x16`, `1x1`; duration `15s`; CTA (`ShopNow`); asset IDs for large libraries; temporary test tags (`_TestA`, `_GreenBG`) removed after winner selection.
+| Level | Template | Example | Extra tokens |
+|---|---|---|---|
+| Campaign | `[Brand/Client]_[Objective]_[Theme/Offer]_[Date]` | `Acme_Sales_WinterSale_Dec2025` | Funnel prefix `1_TOF`/`2_MOF`/`3_BOF` (or `1_Awareness`…`3_Conversion`); agency client code `[CLIENT]_[OBJ]_[AUD]_[PLACEMENT]_[PERIOD]`; quarter (`2026Q2`) or month (`MAY26`) tag |
+| Ad set | `[Audience]_[Geo]_[Placement]_[Bid strategy]` | `LAL1%_US_Feed_CostCap` | Retargeting window (`RET-WEB-7D` vs `RET-WEB-30D`); budget tier or `_CBO`/`_ABO`; `Adv+` flag for automated variants |
+| Ad | `[Hook]_[Format]_[Offer]_[Variant]` | `Testimonial_Video_20%Off_V1` | Format codes V/S/C/Coll (video/static/carousel/collection); ratio `9x16`/`1x1`; duration `15s`; CTA (`ShopNow`); asset IDs for large libraries; temp tags (`_TestA`, `_GreenBG`) removed after winner |
 
 Rules:
-- Use one separator consistently. Underscores simplify exports and parsing; spaces are valid but require correct URL encoding and can make downstream parsing less convenient. Document standardized abbreviations (`Conv`, `LAL`, `RT`) in a shared schema.
-- 5–7 elements max per name; more is noise.
-- No UTMs in ad names (they belong in the URL parameters field).
-- Never change the convention mid-campaign — breaks historical reporting.
-- For Advantage+ Sales campaigns (single consolidated structure), move audience info up from ad-set token to campaign token. (AdLibrary, 2026.)
-- Purpose: names act as filterable data columns for pivot/reporting by hook, audience, offer — not just tidiness.
+- One separator consistently — underscores simplify exports/parsing; spaces need URL encoding. Document abbreviations (`Conv`, `LAL`, `RT`) in a shared schema.
+- 5–7 elements max per name. No UTMs in ad names (belongs in URL parameters field). Never change convention mid-campaign — breaks historical reporting.
+- Advantage+ Sales (single consolidated structure): move audience info up from ad-set token to campaign token. (AdLibrary, 2026.)
+- Names are filterable data columns for pivot/reporting by hook/audience/offer — not just tidiness.
 
 ---
 
@@ -171,27 +146,27 @@ Rules:
 
 The 2010s playbook (many narrow ad sets, ad-set budgets, manual segmentation) now mechanically hurts delivery (Capconvert, May 2026, with Meta Help Center citations):
 
-- **Learning-volume heuristic**: `50 optimization events in 7 days` is a longstanding planning rule, but current official delivery guidance does not publish that number as a universal threshold and Meta has tested other thresholds. The durable point is that splitting limited result volume across redundant ad sets reduces each set's opportunity to stabilize.
-- **Auction overlap**: overlapping ad sets de-duplicate in auction — only the highest Total Value ad enters; the rest don't bid. Five overlapping ad sets buy one auction entry, not five× reach.
-- **Advantage campaign budget only optimizes the pool it's given** — 2 broad healthy ad sets > 8 thin overlapping ones.
+- **Learning-volume heuristic**: `50 optimization events in 7 days` is a longstanding planning rule; not a published universal threshold (Meta has tested others). Durable point: splitting limited result volume across redundant ad sets still reduces each set's chance to stabilize.
+- **Auction overlap**: overlapping ad sets de-duplicate in auction — only the highest Total Value ad enters; the rest don't bid. Five overlapping ad sets buy one auction entry, not 5× reach.
+- **Advantage campaign budget only optimizes the pool it's given** — 2 broad healthy ad sets beat 8 thin overlapping ones.
 - Meta removed the counter-levers: ad-set max spend is an average, not a cap; ASC folded into default-on Advantage+ flow.
 
 ### 6.2 The standard two-campaign (or few-campaign) structure
 
 Practitioner consensus (Ads Uploader 2026 vertical playbooks; Capconvert 2026; Loomer "Modern Approach," Sep 2025):
 
-1. **Testing campaign when separation is useful** — use ad-set budgets for operational control or Meta Experiments for causal comparisons. Choose the number of cells and review window from expected volume, conversion delay, minimum detectable effect, and spend risk.
-2. **Scaling campaign when consolidation is useful** — move or recreate validated concepts in a structure that can allocate sufficient volume. Reusing an existing post can preserve social proof, but leaving the original active can create overlap; decide from incremental reach and marginal economics. Use bid/cost controls only when their delivery tradeoff matches the business constraint.
-3. E-commerce multi-SKU variant: dedicated campaign per hero product + one grouped CBO for the long tail + small ABO launches for new SKUs/angles. DTC single-product variant: exactly the 1-test + 1-scale pair above.
-4. Prospecting vs retargeting separation is the one legitimate structural split beyond test/scale: pooling them lets Meta over-spend on cheap retargeting conversions and under-invest in cold growth. Many 2026 accounts run broad-only (Advantage+ audience) and let creative do the segmentation, with retargeting handled inside the same campaign — both patterns are in current use; separating funnel stages is still the defensible default for smaller budgets. [practitioner opinion diverges here]
+1. **Test when separation is useful** — ad-set budgets for operational control, or Meta Experiments for causal comparisons. Size cell count and review window from expected volume, conversion delay, minimum detectable effect, spend risk.
+2. **Scale when consolidation is useful** — move or recreate validated concepts into a structure that can allocate sufficient volume. Reusing a post preserves social proof but risks overlap if the original stays active — decide from incremental reach and marginal economics; use bid/cost controls only when the tradeoff fits the constraint.
+3. E-commerce multi-SKU variant: dedicated campaign per hero product + one grouped CBO for the long tail + small ABO launches for new SKUs/angles. DTC single-product variant: just the 1-test + 1-scale pair.
+4. Prospecting vs retargeting separation is the one other legitimate structural split: pooling lets Meta over-spend on cheap retargeting and under-invest in cold growth. Many 2026 accounts run broad-only (Advantage+ audience) with retargeting inside the same campaign; separating funnel stages remains the defensible default for smaller budgets. [practitioner opinion diverges here]
 
 ### 6.3 Operating rules
 
-- Evaluate campaign-level allocation and ad-set-level diagnostics together when campaign budget distributes spend; neither level is universally sufficient by itself.
-- Avoid unnecessary edits while delivery is stabilizing, but only edits Meta treats as significant can return an ad set to learning. Use the live Delivery status and conversion lag rather than a fixed one-week clock.
-- Size creative diversity from available delivery and concept coverage; a fixed 5–10 variants can fragment low-volume ad sets.
-- Fixed edit percentages such as 20% are practitioner heuristics, not guaranteed learning boundaries. Monitor marginal economics and Delivery status after a controlled change.
-- For consolidation, audit overlap and decision-useful result volume, merge redundant cells, preserve validated creative, choose the appropriate budget level, then establish a new baseline. The legacy 50-event and one-week rules can be scenario inputs but are not migration requirements.
+- Evaluate campaign allocation and ad-set diagnostics together — neither alone is sufficient when campaign budget distributes spend.
+- Avoid unnecessary edits during stabilization; only edits Meta treats as significant reset an ad set to learning. Use live Delivery status and conversion lag, not a fixed one-week clock.
+- Size creative diversity from available delivery and concept coverage — a fixed 5–10 variants can fragment low-volume ad sets.
+- Fixed edit percentages (e.g. 20%, §3.1) aren't guaranteed learning boundaries — monitor marginal economics and Delivery status after a controlled change.
+- For consolidation: audit overlap and decision-useful result volume, merge redundant cells, preserve validated creative, choose the appropriate budget level, establish a new baseline. Legacy 50-event/one-week rules are scenario inputs, not migration requirements.
 
 ---
 

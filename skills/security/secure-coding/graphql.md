@@ -1,10 +1,8 @@
 # GraphQL Security
 
-Introspection control, depth/complexity limits, batch abuse, field-level
-authorization. GraphQL changes the threat model — one endpoint, many
-shapes; rate limit by request count alone is insufficient.
-
 Related: `express.md` (rate limiting baseline) · `auth.md`.
+
+GraphQL threat model: one endpoint, many shapes — rate limiting by request count alone is insufficient.
 
 ## Disable introspection in production
 
@@ -33,8 +31,6 @@ app.use('/graphql', graphqlHTTP({
 ```
 
 ## Query depth limiting
-
-Without limits, attackers can send deeply nested queries that exponentially increase server load.
 
 ```javascript
 const depthLimit = require('graphql-depth-limit');
@@ -65,7 +61,7 @@ app.use('/graphql', graphqlHTTP({
 
 ## Batching attack prevention
 
-GraphQL batching lets attackers send hundreds of queries in one HTTP request, bypassing per-request rate limits. Useful for brute-forcing OTPs, passwords, or enumeration.
+Batching = hundreds of queries in one HTTP request, bypassing per-request rate limits (OTP/password brute-force, enumeration).
 
 ```javascript
 // Limit batch size
@@ -125,10 +121,10 @@ const resolvers = {
 
 ## Pentest checklist
 
-- Send introspection query: `{__schema{types{name,fields{name}}}}`
-- Try deeply nested queries (depth bomb)
-- Try unbounded lists: `{ users(first:99999) { ... } }`
+- Introspection query: `{__schema{types{name,fields{name}}}}`
+- Deeply nested queries (depth bomb)
+- Unbounded lists: `{ users(first:99999) { ... } }`
 - Batch multiple queries in one request
-- Alias the same field 1000 times: `{ a1: user(id:1){name} a2: user(id:2){name} ... }`
-- Check for field suggestions in error messages (schema leakage without introspection)
-- Test IDOR via direct ID access in queries/mutations
+- Alias same field 1000 times: `{ a1: user(id:1){name} a2: user(id:2){name} ... }`
+- Field suggestions in error messages (schema leakage without introspection)
+- IDOR via direct ID access in queries/mutations

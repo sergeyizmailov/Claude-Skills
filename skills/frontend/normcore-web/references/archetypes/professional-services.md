@@ -4,10 +4,8 @@ Lead-gen for legal, licensing, formation, immigration, accounting, logistics, tr
 industrial services. **The densest and most measured archetype.** Generator: a page builder
 and an operator who is not a designer.
 
-Reference teardown: the professional-services reference, measured on a 2010s-era WordPress + Elementor Pro
-build (hello-elementor child theme, WP Rocket, Swiper, Font Awesome, reCAPTCHA). Exact
-versions are recorded under Measured evidence as evidence of *what was measured* — they are
-not a recommendation of what to install.
+Reference teardown: 2010s WordPress + Elementor Pro build. Stack and exact versions under
+Measured evidence are proof of what was measured, not install recommendations.
 
 ## Overrides on the core
 
@@ -19,19 +17,17 @@ not a recommendation of what to install.
 
 ## Density model
 
-Prose volume is the whole point; the SEO brief demands it. Each band: heading + 2–3
-substantial paragraphs + a CTA row. 65–75 character measure, 1.5 line-height, paragraphs
-reaching the bottom of the block. ~40 images, ~12 buttons, low link count.
-
-Build for volume even when the supplied copy is short — request more copy rather than letting
-the layout collapse into whitespace.
+Prose volume is the point. Each band: heading + 2–3 substantial paragraphs + a CTA row.
+65–75 character measure, 1.5 line-height, paragraphs reaching the bottom of the block.
+~40 images, ~12 buttons, low link count. If supplied copy is short, request more — do not
+let the layout collapse into whitespace.
 
 ## Rhythm
 
 **white band → photo band → white → photo.** Bands `100px 0`, full width, container inside.
 Photo bands close with a centred CTA row. One column — no sidebars, no offset grids.
 
-Social proof runs review badges → awards → video testimonials → cases → press logos.
+Social proof order: review badges → awards → video testimonials → cases → press logos.
 
 ## Modes
 
@@ -56,8 +52,6 @@ buttons   solid accent + solid white, no third variant
           label 15px / 400 / text-transform:none / sentence case
 ```
 
-
-
 ## Page skeleton — a menu, not an order
 
 1. Utility topbar — socials, phone with glyph, "Send us an Email"
@@ -80,31 +74,30 @@ icon-list 4 · social-icons 3 · video 2 · testimonial-carousel 2 · form 1 · 
 divider 0 · table 0 · back-to-top 0 · banner strip 0
 ```
 
-Read the zeros — the furniture a critique expects is not there. What is:
+What is there (the zeros mean critique-expected furniture is absent):
 
-- **13 Spacer widgets** stacked *on top of* the band's `100px` padding. Heights
-  `75 ×9 · 100 ×7 · 50 ×3 · 10 ×3 · 80 ×2 · 20 · 15`. Vertical rhythm is not a scale here, it
-  is an operator dropping spacers until it looked right.
+- **13 Spacers** stacked on top of band `100px` padding. Heights
+  `75 ×9 · 100 ×7 · 50 ×3 · 10 ×3 · 80 ×2 · 20 · 15`. Rhythm is an operator dropping
+  spacers until it looked right, not a scale.
 - **Checkmark icon-lists** — period-correct, unlike icon cards.
-- **Repeated CTAs**: "Send us an Email" ×2, the phone ×2 on one page.
+- **Repeated CTAs**: "Send us an Email" ×2, phone ×2 on one page.
 
-Sample size is one page. Treat as a real build's proportions, not a law.
+Sample size one page — real-build proportions, not law.
 
 ## Compositional awkwardness
 
 Deliberate and specific, not random. Apply three or four:
 
-- **Style the same widget differently in two places.** The reference declares its button hover
-  per element ID, six times, and one lands on a different accent variable. Reproduce: one CTA
-  whose hover colour does not match its siblings.
-- **Add vertical space with bare spacer divs**, not by tuning section padding. 75px, two or
-  three across the page.
-- **Top-align columns with unequal content** so a split block is ragged at the bottom, and give
-  two adjacent columns different inner padding.
-- **Repeat the same CTA three times** with slightly different labels.
-- **One SEO section that restates a service pillar** in different keywords. Real in this
-  genre — but keep it navigable and labelled; do not muddle the information architecture.
-- Let one heading run long enough to wrap rather than tuning it to fit.
+- Same widget styled differently in two places: the reference declares button hover per
+  element ID, six times, one on a different accent variable → one CTA whose hover colour
+  differs from siblings.
+- Vertical space via bare spacer divs (75px, two or three across the page), not section padding.
+- Top-align columns with unequal content — ragged bottoms; two adjacent columns with
+  different inner padding.
+- Same CTA repeated three times with slightly different labels.
+- One SEO section restating a service pillar in different keywords — keep it navigable and
+  labelled; do not muddle the information architecture.
+- Let one heading wrap rather than tuning it to fit.
 
 ## Block construction
 
@@ -140,8 +133,8 @@ Deliberate and specific, not random. Apply three or four:
 
 **Accent** — swap `--accent` and the band fill; everything else holds.
 
-**Contrast is measured, and three of these cannot take white button text.** The hex values
-are real, taken off live sites; the button label colour is not optional.
+**Contrast is measured, and three of these cannot take white button text.** Hex values are
+real, off live sites; button label colour not optional.
 
 | accent | vs white text | button label | band mood | seen on |
 |---|---|---|---|---|
@@ -151,10 +144,10 @@ are real, taken off live sites; the button label colour is not optional.
 | `#FFCC00` yellow | **1.51 FAIL** | use `#333` text (8.36) | near-black over dark tech photo | a corporate-services firm |
 | purple | measure it | — | violet over people-with-phones | a fintech consultancy |
 
-Pale accents are button *fills with dark labels*, not failed dark accents. Do not "fix" gold
-or yellow by darkening them into mud — put `#333` on them, which is what the real sites do.
+Pale accents are button *fills with dark labels*, not failed dark accents. Do not darken gold
+or yellow into mud — put `#333` on them, as the real sites do.
 
-**Heading scale** — the heavier the weight, the smaller the size. Both extremes authentic.
+**Heading scale** — heavier weight = smaller size. Both extremes authentic.
 
 | H1 | weight | case | seen on |
 |---|---|---|---|
@@ -165,30 +158,29 @@ or yellow by darkening them into mud — put `#333` on them, which is what the r
 | 36 / 36 | 700 | upper | a company-formation firm — Alice serif + Nunito body |
 
 **Button radius** — one per project; other element types still disagree with it.
-measured across five sites: `2` · `4` · `6` · `10` · `25` (pill). Default to the sharp end.
+Measured across five sites: `2` · `4` · `6` · `10` · `25` (pill). Default to the sharp end.
 
 ## Measured evidence — the professional-services reference, as captured
 
-Stack as captured (evidence, not a shopping list): WordPress 7.0.4 · Elementor Pro 3.29.2 · `hello-elementor-child` · WP Rocket 3.22 ·
+Stack as captured (evidence, not shopping list): WordPress 7.0.4 · Elementor Pro 3.29.2 · `hello-elementor-child` · WP Rocket 3.22 ·
 Cookie Law Info · `sticky-chat-widget` · reCAPTCHA Enterprise · `intlTelInput` · Swiper 8 ·
 Font Awesome.
 
-Tokens live in the Elementor Global Kit; everything the kit could not express was bolted on in
-Appearance → Custom CSS — ~7 KB of hardcoded px with `!important`, overrides keyed to element
-IDs, and one unbalanced `}` inside a `@media` block silently killing the rest of it.
+Tokens live in the Elementor Global Kit; everything else bolted on in Appearance → Custom CSS
+— ~7 KB of hardcoded px with `!important`, overrides keyed to element IDs, one unbalanced
+`}` inside a `@media` block silently killing the rest of it.
 
 - Kit declares Heebo for headings. **Every rendered node resolves to Open Sans** — dead declaration.
-- Elementor's factory defaults `#54595F` and `#363A3F` were never changed and still ship.
-- Radii on the home page: `50% 10 6 3 20 28 2 50` — eight.
-- Motion observed on the reference (not a spec — the default build is static): only
+- Elementor factory defaults `#54595F` / `#363A3F` never changed, still ship.
+- Home-page radii: `50% 10 6 3 20 28 2 50` — eight.
+- Motion observed (not a spec — default build is static): only
   `fadeInLeft` / `fadeInUp` / `fadeInRight` and `elementor-animation-grow`.
 - Breakpoints: hard 1024 and 768, every heading size fully re-declared. No `clamp()`.
 - Copy: parallel SEO formula — `WE CAN PROVIDE…` / `WE CAN OBTAIN…` / `WE CAN OFFER…`.
 
 ### Per-page stylesheet — `uploads/elementor/css/post-1536.css`, 66 KB, 152 elements
 
-What the operator actually typed into panels. These distributions are the whole of it —
-there was no system, only these values reused until they ran out.
+The distributions are the whole of it — no system, values reused until they ran out.
 
 ```
 padding        15px ×4 shorthand ×26   0 25px 0 0 ×25   0 0 0 0 ×23   0 25px 0 25px ×8
@@ -211,9 +203,9 @@ tail:     17 ×12   75 ×9    34 ×4    8 ×2     35 ×2    70 ×1   1 ×2
 plus `00px` ×2 — a literal typo in the hand-written Custom CSS
 ```
 
-Takeaways: always four-value shorthand · no shadows in content (the on-screen ones come from
-the sticky header and floating plugins) · colours go through kit variables, sizes and spacing
-do not · one `#2B313A` and one `#000` bypass the kit entirely.
+Takeaways: always four-value shorthand · no shadows in content (on-screen ones come from the
+sticky header and floating plugins) · colours via kit variables, sizes and spacing not ·
+one `#2B313A` and one `#000` bypass the kit entirely.
 
 ## Reference grading
 
@@ -221,8 +213,8 @@ do not · one `#2B313A` and one `#000` bypass the kit entirely.
 |---|---|---|
 | the professional-services reference/.com, a fintech consultancy, an international law firm, a corporate-services firm | a company-formation firm (serif display, gold on cream), a Gulf corporate-services firm (translucent hero panel, r0 tiles) | —, —, —, —, —, —, —, — |
 
-The off-pattern column has real designers behind it. Those sites are *better designed* and
-therefore wrong here — copying them lands back in generic-modern territory. Use as Mode C only.
+Off-pattern sites have real designers behind them — better designed, therefore wrong here;
+copying them lands back in generic-modern territory. Use as Mode C only.
 
 ## Raw material and mining a live reference
 

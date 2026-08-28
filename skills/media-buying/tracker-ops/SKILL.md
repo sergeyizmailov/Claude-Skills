@@ -1,6 +1,6 @@
 ---
 name: tracker-ops
-description: "Tracker ops for affiliate/media buying: Keitaro + Binom APIs (keys, reports, cost push), postback/S2S, metric discipline (payout event vs all-conversions, timezones, CPL math), daily spend-sync. Principles port to other trackers. Pairs with fb-grey-ops + meta-ads."
+description: "Tracker ops for affiliate/media buying: Keitaro + Binom APIs (keys, reports, cost push), postback/S2S, metric discipline (payout event vs all-conversions, timezones, CPL math), daily spend-sync, gclid/OCI chain for Google. Principles port to other trackers."
 ---
 
 # Tracker Ops
@@ -18,11 +18,12 @@ below; the metric rules and daily sync port to any tracker.
    setup's ratio, not a law.)
 2. Metric names aren't portable: Keitaro "leads" = status Lead (first event);
    Binom "leads" ≈ all conversions. Verify semantics per tracker per setup.
-3. Cross-check: pixel lead count ≈ tracker lead count. A big divergence = wrong
+3. Cross-check: platform-reported lead count ≈ tracker lead count. A big divergence = wrong
    metric or broken tracking; stop and reconcile before reporting. The "±20%"
    tolerance is an account-specific baseline you set from a reconciled day, not
    a universal constant.
-4. Compute daily CPL in the AD ACCOUNT timezone for both spend and leads.
+4. Compute daily CPL in the AD ACCOUNT timezone for both spend and leads. Google's account
+   timezone is permanent (senior-buyer-ops contract #5) — reconcile in the tracker, never by eye.
 5. Rows with unsubstituted `{{...}}` macros: exclude from performance analysis,
    then classify the cause — bots/crawlers, yes, but also a broken URL template,
    an unsupported/misspelled macro, or manual/direct traffic. Fix the template
@@ -34,7 +35,12 @@ below; the metric rules and daily sync port to any tracker.
 |---|---|
 | Keitaro: key, report/build, measures, update_costs, postback/S2S, postback drill, gotchas | `references/01-keitaro.md` |
 | Binom: legacy URL-param + v2 REST, reports, cost, postback/S2S | `references/02-binom.md` |
-| CPL math, funnel + anti-fraud metrics, cohort nowcasting, backend optimization contract (status→CAPI event), multi-tracker sync + conversion ledger, ATT asymmetry, mapping, daily routine | `references/03-metrics-and-math.md` |
+| CPL math, funnel + anti-fraud metrics, cohort nowcasting, backend optimization contract (status→CAPI event), TMA/bot CAPI without pixel, multi-tracker sync + conversion ledger, ATT asymmetry, mapping, daily routine | `references/03-metrics-and-math.md` |
+| Google lane: gclid/gbraid/wbraid, ValueTrack chains, Keitaro/RedTrack Google config, OCI windows + dedup, the 2026-06-15 cutoff | `references/04-google-lane.md` |
+
+Platform lanes are not interchangeable. Meta counts through CAPI; Google counts through gclid →
+offline conversion import, with different windows, a different dedup key, and a hard onboarding cutoff.
+Read `04` before wiring anything on Google traffic.
 
 ## Non-negotiables
 

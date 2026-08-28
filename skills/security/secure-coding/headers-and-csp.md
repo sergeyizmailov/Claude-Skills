@@ -14,9 +14,8 @@ Cross-Origin-Opener-Policy: same-origin
 
 ### Opt-in: Cross-Origin Isolation (only when you need `SharedArrayBuffer` / high-resolution timers)
 
-These break CDN scripts, embedded analytics, fonts, and iframes that don't
-serve `Cross-Origin-Resource-Policy` / `Cross-Origin-Embedder-Policy: credentialless`.
-Enable only when crossOriginIsolated context is actually required:
+Breaks CDN scripts, embedded analytics, fonts, iframes that don't serve
+`Cross-Origin-Resource-Policy` / `Cross-Origin-Embedder-Policy: credentialless`:
 
 ```
 Cross-Origin-Embedder-Policy: require-corp
@@ -25,12 +24,10 @@ Cross-Origin-Resource-Policy: same-origin
 
 ### Opt-in: HSTS `preload`
 
-`preload` submits the domain to the browser-baked HSTS list. It is
-**effectively irreversible** (removal takes months and ships in next major
-browser releases). Add ONLY after:
+`preload` bakes the domain into browsers — effectively irreversible (removal takes months, ships in next major browser releases). Add ONLY after:
 1. All subdomains serve HTTPS
-2. `max-age` of at least 1 year is live for 1+ months without rollback
-3. You commit to HTTPS-only on the apex and all subdomains long-term
+2. `max-age` ≥ 1 year live for 1+ months without rollback
+3. Commitment to HTTPS-only on apex + all subdomains long-term
 
 ```
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
@@ -83,12 +80,10 @@ X-AspNetMvc-Version: (remove)
 
 ## CSP with Nonces (recommended for inline scripts/styles)
 
-Goal: zero `'unsafe-inline'` in `script-src` AND `style-src`. Mixing
-`'unsafe-inline'` with the rest of a strict policy gives an attacker XSS
-with full execution rights — the strict-looking policy is then theater.
-If a third-party CSS framework requires inline styles, prefer nonces or
-hashes; only fall back to `'unsafe-inline'` for `style-src` if both are
-genuinely impossible, and document the trade-off.
+Goal: zero `'unsafe-inline'` in `script-src` AND `style-src` — mixing it into a
+strict policy gives XSS full execution rights (policy theater). Third-party CSS
+framework needs inline styles → prefer nonces/hashes; `'unsafe-inline'` in
+`style-src` only as a documented compromise.
 
 ```javascript
 // Express middleware
@@ -118,7 +113,6 @@ app.use(helmet({
 ```
 
 ```html
-<!-- In template -->
 <script nonce="{{nonce}}">
   // inline script allowed by nonce
 </script>
@@ -130,7 +124,7 @@ app.use(helmet({
 Content-Security-Policy: script-src 'nonce-RANDOM' 'strict-dynamic'; object-src 'none'; base-uri 'self'
 ```
 
-`strict-dynamic` = scripts loaded by nonce-approved scripts are auto-trusted. No need to whitelist CDN domains. Works with bundlers and dynamic imports.
+`strict-dynamic` = scripts loaded by nonce-approved scripts are auto-trusted. No CDN domain whitelisting. Works with bundlers and dynamic imports.
 
 ## CSP for Common Scenarios
 
@@ -145,9 +139,7 @@ default-src 'self'; script-src 'self' 'nonce-RANDOM' https://www.googletagmanage
 ```
 
 ### SPA with API backend
-Prefer nonces for any unavoidable inline styles. `'unsafe-inline'` in
-`style-src` is a documented compromise — note it and remove when the
-framework allows nonces/hashes:
+Prefer nonces for unavoidable inline styles; `'unsafe-inline'` in `style-src` is a documented compromise — remove when the framework allows nonces/hashes:
 ```
 default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.example.com wss://api.example.com; font-src 'self'; frame-ancestors 'none'; base-uri 'self'
 ```
@@ -159,16 +151,15 @@ default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect
 
 ## CSP Deployment Strategy
 
-1. Start with `Content-Security-Policy-Report-Only` header
-2. Monitor violations in browser console / reporting endpoint
-3. Fix violations (move inline scripts to files, add nonces)
+1. Start with `Content-Security-Policy-Report-Only`
+2. Monitor violations (console / reporting endpoint)
+3. Fix violations (inline scripts → files, add nonces)
 4. Switch to enforcing `Content-Security-Policy`
-5. Add `report-uri` directive for ongoing monitoring
+5. Add `report-uri` for ongoing monitoring
 
 ## Cookie Flags
 
 ```javascript
-// Secure cookie settings
 res.cookie('session', token, {
   httpOnly: true,    // no JS access (prevents XSS theft)
   secure: true,      // HTTPS only
@@ -183,7 +174,7 @@ res.cookie('session', token, {
 |------|---------|-------------|
 | `httpOnly` | Block `document.cookie` access | Always for auth tokens |
 | `secure` | HTTPS only | Always in production |
-| `sameSite=lax` | Block cross-site POST requests | Default for most cookies |
+| `sameSite=lax` | Block cross-site POST | Default for most cookies |
 | `sameSite=strict` | Block all cross-site requests | Sensitive actions |
 | `sameSite=none` | Allow cross-site (requires secure) | Cross-domain auth only |
 | `__Host-` prefix | Force secure + no domain + path=/ | Strictest option |
@@ -209,25 +200,23 @@ app.use(cors({
 ```
 
 Rules:
-- List exact origins, never `*`
-- Only allow needed methods
-- Only allow needed headers
-- Set `maxAge` to cache preflight
-- `credentials: true` only if needed (cookies/auth headers)
+- Exact origins, never `*`
+- Only needed methods/headers
+- `maxAge` caches preflight
+- `credentials: true` only if needed
 
 ## Nginx Security Headers
 
 ```nginx
 server {
-    # Security headers
-    # HSTS without preload by default (see "Opt-in: HSTS preload" before adding `preload`)
+    # HSTS without preload by default (see "Opt-in: HSTS preload" first)
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
     add_header Cross-Origin-Opener-Policy "same-origin" always;
-    # CORP/COEP are opt-in (cross-origin isolation) — see header file
+    # CORP/COEP are opt-in — see header file
     add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
 
     # Hide server info
@@ -286,10 +275,9 @@ function addSecurityHeaders(response) {
 ## Verification
 
 ```bash
-# Check headers
 curl -I https://example.com
 
-# Online scanners
+# Online scanners:
 # securityheaders.com — grades A to F
 # observatory.mozilla.org — comprehensive scan
 # csp-evaluator.withgoogle.com — CSP analysis

@@ -1,110 +1,70 @@
 ---
 name: design-stack-picker
-description: "Use when building or restyling frontend UI and choosing building blocks — icon sets, fonts, component/block libraries, accessible primitives, imagery sources, color systems, motion, shadows, spacing, and image optimization. For landing pages, ecommerce, dashboards, web apps, emails, and single components. Prefer existing project systems first; see resources.md for the catalog and patterns.md for implementation snippets."
+description: "Use when building or restyling frontend UI and choosing building blocks — icon sets, fonts, component/block libraries, accessible primitives, imagery sources, color systems, motion, shadows, spacing, and image optimization. For landing pages, ecommerce, dashboards, web apps, emails, and single components."
+risk: low
+source: custom
+date_added: "2026-06-15"
 ---
 
 # design-stack-picker
 
-Use this skill to improve frontend quality without inventing every asset from scratch.
-It is a **selection layer**, not a mandate to replace a project's current design system.
+A selection layer, not a mandate to replace the project's design system.
 
-## Core Rule
+## Decision order
 
-Inspect the current project before adding anything:
-
-- framework and rendering model
-- existing icons, fonts, tokens, components, image pipeline, and breakpoints
-- current dependencies and visual style
-
-Decision order:
+Audit first: framework and rendering model, existing icons/fonts/tokens/components/image pipeline/breakpoints, current dependencies, visual style. Then:
 
 1. Reuse the existing project system if it works.
 2. Extend it with the smallest compatible building block.
-3. Add a new library only when the project has no good local solution.
-4. Hand-craft locally only for brand assets, tiny static pieces, or cases where a dependency is heavier than the implementation.
-
-## Resource Loading
-
-- Read `resources.md` only when choosing a library, font, icon set, imagery source, component set, motion tool, or color system.
-- For vague "make it look better" tasks, read `resources.md` §12 first to pick concrete references/patterns before changing UI.
-- Read `patterns.md` only when implementing tokens, reset, icons, fonts, cards, image markup, motion, or CSS snippets.
-- Do not load both by default if the task only needs one.
+3. Add a library only when there is no good local solution.
+4. Hand-craft only for brand assets, tiny static pieces, or where a dependency outweighs the implementation.
 
 ## Defaults
 
-Use these as starting points, not fixed requirements:
+Starting points, not requirements.
 
 | Axis | Default |
 |---|---|
 | Icons | Iconify + Solar; Simple Icons for brand marks |
 | Fonts | Unbounded display + Onest body via Fontsource |
-| Components | Existing project components first; HyperUI/Preline for static sections; shadcn/Radix for React primitives |
+| Components | Project components first; HyperUI/Preline for static sections; shadcn/Radix for React primitives |
 | Color | Semantic CSS variables; one dominant brand color + one accent |
 | Motion | CSS-first restrained reveal; Motion for React; GSAP only for complex timelines |
-| Imagery | Real product/user/stock/CMS assets; optimized AVIF/WebP where practical |
+| Imagery | Real product/user/stock/CMS assets; AVIF/WebP where practical |
 
-## Dependency Budget
+## Dependency budget
 
-Do not add a dependency for:
+No dependency for: a single icon when an icon system exists; one static section existing primitives can handle; a basic disclosure/dropdown in Astro or plain HTML where scoped JS is smaller and verifiable; a visual effect existing CSS covers; anything duplicating a current dependency.
 
-- one icon when an icon system already exists
-- one static section that existing layout primitives can handle
-- a basic disclosure/dropdown in Astro/plain HTML when scoped JS is smaller and verifiable
-- a visual effect achievable with existing CSS
-- a library that duplicates current project dependencies
+Add one when it removes real implementation risk: complex accessible widgets, broad consistent icon coverage, image optimization at scale, multi-screen design systems.
 
-Add a dependency when it prevents real implementation risk: complex accessible widgets,
-large consistent icon coverage, image optimization at scale, or multi-screen design systems.
+## Context routing
 
-## Context Routing
-
-| Project context | Bias |
+| Context | Bias |
 |---|---|
-| Existing Astro/static site | Local `.astro` components, scoped CSS, progressive JS, `astro:assets`; avoid React-only primitives unless already used |
-| React/Next app | Current UI layer first; shadcn/Radix for missing complex primitives |
-| Admin/dashboard | Dense, scannable forms/tables/filters; minimal decoration |
-| Ecommerce/catalog | Real product imagery, stable cards, search, category navigation, price/stock hierarchy, mobile filters |
-| Marketing page | Stronger typography, imagery/video, section blocks, restrained motion |
-| Prototype | Smallest working choice; avoid a full design system unless it will continue |
+| Astro/static | Local `.astro` components, scoped CSS, progressive JS, `astro:assets`; avoid React-only primitives unless already used |
+| React/Next | Current UI layer first; shadcn/Radix for missing complex primitives |
+| Admin/dashboard | Dense scannable forms/tables/filters, minimal decoration |
+| Ecommerce | Real product photos, neutral placeholders, stable card dimensions with `object-fit: contain`; price/stock/spec/action hierarchy over decorative labels; reachable category nav, autocomplete, dismissible mobile filters; test long names, missing images, sale/stock states, uneven counts |
+| Marketing | Stronger typography, imagery/video, section blocks, restrained motion |
+| Prototype | Smallest working choice; no full design system unless it will continue |
 
-## Hard Rules
+## Hard rules
 
-- Do not hand-draw generic SVG icons; use one coherent icon set unless it is a supplied brand logo.
-- Do not accidentally ship default fonts for brand-facing UI; choose and load intentional type.
-- Do not scatter magic colors/spacing/shadows inline; use tokens.
-- Use accessible primitives for complex widgets: dialogs, comboboxes, tabs, menus, tooltips, switches.
-- Use one family per axis: one icon style, one illustration style, one color system, one type pairing.
-- Respect `prefers-reduced-motion`, visible focus, and AA contrast.
-- Optimize important images; set dimensions; eager-load only the LCP image.
+- One family per axis: one icon set, one illustration style, one color system, one type pairing.
+- Never hand-draw generic SVG icons — use the icon set (supplied brand logos excepted).
+- Choose and load type intentionally; never ship default fonts on brand-facing UI.
+- Tokens for colors, spacing, radii, shadows, type, and states — no scattered inline magic values.
+- Accessible primitives for dialogs, comboboxes, tabs, menus, tooltips, switches — with real keyboard/focus behavior.
+- Respect `prefers-reduced-motion`, visible focus, AA contrast.
+- Optimize important images, set dimensions, eager-load only the LCP image.
+- Verify in a browser from phone to wide desktop: no horizontal overflow, key images load at natural dimensions.
 
-If a hard rule conflicts with a mature existing project convention, preserve the convention and improve incrementally.
+Where a hard rule conflicts with a mature existing convention, keep the convention and improve incrementally.
 
-## Workflow
+## Resources
 
-1. Establish direction: ecommerce, admin, SaaS, editorial, product, campaign, etc.
-2. Audit existing project foundation before changing it.
-3. Choose the smallest building block that fits the project.
-4. Implement with existing tokens/components where possible.
-5. Use real assets; avoid decorative filler where product/content clarity matters.
-6. Verify in a browser.
+Load only what the task needs, never both by default.
 
-## Ecommerce Notes
-
-For product/catalog UI:
-
-- Prefer real product photos; keep placeholders neutral.
-- Use stable card dimensions and `object-fit: contain` for product grids.
-- Test long names, missing images, different prices, sale/stock states, and uneven item counts.
-- Make category navigation, search/autocomplete, and mobile filters easy to reach and dismiss.
-- Prioritize price, stock, main spec, and action hierarchy over decorative labels.
-
-## Done Checklist
-
-- Icons are from one set and sized consistently.
-- Fonts are intentional and loaded once.
-- Tokens cover colors, spacing, radii, shadows, type, and states.
-- Complex widgets have keyboard/focus behavior.
-- Images are real, optimized where practical, and have stable dimensions.
-- Motion is restrained and respects reduced motion.
-- Responsive behavior is checked from phone to wide desktop.
-- Browser verification confirms no horizontal overflow and key images load with natural dimensions.
+- `resources.md` — the catalog: libraries, fonts, icon sets, imagery, components, motion, color systems. §12 first for vague "make it look better" tasks, to fix concrete references before touching UI.
+- `patterns.md` — implementation snippets: tokens, reset, icons, fonts, cards, image markup, motion, CSS.

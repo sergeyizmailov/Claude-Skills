@@ -1,9 +1,5 @@
 # Express Hardening & Production Misconfigurations
 
-Core Express baseline: helmet/CORS/trust proxy/body limits, rate limiting,
-Zod input validation, error handling, and the production misconfig surface
-(exposed files, NODE_ENV, source maps, open DB ports, debug endpoints).
-
 Related: `auth.md` (sessions, JWT, password, access control) · `db.md`
 (SQL, race conditions) · `uploads.md` · `ssrf.md` · `dos.md` (ReDoS, WS) ·
 `graphql.md` · `llm.md` · `headers-and-csp.md`.
@@ -15,17 +11,13 @@ const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
-const { randomBytes } = require('crypto');
 
 const app = express();
 
-// CSP without `'unsafe-inline'` for either script-src or style-src.
-// If a framework forces inline styles, prefer nonces (see headers-and-csp.md)
-// — only fall back to `'unsafe-inline'` in style-src as a documented compromise.
-// COEP / CORP are opt-in (cross-origin isolation) — enable only when you need
-// SharedArrayBuffer / high-resolution timers; they break most CDN/embed setups.
-// HSTS `preload` is irreversible — see headers-and-csp.md opt-in checklist
-// before enabling.
+// CSP: no 'unsafe-inline' for script-src or style-src. Framework forces inline
+// styles → prefer nonces (see headers-and-csp.md); 'unsafe-inline' in style-src
+// only as a documented compromise. COEP/CORP are opt-in (cross-origin isolation,
+// break most CDN/embeds). HSTS preload is irreversible — see headers-and-csp.md.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -57,24 +49,20 @@ app.use(cors({
 
 app.disable('x-powered-by');
 
-// `trust proxy` — value must match your actual topology, NOT a default `1`.
-// Wrong value → IP spoofing via X-Forwarded-For (rate limit + audit log bypass).
-// Topologies:
-//   Direct exposure (Node bound to public IP):                  app.set('trust proxy', false)
-//   One reverse proxy on same host (Nginx → Node on 127.0.0.1): app.set('trust proxy', 'loopback')
-//   Nginx → Node behind it, both you control:                   app.set('trust proxy', 1)
-//   Cloudflare → Nginx → Node:                                  app.set('trust proxy', 2)
-//   Behind specific proxy IP set you control:                   app.set('trust proxy', '10.0.0.0/8')
+// trust proxy must match actual topology, NOT a default `1` — wrong value →
+// IP spoofing via X-Forwarded-For (rate limit + audit log bypass):
+//   Direct exposure (Node on public IP):                   app.set('trust proxy', false)
+//   One reverse proxy on same host (Nginx → 127.0.0.1):    app.set('trust proxy', 'loopback')
+//   Nginx → Node, both you control:                        app.set('trust proxy', 1)
+//   Cloudflare → Nginx → Node:                             app.set('trust proxy', 2)
+//   Specific proxy CIDR you control:                       app.set('trust proxy', '10.0.0.0/8')
 app.set('trust proxy', 'loopback');
 
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
-// `index: false` disables directory index serving for the static dir.
-// Use this when `public/` is purely assets (CSS/JS/images) and you don't
-// want a default file (e.g. `index.html`) served at `/`. If `public/`
-// is your SPA root and `/` must serve `index.html`, remove this line
-// or replace with `index: 'index.html'`.
+// index: false disables directory index serving for the static dir; remove it
+// (or use index: 'index.html') if public/ is the SPA root serving `/`
 app.use(express.static('public', {
   dotfiles: 'deny',
   index: false
@@ -105,7 +93,7 @@ app.post('/register', authLimiter, registerHandler);
 app.post('/reset-password', authLimiter, resetHandler);
 ```
 
-Production: use `rate-limit-redis` store for multi-instance.
+Multi-instance production: `rate-limit-redis` store.
 
 ## Input Validation (Zod)
 
@@ -138,8 +126,8 @@ app.post('/login', validate(loginSchema), loginHandler);
 Rules:
 - Validate ALL input (body, params, query, headers)
 - Whitelist allowed fields, reject unknown
-- Set max lengths on all strings
-- Use `.strip()` or `.strict()` to remove extra fields
+- Max lengths on all strings
+- `.strip()` / `.strict()` to remove extra fields
 - Never pass raw `req.body` to database
 
 ## Error Handling
@@ -175,11 +163,9 @@ app.get('/users/:id', asyncHandler(async (req, res) => {
 ```
 
 Rules:
-- Never expose stack traces to client
-- Never expose internal paths, DB errors, query details
-- Log errors with context (URL, method, IP, timestamp)
-- Never log passwords, tokens, session data
-- Use generic messages for 5xx, specific for 4xx
+- Never expose stack traces, internal paths, DB errors, query details
+- Log errors with context (URL, method, IP, timestamp); never log passwords, tokens, session data
+- Generic messages for 5xx, specific for 4xx
 - Always handle promise rejections
 
 ## Production Misconfigurations
@@ -231,11 +217,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 ```
 
-Impact of `NODE_ENV=development` in production:
-- Express serves verbose error stacks to clients
-- Template engines disable caching (performance + info leak)
-- Some packages enable debug logging
-- GraphQL introspection may be enabled
+`NODE_ENV=development` in production: verbose error stacks to clients, template
+caching disabled, some packages enable debug logging, GraphQL introspection may be on.
 
 ### Source maps
 
@@ -245,13 +228,11 @@ module.exports = {
   mode: 'production',
   devtool: false // NO source maps in production
 };
-// If needed for error tracking: 'hidden-source-map' (generates .map without //# sourceMappingURL)
-// But .map files still exist on disk — block via Nginx
+// Need error tracking: 'hidden-source-map' (no //# sourceMappingURL) —
+// but .map files still exist on disk, block via Nginx
 ```
 
 ### Open database ports
-
-Databases should never be accessible from the internet. Common mistakes:
 
 | Port | Service | Default Auth |
 |------|---------|-------------|
@@ -262,7 +243,7 @@ Databases should never be accessible from the internet. Common mistakes:
 | 9200 | Elasticsearch | None |
 | 5984 | CouchDB | Admin party |
 
-MongoDB without auth and Redis binding to `0.0.0.0` are still among the most common findings on bug bounty.
+MongoDB without auth and Redis on `0.0.0.0` still among most common bug bounty findings.
 
 ### Debug endpoints left in production
 
@@ -274,20 +255,10 @@ app.get('/health/detailed', ...);   // if it exposes internals
 app.get('/api/test', ...);
 app.get('/admin', ...);              // without auth middleware
 
-// Express stack dump — leaks all routes
+// Stack dump — leaks all routes
 app.get('/debug', (req, res) => {
   res.json(app._router.stack);
 });
-```
-
-### Directory listing
-
-```javascript
-// express.static with dotfiles: 'deny' and index: false
-app.use(express.static('public', {
-  dotfiles: 'deny',
-  index: false
-}));
 ```
 
 ### Pentest checklist for misconfigs
@@ -297,7 +268,7 @@ app.use(express.static('public', {
 - `curl -s https://target/package.json`
 - `curl -s https://target/main.js.map` (and other common bundle names)
 - `nmap -p 27017,6379,5432,3306,9200 target`
-- Check `X-Powered-By`, `Server` headers in response
-- Check for verbose error pages (send invalid JSON, bad routes)
-- Check for GraphQL playground / introspection
-- Check for Swagger/OpenAPI docs at `/docs`, `/api-docs`, `/swagger`
+- Check `X-Powered-By`, `Server` headers
+- Check verbose error pages (send invalid JSON, bad routes)
+- Check GraphQL playground / introspection
+- Check Swagger/OpenAPI docs at `/docs`, `/api-docs`, `/swagger`
