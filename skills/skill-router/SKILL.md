@@ -1,6 +1,6 @@
 ---
 name: skill-router
-description: "Read FIRST on any non-trivial task in these domains — before writing from scratch, and before concluding no skill fits: media-buying (Meta/Google ads, grey ops, trackers, measurement, portfolio ops), frontend (responsive adaptation, design stacks, ordinary-commercial web), security (secure coding, JS obfuscation), research (multi-source research, mass scraping). Skip only for simple edits and direct answers."
+description: "Read FIRST on any non-trivial task in these domains — before writing from scratch, and before concluding no skill fits: media-buying (Meta/Google ads, grey ops, trackers, measurement, portfolio ops), frontend (responsive adaptation, design stacks, ordinary-commercial web), security (secure coding, JS obfuscation), research (multi-source research, mass scraping), engineering (skill authoring). Skip only for simple edits and direct answers."
 license: MIT
 ---
 
@@ -27,6 +27,8 @@ this file is the entry point — skip it and the collection is invisible and you
   obfuscation and anti-automation for authorized testing.
 - **research/** — traceable multi-source research with confidence labels and explicit gaps;
   mass crawling and scraping behind anti-bot protection.
+- **engineering/** — writing, auditing and compressing agent skills themselves: what to keep,
+  what the model already knows, and how to package it.
 
 ## Picking inside media-buying
 

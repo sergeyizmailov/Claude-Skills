@@ -60,6 +60,12 @@ have.
 | [**secure-coding**](skills/security/secure-coding) | Secure defaults and review guidance for JavaScript, Node.js, HTML, CSS, APIs, authentication, databases, uploads, GraphQL, and AI-assisted code. |
 | [**js-obfuscation**](skills/security/js-obfuscation) | JavaScript protection, obfuscation, anti-automation, and anti-debugging techniques for authorized testing and software protection. |
 
+### Engineering
+
+| Skill | Purpose |
+|---|---|
+| [**knowledge-delta-skill-architect**](skills/engineering/knowledge-delta-skill-architect) | Writes, audits, and compresses agent skills so they earn their tokens: baseline what the model already does, keep only the delta, and package it for progressive disclosure. |
+
 ### Research
 
 | Skill | Purpose |
