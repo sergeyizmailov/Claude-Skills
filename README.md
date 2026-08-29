@@ -18,6 +18,24 @@ from any changelog, the threshold learned by getting burned, or the failure mode
 postmortem describes and no tutorial mentions. That gap — the **knowledge delta** — is
 what each skill here closes, and only that.
 
+## Written for models that already know
+
+The first generation of agent skills was written when models had to be told things —
+what a PDF is, how a REST call works, why tests matter. That assumption expired. Claude,
+GPT, Gemini, Grok, DeepSeek, Qwen, Kimi, GLM: whichever one is loading the file, most of
+the public internet is already in its weights, and a skill that restates the docs spends
+context teaching it what it would have produced unprompted.
+
+Restating is not merely wasteful. Content that is topically adjacent to the task but adds
+nothing degrades reasoning on that task — a redundant paragraph inside the domain the
+model is working in is the most expensive place to spend a token, not a neutral one.
+
+So the unit of a skill is no longer *the topic*. It is the **delta**: what the model gets
+wrong, does not know, skips under pressure, or solves in a weaker way than an available
+stronger one. The delta is per-model and it shrinks with every release — which is why
+these skills carry dates, get re-baselined, and are cut when their gap closes. The method
+transfers even when a particular skill stops being needed.
+
 ## This is not
 
 - A tutorial, onboarding guide, or "learn X" walkthrough.
