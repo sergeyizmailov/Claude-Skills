@@ -5,7 +5,6 @@
 [![CI](https://github.com/sergeyizmailov/knowledge-delta-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeyizmailov/knowledge-delta-skills/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Agent Skills standard](https://img.shields.io/badge/Agent%20Skills-open%20standard-8A2BE2)](https://agentskills.io)
-[![Skills](https://img.shields.io/badge/skills-16-informational)](CATALOG.md)
 [![Runtimes](https://img.shields.io/badge/runs%20on-Claude%20Code%20%C2%B7%20Codex%20%C2%B7%20Cursor%20%C2%B7%20Gemini%20CLI%20%C2%B7%20opencode-555)](#install)
 
 **Not knowledge for beginners. Missing expertise for already-capable AI.**
@@ -71,7 +70,7 @@ Full method, what gets cut, how volatile facts are dated: [`docs/METHODOLOGY.md`
 | [**web-scraping**](skills/web-scraping) | Crawls and scrapes at scale past anti-bot defenses (Cloudflare, Akamai, DataDome, PerimeterX) using Crawl4AI and Camoufox. |
 | [**responsive-adapter**](skills/responsive-adapter) | Adapts an existing web interface from 320px to 2560px+ without touching the visual design, then verifies across a device matrix. |
 
-All 16 skills, grouped by domain — media buying, frontend, security, research,
+Every skill, grouped by domain — media buying, frontend, security, research,
 engineering: [`CATALOG.md`](CATALOG.md).
 
 ## Install

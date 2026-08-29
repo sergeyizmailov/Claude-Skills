@@ -1,6 +1,6 @@
 # Catalog
 
-All 16 skills, grouped by domain for browsing — every folder sits directly under
+Every skill, grouped by domain for browsing — each folder sits directly under
 `skills/` (no category subfolders on disk), so a single `cp` installs any of them.
 
 ## Media buying — Meta & Google
