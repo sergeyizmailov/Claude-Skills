@@ -49,24 +49,6 @@ exists. Everything else is cut, no matter how correct or well-written it is.
    nothing restated twice, every volatile fact dated, every remaining rule traceable to
    a prevented failure.
 
-There is deliberately no separate "eval" stage between packaging and shipping — step 6
-*is* the evaluation: the same clean-session rerun that step 2 used for the baseline,
-scored against the same assertions. There is no held-out benchmark, no scoring harness,
-and no published pass rate; "rerun and cut" is a gate on what ships, not a measurement
-that gets reported.
-
-## What's not published
-
-**No skill in this collection has a published, measured base-model-vs-base+skill
-score.** The rerun step is a real check the author ran during development — it decides
-what survives into the file — but it is not re-run under controlled conditions per
-release, not scored against a fixed benchmark, and not comparable across skills or
-across models. Treat "this skill was built with this methodology" as a statement about
-process, not as a claim that a number was measured and is being withheld. Where a skill
-body mentions a figure from a primary source (a vendor-reported percentage, a documented
-rate limit), that figure is the source's, cited with the source — never this project's
-own evaluation.
-
 ## Compression, not brevity
 
 The goal isn't short files — it's a high ratio of decision-changing content to tokens.

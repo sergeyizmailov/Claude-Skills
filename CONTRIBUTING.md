@@ -21,8 +21,6 @@ line, cut the line before you open the PR. Full method:
   it or a live-lookup pointer. No date, no merge.
 - **Invented measurements.** Don't claim a skill was "tested" or "evaluated" unless
   you ran the tasks against a clean-session baseline and can describe what you saw.
-  Nothing in this repo carries a published base-vs-base+skill score, and a new
-  contribution shouldn't imply one either.
 - **Padding.** A skill that restates itself across two files, or pads its body to look
   thorough, loses to a shorter one that only holds what changes model behavior.
 
