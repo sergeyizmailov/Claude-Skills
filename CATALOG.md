@@ -1,17 +1,15 @@
 # Catalog
 
-All 16 skills, grouped by domain. Every skill folder sits directly under `skills/` —
-there are no category subfolders on disk, so a single `cp` installs any of them. The
-grouping below is for browsing.
+All 16 skills, grouped by domain for browsing — every folder sits directly under
+`skills/` (no category subfolders on disk), so a single `cp` installs any of them.
 
 ## Media buying — Meta & Google
 
-Layered by concern, not by platform: buy mechanics (`meta-ads`, `google-ads`), survival
-infrastructure (`meta-grey-ops`, `google-grey-ops`), the retail data layer
-(`google-feed-ops`), counting (`tracker-ops`), experiment validity
-(`measurement-experimentation-ops`), and portfolio orchestration (`senior-buyer-ops`)
-sitting on top. These eight cross-reference each other by skill name — install the set
-together, not a single one in isolation.
+Layered by concern, not platform: buy mechanics (`meta-ads`, `google-ads`) → survival
+infrastructure (`meta-grey-ops`, `google-grey-ops`) → retail data layer
+(`google-feed-ops`) → counting (`tracker-ops`) → experiment validity
+(`measurement-experimentation-ops`) → portfolio orchestration (`senior-buyer-ops`) on
+top. These eight cross-reference each other by name — install the set together.
 
 | Skill | Adds |
 |---|---|

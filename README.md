@@ -10,12 +10,10 @@
 baseline what the model already does  →  research only the gaps  →  distil  →  ship the delta
 ```
 
-Frontier models already know the docs, the frameworks, and the textbook best practice
-for most domains. What they don't reliably know is the rest: the platform quirk that
-never made it into a changelog, the threshold that only shows up after you've been
-burned by it once, the failure mode a postmortem describes and a tutorial never
-mentions. That gap — the **knowledge delta** — is what each skill here is built to
-close, and only that.
+Frontier models know the docs and textbook practice, not the platform quirk missing
+from any changelog, the threshold learned by getting burned, or the failure mode a
+postmortem describes and no tutorial mentions. That gap — the **knowledge delta** — is
+what each skill here closes, and only that.
 
 ## This is not
 
@@ -26,9 +24,8 @@ close, and only that.
 
 ## Three examples
 
-Quoted verbatim, with the file they live in. None of these are things a competent
-outsider — or a general-purpose model with no domain-specific skill loaded — would
-reliably know or check for.
+Verbatim, with the file each lives in. A competent outsider would not reliably know to
+check any of them; nor would a model with no domain skill loaded.
 
 > iOS 18 does NOT update `window.innerHeight` when address bar expands; `100vh` always
 > equals `lvh` on iOS Safari.
@@ -49,16 +46,13 @@ reliably know or check for.
 
 ## How these are built
 
-Baseline → gap discovery → research → validation → contradiction review → compression
-→ skill. In short: run the real tasks with no skill, record what the model gets wrong
-or skips, research only the confirmed gaps plus one bounded pass for unknown unknowns,
-keep only rules that trace back to a prevented failure, compress hard, then rerun the
-same tasks against the draft and cut anything that didn't fix what it was written for.
-On broad domains, independent research and a separate contradiction-hunting pass are
-used before anything is merged in.
+- Run real tasks with no skill; record what breaks or gets skipped.
+- Research only confirmed gaps, plus one bounded pass for unknown unknowns.
+- Keep only rules traced to a prevented failure; compress hard.
+- Rerun the draft; cut anything that didn't fix what it was written for.
+- Broad domains: independent research + a contradiction-hunting pass before merging.
 
-Full method, what gets cut, and how volatile facts are dated:
-[`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
+Full method, what gets cut, how volatile facts are dated: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
 
 ## Catalog
 
@@ -78,8 +72,7 @@ engineering: [`CATALOG.md`](CATALOG.md).
 
 ## Install
 
-Copy the skill directories you want into your runtime's skills folder. There's nothing
-else to configure.
+Copy the skill directories you want into your runtime's skills folder — nothing else to configure.
 
 ```bash
 git clone https://github.com/sergeyizmailov/knowledge-delta-skills.git
@@ -98,9 +91,8 @@ Everything:
 cp -R knowledge-delta-skills/skills/* ~/.claude/skills/
 ```
 
-Skills folder by runtime, personal/global scope, verified against each vendor's docs
-on 2026-08-29. Most also read a project-local equivalent, and several read each other's
-directories for compatibility — check the runtime's own docs for the current list:
+Personal-scope directory by runtime, verified against each vendor's docs on 2026-08-29.
+Most also read a project-local equivalent, and some read each other's directories.
 
 | Runtime | Skills directory |
 |---|---|
@@ -115,17 +107,14 @@ install any one of them.
 
 ## Redundancy and retirement
 
-Base models absorb more of the public internet every release. A skill earns its place
-only while there's a real gap between what the model already knows and what a task
-needs — once that gap closes, the skill isn't neutral, it's the exact kind of
-topically-adjacent-but-useless content that degrades reasoning instead of helping it.
+Base models absorb more of the internet every release. A skill earns its place only
+while a real gap exists between what the model knows and what a task needs — once that
+gap closes, the skill is topically-adjacent-but-useless content, not neutral filler.
 
-This collection doesn't promise permanence. Volatile-domain skills carry a date; when a
-skill is re-baselined and a section turns out to already be handled correctly by a
-current model, that section gets cut — the same rule applied at first-write time. Some
-skills here will shrink over time, and some are expected to be retired outright once
-their delta closes. See [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for how that
-review happens.
+No permanence promised: volatile-domain skills carry a date; a re-baseline that finds a
+section already handled correctly gets that section cut, same rule as first-write.
+Skills here will shrink or retire outright as their delta closes — see
+[`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
 
 ## Structure
 
@@ -142,8 +131,7 @@ only once a skill is selected.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the quality bar, the anatomy of a skill, and
-the local checks CI runs.
+Quality bar, skill anatomy, local checks CI runs: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
