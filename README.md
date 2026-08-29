@@ -13,40 +13,27 @@
 baseline what the model already does  →  research only the gaps  →  distil  →  ship the delta
 ```
 
-Frontier models know the docs and textbook practice, not the platform quirk missing
-from any changelog, the threshold learned by getting burned, or the failure mode a
-postmortem describes and no tutorial mentions. That gap — the **knowledge delta** — is
-what each skill here closes, and only that.
+## Skills for models that already know
 
-## Written for models that already know
+Claude, GPT, Gemini, Grok, DeepSeek, Qwen, Kimi, GLM — the 2026 generation already
+holds most of the public internet. Restating documentation spends context teaching
+what the model would produce unprompted; topically-adjacent-but-useless content
+degrades its reasoning. The unit here isn't *the topic* — it's the **delta**: what the
+model gets wrong, doesn't know, skips under pressure, or solves weaker than a stronger
+option that exists.
 
-The first generation of agent skills was written when models had to be told things —
-what a PDF is, how a REST call works, why tests matter. That assumption expired. Claude,
-GPT, Gemini, Grok, DeepSeek, Qwen, Kimi, GLM: whichever one is loading the file, most of
-the public internet is already in its weights, and a skill that restates the docs spends
-context teaching it what it would have produced unprompted.
+Not tutorials. Not documentation summaries. Not generic best practice restated in Markdown.
 
-Restating is not merely wasteful. Content that is topically adjacent to the task but adds
-nothing degrades reasoning on that task — a redundant paragraph inside the domain the
-model is working in is the most expensive place to spend a token, not a neutral one.
+## Not our idea alone
 
-So the unit of a skill is no longer *the topic*. It is the **delta**: what the model gets
-wrong, does not know, skips under pressure, or solves in a weaker way than an available
-stronger one. The delta is per-model and it shrinks with every release — which is why
-these skills carry dates, get re-baselined, and are cut when their gap closes. The method
-transfers even when a particular skill stops being needed.
+- **Anthropic**, [skill-authoring guidance](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) — "Only add context Claude doesn't already have."
+- **Microsoft**, [Waldek Mastykarz](https://developer.microsoft.com/blog/stop-overloading-your-skills/) — "How do you know what the model knows? You don't, unless you measure." And: "models don't need a textbook. They needed a cheat sheet."
+- **ETH Zurich**, [*Evaluating AGENTS.md*](https://arxiv.org/abs/2602.11988) — repository context files did not generally improve task success rates, and raised inference cost by more than 20%.
 
-## This is not
+## Three deltas, verbatim
 
-- A tutorial, onboarding guide, or "learn X" walkthrough.
-- A summary or reformatting of a vendor's official documentation.
-- A beginner's guide — every skill assumes a competent model and a competent operator.
-- A generic best-practices checklist restated in Markdown.
-
-## Three examples
-
-Verbatim, with the file each lives in. A competent outsider would not reliably know to
-check any of them; nor would a model with no domain skill loaded.
+A competent outsider wouldn't reliably know these — nor would a model with no skill
+loaded.
 
 > iOS 18 does NOT update `window.innerHeight` when address bar expands; `100vh` always
 > equals `lvh` on iOS Safari.
@@ -65,56 +52,36 @@ check any of them; nor would a model with no domain skill loaded.
 
 — [`skills/tracker-ops/references/03-metrics-and-math.md`](skills/tracker-ops/references/03-metrics-and-math.md)
 
-## How these are built
+## How they're built
 
-- Run real tasks with no skill; record what breaks or gets skipped.
-- Research only confirmed gaps, plus one bounded pass for unknown unknowns.
-- Keep only rules traced to a prevented failure or an unlocked capability; compress
-  hard.
-- Rerun the draft; cut anything that didn't fix what it was written for.
-- Broad domains: independent research + a contradiction-hunting pass before merging.
+Run real tasks with no skill → research only the confirmed gaps → keep only rules
+traced to a prevented failure → rerun the draft and cut what didn't fix anything. Full
+method: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
 
-Full method, what gets cut, how volatile facts are dated: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
-
-## Catalog
-
-### Featured
+## Featured
 
 | Skill | Adds |
 |---|---|
-| [**knowledge-delta-skill-architect**](skills/knowledge-delta-skill-architect) | Writes, audits, and compresses agent skills against the baseline-then-cut method this collection follows. |
-| [**meta-ads**](skills/meta-ads) | Plans, launches, audits, and diagnoses Meta ad accounts — ODAX objectives, budgets/bidding, pixel/CAPI, policy, and a Marketing API error catalog. |
-| [**deep-research**](skills/deep-research) | Runs traceable multi-source research with primary-source prioritization, verification, and explicit confidence labels. |
-| [**secure-coding**](skills/secure-coding) | Applies secure defaults across JS/Node/HTML/API/auth/DB/upload code paths and flags AI-generated-code vulnerability patterns. |
-| [**web-scraping**](skills/web-scraping) | Crawls and scrapes at scale past anti-bot defenses (Cloudflare, Akamai, DataDome, PerimeterX) using Crawl4AI and Camoufox. |
-| [**responsive-adapter**](skills/responsive-adapter) | Adapts an existing web interface from 320px to 2560px+ without touching the visual design, then verifies across a device matrix. |
+| [**knowledge-delta-skill-architect**](skills/knowledge-delta-skill-architect) | Writes, audits, and compresses skills against this method. |
+| [**meta-ads**](skills/meta-ads) | Meta ad accounts — ODAX objectives, budgets/bidding, pixel/CAPI, policy, error catalog. |
+| [**secure-coding**](skills/secure-coding) | Secure defaults across JS/Node/HTML/API/auth/DB/upload, plus AI-code vulnerability patterns. |
+| [**responsive-adapter**](skills/responsive-adapter) | Adapts an interface 320px→2560px+ without touching the design, then verifies it. |
 
-Every skill, grouped by domain — media buying, frontend, security, research,
-engineering: [`CATALOG.md`](CATALOG.md).
+Every skill, by domain: [`CATALOG.md`](CATALOG.md).
 
 ## Install
 
-Copy the skill directories you want into your runtime's skills folder — nothing else to configure.
+Copy the skill directories you want — nothing else to configure.
 
 ```bash
 git clone https://github.com/sergeyizmailov/knowledge-delta-skills.git
-```
-
-One skill:
-
-```bash
 mkdir -p ~/.claude/skills
-cp -R knowledge-delta-skills/skills/meta-ads ~/.claude/skills/
+cp -R knowledge-delta-skills/skills/meta-ads ~/.claude/skills/   # one skill
+cp -R knowledge-delta-skills/skills/* ~/.claude/skills/          # everything
 ```
 
-Everything:
-
-```bash
-cp -R knowledge-delta-skills/skills/* ~/.claude/skills/
-```
-
-Personal-scope directory by runtime, verified against each vendor's docs on 2026-08-29.
-Most also read a project-local equivalent, and some read each other's directories.
+Personal-scope directory by runtime, verified against each vendor's docs on
+2026-08-29. Most also read a project-local equivalent.
 
 | Runtime | Skills directory |
 |---|---|
@@ -124,32 +91,14 @@ Most also read a project-local equivalent, and some read each other's directorie
 | Gemini CLI | `~/.gemini/skills/` (alias `~/.agents/skills/`) |
 | opencode | `~/.config/opencode/skills/` (also reads `~/.claude/skills/`) |
 
-The eight media-buying skills reference each other by name; keep them together if you
-install any one of them.
+The eight media-buying skills reference each other by name — install them together.
 
-## Redundancy and retirement
+## Nothing here is permanent
 
-Base models absorb more of the internet every release. A skill earns its place only
-while a real gap exists between what the model knows and what a task needs — once that
-gap closes, the skill is topically-adjacent-but-useless content, not neutral filler.
-
-No permanence promised: volatile-domain skills carry a date; a re-baseline that finds a
-section already handled correctly gets that section cut, same rule as first-write.
-Skills here will shrink or retire outright as their delta closes — see
+Base models absorb more of the internet every release, so a skill earns its place only
+while its gap stays open — a re-baseline that finds a section already correct cuts
+that section, and skills shrink or retire as their delta closes:
 [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
-
-## Structure
-
-```text
-skills/<name>/
-├── SKILL.md        # required — frontmatter (name, description) + the workflow
-├── agents/         # optional — agent-facing metadata
-├── references/     # optional — on-demand docs, loaded only when needed
-└── scripts/        # optional — deterministic helper scripts
-```
-
-Only `name` and `description` load for discovery; the body and supporting files load
-only once a skill is selected.
 
 ## Contributing
 
