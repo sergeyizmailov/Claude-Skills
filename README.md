@@ -1,3 +1,5 @@
+![knowledge-delta-skills — not knowledge for beginners, missing expertise for already-capable AI](.github/assets/banner.png)
+
 # knowledge-delta-skills
 
 [![CI](https://github.com/sergeyizmailov/knowledge-delta-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeyizmailov/knowledge-delta-skills/actions/workflows/ci.yml)
