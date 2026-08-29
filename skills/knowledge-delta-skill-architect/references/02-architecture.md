@@ -95,9 +95,10 @@ genuinely disagree; the resolution:
 
 **Exactly one level deep.** A file reached *from* another reference may be read partially — the agent
 previews it (`head -100`) instead of reading it whole, and the tail is never seen. Every reference
-links directly from SKILL.md. Where one reference must send the reader to another, repeat the rule
-inline instead: the pointer is what triggers the partial read. Conflict worth knowing: skill-creator
-advises *adding* a layer of hierarchy as a skill nears 500 lines; prefer more files at one level over
+links directly from SKILL.md. A rule belongs in the file that needs it at decision time — if two
+references both need it there, the split is wrong, not the rule. Cross-reference by name for
+orientation, never as the only path to a rule the reader is about to act on. Conflict worth knowing:
+skill-creator advises *adding* a layer of hierarchy as a skill nears 500 lines; prefer more files at one level over
 a second level.
 
 TOC threshold: sources disagree (§0). Use the lower one — the stated purpose is that a partial read

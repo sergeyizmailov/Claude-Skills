@@ -18,7 +18,7 @@ venue** · `[preprint]` arXiv only, no venue found · `[measured]` counted direc
 | Level 1 ≈100 tokens per skill, loaded for every model-invocable skill; Level 2 target <5k tokens | [official] | agent-skills/overview, disclosure table |
 | SKILL.md <500 lines | [official] ×3 | best-practices doc; code.claude.com/docs/en/skills; `anthropics/skills` skill-creator |
 | TOC past **100** lines vs past **300** lines — unresolved | [official], conflicting | best-practices doc (100) vs skill-creator (300) |
-| References one level deep; deeper chains get partially read | [official] | best-practices doc |
+| References one level deep; deeper chains **may** get partially read | [official] | best-practices doc |
 | Compaction re-attaches first 5,000 tokens per skill, 25,000 shared — **Claude Code only** | [official] | code.claude.com/docs/en/skills |
 | Personal skills documented at one level; category nesting not auto-loaded | [official] for the path, [measured] for the negative | code.claude.com/docs/en/skills; observed in-session (50 nested skills, only the top-level one listed) |
 
