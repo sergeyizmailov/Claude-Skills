@@ -47,7 +47,7 @@ exists. Everything else is cut, no matter how correct or well-written it is.
    already passed is a net loss.
 7. **Ship check.** Frontmatter valid, every reference linked and read-when labeled,
    nothing restated twice, every volatile fact dated, every remaining rule traceable to
-   a prevented failure.
+   a prevented failure or a capability it unlocked.
 
 ## Compression, not brevity
 

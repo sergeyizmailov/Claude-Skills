@@ -51,7 +51,8 @@ check any of them; nor would a model with no domain skill loaded.
 
 - Run real tasks with no skill; record what breaks or gets skipped.
 - Research only confirmed gaps, plus one bounded pass for unknown unknowns.
-- Keep only rules traced to a prevented failure; compress hard.
+- Keep only rules traced to a prevented failure or an unlocked capability; compress
+  hard.
 - Rerun the draft; cut anything that didn't fix what it was written for.
 - Broad domains: independent research + a contradiction-hunting pass before merging.
 
