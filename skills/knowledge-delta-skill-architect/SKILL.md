@@ -5,11 +5,8 @@ description: "Writes, audits, and compresses agent skills so they earn their tok
 
 # Knowledge-Delta Skill Architect
 
-`Baseline: not run — Claude Opus 5 / Claude Code / 2026-08-29`. Built from primary sources and
-statically reviewed, never measured against a no-skill run: unverified by its own standard, and a
-hypothesis about the model rather than a finding. Sources and their limits: `03`.
-
 `01` `02` `03` = the numbered files under `references/`; read triggers in the table at the end.
+Sources and their limits: `03`.
 
 The method here is model- and vendor-independent. What is not — numbers, runtime behavior — is confined
 to `02`: §0 for the numbers, inline flags wherever behavior is runtime-specific. When a spec or a
