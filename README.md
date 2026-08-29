@@ -1,4 +1,4 @@
-![Knowledge Delta Skills — missing expertise for already-capable AI](.github/assets/banner.jpg)
+![Knowledge Delta Skills — missing expertise for already-capable AI](.github/assets/social-banner.jpg)
 
 # knowledge-delta-skills
 
