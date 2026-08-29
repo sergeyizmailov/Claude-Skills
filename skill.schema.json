@@ -21,8 +21,11 @@
       "type": "string"
     },
     "allowed-tools": {
-      "type": "array",
-      "items": { "type": "string" }
+      "description": "Pre-approved tools. The portable spec defines a space-separated string; Claude Code also accepts a YAML list. Both are valid here — prefer the string form for skills meant to run outside Claude Code.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
     },
     "metadata": {
       "type": "object"

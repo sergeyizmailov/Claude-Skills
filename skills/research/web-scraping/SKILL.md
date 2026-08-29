@@ -1,8 +1,7 @@
 ---
 name: web-scraping
 description: "Mass crawl/scrape sites incl. anti-bot (Cloudflare, Akamai, DataDome, PerimeterX). Crawl4AI = scale (arun_many, dispatchers, deep crawl, LLM-ready markdown); Camoufox = fingerprint evasion. For: scrape N pages, crawl a site, extract structured data, 403/challenge/bot-detection, captcha."
-allowed-tools:
-  - Bash
+allowed-tools: Bash
 ---
 
 # Mass Scraping — Crawl4AI + Camoufox
