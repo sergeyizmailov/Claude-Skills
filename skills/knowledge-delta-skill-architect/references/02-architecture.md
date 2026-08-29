@@ -94,7 +94,7 @@ genuinely disagree; the resolution:
 ```
 
 **Exactly one level deep.** A file reached *from* another reference may be read partially — the agent
-previews it (`head -100`) instead of reading it whole, and the tail is never seen. Every reference
+may preview it (`head -100`) instead of reading it whole, leaving the tail unseen. Every reference
 links directly from SKILL.md. A rule belongs in the file that needs it at decision time — if two
 references both need it there, the split is wrong, not the rule. Cross-reference by name for
 orientation, never as the only path to a rule the reader is about to act on. Conflict worth knowing:
