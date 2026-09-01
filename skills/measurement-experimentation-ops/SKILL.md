@@ -60,21 +60,9 @@ honest weaker method beats a "causal" test that's silently contaminated.
 |---|---|
 | Sizing (MDE/power as decision rules), SRM, peeking, contamination, lag, inconclusive handling | `references/01-experiment-design.md` |
 | Meta tools: A/B Test, `ad_study` API, Conversion Lift, Brand Lift, GeoLift, Robyn/MMM, Andromeda implication | `references/02-meta-measurement-tools.md` |
-| Google tools: Experiments/drafts, PMax experiments, Conversion Lift, Meridian MMM, brand-search incrementality | `references/03-google-measurement-tools.md` |
+| Google tools: Experiments/drafts, PMax experiments, Conversion Lift, Meridian MMM, brand-search incrementality, plus two 2026 confounders — read before attributing any Google result to your own change | `references/03-google-measurement-tools.md` |
 
 Buy mechanics → meta-ads (its /09 owns single-account diagnosis & test-design
 intake) or google-ads (its /08 owns the diagnostic tree and unit economics); this
 skill owns the validity/incrementality layer above both. Counting &
 cohort truth → tracker-ops. Portfolio decisions on the result → senior-buyer-ops.
-
-## Two 2026 confounders that invalidate naive reads on Google
-
-Check both before attributing any Google result to your own change:
-
-1. **Market-level auction supply.** Optmyzr measured eligible auction impressions **−12.3% YoY** across
-   21,425 accounts (Q1 2025 → Q1 2026). A pre/post spanning that shift measures the market, not your
-   treatment.
-2. **The 2026-08-17 budget-limited target enforcement.** Every tCPA/tROAS campaign flagged "Limited by
-   budget" changed behavior on that date. A test straddling it has a structural break in the middle.
-
-Neither surfaces as anything but a performance change. See `google-ads/02` and `/08`.

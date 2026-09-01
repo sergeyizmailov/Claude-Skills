@@ -1,0 +1,52 @@
+{
+  "run_id": "catalog-single-2026-09-02",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "_note": "One-product set renders as a single deep-linked card — no 4-item minimum. format_option 'single_video' is the documented Dynamic Media path and needs the video attached to the PRODUCT in the catalog, not to the ad. Catalog card clicks bypass ad url_tags: carry subids via template_url_spec or the landing builder (04 -> url_tags).",
+  "campaign": {
+    "name": "TR|casino|reg|catalog-single|2026-09-02",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": [],
+    "daily_budget_minor": 7500,
+    "bid_strategy": "LOWEST_COST_WITHOUT_CAP"
+  },
+  "adsets": [
+    {
+      "name": "TR|21+|broad|reg",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "billing_event": "IMPRESSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "start_time": "2026-09-02T07:00:00+03:00",
+      "attribution": {
+        "click_days": 1,
+        "view_days": 1
+      },
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "single-card-01",
+          "creative": {
+            "kind": "catalog_single",
+            "product_set_id": "REPLACE_ME_ONE_PRODUCT_SET",
+            "format_option": "single_video",
+            "link": "https://example-lander.tld/",
+            "message": "Primary text.",
+            "cta": "PLAY_GAME",
+            "template_url": "https://example-lander.tld/?sub1={{ad.name}}&pid={{product.retailer_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

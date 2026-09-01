@@ -36,11 +36,9 @@ below; the metric rules and daily sync port to any tracker.
 | Keitaro: key, report/build, measures, update_costs, postback/S2S, postback drill, gotchas | `references/01-keitaro.md` |
 | Binom: legacy URL-param + v2 REST, reports, cost, postback/S2S | `references/02-binom.md` |
 | CPL math, funnel + anti-fraud metrics, cohort nowcasting, backend optimization contract (status→CAPI event), TMA/bot CAPI without pixel, multi-tracker sync + conversion ledger, ATT asymmetry, mapping, daily routine | `references/03-metrics-and-math.md` |
-| Google lane: gclid/gbraid/wbraid, ValueTrack chains, Keitaro/RedTrack Google config, OCI windows + dedup, the 2026-06-15 cutoff | `references/04-google-lane.md` |
+| Google lane: gclid/gbraid/wbraid, ValueTrack chains, Keitaro/RedTrack Google config, OCI windows + dedup, the 2026-06-15 cutoff, Data Manager `events:ingest` for new tokens | `references/04-google-lane.md` |
 
-Platform lanes are not interchangeable. Meta counts through CAPI; Google counts through gclid →
-offline conversion import, with different windows, a different dedup key, and a hard onboarding cutoff.
-Read `04` before wiring anything on Google traffic.
+Platform lanes are not interchangeable — Meta counts through CAPI, Google through gclid → OCI, with different windows, a different dedup key, and a hard onboarding cutoff. Read `04` before wiring anything on Google traffic.
 
 ## Non-negotiables
 

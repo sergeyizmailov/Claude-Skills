@@ -102,3 +102,15 @@ The SKILL.md gate applies, with Google-specific reasons causal measurement is of
 When causal is unavailable, say so and drop to the best affordable proxy — geo holdout, pre/post against
 tracker truth, screening — **labeled directional.** The honest weaker method beats a "causal" test that
 is silently contaminated.
+
+## Two 2026 confounders that invalidate naive reads on Google
+
+Check both before attributing any Google result to your own change:
+
+1. **Market-level auction supply.** Optmyzr measured eligible auction impressions **−12.3% YoY** across
+   21,425 accounts (Q1 2025 → Q1 2026). A pre/post spanning that shift measures the market, not your
+   treatment.
+2. **The 2026-08-17 budget-limited target enforcement.** Every tCPA/tROAS campaign flagged "Limited by
+   budget" changed behavior on that date. A test straddling it has a structural break in the middle.
+
+Neither surfaces as anything but a performance change. See `google-ads/02` and `/08`.

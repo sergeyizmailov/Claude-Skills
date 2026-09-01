@@ -89,6 +89,7 @@ General tiering: higher-GDP geos command higher CPA; Tier 1 (Europe, North Ameri
 best.
 
 Optimize on FTD via offline conversion import, not registration (`google-ads/06`).
+App/UAC gambling (3P events, never install-opt, name-as-router) → `08`.
 
 ## What breaks first
 

@@ -36,6 +36,21 @@ still apply]:
 Claimed 2–4× funnel lifespan vs cloaked Search [vendor, no methodology]. This does not make App
 campaigns a cert path: regulated verticals still need the certification they need (`google-ads/09`).
 
+## Gambling UAC launch (vendor MagicClick 2026, 3P-event lane)
+
+This lane is **not** generic app UA (`dating-loans-apps` tCPI-first). Do not install-opt here.
+
+- Empty CID: dummy App-install campaign → publish → **pause** to unlock 3P app-analytics linking.
+  Existing CID: accept 3P analytics and skip dummy.
+- Events >6h after share may never land — swap app.
+- Optimize **Third-party app analytics** only. `in_app_purchase` = CPA; `sign_up` = CPL. Do **not**
+  bid Play default install (budget drain). If the GEO has no organic: Play-install **secondary**,
+  `first_open` **primary**.
+- Campaign **name is the in-app casino router**. Wrong name submitted → recreate (name caches).
+- tCPA from payout $P is a network heuristic — replace with live data. Budget floor they quote:
+  2× tCPA (CPA) / 5× (CPL).
+- YouTube asset: Not for kids **and** still allow 18+ or reach dies.
+
 ## Demand Gen — sensitive inventory
 
 Official Demand Gen help [13695777], fetched 2026-08-27:

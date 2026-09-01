@@ -1,5 +1,11 @@
 # 03 — Agency accounts, BMs, asset sharing
 
+**New BM = 1 ad account cap** (UI, field-observed 2026-08-30): "maximum number
+of ad accounts allowed for a new business portfolio" — more only after "several
+weeks of following policies". Second account today = create BM2, create the
+account there, then partner-share it to BM1 (BM2 Partners → share ad account →
+BM1 ID) and assign your System User on it — existing app/token keeps working.
+
 Agencies issue "setups": FB profile + proxy + BM share + N ad accounts + pages
 (sometimes catalog). Billing topped via the agency (crypto). You're a TENANT:
 can't make system users / change BM settings / assign some assets. Know your
@@ -10,12 +16,21 @@ level (BM → People → your user → assigned assets).
   prior, not a fixed rate; replace, don't "fix". Document every ban (account ID,
   date, spend at death); agencies replace against lists.
 
+**Cross-account creative discipline (practitioner, high-consensus): ONE creative = ONE
+account.** Never duplicate the same campaign+creative across accounts: both hit the same users
+(two accounts share one auction pool), audience freshness dies, the auction overheats on your
+own TA → no leads + spam/reject flags. Per account: its own creative + separated audiences
+(exclusions on converted leads, refreshed ~weekly; restart campaigns on refresh). Scale
+horizontally by NEW creatives per account, not clones.
+
 ## Asset sharing (order of operations)
 
 Pixel/catalog/pages live at BM level; a NEW ad account does NOT inherit them.
 Missing-share symptom: ad error "Unassociated pixel" / "account does not have
-access to pixel ID" — ad can't deliver. (Code #1815045 is field-observed, not
-in Meta's published reference — match the message.)
+access to pixel ID" — ad can't deliver. (Code 1815045 is field-observed and absent
+from Meta's published reference; it is still a stable numeric code, so branch on it
+like any other — `meta-ads/14` owns the rule. Never condition on the message string:
+Meta rewrites and localizes those. Log `error_user_msg` as evidence only.)
 
 Fix, in order:
 1. Self-serve: business.facebook.com → Settings → Data Sources → Datasets →
@@ -35,6 +50,16 @@ Distinguish the LEVEL of the hit — recovery differs sharply:
   OWNED by that BM may go inaccessible — but scope VARIES by restriction type, and
   a Page/dataset can survive or stay reachable via another role. Check Business
   Support Home / Account Quality per asset before assuming it's lost.
+- **Creation-link death chain** (practitioner prior, 2026 storm-era): accounts CREATED
+  INSIDE one BM = one death chain — one account flagged → all BM-created accounts died
+  (observed 6/6). Accounts created elsewhere and merely SHARED into a BM don't chain:
+  observed 1/4 dead over 2 weeks. Shared pixel + catalog + FBP across such accounts was
+  NOT the kill factor. Setup implication: create accounts with separate origins, add
+  them into a working BM, keep the pixel/catalog/FBP sharing — but assume BM-created
+  siblings fall together.
+- **Lead-base uploads need a BM-owned account**: personal/legacy accounts can't host
+  big uploaded custom-audience databases — keep 1–2 spare BM accounts per setup purely
+  as the audience-holding core (exclusions / lookalike seeds), spend elsewhere.
 
 Recovery (do NOT rebuild/farm to evade — that's a ban path, and Meta treats
 replacement-to-evade as a violation):
@@ -70,6 +95,12 @@ late. Two sweeps, both cron-able:
 - SPEND sweep (daily): yesterday's spend ≈ 0 on an account that was live =
   silent stop — ASL hit, unpaid balance, or a restriction that hasn't surfaced
   as a status yet. All child accounts stopping at once is also the earliest
+- **Opportunity Score (Ads Manager overview, 0–100) is ADVISORY — not a signal.**
+  Aggregates setup recommendations (A+, CAPI, creative count); restricted/grey
+  verticals floor it to 0 because the recommendations are unappliable. Meta
+  officially: "does not reflect actual or future performance". Not exposed via
+  Graph API. The real signals are account_status/disable_reason, per-ad
+  DISAPPROVED, and delivery-vs-budget gaps — not this score.
   BM-level signal (BM restriction, above).
 
 This is the front of the chain: detection (here) → attribution (06) → response

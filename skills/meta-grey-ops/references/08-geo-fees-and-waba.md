@@ -25,6 +25,8 @@ Official currency [291404291014138]: you can change currency **once every 60 day
 
 Same page: for **Brazil, India, Poland**, business country and currency **must match**. Select a country other than Brazil at create → **cannot change to Brazil later**. Same for BRL.
 
+**RULE — account timezone = target-geo timezone, set at creation, always.** Default for a new account is PST — if you skip the dropdown, your budget day resets at PT midnight = mid-morning in most target geos (TR: 10:00), starving the evening peak and front-loading dead hours. Consequences of a mismatched tz: daily_budget/day-parting/insights date boundaries all follow ACCOUNT tz, not geo — daily-spend reporting doesn't align with local calendar, and delayed-start launches planned by geo hours (04) fire at the wrong time. Tracker joins must match too (timezone discipline, tracker-ops). Field example: tr-1 account created with `timezone_id: 134` (Europe/Istanbul) for TR traffic — verify at setup with `GET /{act_id}?fields=timezone_name,currency`.
+
 Grey: a “settings fix” is a **new act ID**. Pixel/page shares do not follow automatically (`03`).
 
 ## Sanctioned targeting (not Google’s OFAC list)

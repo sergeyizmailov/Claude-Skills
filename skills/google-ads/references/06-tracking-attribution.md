@@ -14,6 +14,7 @@ conversion upload to the **Data Manager API**.
 Practical consequence: **existing** integrations keep working; a **fresh developer token cannot
 onboard classic gclid-based OCI**. Verify live status before committing engineering effort, and plan
 new pipelines around enhanced conversions for leads or Data Manager instead.
+Implementation of the Data Manager hop (SA JWT, `{gclid}` cloak-forward trap) → `tracker-ops/04`.
 
 ## Conversion action anatomy
 

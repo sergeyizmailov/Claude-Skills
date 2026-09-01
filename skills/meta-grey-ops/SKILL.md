@@ -40,8 +40,22 @@ the brand.
 
 ## Route references
 
+**Launching anything via API? Read `references/00-launch-runbook.md` and stop there.**
+It is the ordered path (gate → access → media → spec → dry run → PAUSED → verify →
+activate → kill rules) and it names which file below to open *when a step fails*. The
+rest of this table is exception handling — reading it up front costs ~25k tokens you
+do not need.
+
+Deterministic launch tooling lives in `scripts/` (`probe.py`, `media.py`, `launch.py`,
+`verify.py`, `activate.py`, `mutate_set.py`, `insights.py`, plus `selftest.py` — offline
+regression checks, run it after editing any of them). **The agent writes the JSON spec; the
+scripts write the API calls.** Hand-assembling a Graph payload from prose is the single
+largest source of launch errors here — every unit, nesting and ordering rule that three
+different error codes punish is encoded in `launch.py` once.
+
 | Need | Reference |
 |---|---|
+| **Ordered launch path, any vertical — START HERE** | `references/00-launch-runbook.md` |
 | Antidetect, proxies, IP/session discipline, checkpoints, restrictions, domain/pixel rotation cadence | `references/01-infra-and-identity.md` |
 | App setup, Live mode, permissions, token lifecycle, System User, death codes | `references/02-meta-app-and-tokens.md` |
 | Agency setups, BMs, asset sharing, BM-ban & asset recovery, billing gotchas & fees, naming, replacements | `references/03-agency-accounts-and-bm.md` |
@@ -50,11 +64,14 @@ the brand.
 | Why accounts die, attributed: hazard-rate forensics, balanced infra tests, anomaly pivots, incident fingerprints | `references/06-portfolio-forensics.md` |
 | Review-layer filters, cloaking, DLO/catalog/unicode/CTM tricks, BM verification | `references/07-review-layer-and-cloaking.md` |
 | Location fees (DST), tz/currency 60d lock, sanctioned targeting, WABA, Meta CBD | `references/08-geo-fees-and-waba.md` |
+| PWA funnel builders (pwa.bot, MonsterPWA, APEX...): join macros, postback contracts, CAPI, cloak, QA gates | `references/11-pwa-funnel-builders.md` |
 | Verification gates: business/beneficial-owner/identity+selfie, SIEP + financial + gambling + crypto authorization, payment verification, pre-clear order | `references/09-verification-gates.md` |
 | **Does this vertical have a path at all** — permission-before-spend list, no-path list, per-vertical status/geo/conditions | `references/10-no-path-and-permissions.md` |
 | Per-vertical playbooks | `playbooks/` |
 
-Declared gaps: no dating or loans playbook, and **no App-campaign/app-install coverage** — `APP_PROMOTION` appears only in the ODAX enum (`04`). `google-grey-ops` covers the Google side of both; do not port its mechanics blindly.
+Declared gaps: no dating or loans playbook. `APP_PROMOTION` / rented WebView is
+directional in `playbooks/casino.md` (vendor MagicClick) — not a full app-install
+skill. `google-grey-ops` covers the Google side; do not port its mechanics blindly.
 
 Playbooks: news-tg.md is filled (one team); nutra/casino/crypto-trading carry
 directional vendor benchmarks (dated/sourced) + event ladders — replace the
@@ -62,6 +79,9 @@ numbers with your live data. The shape ports to any vertical (dating, sweeps,
 ecom, apps, loans, adult...).
 
 ## New-job bootstrap (proven order)
+
+Superseded in detail by `references/00-launch-runbook.md` — that file is the executable
+version of this list. Kept here as the one-screen summary.
 
 0. **Does the vertical have a path at all?** `10` first — Q1 (permission before spend) and Q2 (no path
    in any geo). Iterating creatives against a prohibited vertical burns the account for nothing.
@@ -80,7 +100,8 @@ ecom, apps, loans, adult...).
    splits in the tracker because the campaign URL maps it into a tracker param
    (not automatic; tracker-ops mapping contract). Ad name = creative name. Map
    ad → creative.
-5. Launch champions structure (04), scheduled 00:00 account tz.
+5. Launch champions structure (04). `start_time` by optimization goal — conversions
+   06:00-08:00 geo-time, NEVER 00:00; reach/traffic next 00:00 (04 → Scheduling).
    Review layer: cloak **off** until the ad is serving; filter stack in `07`.
 6. Daily sync (Meta spend → tracker cost → report) before the team deadline;
    verify one day manually, then trust it.

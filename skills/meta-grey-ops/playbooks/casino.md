@@ -3,6 +3,10 @@
 Status (reviewed 2026-08-28): directional vendor benchmarks (dated below) + verified Meta policy.
 NOT this team's live data — replace with your own numbers.
 
+Execution order for an API launch is `references/00-launch-runbook.md`; this file supplies
+the casino-specific parameters it asks for (gate, event ladder, optimization event, kill
+numbers). Read it alongside, not instead.
+
 **Gate before anything here:** A&V authorization + per-jurisdiction licence, filed **before any ad
 exists**, with intent declared per new territory. **19 markets take no gambling ads at any authorization
 level** — named list and the social-casino carve-out in `references/10-no-path-and-permissions.md`.
@@ -84,6 +88,67 @@ once volume builds (meta-grey-ops/04 event-volume lever).
   for CAPI); app-promo campaigns need the app registered + a Meta SDK/certified
   MMP source with events mapped. Pin which event = FTD in the MMP, mirror to the
   tracker/advertiser postback.
+  Messenger/ManyChat JSON flows: still the CTM greeting+thread gate (`07`) — no
+  web LP, not a skip past thread review.
+
+## APP_PROMOTION / rented WebView [practitioner, MagicClick, fetched 2026-08-30]
+
+Store-shell, not web cloak. Do not port PHP-white onto this lane.
+
+- Objective `APP_PROMOTION`. Review sees the Play listing / in-app placeholder; user
+  hits the offer in the WebView.
+- Apps last ~**1 week** then Play-dead — **re-share a new app into the live campaign**,
+  don't rebuild.
+- Optimize in-app **Purchases** for FTD (not install). Audience Network = junk quality.
+  OS **10+** for payer quality; 7+ only for reach.
+- Deep link / campaign naming is the offer router (AppsFlyer OneLink or network bot).
+  Wrong name → recreate; it caches.
+- Payment method reused **>10× → Risks** (vendor). Card vendors → `03`.
+- DE+AT first (same EUR/PPP); CH later (higher CPM, CHF, iOS-heavier). Kill one GEO
+  without stopping the campaign: Page → Followers → Country Restrictions "Show only
+  to…". [MagicClick 2026]
+
+## TR PWA catalog-camouflage launch (field-tested 2026-08-30, own BM+app, single acct)
+
+End-to-end validated: build → review pass on white → API set-swap → delivery on slots.
+
+- **Catalog**: the **≥4 products in set** limit is Collection-format-only (storefront hero + cards;
+  error 2490457). At submission the
+  advertised set = all-white cards (electronics); slot arts pre-uploaded in catalog (Eligible
+  independently) but OUT of the set. Post-approval: swap set to slot arts via API filter — no ad
+  re-review (04). Never let set drop below 4. Alternative shape: regular catalog ad with a
+  **1-product set** — renders as one deep-linked card, no minimum (04); image card via
+  `force_single_link: true`, or VIDEO card via catalog-item video + `format_option:"single_video"`
+  (Dynamic Media, 04). Looks like a plain ad instead of a storefront.
+- **Campaign**: OUTCOME_LEADS → optimize CompleteRegistration (reg volume; FTD too sparse on small
+  budgets), switch to Purchase at ~20-30 FTD via NEW campaign. Lowest cost, CBO per concept
+  ($60-90 each), 1 adset/ad per campaign. TR broad 21+, all placements, Advantage+ creative OFF,
+  multi-advertiser OFF pre-activation (04). Attribution 1-day click/view at create (default 7d
+  inflates CPL numbers).
+- **Kill numbers** (ladder 04, target CPL_reg $12 example): ad spend $36/0 regs kill, $57/≤1,
+  $76/≤2; FTD verdict only on matured click-date cohorts (reg→FTD 15-25% band); spend-without-FTD
+  stop at ~2× target CPA_FTD on matured data.
+- **Tracking holes**: catalog-card clicks bypass ad url_tags (no sub1-4) unless deep-link override
+  — subid capture must live in the landing builder, not the ad link. Set/catalog changes propagate
+  to ad render with 15-60 min lag; preview popups cache — verify via API, not previews.
+
+## pwa.bot funnel builder (vendor, docs.pwa.bot 2026-08-30)
+
+PWA landing builder: built-in tracker, geo-cloak, CAPI. TR casino teams run FB Ads → PWA → offer.
+
+- Offer link macros: `{user_id}` = visitor id, the ONLY join key (**no `{subid}` macro** — wrong
+  macro = postbacks never match = zero CAPI events, funnel looks dead). Incoming ad params
+  addressable by key: `&sub1={sub1}`.
+- Postbacks (paste into ПП S2S): `api.pwa.bot/postback/?user_id={visit_id}&event=reg` /
+  `...event=dep&value={profit}&currency=usd` (usd only). Exact URLs incl. pwaId from ЛК → Аналитика.
+- CAPI: dataset id + token in ЛК → Аналитика (System User token works — 02). Default map: install→
+  Lead, reg→CompleteRegistration, dep→Purchase. Pixel NOT injected into PWA by default (CAPI-only)
+  — inject via `fbp=<dataset_id>` URL param or ЛК toggle if browser events wanted.
+- Test server events: Events Manager test_event_code → ЛК → Аналитика → «Пульс» → Test Events.
+- Geo-cloak: non-target-geo IPs (office, US crawlers) get whitepage → remote curl QA always shows
+  white; user-branch test only via target-geo proxy. Real-geo postback loop test: fire manual
+  postback with a live visit_id, watch Events Manager.
+- Other builders (Monster PWA, PWA.Group, APEX, Comsign) + universal QA gates → `11-pwa-funnel-builders.md`.
 
 ## Metrics discipline
 

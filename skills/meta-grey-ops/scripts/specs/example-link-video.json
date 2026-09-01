@@ -1,0 +1,52 @@
+{
+  "run_id": "tr-casino-video-2026-09-01",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "campaign": {
+    "name": "TR|casino|reg|video|2026-09-01",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": [],
+    "daily_budget_minor": 9000,
+    "bid_strategy": "LOWEST_COST_WITHOUT_CAP"
+  },
+  "adsets": [
+    {
+      "name": "TR|21+|broad|reg",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "billing_event": "IMPRESSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "start_time": "2026-09-01T07:00:00+03:00",
+      "attribution": {
+        "click_days": 1,
+        "view_days": 1
+      },
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "slots-bigwin-01",
+          "creative": {
+            "kind": "link_video",
+            "video_id": "REPLACE_ME_FROM_media.py",
+            "link": "https://example-lander.tld/?sub1={{campaign.name}}",
+            "message": "Primary text goes here.",
+            "headline": "Headline",
+            "cta": "PLAY_GAME",
+            "url_tags": "utm_source=fb&utm_campaign={{campaign.name}}&utm_content={{ad.name}}",
+            "image_hash": "REPLACE_ME_thumbnail_image_hash_FROM_media.json"
+          }
+        }
+      ]
+    }
+  ]
+}

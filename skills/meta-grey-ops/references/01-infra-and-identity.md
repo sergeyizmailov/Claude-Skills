@@ -57,6 +57,16 @@ curl: `-x socks5h://user:pass@ip:port`.
 - Ad account disabled/restricted: normal background rate. Don't appeal fresh
   agency accounts — request replacement, keep a reserve pipeline.
 
+## Pre-buy / farmed-account QC [practitioner, MagicClick, fetched 2026-08-30]
+
+View-source the logged-in Ads Manager HTML for `ADS_TRUST_TIER_` /
+`ADS_TRUSTED_TIER_` — a farmed-vs-newreg tell, **not** a spend cap. Circulating
+dollar-tier tables are vendor construction (`09` already rejects those). Empty
+Off-Facebook activity **or** "Ads based on custom audiences" **or** no feed ads →
+likely not farmed. Empty Fan Page is a review flag. Still judge after $30-50
+spend (SKILL #5). Chrome-agent driving Ads Manager inside antidetect on rented
+seats → selfie/SMS/freeze risk.
+
 ## Domain / pixel rotation cadence (rotate before burn, not after)
 
 Cadence is signal-driven, not a fixed clock:

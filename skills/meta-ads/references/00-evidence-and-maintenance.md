@@ -68,10 +68,21 @@ For high-impact recommendations, include the evidence label inline. Exact prices
 Graph API majors ship ~2×/year and a version number goes stale within months — check the changelog
 (§7 map) before asserting "current". Version-bound behavior observed in this corpus:
 
-| Version | What changed | Lives |
-|---|---|---|
-| v22.0 (Jan 2025) | `instagram_actor_id` removed → `instagram_user_id`; single `enable_standard_enhancements` deprecated → per-feature flags via `creative_features_spec` | `13` §5, `04` §6, `14` |
-| v26.0 (2026-08) | Current reference version: the error catalog and field-observed automated-rules API behavior are validated on it | `14` header, `02` §9 |
+**A Marketing API version is available for ~12 months TOTAL** — v24.0 ran 2025-10-08 →
+2026-10-06 — far shorter than Graph API's 2-year core guarantee; do not conflate the two. The
+"90 days" quoted on the versions page is the **minimum overlap guaranteed after a new version
+ships** ("at least 90 days"), not an extra grace period tacked onto the 12 months and not the
+lifetime. Marketing API also **rejects unversioned calls outright**. Pin the version in every
+script. Per-version dates exist only in the Graph API changelog's Marketing API table — the
+`marketing-api/versions` page carries none. [verified 2026-08-31]
+
+| Version | Released | Marketing API status (2026-08-31) | What changed / lives |
+|---|---|---|---|
+| v22.0 | 2025-01-21 | expired | `instagram_actor_id` → `instagram_user_id`; `enable_standard_enhancements` → per-feature `creative_features_spec`. `13` §5, `04`, `14` |
+| v23.0 | 2025-05-29 | expired | — |
+| v24.0 | 2025-10-08 | **available until 2026-10-06** (Graph API changelog → Marketing API table). The `marketing-api/versions` page still names v25.0 current and gives no per-version dates — it lags; use the changelog | anything still on v24 breaks within weeks. Do not quote the Graph API 2-year date here |
+| v25.0 | 2026-02-18 | supported, TBD | — |
+| **v26.0** | **2026-07-29** | **current, no expiry announced** | Reference version for `14` and `02` §9. Removed `delivery_estimate.daily_outcomes_curve` / `budget_guardrail` / `estimate_dau`; HEC-F campaigns now require explicit `targeting_automation.advantage_audience`; Instagram Explore placement discontinued; Messenger `story` position removed; poll ads unsupported |
 
 If any reference names a version, treat the claim as version-bound and re-verify against the current
 major before automating.

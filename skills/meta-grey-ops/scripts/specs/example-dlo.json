@@ -1,0 +1,71 @@
+{
+  "run_id": "dlo-2026-09-02",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "_note": "Locale ids are NUMERIC, from GET /search?type=adlocale&q=<lang>. Exactly one entry sets is_default, and at least two rules are required. `description` is REQUIRED — use a single space for blank. DLO ad_format is SINGLE_IMAGE or SINGLE_VIDEO only. Website destination only: no Instant Experience, no Messaging Apps. Meta documents DLO against LEGACY objective names (LINK_CLICKS/CONVERSIONS/...); whether ODAX OUTCOME_* is accepted is UNVERIFIED — a dry run will NOT catch it — validate_only cannot validate an ad without a real parent ad set, so a rejection lands at POST /ads during the real create. Prove this objective on one throwaway ad before scheduling a launch on it.",
+  "campaign": {
+    "name": "DLO|reg|2026-09-02",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": [],
+    "daily_budget_minor": 6000,
+    "bid_strategy": "LOWEST_COST_WITHOUT_CAP"
+  },
+  "adsets": [
+    {
+      "name": "geo|broad|reg",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "billing_event": "IMPRESSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "start_time": "2026-09-02T07:00:00+03:00",
+      "attribution": {
+        "click_days": 1,
+        "view_days": 1
+      },
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "dlo-01",
+          "creative": {
+            "kind": "dlo",
+            "ad_format": "SINGLE_VIDEO",
+            "cta": "PLAY_GAME",
+            "video_id": "REPLACE_ME_FROM_media.json",
+            "locales": [
+              {
+                "label": "default",
+                "ids": [
+                  6
+                ],
+                "is_default": true,
+                "body": "Default-slot copy.",
+                "title": "Default title",
+                "description": " ",
+                "link": "https://white-page.tld/"
+              },
+              {
+                "label": "tr",
+                "ids": [
+                  59
+                ],
+                "body": "Hedef dildeki metin.",
+                "title": "Başlık",
+                "description": " ",
+                "link": "https://money-lander.tld/"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

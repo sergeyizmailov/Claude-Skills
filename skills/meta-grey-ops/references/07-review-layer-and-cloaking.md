@@ -211,6 +211,9 @@ self-hosted, no constructors, 200, same URL, no redirect. Empty HTML whites pass
 7. **Recreating similar violating ads across Pages/BMs** — Evading Enforcement
    (2024 named; live heading gone, enforcement not).
 8. **CTM / IX as a cloak** — second gate exists, not a skip (see layered review above)
+9. **Direct link to offer** (no catalog/landing/dynamic layer) — practitioner prior
+   (2026 storm-era): ~1 in 10 accounts survives, even on nominally white verticals.
+   Catalog or landing layer is baseline survival gear, not camouflage optional.
 
 ## Failure signatures
 
@@ -238,7 +241,7 @@ restriction**.
 
 | Trick | What it actually is | 2026 status |
 |---|---|---|
-| **DLO Default exotic + Added GEO language** | Default = VI/AZ/KY + Amazon/white URL; Added = ES/PT/ID + grey creative + money URL. Claim: bot scores Default first; users follow UI language | **LIVE, primary format trick** (CPA.RIP 2025-04 → AffTrends 2026-07). Official: DLO **unavailable** for Instant Experience and Messaging Apps — needs **Website** dest. Failure: EN copy in exotic slot; target language common in GEO so white spends |
+| **DLO Default exotic + Added GEO language** (API build: `04` → DLO) | Default = VI/AZ/KY + Amazon/white URL; Added = ES/PT/ID + grey creative + money URL. Claim: bot scores Default first; users follow UI language | **SPLIT, not dead.** Still the primary language-layer format. 2026 vendor chatter is ~50/50 by seat/batch — some accounts still clear, some don't. Do **not** write it off; do **not** promise it. Official: DLO **unavailable** for Instant Experience and Messaging Apps — needs **Website** dest. Failure: EN copy in exotic slot; target language common in GEO so white spends. (CPA.RIP 2025-04 → AffTrends 2026-07; MagicClick 2026 split) |
 | Soft-language copy, other GEO, no DLO | PT/ES/ID/TH/RU/AR vs US/EU, hope EN classifier misses | **Degraded.** OCR is multilingual. Official wants creative to match |
 | RTL / U+202E bidi override | Reverse displayed text | **Unknown** on Meta ads 2025–26. Treat as named unicode obfuscation |
 | Homoglyphs / ZWSP / ZWNJ / BOM | Cyrillic а, Greek ο, U+200B/C/D, U+FEFF | **LIVE vs keyword filters** (Gen Digital Mar 2026 at scale). **DEAD vs CV/OCR** (AffTrends Jul 2026). Named Circumventing |
@@ -247,6 +250,12 @@ restriction**.
 | Blur / pixelate / object-cover | Hide slot UI / body | **DEAD** for gambling/nutra icons (AffTrends). Superpower Daily Aug 2026: scenic **video covers** for porn = Meta called **adversarial** |
 | **Collection / Advantage+ catalog** | Innocent cover + grey product set; product click → feed `link` unless **Override catalog deep links** | **LIVE as structure.** Cover is **not** the only review object — Commerce Manager rejects products; image fetch = `Meta-ExternalAds`; `link` crawled. Cover-only review is **false** |
 | Catalog feed-swap after review | Change images/text/links post-approval | **Circumventing** if destination disguises. High ban on re-crawl |
+| Catalog **set-membership** mutate | Review on a **White product set**; after approval, replace members of **that same set** with grey SKUs (not ad fields, not a different set ID) | **Claimed no re-moderation** [MagicClick 2026]. Discriminator vs the row above: membership ≠ creative-field edit. Still Circumventing / re-crawl; Commerce Manager can still kill black SKUs. Pixel **must** be attached or the catalog is invisible in Ads Manager |
+| 3-min white **tail** | 10–15s grey then 2–3 min neutral video | **LIVE/degraded** [MagicClick 2026]. Confuses length-based scoring + spy tools. CPM/optimization hit. Combine with white thumbnail, not as a solo |
+| **10-min tail (extended)** | ~2 min creative (first ~10s extra neutral, no claims/balances) + 8 min looped filler card (e.g. "contact us on site/WhatsApp") | Practitioner 2026 storm-era setup [YT team lead, unverified]: claims review pass + high retention/watch metrics. Same mechanism caveats as 3-min tail; full content still matches (audio+frames per above). CPM/optimize hit larger |
+| Ads Manager **crop-from-white-collage** | Upload ~3000×3000 collage, ~95% innocuous white (animal/object) + grey creative in a 600×600 corner; crop in-UI to the corner before submit; **FB feed placement only** (Stories/Reels 9:16 force full-asset render = white shows) | **LIVE claim** [MagicClick 2026; YT practitioner 2026-08-31: "runs even potency direct, no cloaker"]. No public corroboration either way (search-negative 2026-08-31). Structural weakness: Meta retains the ORIGINAL file (Ad Library + any post-approval edit → re-review of stored original) — the risk is deferred, not removed. Compression doesn't blind OCR (classifiers train on compressed data). Unverified vs human re-review |
+| Flexible / dynamic mix | 4–5 white sources + 1 grey; delivery then spends the grey | **LIVE** [MagicClick 2026]. Same dilution idea as carousel. Not a causal test |
+| **Branding** toggle flip | ON↔OFF on a Rejected / stuck In Review ad, no new creative | **Unverified requeue** [MagicClick 2026], 5–20 min claimed. Hidden if all Advantage+ enhancements OFF. If enable still fails (2490468), create a new ad (`04`) |
 | Instant Experience as first hop | White IE canvas, CTA to money | **LIVE format.** Button URLs crawled. DLO off. Jun 2025: IE ≠ LPV |
 | **Mar 2026 Feed footer URL gone** | Single-media + A+ catalog collection on FB Feed no longer show URL | Display-URL “cnn.com” trust cue **dies on those units**. Dest mismatch less user-visible, still enforced |
 | Display URL ≠ Website URL | news-tg: news domain vs tracker | **Official: same domain.** Gen Digital Mar 2026: URL masking **still at scale**. 60-day domain block if it trips |
@@ -263,10 +272,15 @@ restriction**.
 | Page name / IG bio as the pitch | Ad is clean | **Unknown / weak.** No 2025–26 sourced playbook |
 
 **Replacement stack if unicode/blur died:** UGC lifestyle (no slot UI, no
-before/after) + DLO language layers + empty ad-level copy + image-baked
+before/after) + DLO language layers (50/50 — still try) + empty ad-level copy + image-baked
 *non-keyword* headline + CTWA/forms if the funnel allows + Collection/IE as first hop. SAC: declare if
 finance-shaped. Cloak stack (PHP white) is still required for a grey web dest —
 format tricks are the **classifier** layer, not a substitute.
+
+Organic Reels farm (not ads) [MagicClick 2026]: unique video + unique **non-offer** caption
+(city/news/hashtags) + neutral cover; dest = bio or Highlights. Squeeze flash accounts.
+**Adult arousal dest remains no-path (`10`).** Flashing / 25th-frame on **paid** ads = official
+video-disruptive trip — do not port.
 
 ### Catalog-camouflage ops (vendor-reported, Rentacc 2025-05)
 
@@ -277,6 +291,11 @@ track per-card ROAS through `content_id` and kill losers individually · Events
 catalogs carry sweepstake-style offers. Constraint from the tricks table above
 stands: Commerce Manager rejects products independently — cover-pass ≠ feed-pass,
 and post-approval feed swaps that disguise the destination are Circumventing.
+
+**Set-membership mutate [MagicClick 2026]:** attach pixel or the catalog never appears in Ads
+Manager. Manual SKUs (white Amazon/neutral + grey), two sets, ad reviews on the White set, then
+swap members of that same set. Claimed no re-moderation. Still the Circumventing row above —
+do not treat a pass as durable.
 
 ## Delivery-cloaking: steering Andromeda (not the review)
 
@@ -317,9 +336,9 @@ does not clear personal ID, 2FA, or payment.
 
 **Liveness:** presentation attacks (print, screen replay, 2D mask) are **mostly
 dead** against certified PAD. Injection (virtual camera / Android camera hook)
-is the live industry class — **no 2025–26 source shows a confirmed Meta ads
-selfie pass via deepfake/injection.** Grey inventory is **already-verified
-assets**, not a liveness exploit.
+is the live industry class. MagicClick 2025 claims OBS Virtual Camera + 3D-head
+injection (~4/5 on fresh gens, n=5) — **unverified**. Default remains
+**already-verified assets**, not a liveness exploit.
 
 Same nominee on Google + Meta + bank: **intra-platform** cascade is real.
 Cross-platform sharing of the selfie video is **undocumented**. Shared phone /
@@ -335,7 +354,8 @@ legal name / address / card is the practical radius.
 - HideClick / Cloaking Master: no public FB field-level SOP.
 - BHW / afflift: HTTP 403 this pass.
 - Whether DLO Default is what the pre-moderation bot actually scores first: universal
-  practitioner claim, no Meta confirmation.
+  practitioner claim, no Meta confirmation. 2026 pass rate is seat-dependent (~50/50
+  vendor chatter) — not a death, not a guarantee.
 - Catalog ads-only (no Shop): exact HTML policy crawl of every `link` vs cover —
   image crawler confirmed; full page crawl not in one Help sentence.
 - Page name / IG bio as sole pitch: no sourced 2025–26 playbook.

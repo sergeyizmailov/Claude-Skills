@@ -21,7 +21,27 @@ onboard classic gclid-based OCI at all.**
 
 Existing integrations keep working. New ones must go through the **Data Manager API** or enhanced
 conversions for leads. Verify live status before committing engineering effort — this is a hard
-blocker, not a deprecation warning.
+blocker, not a deprecation warning. Implementation of the Data Manager hop is below; do not let a
+gclid-only Worker become the whole lane.
+
+## Post-cutoff path: Data Manager API [practitioner, MagicClick 2026-08]
+
+Classic `UploadClickConversion` stays for tokens that already onboarded. New tokens:
+`POST https://datamanager.googleapis.com/v1/events:ingest`.
+
+- Conversion action: Tools → Conversions → Import → **Clicks** → Website (Import from clicks).
+  Address-bar `ctId=` = `conversion_action_id` / `productDestinationId`.
+- GCP: enable **Data Manager API**; service-account JSON; invite `client_email` as **Standard**
+  user on the CID (hyphens stripped). JWT-bearer scope
+  `https://www.googleapis.com/auth/datamanager`. This SA path is **Data Manager only** —
+  Google Ads API still has no SA auth (`google-ads/10`).
+- `{gclid}` expands **only** in the Final URL Google Ads actually stores. A cloak/intermediary
+  must **forward the already-substituted value**. Putting `{gclid}` in the cloak's own redirect
+  sends the literal 7 characters.
+- Capture **gbraid/wbraid too** — a gclid-only Worker silently drops iOS. Windows / dedup /
+  `partial_failure` still apply; Data Manager does not waive them.
+- Send **Approved/payout** events only. 🔺 Vendor: 14-day trial before the action feeds bidding
+  (visible in reports immediately) — verify in-product.
 
 ## Click IDs — three, not one
 

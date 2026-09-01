@@ -93,3 +93,7 @@ cutting variants.
 - AdHeart — FB/IG, strong in CIS grey scene.
 - Anstrex — native + push, rips landing/pre-lander pages (nutra pre-landers).
 - Meta Ad Library — official, no spend/performance, no cloaked/rejected ads → baseline recon only.
+- GEO-local spy farm [MagicClick 2026]: seed a GEO-reg acc → search/join/like casino Pages →
+  click 5–10 ads, ~30s on LP → ~50% casino in feed. **Mobile session** (many affiliates
+  mobile-only). Then Library-by-Page for the full set. Spy tools miss cloaked/rejected; this
+  sees live delivery.

@@ -24,10 +24,11 @@ description not matching what exists. **RMF applies only to Standard application
   **Production**. In **Testing** status refresh tokens expire after **7 days** — the most common
   "it worked yesterday" bug.
 - **Web application** — supported; needs a loopback redirect URI for local dev.
-- **Service account — NOT supported** for standard access. There is no server-to-server grant
-  analogous to other Google Cloud APIs, and domain-wide delegation is not a documented path. 🔺 Treat
-  any tutorial claiming service-account auth for Google Ads with suspicion and verify against current
-  docs before building on it.
+- **Service account — NOT supported** for standard Google Ads API access. There is no
+  server-to-server grant analogous to other Google Cloud APIs, and domain-wide delegation is not a
+  documented path. 🔺 Treat any tutorial claiming service-account auth **for the Ads API** with
+  suspicion. **Exception:** Data Manager API (`auth/datamanager`) **does** take a GCP service
+  account — that is not Ads API auth. See `tracker-ops/04`.
 
 Revocation triggers: user revokes app access · password change (some configs) · OAuth client deleted
 or regenerated · 6 months unused · consent screen falling out of Production.
@@ -423,6 +424,7 @@ Failure enums: `INVALID_EMAIL` · `INVALID_PHONE_NUMBER` (not E.164) · `MISSING
 `CLICK_CONVERSION_ALREADY_EXISTS`.
 
 **Windows, dedup rules, and the 2026-06-15 new-adopter cutoff** → `06-tracking-attribution.md`.
+New tokens that cannot onboard classic OCI: Data Manager `events:ingest` → `tracker-ops/04`.
 
 ## Google Ads Scripts
 

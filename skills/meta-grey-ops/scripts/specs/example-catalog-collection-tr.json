@@ -1,0 +1,52 @@
+{
+  "run_id": "tr-casino-catalog-2026-09-02",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "_note": "White-set-at-review pattern. Submit with the all-white product set; after approval swap set membership with mutate_set.py (no ad re-review). Never let the set drop below 4 items while the creative is COLLECTION.",
+  "campaign": {
+    "name": "TR|casino|reg|catalog|2026-09-02",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": [],
+    "daily_budget_minor": 7500,
+    "bid_strategy": "LOWEST_COST_WITHOUT_CAP"
+  },
+  "adsets": [
+    {
+      "name": "TR|21+|broad|reg",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "billing_event": "IMPRESSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "start_time": "2026-09-02T07:00:00+03:00",
+      "attribution": {
+        "click_days": 1,
+        "view_days": 1
+      },
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "storefront-hero-01",
+          "creative": {
+            "kind": "catalog_collection",
+            "product_set_id": "REPLACE_ME_WHITE_SET_4_ITEMS",
+            "video_id": "REPLACE_ME_FROM_media.json",
+            "link": "https://example-lander.tld/",
+            "message": "Primary text.",
+            "cta": "PLAY_GAME",
+            "template_url": "https://example-lander.tld/?sub1={{ad.name}}"
+          }
+        }
+      ]
+    }
+  ]
+}

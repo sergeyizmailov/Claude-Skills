@@ -47,9 +47,9 @@ Which you need:
 
 ads_read, ads_management, business_management, pages_read_engagement,
 pages_show_list (+public_profile). All current, none renamed in v26.0.
-`catalog_management` needs App Review (Advanced Access) — until approved it's
-stripped from the token, catalog writes fail; do catalog/product-sets in
-Commerce Manager UI.
+`catalog_management`: docs say App Review (Advanced Access) needed — but
+field-observed 2026-08-30 GRANTED on a Business-type Live app, Limited tier,
+own-BM catalog (see 04). Try the token before assuming it's stripped.
 
 ## User token lifecycle
 
@@ -59,6 +59,13 @@ Commerce Manager UI.
 3. `GET /debug_token` (access_token = `APP_ID|SECRET`) → check is_valid,
    expires_at, scopes.
 4. Store in gitignored secrets; reminder ~55d out.
+
+Events Manager **Generate access token** is a **CAPI dataset token**, not an
+ads/BM token — do not launch with it. Do not scrape `AccessToken=` from page HTML
+or run token-grabber extensions (OPSEC fail). Reverse also true: a System User
+token with Full access on the pixel/dataset **works as a CAPI token**
+(`POST /{dataset_id}/events`; field-observed 2026-08-30) — no separate
+Events Manager token needed for funnel builders like pwa.bot.
 
 ## System User tokens
 
@@ -97,3 +104,12 @@ UTC-7. Tracker "day" and Meta "day" only align in account tz.
 Marketing API runs on dynamic BUC limits read from response headers, not a
 fixed quota (details/back-off in 05). A single buyer never approaches it — just
 don't poll in tight loops.
+
+## Meta "Ads MCP Server" / AI Connectors (2026-04-29, open to any app 2026-07-16)
+
+Official Meta-hosted MCP wrapping Marketing API: ~29 tools (campaign/audience/catalog CRUD,
+insights, A/B + lift). Auth: Facebook Login for Business or **your existing token — SU tokens
+work**. Verdict for direct-Graph users: **no new surface** — it IS the Marketing API with a
+conversational/agent UX; own scripts beat it on batch/precision. If ever used: dedicate a
+least-privilege SU token (the agent acts with full token permissions), and know that prompt +
+account context flows through Meta AND the third-party AI client.

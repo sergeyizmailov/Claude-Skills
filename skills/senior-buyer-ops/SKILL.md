@@ -26,13 +26,9 @@ Platform-agnostic: trackers/metrics → `tracker-ops` · is-a-result-real →
 `references/02-creative-ops.md` · funnel QA → `references/03-funnel-ops.md` ·
 automated kill/scale rules that survive small samples →
 `references/04-automated-rules.md` · which automation pipe (API/MCP/CSV/Sheets)
-for agent vs human → `references/05-automation-channels.md`.
+for agent vs human → `references/05-automation-channels.md` · platform is Google → also read `references/06-google-lane.md` (contract additions, structure-doctrine rationale, channel detail).
 
-**Do not port structure doctrine between platforms.** Google is explicit-search-intent driven (Ani:
-"every search query is a person telling you something, not a demographic"), so the split that pays is
-by **intent and unit economics**, not by campaign count — merging price tiers and funnel stages the way
-Meta rewards is what fails there. Consolidation itself is normal on Google (`google-ads/01`). The
-operating discipline below is shared; the mechanics are not.
+**Do not port structure doctrine between platforms** — Google splits by intent and unit economics, not by campaign count; merging price tiers/funnel stages the way Meta rewards fails there (mechanics: `references/06-google-lane.md`).
 
 Before you scale or kill on a difference, confirm it's real, not noise
 (`measurement-experimentation-ops`): the kill/scale ladder and marginal-scaling
@@ -63,17 +59,7 @@ Get these from the TL explicitly, don't infer:
 
 Missing any of 1-8 = you are flying blind; resolve before launch.
 
-### Google adds three to the contract
-
-Pin these too when the platform is Google — each one silently redefines a number above:
-
-9. **Which conversion actions are primary and include-in-conversions.** This, not the bid strategy,
-   defines what Smart Bidding chases. An analytics-only action left included corrupts every target.
-10. **Whether offline conversion import is even available** on this account's developer token — the
-    2026-06-15 cutoff blocks new adopters (`tracker-ops/04`). If it is closed, the whole "optimize on
-    the payout event" plan needs a different path, and you need to know before quoting a CPA target.
-11. **Certification and verification state per target geo**, with expiry dates. Financial services and
-    gambling both changed multiple times in 2026; a lapsed certificate stops serving without warning.
+When the platform is Google, the contract above gets three more items (conversion-action hygiene, offline-import availability, per-geo certification) — `references/06-google-lane.md`.
 
 ### Two 2026 facts that change portfolio decisions
 

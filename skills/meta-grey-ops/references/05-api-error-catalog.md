@@ -9,9 +9,10 @@ file is the grey-ops RESPONSE layer: what an error MEANS for account/profile
 survival and what to do — freeze, replace, or rotate. Don't duplicate the code
 table; look codes up in 14, act here.
 
-General rule: match on `error_user_msg`, not the number — several codes buyers
-rely on (1815857, 3858040, 2446814, 1815045, 3738001) are field-observed and not
-in Meta's published references, so the string is more stable than the digits.
+Matching rule: branch on `code` + `error_subcode`, never on the message string —
+`meta-ads/14` owns that rule and explains why field-observed codes (1815857, 3858040,
+2446814, 1815045, 3738001) are still safe to match numerically. Log `error_user_msg`
+as evidence; do not condition on it.
 
 ## Auth 190 → freeze protocol
 
@@ -33,13 +34,13 @@ PAUSED object) proves write access; GET does not.
 
 ## Delivery / account-state → replace, don't fight
 
-- Pixel "no access" (msg like #1815045): assign via BM Data Sources → Datasets,
+- Pixel "no access" (1815045): assign via BM Data Sources → Datasets,
   or ask the agency; ads recover automatically, no rebuild (03).
 - "Not delivering", no error: future start_time (normal), review pending,
   billing hold, or spend cap — wait/verify before touching.
 - Account "Disabled"/restricted: routine in agency stock. Document (ID, date,
   spend at death), request replacement, move on — don't appeal fresh stock (03).
-- CSV import blocked on fresh accounts (msg like #3738001): build via API/UI.
+- CSV import blocked on fresh accounts (3738001): build via API/UI.
 
 ## Rate limits → back off, don't burn calls
 

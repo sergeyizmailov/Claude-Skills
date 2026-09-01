@@ -1,6 +1,6 @@
 # Meta Marketing API, Billing, and Launch Operations
 
-Last reviewed: 2026-07-28
+Last reviewed: 2026-07-28. §10.0 (`execution_options`) added and verified 2026-08-31.
 
 Use this reference for Marketing API and Ads MCP automation, System User tokens,
 Page/Instagram advertising identity, payment readiness, restrictions, and final
@@ -115,9 +115,11 @@ Treat each of these as a separate gate:
    and data source by stable ID.
 4. **System User tasks** — inspect the System User's assigned assets in Business
    Settings. Seeing an asset in one list does not prove every required task.
-5. **Zero-spend write probe** — create the smallest disposable campaign or
-   creative as `PAUSED`; then read it back. Do this before uploading the full
-   creative set or building the complete campaign.
+5. **Zero-spend write probe** — prefer `execution_options: ["validate_only"]` (§10.0):
+   it exercises the same write path and creates nothing at all, so there is no object to
+   clean up. Fall back to creating the smallest disposable campaign as `PAUSED` and
+   reading it back only where validate_only is unsupported. Either way, do it before
+   uploading the full creative set or building the complete campaign.
 6. **Identity probe** — create a paused creative using the intended Page and
    Instagram identity. A generic campaign write does not validate identity.
 7. **Delivery gate** — inspect Account Quality, Billing, effective status, and
@@ -254,6 +256,12 @@ Never send a Marketing API token to an unknown MCP provider. Prefer Meta-hosted
 authorization when independently verified; otherwise inspect the server,
 credential storage, logging, deletion, and revocation model first.
 
+🔺 Vendor MagicClick 2026-04/05: official connector `mcp.facebook.com/ads`; 3P Ads MCP
+(Pipeboard / Adzviser / GoMarble / Madgicx) associated with **permanent bans**, including
+high-spend seats. MCP **cannot upload media** — Media Library first. Gate
+`is_ads_mcp_enabled` is rollout-dependent (verified BM + spend history cited). Chrome-agent
+driving Ads Manager inside antidetect on rented seats → selfie/SMS/freeze (`meta-grey-ops/01`).
+
 ## 8. Billing and payment diagnosis
 
 The Marketing API does not replace the trusted Meta UI for entering card
@@ -321,7 +329,46 @@ explicitly requests the relevant document.
 
 ## 10. Safe automation launch sequence
 
-Build for reversibility:
+Build for reversibility. The composing rule is **`validate_only` → PAUSED → human
+enable**, in that order, on every object.
+
+One limit worth stating up front: an object that references a parent which does not exist
+yet (an ad set needs a `campaign_id`, an ad needs `adset_id` + `creative_id`) cannot be
+validated ahead of the run — the call would fail on the missing parent, not on your
+payload. Campaigns and ad creatives have no such dependency and can be validated any time.
+So a pre-flight pass covers campaign and creative; ad sets and ads are validated in
+sequence during the real build, immediately before each create.
+
+### 10.0 `execution_options` — the zero-cost dry run
+
+Meta validates a payload without mutating anything. Use it before every create; it is
+the guardrail that keeps a malformed payload from becoming a real object, and it costs
+no spend and no account risk. [doc-confirmed, v26.0 reference, verified 2026-08-31]
+
+| Endpoint | Accepted values |
+|---|---|
+| `POST /act_X/campaigns`, `POST /{campaign_id}` | `validate_only`, `include_recommendations` |
+| `POST /act_X/adsets`, `POST /{adset_id}` | `validate_only`, `include_recommendations` |
+| `POST /act_X/ads`, `POST /{ad_id}` | `validate_only`, **`synchronous_ad_review`**, `include_recommendations` |
+| `POST /act_X/adcreatives` | `validate_only` only |
+| `POST /{adcreative_id}` (update) | **not supported** — validate a creative at create time or not at all |
+
+- `validate_only`: "will not perform the mutation but will run through the validation
+  rules against values of each field." Passes → `{"success": true}`; fails → a normal
+  error envelope whose **`error_data.blame_field_specs`** names the exact field path at
+  fault. Read that array first — it is the fastest payload debugger Meta ships.
+- `synchronous_ad_review`: must be paired with `validate_only`. Adds Ads Integrity
+  checks (message language, image text rule, …) **before the object exists**. On ad
+  endpoints only. Cheapest available read on whether a creative survives review.
+- `include_recommendations`: cannot be used alone.
+- What it catches: bad values, wrong types, missing required fields. Whether it catches
+  wrong *nesting* is [unverified] — `blame_field_specs` encodes a field's location in
+  the spec, which implies it does, but no doc says so. It is not a policy verdict:
+  full ad review still happens after creation.
+- Inside a batch: [unverified], and do not mix it with chained creation — a
+  validate-only op returns no `id`, so every `{result=…:$.id}` reference breaks.
+
+### 10.1 Sequence
 
 1. Confirm ownership, privileged users, 2FA, Account Quality, Billing, currency,
    time zone, payment type, spending limits, and Page/Instagram linkage.
