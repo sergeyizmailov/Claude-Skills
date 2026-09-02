@@ -1,0 +1,42 @@
+[
+  {
+    "account_id": "act_REPLACE_ME_1",
+    "page_id": "REPLACE_ME",
+    "pixel_id": "REPLACE_ME",
+    "instagram_user_id": "auto",
+    "tag": "J41-16",
+    "media": {
+      "slots-bigwin-01": {
+        "video_id": "REPLACE_ME",
+        "image_hash": "REPLACE_ME_thumb"
+      },
+      "wheel-bonus-01": {
+        "image_hash": "REPLACE_ME"
+      },
+      "carousel-01": {
+        "cards": [
+          {
+            "image_hash": "A1",
+            "headline": "Card 1"
+          },
+          {
+            "image_hash": "A2",
+            "headline": "Card 2"
+          },
+          {
+            "image_hash": "A3",
+            "headline": "Card 3"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "account_id": "act_REPLACE_ME_2",
+    "page_id": "REPLACE_ME",
+    "pixel_id": "REPLACE_ME",
+    "instagram_user_id": "auto",
+    "tag": "J41-17",
+    "_note": "overrides deep-merge into the resolved spec; media keys are per-account because image hashes are account-scoped. Delete this row's overrides key — it is only here to show the shape."
+  }
+]

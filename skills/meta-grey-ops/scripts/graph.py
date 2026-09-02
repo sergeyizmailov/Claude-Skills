@@ -10,23 +10,31 @@ and process lists):
     META_PROXY        socks5h://user:pass@host:port  (see 01 — socks5:// breaks TLS)
     META_API_VERSION  Override the pinned version below.
     META_ALLOW_NO_PROXY=1  Escape hatch for a server-side System User token only.
+    META_APP_SECRET   Optional. When set, every call carries `appsecret_proof`
+                      (HMAC-SHA256 of the token) — required once the app enforces
+                      "Require App Secret", and cheap insurance against a leaked token
+                      being replayed from elsewhere.
 """
 
 from __future__ import annotations
 
+import argparse
+import hashlib
+import hmac
 import json
 import os
 import random
 import re
 import sys
 import time
-from urllib.parse import quote
 from typing import Any
+from urllib.parse import quote, urlsplit
+
 
 def _requests():
     """Imported lazily so --help works on a box that has not installed it yet."""
     try:
-        import requests  # noqa: PLC0415
+        import requests
     except ImportError:  # pragma: no cover
         sys.exit("Missing dependency. Run:  pip install 'requests[socks]'")
     return requests
@@ -141,17 +149,101 @@ def _session():
 
 
 _SESSION = None
+_SESSION_CONFIG = None
+_WRITE_ACCOUNTS: set[str] | None = None
+_WRITE_CAPABILITY_LOADED = False
+
+
+def _session_config() -> tuple[str, str]:
+    return (
+        os.environ.get("META_PROXY", "").strip(),
+        os.environ.get("META_ALLOW_NO_PROXY", ""),
+    )
 
 
 def session():
-    global _SESSION
-    if _SESSION is None:
+    global _SESSION, _SESSION_CONFIG
+    current = _session_config()
+    # A non-None config marks a real cached requests.Session. Tests and embedded callers
+    # may inject a session directly; leave that object alone when no config was recorded.
+    if _SESSION is None or (_SESSION_CONFIG is not None and _SESSION_CONFIG != current):
         _SESSION = _session()
+        _SESSION_CONFIG = current
     return _SESSION
 
 
+def authorize_writes(accounts: list[str] | set[str]) -> None:
+    """Authorize this metaops process after it has validated a workspace."""
+    global _WRITE_ACCOUNTS, _WRITE_CAPABILITY_LOADED
+    _WRITE_ACCOUNTS = {normalize_account(value) for value in accounts}
+    _WRITE_CAPABILITY_LOADED = True
+
+
+def _load_write_capability() -> None:
+    """Load a one-shot capability inherited from the parent metaops process."""
+    global _WRITE_ACCOUNTS, _WRITE_CAPABILITY_LOADED
+    if _WRITE_CAPABILITY_LOADED:
+        return
+    _WRITE_CAPABILITY_LOADED = True
+    fd_text = os.environ.pop("METAOPS_AUTH_FD", "")
+    if not fd_text.isdigit():
+        return
+    try:
+        raw = os.read(int(fd_text), 65536)
+        os.close(int(fd_text))
+        payload = json.loads(raw.decode("utf-8"))
+    except (OSError, ValueError, TypeError):
+        return
+    if payload.get("parent_pid") != os.getppid():
+        return
+    accounts = payload.get("allowed_accounts")
+    if isinstance(accounts, list) and all(isinstance(value, str) for value in accounts):
+        _WRITE_ACCOUNTS = {normalize_account(value) for value in accounts}
+
+
+def require_write_authority(method: str, path: str) -> None:
+    """Block accidental use of low-level mutators outside a validated metaops workspace."""
+    if method.upper() == "GET":
+        return
+    _load_write_capability()
+    if _WRITE_ACCOUNTS is None:
+        sys.exit(
+            f"direct Graph {method.upper()} is disabled for {path}; use metaops from a "
+            "validated workspace (low-level write scripts are internal implementations)"
+        )
+    match = re.match(r"^/?(act_[0-9]+)(?:/|$)", path)
+    if match and match.group(1) not in _WRITE_ACCOUNTS:
+        sys.exit(
+            f"workspace does not authorize Graph write target {match.group(1)}"
+        )
+
+
+def normalize_graph_path(path: str) -> str:
+    """Validate an absolute Graph URL and return its version-free path for authorization."""
+    if path.startswith(("http://", "https://")):
+        parsed = urlsplit(path)
+        if parsed.scheme != "https" or parsed.netloc.lower() != "graph.facebook.com":
+            sys.exit(
+                f"refusing absolute Graph URL outside https://graph.facebook.com: {path}"
+            )
+        path = parsed.path
+    clean = path.lstrip("/")
+    return re.sub(r"^v[0-9]+\.[0-9]+/", "", clean)
+
+
+def normalize_account(x) -> str:
+    """`123` / `act_123` → `act_123`. One helper so every CLI accepts both forms."""
+    x = str(x).strip()
+    return x if x.startswith("act_") else f"act_{x}"
+
+
 def _worst_usage(headers) -> float:
-    """Highest utilisation percentage across every usage header Meta returned."""
+    """Highest utilisation percentage across every usage header Meta returned.
+
+    In `x-business-use-case-usage` the per-bucket `call_count`, `total_cputime`, `total_time`
+    ARE percentages of the hourly quota (0-100), not counts — doc-confirmed, meta-ads/14
+    "Rate limits". Values are clamped to 0-100 so a future absolute counter under the same
+    name cannot trip the pause threshold on its own."""
     worst = 0.0
     for name in ("x-app-usage", "x-ad-account-usage", "x-business-use-case-usage"):
         raw = headers.get(name)
@@ -179,7 +271,7 @@ def _worst_usage(headers) -> float:
                     "total_time",
                 ):
                     try:
-                        worst = max(worst, float(v))
+                        worst = max(worst, min(float(v), 100.0))
                     except (TypeError, ValueError):
                         pass
     return worst
@@ -242,6 +334,9 @@ def call(
     business SDK does), and it arrives double-encoded. A double-encoded product-set
     `filter` silently no-ops: HTTP 200, set id returned, filter unchanged (04).
     """
+    authorization_path = normalize_graph_path(path)
+    require_write_authority(method, authorization_path)
+
     # A transport failure on a CREATE is not safe to retry: the request may have been
     # applied before the connection dropped, so a retry duplicates the object. Reads and
     # explicit idempotent writes retry freely. Errors Graph *answered* with are always
@@ -252,7 +347,13 @@ def call(
 
     url = path if path.startswith("http") else f"{BASE}/{path.lstrip('/')}"
     params = {k: _encode(v) for k, v in (params or {}).items() if v is not None}
-    params["access_token"] = token_override or token()
+    tok = token_override or token()
+    # The token travels in the Authorization header, never in the query string: a URL
+    # lands in proxy/access logs and exception strings, a header does not.
+    headers = {"Authorization": f"Bearer {tok}"}
+    secret = os.environ.get("META_APP_SECRET", "").strip()
+    if secret:
+        params["appsecret_proof"] = hmac.new(secret.encode(), tok.encode(), hashlib.sha256).hexdigest()
 
     body = None
     if data is not None:
@@ -262,11 +363,12 @@ def call(
     for attempt in range(retries + 1):
         try:
             resp = session().request(
-                method.upper(), url, params=params, data=body, files=files, timeout=180
+                method.upper(), url, params=params, data=body, files=files, headers=headers,
+                timeout=180,
             )
         except Exception as exc:  # noqa: BLE001 - transport errors embed the tokenised URL
-            # requests puts request.url — access_token included — into the exception
-            # string, so it is redacted before it can reach stderr or a traceback.
+            # The token is a header now, but redact anyway: an overridden Page token or a
+            # caller-built URL could still carry one into the exception string.
             # A dropped proxy connection or a read timeout is exactly what retries exist
             # for: back off and try again, and only surface it once they are exhausted.
             err = GraphError(
@@ -294,7 +396,7 @@ def call(
         try:
             payload = resp.json()
         except ValueError:
-            payload = {"error": {"message": resp.text[:500], "code": -1}}
+            payload = {"error": {"message": redact(resp.text[:500]), "code": -1}}
 
         if resp.ok and "error" not in payload:
             return payload
@@ -305,10 +407,13 @@ def call(
             isinstance(err.code, int) and 80000 <= err.code <= 80999
         )
         if throttled and attempt < retries:
-            wait = _regain_seconds(resp.headers) or delay
-            print(f"  ! throttled ({err.code}) — sleeping {wait}s", file=sys.stderr)
+            # Code 17 / 80004 is the ad-account score cap (60 points on Limited tier, 9000 on
+            # Full). Live 2026-09-02: it does not clear in 2-16 s — a clone run burned all
+            # four retries. Wait a real minute per attempt unless the header says otherwise.
+            wait = _regain_seconds(resp.headers) or max(delay, 60.0)
+            print(f"  ! throttled ({err.code}) — sleeping {wait:.0f}s", file=sys.stderr)
             time.sleep(wait)
-            delay = min(delay * 2, 300)
+            delay = min(max(delay, 60.0) * 2, 300)
             continue
 
         # A 5xx with no Graph error envelope (an HTML page from the proxy or Meta's edge)
@@ -368,3 +473,14 @@ def page_token(page_id: str) -> str:
             "page_token",
         )
     return node["access_token"]
+
+
+def main() -> int:
+    argparse.ArgumentParser(
+        description="Internal Meta Graph transport used by workspace-bound metaops commands."
+    ).parse_args()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,362 +1,234 @@
 # 07 — Review layer, cloaking, creative-classifier tricks
 
 Reviewed 2026-08-27. Session/IP → `01`. Agency/BM → `03`. API launch / re-moderation
-→ `04`. Policy taxonomy (clean lane) → `meta-ads/07`. This file is the grey overlay:
-how Meta’s review fetch is filtered, and which creative/format tricks still move
-the classifier.
+→ `04`. Policy taxonomy (clean lane) → `meta-ads/07`. Grey overlay: how Meta's
+review fetch is filtered, which creative/format tricks still move the classifier.
 
-Vendor recipes are **vendor-reported**. Policy facts are official. Live Circumventing
-Systems page **redirected to Account Integrity** this pass — cloaking is still named
-in Meta’s 2026-02-26 lawsuit.
+Vendor recipes = **vendor-reported**. Policy facts = official. Live Circumventing
+Systems page redirects to Account Integrity this pass — cloaking still named in
+Meta's 2026-02-26 lawsuit.
 
-## What Meta named
+## What Meta named (official, live-fetched 2026-08-27)
 
-Live Standards (fetched 2026-08-27):
+- Ad product/service **must match landing page**. Helping anyone **evade/circumvent
+  enforcement** is prohibited. Restriction grounds include evading review.
+- 2024 Circumventing Systems (URL now redirects, Loomer-quoted): named **cloaking**
+  (limiting Meta's destination access), **unicode/symbol obfuscation**, **obscure
+  images**. Evading Enforcement: don't recreate violating ads across assets; don't
+  spin new assets after restriction.
+- 2026-02-26 newsroom: cloaking = "webpage shows one version to ad review, different
+  content to real users." AI cloaking detection; faster reject on redirect chains.
+- **Display URL must match Website URL's domain.** 🔺 "~25 char truncation" figure
+  has no official source — likely conflated with Link Description (30-char cap,
+  Marketplace/search/AN only). Measure in preview, don't design to 25. [unverified]
+- Mar 2026: single-media + A+ catalog collection ads on FB Feed **no longer show
+  footer URL** — mismatch less visible, not less enforced.
+- **Domain block**: restricted/suspicious LP domain → all ads to it rejected, 60-day
+  block, repeats if linked accounts keep violating. Fix = **change domain**, never
+  appeal the domain.
 
-- “The products and services promoted in an ad **must match those promoted on the
-  landing page**.”
-- “Helping anyone **evade or circumvent** our enforcement” is prohibited.
-- Restriction grounds include **evading review and enforcement**.
+## Crawlers (official page, `developers.facebook.com/docs/sharing/webmasters/crawler/`)
 
-2024 Circumventing Systems page (Jon Loomer quote; URL now redirects): advertisers
-can’t run ads that purposely avoid review. Named: **cloaking** (limit Meta’s access
-to the destination), **unicode/symbols to obfuscate**, **obscure images**. Evading
-Enforcement: don’t recreate similar violating ads across assets; don’t create new
-assets after restriction.
-
-2026-02-26 newsroom (live): “a webpage connected to a seemingly legitimate ad
-displays one version of its content to our ad review system, but shows different
-content to real users.” AI cloaking detection; faster reject of **redirect** chains.
-
-**Display URL** must go to the **same domain as Website URL**.
-🔺 The widely-repeated "truncated ~25 chars" figure has **no official source** and is probably a
-conflation with **Link Description** (30-char cap, ~27 visible, and only on Marketplace / search
-results / Audience Network). Measure in preview; do not design to 25. [unverified]
-**March 2026:** single-media and Advantage+ catalog collection ads on Facebook Feed
-**no longer display a URL in the ad footer** — display-URL mismatch is less visible
-in Feed, not less enforced.
-
-**Domain block (Meta-specific, official):** restricted/suspicious landing-page
-domain → **all ads** to that domain rejected (“Ads must not promote restricted
-domains”). Block **60 days**, then unblock; **repeats** if linked ad accounts keep
-violating. Fix: **change domain**, not appeal the domain. Signals include user
-feedback and domains tied to disabled ad accounts / payment risk.
-
-## Meta has no AdsBot
-
-Live crawler page (`developers.facebook.com/docs/sharing/webmasters/crawler/`):
-
-| UA | Official job | Ad review? |
+| UA | Job | Ad review? |
 |---|---|---|
-| `facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)` | OG link-preview (Sharing Debugger) | **Not stated** |
-| `meta-externalads/1.1` | “Improving advertising and other business-related products” | Closest named ads crawler. Not labeled “review” |
-| `meta-externalagent/1.1` | AI training / indexing | No |
-| `meta-externalfetcher/1.1` | User-requested / agentic; **may bypass robots.txt** | No |
+| `facebookexternalhit/1.1` | OG link-preview | Not stated |
+| `meta-externalads/1.1` | ad/business products | Closest named; not labeled "review" |
+| `meta-externalagent/1.1` | AI training/indexing | No |
+| `meta-externalfetcher/1.1` | user-requested; may bypass robots.txt | No |
 | `meta-webindexer/1.1` | Meta AI search | No |
 
-`facebookexternalhit` mechanics (official): gzip+deflate; OG in first **1 MB**;
-`Range: bytes=0-524288`; crawl in a few seconds; may bypass robots.txt for
-malware/integrity. Simulate:
+Retired/unlisted (not on current page): `Facebot`, `FacebookBot`, IG crawler,
+`facebookcatalog/1.0`.
 
-```
-curl -v --compressed -H "Range: bytes=0-524288" -H "Connection: close" \
-  -A "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)" "$URL"
-```
+`facebookexternalhit`: gzip+deflate, OG in first 1MB, `Range: bytes=0-524288`,
+crawls in seconds, may ignore robots.txt for malware/integrity checks. Simulate:
+`curl -v --compressed -H "Range: bytes=0-524288" -H "Connection: close" -A
+"facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)" "$URL"`.
+IP check: `whois -h whois.radb.net -- '-i origin AS32934'` + AS63293; IPv6
+`2a03:2880::/32`; 2026 logs add **57.141.0.0/24**.
 
-IPs: `whois -h whois.radb.net -- '-i origin AS32934'` plus AS63293. IPv6
-`2a03:2880::/32`. 2026 logs: **57.141.0.0/24** as facebookexternalhit.
+WhatsApp preview UA = link-preview, not ad review. **JS execution by ad review:
+undocumented** — `facebookexternalhit` is a static scrape but vendors assume a
+second Chrome-class/residential path exists. Don't bet on "review can't run JS."
 
-**Not on the 2026-08-27 crawler page:** `Facebot`, `FacebookBot`, Instagram crawler,
-`facebookcatalog/1.0`. Treat as retired/unlisted, not current review UAs.
+## Review layering (order)
 
-WhatsApp preview UA `WhatsApp/2.x.x.x A|I|N` (Android/iOS/web), OG in first 300 KB
-— **link-preview, not ad review**.
+1. Automated pre-serve on create/edit, "In review" ~24h (often minutes). Ad **may
+   deliver before all policy checks finish**.
+2. Destination fetch of Website URL + redirect path (official: LP is reviewed; no
+   published fetcher UA for this step).
+3. Re-review any time, including post-live.
+4. Re-review triggers (official): targeting, creative, optimization, billing event.
+   Field test (`04`, 2026-08, 45 ad sets): geo/device/age/placement/budget/bid/
+   schedule did **not** change status — review attaches to the **creative**. Treat
+   official as "can" trigger, field as what "usually" does.
+5. **Click-to-Messenger**: thread-level checkpoint on top of ad review — welcome
+   message reviewed instead of a web LP. Second gate, not a skip.
+6. **Instant Experience**: Meta-hosted, button URLs still crawlable. Jun 2025: IX no
+   longer counts as landing-page view.
+7. Ads Library `ad_snapshot_url` = archived creative, not the money page; CTA click
+   from Library is a normal browser to the advertised URL.
 
-JS execution by ad review: **not documented**. `facebookexternalhit` is a static
-scrape. Vendors assume a second Chrome-class / residential path. Do not bet on
-“review cannot run JS.” Do not bet on JS-only cloaks.
+No official human-reviewer UA/IP exists. Account-restriction review ~48h
+(expectation, not SLA).
 
-## How review is actually layered
+## Filter stack (build AND, architecture-first: zero-redirect PHP white; JS-only/
+Tilda-Shopify/IP-only die)
 
-1. **Automated pre-serve** on create/edit. Status In review. Typically **24h**, often
-   minutes. Official: an ad **may deliver before all policies are checked**.
-2. **Destination fetch** of Website URL (and redirect path). Official: review includes
-   landing page. No published fetcher-UA for this step.
-3. **Re-review at any time**, including after live.
-4. **Edits that may re-review (official):** targeting, creative (images/text/links/
-   videos), optimisation, billing event.
-5. **Field 2026-08 (`04`):** review attaches to the **creative**. Ad-set geo / devices /
-   age / placements / budget / bid / schedule did **not** change status in a 45-ad-set
-   test. Treat official as what *can* re-trigger; field as what *usually* does.
-6. **Click-to-Messenger** has a **thread-level checkpoint on top of ad review**. If
-   destination is Messenger/IG/WA, there is no web LP for the primary destination —
-   welcome message is reviewed instead. Second gate, not a skip.
-7. **Instant Experience** is a Meta-hosted destination. Buttons still have URLs
-   (those can be crawled). June 2025: IX **no longer counts as a landing-page view**.
-8. **Ads Library** `ad_snapshot_url` is a Meta-hosted **archived creative**, not the
-   money page. CTA click from Library is a **normal browser** to advertised URL.
+0. **Same-host PHP reverse/local file** — safe page must display **without
+   redirect** (Adspect: mandatory for FB PHP). 302-the-white is the leak.
+1. **Named crawler identity** — UA ∈ facebookexternalhit/meta-externalads/(hist.)
+   Facebot AND IP ∈ AS32934/AS63293/57.141 → serve white 200. Never 403 these.
+2. IPv6 reject (optional/leftover — real users also use v6).
+3. **Unsubstituted macros / missing url_tags/fbclid** — money AND: `{{ad.name}}`
+   (or utm) not `@empty`. Works only if review fetches the **declared** Website URL
+   without url_tags (official conflict: macros "replaced when rendered" — if Meta
+   fetches expanded href, this gate dies). Still vendor-documented (Binom 2025-05,
+   CPA.RIP). Keitaro: don't put `fbclid={fbclid}` in URL Parameters — Meta
+   auto-appends fbclid; a source placeholder blocks capture.
+4. Referrer contains facebook (Binom money-path requirement).
+5. Language + geo match campaign targeting (empty/unknown language = common white).
+6. First-N-clicks white (Binom `FIRST`; Adspect On Review + blacklist-all-IPs-in-
+   Review — never click your own On-Review link).
+7. JS/TLS fingerprint (second stage). Binom TLS/TCP/VPN die behind Cloudflare;
+   Adspect requires Cloudflare. Pick CF+PHP or Binom-TLS-without-CF, not both.
+8. **Pixel on money**: no standard FB JS pixel (Referer leaks money URL) — use
+   `<meta name="referrer" content="no-referrer">` or noscript/`fetch` with
+   `referrerPolicy: "no-referrer"`.
 
-Humans exist (train systems; sometimes review ads). **No official human UA/IP.**
-Account-restriction review typically 48h — expectation, not SLA.
+Don't enable the cloak day 0 — watch click log (bot flag/geo/UA/macros present)
+first, then turn filters on.
 
-## Filter stack for Facebook (layers, in order)
+**Vendor tool recipes** (same AND-stack, different config surface): Binom —
+Website URL = bare tracker, `utm_code` lives in URL Parameters (attaches
+post-moderation, so reviewer hits untagged URL); Protect-FB rule = referrer
+facebook + language EN/not-empty + not-Bot (headers+IP) + country=buy geo;
+expect tracker clicks ≈2× FB clicks (bot traffic), offer discrepancy 3–5%.
+Keitaro — `Bots IS → white`, `country=geo AND Bots IS NOT AND {{ad.name}}/utm not
+empty → money`, default white; bot DB is generic, update Geo-DBs/Bots regularly.
+Adspect — safe page must have no redirect; submit On-Review + blacklist all
+Review IPs, switch to Filtering only after approval; Cloudflare yellow-cloud;
+self-hosted only (Shopify/Wix/Tilda pre-banned by networks); never alter a live
+white; JS-integration variant (visitor starts white, ajax.php swaps) is weaker —
+a JS-capable reviewer sees money.
 
-Google’s gclid-always-on does **not** port. FB’s cheap gate is **unsubstituted
-macros / missing url_tags**. Build AND. Architecture first: **zero-redirect PHP
-white**. JS-only / Tilda-Shopify / IP-only die.
+**White bar**: official is thin (product match, working destination, not
+restricted domain) — no AdsBot-style checklist. Vendor practice treats FB white
+like Google white: real site, unique, mobile, legal pages, self-hosted, 200, no
+redirect, not a bare affiliate link. Empty-HTML whites pass `facebookexternalhit`
+OG, fail human re-review.
 
-0. **Same-host PHP reverse / local file.** Adspect: safe page **must be displayed
-   without redirect** — mandatory for Facebook PHP. 302-the-white is the leak.
-1. **Named crawler identity** — UA ∈ facebookexternalhit / meta-externalads /
-   (hist.) Facebot **and** IP ∈ AS32934 / AS63293 / 57.141. Serve white **200**.
-   Never 403 these.
-2. **IPv6 reject** — Keitaro: FB owns huge v6 and uses it for bots. Optional,
-   leftover; real users also use v6.
-3. **Unsubstituted macros / missing url_tags / missing fbclid** — money AND:
-   `{{ad.name}}` (or a dedicated utm) **is not @empty**. Review hits **Website URL**;
-   users get the **URL parameters** field + auto `fbclid`. Official conflict:
-   macros “replaced when the ad is rendered.” The trick only works if review
-   fetches the **declared Website URL** without `url_tags`. Vendor (Binom 2025-05,
-   CPA.RIP) still documents it. If Meta fetches the expanded href, this gate dies.
-4. **Referrer contains facebook** — Binom money path requires it. Review/share
-   crawls often have none.
-5. **Language + geo match campaign targeting.** Review language empty/unknown is
-   a common white.
-6. **First-N clicks white** — Binom `FIRST`. Adspect On Review + “blacklist all
-   IPs in Review.” Do **not** click your own On-Review link.
-7. **JS / TLS fingerprint** — second stage only. Binom TLS/TCP/VPN **die behind
-   Cloudflare**. Adspect **requires** Cloudflare. Pick: CF + PHP, or Binom TLS
-   without CF — not both.
-8. **Pixel on money:** do **not** fire standard FB JS pixel (Referer leaks money
-   URL). Adspect: `<meta name="referrer" content="no-referrer">` or noscript /
-   `fetch` with `referrerPolicy: "no-referrer"`.
+## What actually kills an account
 
-**Do not enable the cloak on day 0.** Watch the click log (bot flag, geo, UA,
-macros present?), then turn filters on.
-
-### Binom UTM split (vendor blog 2025-05, still published)
-
-Website URL = bare tracker: `https://domain.com/click?key=…`
-
-URL parameters field = `ad_id={{ad.id}}&…&utm_code=310306` (Binom recipe 2025-05).
-**Keitaro:** do **not** put `fbclid={fbclid}` in URL Parameters — Meta **auto-appends** `fbclid`; a source placeholder **blocks** capture (`docs.keitaro.io` Facebook Conversions, 2026-07).
-
-Stated logic: `utm_code` is attached **after** moderation on the user-visible ad.
-Reviewers hit the original URL without tags → white. Money rule requires the UTM.
-
-### Binom Protect Facebook recipe (official)
-
-Default path = white. Money path AND:
-
-1. Referrer **facebook**
-2. Language EN (or IS NOT Empty/Unknown)
-3. Is **not** Bot (`FB` method = HTTP headers + IP — “recommended by default if
-   working with Facebook”)
-4. Country = buy geo
-
-Expected: tracker clicks **~2×** FB clicks (FB bots). Offer discrepancy 3–5%.
-
-## Keitaro — Facebook recipe
-
-```text
-Forced: Bots IS  → CURL / Show HTML = WHITE (200, same host)
-Regular: Country IS {buy geo} AND Bots IS NOT
-         AND Parameter {{ad.name}} (or utm) IS NOT @empty
-         → money / prelander
-Default: WHITE
-```
-
-Bot DB is generic, not FB-specific. Update Maintenance → Geo-DBs / Bots. IPv6
-reject is the vendor leftover. Watch Click Log before enabling.
-
-## Adspect — Facebook SOP
-
-[docs.adspect.ai, 2026-07]:
-
-1. Use-case = Facebook.
-2. Safe page **without redirect** (local file / reverse PHP / No Action).
-3. Submit **On Review** + Blacklist All IPs in Review. Not Filtering.
-4. After approval → Filtering.
-5. Cloudflare yellow-cloud. `.com/.net/.org`. No stop-words in domain.
-6. Self-hosted white. Shopify / Wix / Tilda: vendor says networks **pre-ban**
-   constructors.
-7. White: terms/privacy/cookies, unique, mobile, not a redirect to google.com,
-   not a direct affiliate link.
-8. Do not alter a live white.
-9. One stream per campaign.
-10. JS integration = constructor fallback (visitor starts on white; ajax.php
-    decides). Weaker. JS-capable reviewer sees money if money is JS-swapped.
-
-## White page Meta actually checks
-
-Official bar is **thin**: ad↔LP product match, working destination, **not a
-restricted domain**. No AdsBot-style published checklist.
-
-Vendor FB white = Google-like **real site**: unique, mobile, legal pages,
-self-hosted, no constructors, 200, same URL, no redirect. Empty HTML whites pass
-`facebookexternalhit` OG and fail a human re-review.
-
-**news-tg display-a-news-domain** conflicts with official same-domain Display URL (tricks table below; Mar 2026 feed-footer removal hides it from users, not from review).
-
-## What actually dies
-
-1. **Content substitution** — Meta’s own 2026 lawsuit definition. Account /
-   BM / domain cascade.
-2. **JS-primary / Tilda-Shopify white** — constructor pre-ban (Adspect); JS
-   reviewer sees money.
-3. **IP-only** — misses new ranges (57.141) + any residential reviewer.
-4. **302-the-white** — Adspect mandatory no-redirect on FB PHP.
-5. **Standard FB pixel on money** — Referer leak.
-6. **Restricted domain** — 60-day, all ads, don’t appeal the domain.
-7. **Recreating similar violating ads across Pages/BMs** — Evading Enforcement
-   (2024 named; live heading gone, enforcement not).
-8. **CTM / IX as a cloak** — second gate exists, not a skip (see layered review above)
-9. **Direct link to offer** (no catalog/landing/dynamic layer) — practitioner prior
-   (2026 storm-era): ~1 in 10 accounts survives, even on nominally white verticals.
-   Catalog or landing layer is baseline survival gear, not camouflage optional.
+1. **Content substitution** (Meta's 2026 lawsuit definition) → account/BM/domain
+   cascade.
+2. JS-primary/Tilda-Shopify white — constructor pre-ban; JS reviewer sees money.
+3. IP-only allowlist — misses new ranges (57.141) + any residential reviewer.
+4. 302-the-white — Adspect mandates no-redirect on FB PHP.
+5. Standard FB pixel on money — Referer leak.
+6. Restricted domain — 60-day, all ads, don't appeal the domain.
+7. Recreating similar violating ads across Pages/BMs — named Evading Enforcement.
+8. CTM/IX used as a cloak — second gate exists, not a skip.
+9. Direct link to offer, no catalog/landing/dynamic layer — practitioner prior
+   (2026 storm-era): ~1 in 10 accounts survives even nominally-white verticals.
+   Catalog/landing layer is baseline survival gear, not optional camouflage.
 
 ## Failure signatures
 
 | Signature | What it is | Move |
 |---|---|---|
-| Ad rejected, account live | Creative / destination | Edit creative, new ad (`04`). Rejected ad cannot enable (2490468) |
-| Approved → later reject | Official re-review | Isolate: creative vs domain vs account |
-| Ad account restricted | Asset-level | Fresh agency: **replace**, don’t appeal (`01`) |
+| Ad rejected, account live | Creative/destination | Edit creative, new ad (`04`); rejected ad can't re-enable (2490468) |
+| Approved → later reject | Official re-review | Isolate creative vs domain vs account |
+| Ad account restricted | Asset-level | Fresh agency: replace, don't appeal (`01`) |
 | User restricted from advertising | Other admins may still run | Freeze the persona |
-| BM / portfolio restriction | “Connected abusive assets” | Isolate. Don’t attach clean Pages |
-| **Domain restricted 60 days** | Meta-specific | Rotate domain. Do not reuse on next seat |
-| Pixel/event domain blocked | Events Manager, separate | New dataset; don’t share across risk tiers (`01`) |
+| BM/portfolio restriction | "Connected abusive assets" | Isolate; don't attach clean Pages |
+| Domain restricted 60d | Meta-specific | Rotate domain; don't reuse on next seat |
+| Pixel/event domain blocked | Events Manager, separate | New dataset; don't share across risk tiers (`01`) |
 | Page unpublished | Community Standards + ads | New Page, uniquify |
-| Tracker clicks ≈ 2× FB clicks | Binom: FB bots on white | Normal. Watch for domain/account wave |
-| Instant copy reject | Classifier, not cloak | Image-baked text / new copy. Unicode tricks → this file § below |
-| Circumventing / evading | 2024 named; 2026 page moved | Freeze. Replacement is `03`, not a new self-farmed BM |
+| Tracker clicks ≈2× FB clicks | Bots on white | Normal; watch for domain/account wave |
+| Instant copy reject | Classifier, not cloak | Image-baked text/new copy — see tricks table |
+| Circumventing/evading | 2024 named; page moved 2026 | Freeze; replacement is `03`, not a self-farmed BM |
 
-## Creative-classifier tricks (catalog, language, unicode)
+## Creative-classifier tricks
 
-Named Circumventing (live ads-violations UI 2026-08-27; dedicated Transparency
-URL 302s to Account Integrity): cloaking · **unicode/symbols to obfuscate** ·
-**obscure images** (blur/pixelate/objects) · **emoji as numbers/prices**.
-Evading Enforcement: clone violating ads across assets; **new assets after
-restriction**.
+Named Circumventing (live UI 2026-08-27): cloaking · unicode/symbol obfuscation ·
+obscure images (blur/pixelate/object-cover) · emoji-as-numbers/prices. Named
+Evading Enforcement: clone violating ads across assets; new assets post-restriction.
 
-| Trick | What it actually is | 2026 status |
+| Trick | Mechanism | 2026 status |
 |---|---|---|
-| **DLO Default exotic + Added GEO language** (API build: `04` → DLO) | Default = VI/AZ/KY + Amazon/white URL; Added = ES/PT/ID + grey creative + money URL. Claim: bot scores Default first; users follow UI language | **SPLIT, not dead.** Still the primary language-layer format. 2026 vendor chatter is ~50/50 by seat/batch — some accounts still clear, some don't. Do **not** write it off; do **not** promise it. Official: DLO **unavailable** for Instant Experience and Messaging Apps — needs **Website** dest. Failure: EN copy in exotic slot; target language common in GEO so white spends. (CPA.RIP 2025-04 → AffTrends 2026-07; MagicClick 2026 split) |
-| Soft-language copy, other GEO, no DLO | PT/ES/ID/TH/RU/AR vs US/EU, hope EN classifier misses | **Degraded.** OCR is multilingual. Official wants creative to match |
-| RTL / U+202E bidi override | Reverse displayed text | **Unknown** on Meta ads 2025–26. Treat as named unicode obfuscation |
-| Homoglyphs / ZWSP / ZWNJ / BOM | Cyrillic а, Greek ο, U+200B/C/D, U+FEFF | **LIVE vs keyword filters** (Gen Digital Mar 2026 at scale). **DEAD vs CV/OCR** (AffTrends Jul 2026). Named Circumventing |
-| Emoji as the claim (💰💊🎰 / 9️⃣9️⃣9️⃣) | Replace prices/banned words | **Named trip**, not a bypass |
-| Image-baked headline + **empty** ad-level text | news-tg live Aug 2026 | **LIVE as copy-field skip.** **DEAD as OCR skip** if the baked string is the violating claim. Official: blank text **may be pulled from Website URL**. Advantage+ can **rewrite text baked into the image** (Loomer 2026-07) — OPT_OUT |
-| Blur / pixelate / object-cover | Hide slot UI / body | **DEAD** for gambling/nutra icons (AffTrends). Superpower Daily Aug 2026: scenic **video covers** for porn = Meta called **adversarial** |
-| **Collection / Advantage+ catalog** | Innocent cover + grey product set; product click → feed `link` unless **Override catalog deep links** | **LIVE as structure.** Cover is **not** the only review object — Commerce Manager rejects products; image fetch = `Meta-ExternalAds`; `link` crawled. Cover-only review is **false** |
-| Catalog feed-swap after review | Change images/text/links post-approval | **Circumventing** if destination disguises. High ban on re-crawl |
-| Catalog **set-membership** mutate | Review on a **White product set**; after approval, replace members of **that same set** with grey SKUs (not ad fields, not a different set ID) | **Claimed no re-moderation** [MagicClick 2026]. Discriminator vs the row above: membership ≠ creative-field edit. Still Circumventing / re-crawl; Commerce Manager can still kill black SKUs. Pixel **must** be attached or the catalog is invisible in Ads Manager |
-| 3-min white **tail** | 10–15s grey then 2–3 min neutral video | **LIVE/degraded** [MagicClick 2026]. Confuses length-based scoring + spy tools. CPM/optimization hit. Combine with white thumbnail, not as a solo |
-| **10-min tail (extended)** | ~2 min creative (first ~10s extra neutral, no claims/balances) + 8 min looped filler card (e.g. "contact us on site/WhatsApp") | Practitioner 2026 storm-era setup [YT team lead, unverified]: claims review pass + high retention/watch metrics. Same mechanism caveats as 3-min tail; full content still matches (audio+frames per above). CPM/optimize hit larger |
-| Ads Manager **crop-from-white-collage** | Upload ~3000×3000 collage, ~95% innocuous white (animal/object) + grey creative in a 600×600 corner; crop in-UI to the corner before submit; **FB feed placement only** (Stories/Reels 9:16 force full-asset render = white shows) | **LIVE claim** [MagicClick 2026; YT practitioner 2026-08-31: "runs even potency direct, no cloaker"]. No public corroboration either way (search-negative 2026-08-31). Structural weakness: Meta retains the ORIGINAL file (Ad Library + any post-approval edit → re-review of stored original) — the risk is deferred, not removed. Compression doesn't blind OCR (classifiers train on compressed data). Unverified vs human re-review |
-| Flexible / dynamic mix | 4–5 white sources + 1 grey; delivery then spends the grey | **LIVE** [MagicClick 2026]. Same dilution idea as carousel. Not a causal test |
-| **Branding** toggle flip | ON↔OFF on a Rejected / stuck In Review ad, no new creative | **Unverified requeue** [MagicClick 2026], 5–20 min claimed. Hidden if all Advantage+ enhancements OFF. If enable still fails (2490468), create a new ad (`04`) |
-| Instant Experience as first hop | White IE canvas, CTA to money | **LIVE format.** Button URLs crawled. DLO off. Jun 2025: IE ≠ LPV |
-| **Mar 2026 Feed footer URL gone** | Single-media + A+ catalog collection on FB Feed no longer show URL | Display-URL “cnn.com” trust cue **dies on those units**. Dest mismatch less user-visible, still enforced |
-| Display URL ≠ Website URL | news-tg: news domain vs tracker | **Official: same domain.** Gen Digital Mar 2026: URL masking **still at scale**. 60-day domain block if it trips |
-| CT-Messenger / WhatsApp / IG Direct | No web LP | **LIVE LP-skip.** Greeting + creative still reviewed. DLO off. Partnerkin: language trick **requires Website** dest |
-| Instant Forms | No offer LP; privacy-policy URL required (not PDF) | **LIVE LP-skip.** 2026 Leads default = **Website and Instant Forms** — buried Single; accidental website dest turns LP review back on |
-| Carousel: grey card 1 + white 2–n | Disable card optimization | **LIVE** (AffTrends / vc.ru). Per-card review |
-| Placement mix: grey Feed/IG, white Messenger/Search | Dilute | **Dying** — Aug 2026 placement-control removal (Loomer) |
-| Split claim across headline + description | Neither string trips | **Degraded.** Advantage+ can swap headline ↔ primary. Description not shown on most Feed/IG |
-| Video: no captions / first 3s clean / white thumbnail | Skip ASR / OCR | **No-captions ≠ no ASR** (review includes **audio**). First-3s is a **view metric**, not a review window. White thumbnail **LIVE/degraded** |
-| SAC undeclared | Avoid Financial targeting tax | **KILL.** Official: ads may be rejected if category not chosen (US Financial 2025-01-14). Practitioner *workaround* is **declare Financial**, not hide it |
-| Dark posts / multi-Page clone | Hide from Ad Library / reset | Dark posts **still in Ad Library** when active. Multi-Page clone = **named Evading** |
-| PostID reuse of an approved post | Port a cleared creative | **Evading** if the post is the same violation |
-| Advantage+ gen-bg / expand / text gen | Camouflage | **Trip, not camouflage.** Crop disclaimers, invent claims. Grey default = OPT_OUT (`04`) |
-| Page name / IG bio as the pitch | Ad is clean | **Unknown / weak.** No 2025–26 sourced playbook |
+| **DLO Default-exotic + Added-GEO** (`04`→DLO) | Default=VI/AZ/KY+white URL; Added=ES/PT/ID+grey+money URL; bot scores Default, users follow UI language | Split ~50/50 by seat/batch, not dead. Unavailable for IX/Messaging (needs Website dest). Fails if EN leaks into exotic slot or target language common in GEO |
+| Soft-language copy, no DLO | Non-EN vs US/EU targeting | Degraded — OCR is multilingual |
+| RTL/U+202E bidi override | Reverse displayed text | Unknown on Meta ads; treat as named obfuscation |
+| Homoglyphs/ZWSP/ZWNJ/BOM | Cyrillic а, Greek ο, U+200B/C/D, U+FEFF | Live vs keyword filters, dead vs CV/OCR. Named Circumventing |
+| Emoji as the claim | 💰💊🎰, 9️⃣9️⃣9️⃣ for prices | Named trip, not a bypass |
+| Image-baked headline + empty ad text | — | Live as copy-field skip; dead if baked string is the violation (OCR). Blank text may pull from Website URL. A+ can rewrite baked text — opt out |
+| Blur/pixelate/object-cover | Hide slot UI/body | Dead for gambling/nutra icons; video covers on porn called adversarial |
+| Collection/A+ catalog | Innocent cover + grey product set; click→feed link unless Override deep links set | Live as structure — cover isn't the only review object (Commerce Manager rejects products independently, link crawled) |
+| Catalog feed-swap post-review | Change images/links after approval | Circumventing if destination disguised; high ban on re-crawl |
+| Catalog set-membership mutate | Pass review on white set, swap members to grey SKUs after | Claimed no re-moderation [MagicClick 2026] — still Circumventing risk; pixel must be attached or catalog invisible |
+| 3-min white tail | 10-15s grey + 2-3min neutral | Live/degraded; confuses length scoring; CPM hit |
+| 10-min tail | ~2min creative + 8min filler loop | Unverified 2026 claim: review pass + retention; larger CPM hit |
+| Crop-from-white-collage | ~3000×3000 collage, ~95% white + grey corner, crop in-UI; FB feed only (Stories/Reels render full asset) | Live claim, uncorroborated. Meta retains original file → re-review on any post-approval edit; risk deferred not removed |
+| Flexible/dynamic mix | 4-5 white sources + 1 grey | Live [MagicClick 2026]; dilution, not causal proof |
+| Branding toggle flip on stuck ad | ON↔OFF, no new creative | Unverified requeue 5-20min; if still fails (2490468) → new ad |
+| Instant Experience first hop | White IE canvas, CTA to money | Live; button URLs crawled; DLO off; IE≠LPV since Jun 2025 |
+| Display URL ≠ Website URL | e.g. news domain vs tracker | Official: must match; masking still at scale; 60-day block risk |
+| CTM/WhatsApp/IG Direct | No web LP | Live LP-skip; greeting/creative still reviewed; DLO off |
+| Instant Forms | No offer LP; privacy-policy URL required | Live LP-skip; 2026 default buries Single-form (Website+Forms) — accidental website dest re-enables LP review |
+| Carousel: grey card1 + white 2-n | Disable card optimization | Live; per-card review |
+| Placement mix (grey Feed/IG, white Messenger/Search) | Dilute | Dying — Aug 2026 placement-control removal |
+| Split claim across headline+description | Neither string trips | Degraded; A+ can swap headline↔primary |
+| Video: no captions/clean first 3s/white thumbnail | Skip ASR/OCR | No-captions ≠ no ASR (audio reviewed); first-3s is a view metric not a review window |
+| SAC undeclared | Avoid Financial targeting tax | Kill — may reject if uncategorized (US Financial, 2025-01-14); correct move is declare Financial |
+| Dark posts/multi-Page clone | Hide from Ad Library | Dark posts still appear when active; multi-Page clone = named Evading |
+| PostID reuse of approved post | Port cleared creative | Evading if same violation |
+| A+ gen-bg/expand/text-gen | Camouflage | Trip, not camouflage — crops disclaimers, invents claims; grey default OPT_OUT |
+| Page name/IG bio as the pitch | Ad stays clean | Unknown/weak, no sourced playbook |
 
 **Replacement stack if unicode/blur died:** UGC lifestyle (no slot UI, no
-before/after) + DLO language layers (50/50 — still try) + empty ad-level copy + image-baked
-*non-keyword* headline + CTWA/forms if the funnel allows + Collection/IE as first hop. SAC: declare if
-finance-shaped. Cloak stack (PHP white) is still required for a grey web dest —
-format tricks are the **classifier** layer, not a substitute.
+before/after) + DLO language layers (still try, ~50/50) + empty ad-level copy +
+image-baked non-keyword headline + CTWA/forms if funnel allows + Collection/IE as
+first hop + declare SAC if finance-shaped. Cloak stack (PHP white) still required
+for a grey web dest — format tricks are the classifier layer, not a substitute for it.
 
-Organic Reels farm (not ads) [MagicClick 2026]: unique video + unique **non-offer** caption
-(city/news/hashtags) + neutral cover; dest = bio or Highlights. Squeeze flash accounts.
-**Adult arousal dest remains no-path (`10`).** Flashing / 25th-frame on **paid** ads = official
-video-disruptive trip — do not port.
+Organic Reels farm (not ads) [MagicClick 2026]: unique video + non-offer caption
+- neutral cover, dest = bio/Highlights. Adult-arousal dest = no-path (`10`).
+Flashing/25th-frame on **paid** ads = official video-disruptive trip, don't port.
 
-### Catalog-camouflage ops (vendor-reported, Rentacc 2025-05)
+**Catalog camouflage** [Rentacc 2025-05]: budget spread across many product cards
+blurs arbitrage footprint vs one mono-creative link — update feed daily, segment
+via product sets, track per-card ROAS via `content_id`. Commerce Manager still
+rejects products independently (cover-pass ≠ feed-pass); post-approval swaps
+disguising destination = Circumventing.
 
-Why catalogs work as camouflage: budget spread across many product cards "blurs"
-the arbitrage footprint vs a mono-creative with one landing link. Mechanics:
-update the feed daily and cut stale cards · segment offers via product sets ·
-track per-card ROAS through `content_id` and kill losers individually · Events
-catalogs carry sweepstake-style offers. Constraint from the tricks table above
-stands: Commerce Manager rejects products independently — cover-pass ≠ feed-pass,
-and post-approval feed swaps that disguise the destination are Circumventing.
+## Delivery-cloaking (steers targeting, not review)
 
-**Set-membership mutate [MagicClick 2026]:** attach pixel or the catalog never appears in Ads
-Manager. Manual SKUs (white Amazon/neutral + grey), two sets, ad reviews on the White set, then
-swap members of that same set. Claimed no re-moderation. Still the Circumventing row above —
-do not treat a pass as durable.
+Different goal: bot-differentiated content to manipulate Andromeda's audience-
+expansion signal, not to pass review. Product still matches (not the named
+substitution pattern) but is bot-vs-user differentiation — risk-bearing.
+[practitioner, n=1, Partnerkin 2026-01, unverified, +30% ROI]: serve crawler UAs
+content structured for a different audience signal than users see → delivery
+explores audiences the user lander never attracted; readout = frequency at
+scale, not CTR. Attribute with `06`'s balanced designs, one axis at a time.
 
-## Delivery-cloaking: steering Andromeda (not the review)
+## Identity / BM verification gates
 
-Different goal from everything above: bot-differentiated content to manipulate
-**targeting**, not to pass review. The product still matches — this is not the
-named substitution pattern — but it IS bot-vs-user differentiation; treat as
-risk-bearing. [practitioner case, n=1, Partnerkin 2026-01, white e-com US, +30%
-ROI — mechanism unverified]:
-
-- Serve Meta's crawler/indexer UAs (§ "Meta has no AdsBot") content structured
-  for a different audience/expansion signal than users see → delivery explores
-  audiences the user lander never attracted. Readout is **frequency at scale**,
-  not CTR.
-- Adjacent levers from the same case: lander rotation via external tracker +
-  CAPI loop (7 variants as an audience-expansion lever, orders passed API→shop);
-  sweeps-style native post without the CTA button, link in the first pinned
-  comment (~10× organic reach claim); seeded comment threads →
-  `senior-buyer-ops/02`.
-- Discipline: attribute with `06`'s balanced designs — one axis at a time, or
-  the read is fiction.
-
-## Identity / selfie / BM verification (Meta)
-
-Three+ **separate** gates. Buying “verified” clears one of them.
-
-| Gate | What it is | Grey note |
-|---|---|---|
-| Business Suite verification | Legal entity. 5 docs: COI; registration/license; **gov-issued** tax (self-filed refused); bank statement; utility **only for address/phone — cannot prove legal name**. Up to 14 business days. HTTPS site | Monthly invoicing: Meta may not need docs for this flow |
-| Ads-transparency advertiser/payer (Mar 2026: “advertiser” replaces “beneficiary”) | Org: registry match or upload. Person: **gov ID**. Advertiser and payer **can differ** | Grant the person access or they verify from an account they already have |
-| Payment-method hold | Card: temporary authorization, 🔺 exact amount **[unverified]**. Bank: Meta deposits **$0.01–$0.99**, re-enter exactly, **max 3 attempts** [official 260929950658464]. Full table → `09` | Not last-4 of PAN. Separate from ID |
-| Commerce Manager KYC | Checkout shops. Address last 12 months, **no P.O. box**. Beneficial owner = **≥10% of shares** [official 193400874040813] — there is **no** "$50k lifetime Shops revenue" trigger; two verification passes found no Meta page stating one. Docs per owner → `09` | Extra vs catalog-ads-only (domain + Commerce catalog still required) |
-| Facebook Verified (Jul 2026) | Free selfie vs **profile photos**. Dating/Marketplace/Groups badge | **Not** an ads gate |
-
-**Market (2026, vendor prices, volatile):** verified BM ~$50–$350; aged profiles
-sold with “matching identity documents.” What still links after you buy: **user
-ID / cookies-tokens, phone/2FA, the verification ID, the card.** A verified BM
-does not clear personal ID, 2FA, or payment.
-
-**Liveness:** presentation attacks (print, screen replay, 2D mask) are **mostly
-dead** against certified PAD. Injection (virtual camera / Android camera hook)
-is the live industry class. MagicClick 2025 claims OBS Virtual Camera + 3D-head
-injection (~4/5 on fresh gens, n=5) — **unverified**. Default remains
-**already-verified assets**, not a liveness exploit.
-
-Same nominee on Google + Meta + bank: **intra-platform** cascade is real.
-Cross-platform sharing of the selfie video is **undocumented**. Shared phone /
-legal name / address / card is the practical radius.
+Full gate table (docs, thresholds, KYC specifics) → `09`. Summary relevant here:
+three+ separate gates, buying "verified" clears only one. Full details → `09`.
+Market (2026, vendor prices, volatile): verified BM ~$50-$350. What still links
+after purchase: user ID/cookies-tokens, phone/2FA, the verification ID, the card
+— a verified BM clears none of those. Liveness: presentation attacks (print/
+screen-replay/2D mask) mostly dead vs certified PAD; injection (virtual camera/
+Android camera hook) is the live class, unverified efficacy claims circulate.
+Same nominee on Google+Meta+bank = real intra-platform cascade; shared phone/
+legal name/address/card is the practical radius, cross-platform selfie-sharing
+undocumented.
 
 ## Gaps
 
-- No official UA for **ad review** as distinct from sharing / ads-product crawl.
-- No official JS-execution or residential-reviewer spec.
-- Live Circumventing Systems text not retrievable (redirect).
-- Macro/`url_tags` split: vendor yes (2025-05); official “when rendered” argues
-  against. Unverified 2026.
-- HideClick / Cloaking Master: no public FB field-level SOP.
-- BHW / afflift: HTTP 403 this pass.
-- Whether DLO Default is what the pre-moderation bot actually scores first: universal
-  practitioner claim, no Meta confirmation. 2026 pass rate is seat-dependent (~50/50
-  vendor chatter) — not a death, not a guarantee.
-- Catalog ads-only (no Shop): exact HTML policy crawl of every `link` vs cover —
-  image crawler confirmed; full page crawl not in one Help sentence.
-- Page name / IG bio as sole pitch: no sourced 2025–26 playbook.
-- RTL/U+202E on Meta ads: not found.
+No official UA for ad review distinct from sharing/product crawl, no official
+JS-execution or residential-reviewer spec, Circumventing Systems text unreadable
+(redirect), macro/url_tags split unverified, DLO-Default-scored-first is
+practitioner consensus with no Meta confirmation (seat-dependent ~50/50), catalog
+full-page-crawl-vs-cover-only not confirmed, RTL/U+202E on Meta ads not found.

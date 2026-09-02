@@ -1,12 +1,8 @@
 # Meta Marketing API, Billing, and Launch Operations
 
-Last reviewed: 2026-07-28. §10.0 (`execution_options`) added and verified 2026-08-31.
+Last reviewed: 2026-09-02 (§2, §6, §7 reduced to clean-lane rules; mechanics moved to `meta-grey-ops/02`). §10.0 verified 2026-08-31.
 
-Use this reference for Marketing API and Ads MCP automation, System User tokens,
-Page/Instagram advertising identity, payment readiness, restrictions, and final
-activation. Meta UI labels, Graph versions, permissions, app-mode rules, and
-support availability change; verify the live account and current official
-developer documentation before an irreversible or spend-producing action.
+Marketing API/MCP automation, System User tokens, Page/Instagram identity, payment readiness, restrictions, final activation. UI labels, Graph versions, permissions, app-mode rules, support availability change — verify live account/current docs before irreversible or spend-producing action.
 
 ## Contents
 
@@ -26,8 +22,6 @@ developer documentation before an irreversible or spend-producing action.
 
 ## 1. Ownership model
 
-Keep these layers distinct:
-
 ```text
 Personal or managed login
   Business Portfolio
@@ -39,129 +33,45 @@ Personal or managed login
     System User -> token -> assigned assets
 ```
 
-- The portfolio owns or receives partner access to assets. A person or System
-  User then receives tasks on each asset.
-- Adding a person, partner, or System User to a portfolio does not automatically
-  assign the ad account, Page, Instagram account, dataset, or app.
-- Prefer business ownership and partner access over shared personal credentials.
-- An established or “warmed” portfolio is not a documented guarantee of faster
-  moderation, lower restriction risk, or transferable trust.
-- Before spend, audit `People`, `Partners`, and `System Users`. An unknown
-  full-control identity can manage people, settings, and assets and may be able
-  to delete the portfolio. Confirm recovery/ownership before removing an
-  unfamiliar owner; secure legitimate admins with 2FA first.
+- Portfolio owns/receives partner access to assets; a person/System User then receives tasks per asset — adding them to the portfolio does NOT auto-assign the ad account, Page, Instagram account, dataset, or app.
+- Prefer business ownership/partner access over shared personal credentials. A "warmed" portfolio is not a documented guarantee of faster moderation, lower restriction risk, or transferable trust.
+- Before spend, audit `People`, `Partners`, `System Users` — an unknown full-control identity can manage people/settings/assets and may delete the portfolio. Confirm recovery/ownership before removing an unfamiliar owner; secure legitimate admins with 2FA first.
 
 ## 2. System User and token setup
 
-Use a System User token for durable server-to-server work on the business's own
-assets. Do not call it an “API key” when precision matters: it is a bearer
-access token tied to an app, System User, scopes, business, and asset tasks.
-
-Recommended UI sequence:
-
-1. Create or connect a **Business** developer app to the owning portfolio.
-2. Add the Marketing API product if the app dashboard requires it.
-3. In `Business Settings -> Users -> System users`, create/select a System User.
-4. Assign the app and every required business asset before generating the token:
-   - ad account: create/manage campaigns and view performance;
-   - Page: advertise and read the Page information required by the flow;
-   - Instagram professional account: advertise;
-   - dataset/Pixel or catalog only when the campaign or measurement needs it.
-5. Generate the token for that app and request only required scopes.
-6. Inspect the token and run both read and zero-spend write tests.
-
-Common scopes:
-
-| Need | Typical scope |
-|---|---|
-| Create/update campaigns, ad sets, ads | `ads_management` |
-| Read ad objects and reporting | `ads_read` |
-| Read/manage business asset relationships | `business_management` |
-| Create Page-backed ads | `pages_manage_ads` |
-| Read Page engagement/identity data | `pages_read_engagement` |
-| List accessible Pages when required | `pages_show_list` |
-| Read connected Instagram professional identity | `instagram_basic` |
-| Catalog commerce work | `catalog_management`, only when needed |
-
-**Naming, from 2026-05-04:** the feature is "Marketing API Access Tier";
-**Standard → Limited**, **Advanced → Full**. Both names appear below and in Meta's
-own older docs — they are the same two tiers. [official: Meta developer blog]
-
-Permission names and combinations are product- and version-dependent. Do not
-request every available permission “just in case.” For an app managing only its
-own business's ad accounts, Meta's official Marketing API collection states
-that Standard Access with `ads_read` and `ads_management` can be sufficient.
-Managing assets owned by other businesses may require Advanced Access, App
-Review, partner/Business On Behalf Of design, or another supported relationship.
-
-System User setup via API is possible, but the UI is usually safer for the first
-installation. API creation has additional admin-token, app/business ownership,
-and app-secret-proof requirements. Do not disable App Secret Proof merely to
-make token automation easier.
+Mechanics (app use cases, scope table, assignment order, token generation, tier rename Standard→Limited/Advanced→Full, upgrade criteria, death codes) → `meta-grey-ops/references/02-access-tokens-and-mcp.md`.
 
 ## 3. Token security
 
-Generic token hygiene (never paste/print/expose tokens; store in a secret manager) is in SKILL.md guardrails — not repeated here. Non-generic: generate separate tokens per integration when practical so one can be rotated without breaking everything; if a token was exposed, revoke/rotate it before spend — and check dependencies first, since `Revoke tokens` can affect more than the token currently visible.
+Generic hygiene (never paste/print/expose tokens; secret manager) is in SKILL.md guardrails. Non-generic: generate separate tokens per integration so one can be rotated without breaking everything; if exposed, revoke/rotate before spend — check dependencies first, `Revoke tokens` can affect more than the visible token.
 
 ## 4. Readiness tests
 
-Treat each of these as a separate gate:
+Separate gates:
 
-1. **Token identity** — inspect the token with Meta's token debugger or supported
-   debug endpoint; verify app, type, expiry, data-access expiry, and user.
-2. **Granted scopes** — query `/me/permissions`; requested scopes are not proof
-   that they were granted.
-3. **Readable assets** — list the expected ad account, Page, Instagram account,
-   and data source by stable ID.
-4. **System User tasks** — inspect the System User's assigned assets in Business
-   Settings. Seeing an asset in one list does not prove every required task.
-5. **Zero-spend write probe** — prefer `execution_options: ["validate_only"]` (§10.0):
-   it exercises the same write path and creates nothing at all, so there is no object to
-   clean up. Fall back to creating the smallest disposable campaign as `PAUSED` and
-   reading it back only where validate_only is unsupported. Either way, do it before
-   uploading the full creative set or building the complete campaign.
-6. **Identity probe** — create a paused creative using the intended Page and
-   Instagram identity. A generic campaign write does not validate identity.
-7. **Delivery gate** — inspect Account Quality, Billing, effective status, and
-   the live UI. API object creation does not prove the account can deliver.
+1. **Token identity** — inspect via token debugger/debug endpoint; verify app, type, expiry, data-access expiry, user.
+2. **Granted scopes** — query `/me/permissions`; requested ≠ granted.
+3. **Readable assets** — list expected ad account, Page, Instagram account, data source by stable ID.
+4. **System User tasks** — inspect assigned assets in Business Settings; visible in one list ≠ every required task.
+5. **Zero-spend write probe** — prefer `execution_options: ["validate_only"]` (§10.0): exercises the write path, creates nothing to clean up. Fall back to a disposable `PAUSED` campaign + read-back where validate_only unsupported. Do this before uploading the full creative set.
+6. **Identity probe** — create a paused creative with the intended Page/Instagram identity; a generic campaign write does not validate identity.
+7. **Delivery gate** — inspect Account Quality, Billing, effective status, live UI; API object creation ≠ proof of deliverability.
 
-Never activate a probe. Delete it only after validating that no useful audit
-evidence or dependency remains; otherwise keep it paused with a clear test name.
+Never activate a probe. Delete only after confirming no useful audit evidence/dependency remains; otherwise keep paused with a clear test name.
 
-If a read succeeds but a write fails, do not regenerate tokens blindly. Check:
+Read succeeds, write fails — check: `ads_management` granted (not just requested); System User has write tasks on the exact ad account; app has supported relationship with the business; token belongs to the expected app/System User; Page/Instagram assets assigned where creative requires; account/business/user/Page/payment unrestricted; API version and fields current.
 
-- `ads_management` is granted, not merely requested;
-- the System User has write tasks on the exact ad account;
-- the app belongs to/has the supported relationship with the business;
-- the token belongs to the same app and System User expected;
-- Page and Instagram assets are assigned where the creative requires them;
-- the ad account, business, user, Page, and payment method are unrestricted;
-- the API version and requested fields are current.
-
-Do not infer meanings from an undocumented numeric `account_status` alone.
-Combine the API response with effective statuses, Account Quality, Billing, and
-the live product message.
+Don't infer meaning from a numeric `account_status` alone — combine with effective statuses, Account Quality, Billing, live product message.
 
 ## 5. Page and Instagram identity
 
-For Instagram ads, verify all of the following:
+Verify: Instagram account is professional and linked to the intended Page; portfolio owns it or has valid partner access; operator/System User has advertising access to Page and Instagram; ad account allowed to use those identities; identity appears in the live ad creation flow; a paused creative using both identities succeeds.
 
-- the Instagram account is professional and linked to the intended Page;
-- the portfolio owns it or has valid partner access;
-- the operator/System User has advertising access to the Page and Instagram;
-- the ad account is allowed to use those identities;
-- the intended identity appears in the live ad creation flow;
-- a paused creative using both identities succeeds.
-
-An Instagram account appearing in `/instagram_accounts` does not prove that it
-is valid as the creative identity. The creative is the authoritative probe.
-`Param instagram_user_id must be a valid Instagram account id` usually points
-to linkage, asset assignment, ID type, token/app relationship, or unsupported
-creative configuration—not audience targeting.
+An account appearing in `/instagram_accounts` doesn't prove it's valid as creative identity — the creative is the authoritative probe. `Param instagram_user_id must be a valid Instagram account id` usually points to linkage, asset assignment, ID type, token/app relationship, or unsupported creative config — not audience targeting.
 
 ### Field rename (doc-confirmed, enforced)
 
-`instagram_actor_id` is GONE from v22.0 (2025-01). Legacy → current:
+`instagram_actor_id` GONE from v22.0 (2025-01):
 
 | legacy | current |
 |---|---|
@@ -169,151 +79,67 @@ creative configuration—not audience targeting.
 | `instagram_story_id` | `source_instagram_media_id` |
 | `effective_instagram_story_id` | `effective_instagram_media_id` |
 
-Meta cut the migration deadline to 2025-09-09; no supported version accepts the
-legacy names now. Any snippet, Postman example, or SDK wrapper still passing
-`instagram_actor_id` is pre-v22 and will reject a valid ID — **the rejection is
-not evidence the ID is bad.** Older docs pages still show the legacy name.
+Migration deadline cut to 2025-09-09 — no supported version accepts legacy names now. A snippet/Postman example/SDK wrapper still passing `instagram_actor_id` is pre-v22 and will reject a valid ID — **rejection is not evidence the ID is bad.** Older docs pages still show the legacy name.
 
 ### Page-backed Instagram accounts (PBIA) (doc-confirmed)
 
-A Page with **no** Instagram account can still run Instagram placements. The
-Page's PBIA is an auto-derived IG identity (name + profile picture inherited
-from the Page) — this is exactly what the Ads Manager identity picker means by
-"Use Facebook Page".
+A Page with **no** Instagram account can still run Instagram placements: the Page's PBIA is an auto-derived IG identity (name+picture from the Page) — what the Ads Manager identity picker means by "Use Facebook Page".
 
 ```
 GET  /{page_id}/page_backed_instagram_accounts   → existing PBIA (data: [] if none)
 POST /{page_id}/page_backed_instagram_accounts   → creates it; returns existing if present
 ```
 
-- **Requires a PAGE access token** (`GET /{page_id}?fields=access_token`), with
-  ≥ADVERTISER role. A user/System-User token returns
-  `190 "must be called with a Page Access Token"` — that error means wrong token
-  type, NOT missing PBIA. Helper wrappers that inject a user token silently hit
-  this; call this edge directly.
+- **Requires a PAGE access token** (`GET /{page_id}?fields=access_token`), ≥ADVERTISER role. A user/System-User token returns `190 "must be called with a Page Access Token"` — wrong token type, NOT missing PBIA. Helper wrappers injecting a user token hit this silently; call the edge directly.
 - One PBIA per Page, created idempotently.
 - Pass the returned id as **`instagram_user_id`** in `object_story_spec`.
-- Ads-only identity: no organic posts, comments, or likes, and it cannot be
-  logged into. In-feed the profile name renders black and non-clickable rather
-  than a blue link — so ad comment-reply workflows have no account to reply
-  from. Irrelevant for pure direct-response, disqualifying if the plan needs
-  organic IG presence or comment moderation.
+- Ads-only identity: no organic posts/comments/likes, cannot log in. In-feed the profile name renders black/non-clickable, not a blue link — ad comment-reply workflows have no account to reply from. Irrelevant for pure direct-response; disqualifying if the plan needs organic IG presence or comment moderation.
 
-Destination-specific flows such as Instagram Direct can additionally require the
-matching promoted object, destination, CTA, and messaging eligibility.
+Destination-specific flows (e.g. Instagram Direct) can additionally require matching promoted object, destination, CTA, messaging eligibility.
 
-In the EU, account-level choices about personalized or less-personalized ads can
-affect creation eligibility. This is the user's privacy choice: explain the
-effect and open the exact Accounts Center screen, but do not choose on the
-user's behalf. Re-test the paused creative after the user completes the choice.
+EU: account-level personalized/less-personalized ad choices can affect creation eligibility — it's the user's privacy choice; explain the effect and open the exact Accounts Center screen, don't choose on their behalf. Re-test the paused creative after they complete the choice.
 
 ## 6. App state and access levels
 
-- Complete required app basics: contact email, category, privacy-policy URL,
-  data-deletion instructions/URL, and app icon when the dashboard requests them.
-- Own-asset use and third-party use have different access requirements.
-  Standard Access may be enough for the business's own ad account; third-party
-  assets commonly require Advanced Access and App Review.
-- Development/Live mode behavior is use-case- and rollout-dependent. If the API
-  explicitly requires Live mode for the attempted write, complete the displayed
-  requirements and verify the exact app/use-case relationship. Do not publish
-  an app solely because a generic tutorial says it is always required.
-- A successful token generation does not prove app review, access level, asset
-  tasks, creative identity, or delivery eligibility.
+Detail → `meta-grey-ops/02` §3.
 
 ## 7. Ads MCP governance
 
-Ads MCP availability and controls are account/rollout-dependent. Distinguish
-Meta's connector shown in Business Suite from a third-party MCP server and from
-direct Marketing API access; they have different operators, credentials, and
-trust boundaries.
+Facts (tools, auth, Claude Code syntax, rules API, verified failures) → `meta-grey-ops/02` §0 and §5. Clean-lane governance:
 
-A secondary report dated 2026-07-27 shows
-`Business Suite -> Integrations -> Ads MCP Server` controls for:
-
-- read-only versus actions in the ad account;
-- budget editing with limits;
-- creating campaigns, ad sets, and ads initially off;
-- audience, creative, and delivery-status changes.
-
-It also reports that these controls may be enabled by default. Treat the path,
-defaults, and availability as **unverified** until confirmed in the exact
-portfolio. When present:
-
-1. Start read-only; verify the connected portfolio and ad accounts.
-2. Enable only the required write categories. Keep budget, creative, audience,
-   status, and activation writes off for analysis-only agents.
-3. Set the smallest workable budget ceiling. A daily budget is not itself an
-   agent permission boundary.
-4. Require new objects to remain off/paused and review stable IDs, identity,
-   targeting, placements, destination, schedule, and budget before activation.
-5. Keep activation and budget increases human-approved; recheck the live
-   integration controls before each spend-producing session.
-6. Review agent actions and revoke the integration if the operator, server, or
-   requested permissions are unclear.
-
-Never send a Marketing API token to an unknown MCP provider. Prefer Meta-hosted
-authorization when independently verified; otherwise inspect the server,
-credential storage, logging, deletion, and revocation model first.
-
-🔺 Vendor MagicClick 2026-04/05: official connector `mcp.facebook.com/ads`; 3P Ads MCP
-(Pipeboard / Adzviser / GoMarble / Madgicx) associated with **permanent bans**, including
-high-spend seats. MCP **cannot upload media** — Media Library first. Gate
-`is_ads_mcp_enabled` is rollout-dependent (verified BM + spend history cited). Chrome-agent
-driving Ads Manager inside antidetect on rented seats → selfie/SMS/freeze (`meta-grey-ops/01`).
+1. Agent writes go through the Marketing API; MCP is for reads and bounded edits. No published MCP tool schema exposes attribution/enhancement/multi-advertiser controls; `ads_create_creative` is single-image only (doc-confirmed 2026-09-02).
+2. Distinguish Meta's connector (`mcp.facebook.com/ads`) from third-party MCP servers and direct API — different operators/credentials/trust boundaries. Never send a Marketing API token to a third-party MCP provider; shared-app + raw-token + unsupervised writes is the reported ban mechanism [practitioner-multiple, no Meta statement].
+3. When MCP used: start read-only; enable write categories per task via Business Suite ads MCP rules (or `POST …/ads_mcp_rules`); set a budget cap (`edit_budget` max_amount_cents/max_percentage); keep new objects PAUSED and read IDs/identity/targeting/placements/destination/schedule/budget **in major units and currency** back through the API before activation; keep activation and budget increases human-approved.
+4. Any billing anomaly during agent activity: pause first, diagnose second (claude-code #62376: 100x TWD overspend while the agent debated units).
 
 ## 8. Billing and payment diagnosis
 
-The Marketing API does not replace the trusted Meta UI for entering card
-details, 3DS, temporary-hold codes, or payment-method verification. The user
-must perform those steps; never ask them to share full card data in chat.
-
-Keep these states separate:
+The Marketing API doesn't replace the trusted Meta UI for card entry, 3DS, temporary-hold codes, payment-method verification — user must do those; never ask them to share full card data in chat.
 
 | State | Meaning | Action |
 |---|---|---|
 | Failed transaction | One charge/top-up attempt failed | Inspect that transaction and card response |
-| Current amount due | Meta shows an actual payable balance | Pay through the displayed billing flow |
-| Card verified/default | The card passed one verification and is selected | Continue checking account eligibility |
-| Payment method ineligible | Meta will not accept that method for the shown verification/flow | Use the supported alternative or support path |
-| Ad account restricted | Delivery/write access is blocked at account level | Resolve in Business Support Home/Account Quality |
+| Current amount due | Meta shows a payable balance | Pay through the displayed billing flow |
+| Card verified/default | Card passed verification, selected | Continue checking account eligibility |
+| Payment method ineligible | Meta won't accept that method for the shown flow | Use supported alternative or support path |
+| Ad account restricted | Delivery/write access blocked at account level | Resolve in Business Support Home/Account Quality |
 
-`Current balance = 0` or `No payment due` can coexist with a failed transaction
-and an account restriction. Do not pay an arbitrary amount or add funds just to
-“unlock” the account when no real amount is due.
+`Current balance = 0`/`No payment due` can coexist with a failed transaction AND an account restriction. Don't pay an arbitrary amount to "unlock" when no real amount is due.
 
-Virtual, prepaid, and crypto-linked cards are not subject to a documented
-universal ban, but they may receive more issuer, verification, or risk failures
-in practice. Treat “not eligible for self-verification” as account-specific.
-For the cleanest path, prefer a conventional bank-issued, verifiable
-credit/debit card whose legal name, billing country/address, currency, and
-available funds are consistent. Avoid rapid card swaps and repeated retries.
+Virtual/prepaid/crypto-linked cards: no documented universal ban, but more issuer/verification/risk failures in practice. Prefer a conventional bank-issued, verifiable credit/debit card with consistent legal name/billing country/currency/funds; avoid rapid card swaps/retries.
 
-A default or verified replacement card does not automatically clear a
-restriction caused by an earlier failed payment. Confirm restoration separately
-in Account Quality and by a paused write probe.
+A default/verified replacement card does NOT automatically clear a restriction from an earlier failed payment — confirm restoration separately in Account Quality and via a paused write probe.
 
 ## 9. Restriction and support flow
 
-1. For a personal-profile or Page feature restriction, inspect Facebook
-   **Account Status**. For advertising/business assets, open Business Support
-   Home / Account Quality. Check Meta Status first when multiple unrelated
-   accounts or surfaces fail at once.
-2. Select the exact affected person, portfolio, ad account, Page, or payment
-   asset.
-3. Save the displayed reason, transaction/payment ID, policy/error code,
-   timestamps, and screenshots. Record only the card's last four digits.
+1. Personal-profile/Page feature restriction → Facebook **Account Status**. Advertising/business assets → Business Support Home/Account Quality. Check Meta Status first if multiple unrelated accounts/surfaces fail at once.
+2. Select the exact affected person/portfolio/ad account/Page/payment asset.
+3. Save displayed reason, transaction/payment ID, policy/error code, timestamps, screenshots. Record only card's last 4 digits.
 4. Correct the underlying issue before requesting review.
-5. Use the review/contact path shown for that asset. Avoid duplicate requests.
-6. If support calls the decision final, preserve the case. Clean lane: do not
-   bypass it from this skill. Replacement / cloaking / asset hopping is
-   `meta-grey-ops`.
+5. Use the review/contact path shown for that asset; avoid duplicate requests.
+6. If support calls it final, preserve the case. Clean lane: do not bypass from this skill — replacement/cloaking/asset hopping is `meta-grey-ops`.
 
-Treat support replies as official for the named account, not as universal
-product documentation. Automated or first-line replies can conflict with the
-live UI. Preserve the transcript and case ID; ask for manual escalation and the
-exact affected asset, rule, date, duration, and review path when the answer is
-ambiguous or contradictory.
+Treat support replies as official for the named account, not universal product documentation — automated/first-line replies can conflict with live UI. Preserve transcript/case ID; ask for manual escalation + exact affected asset/rule/date/duration/review path when ambiguous.
 
 Concise billing appeal template:
 
@@ -323,27 +149,17 @@ Concise billing appeal template:
 > [BALANCE/NO PAYMENT DUE]. Please restore access or provide the exact remaining
 > remediation and affected asset.
 
-Do not include a token, app secret, full card number, CVV, verification code, or
-identity document in the message unless the official secure upload flow
-explicitly requests the relevant document.
+Never include token, app secret, full card number, CVV, verification code, or ID document unless the official secure upload flow explicitly requests it.
 
 ## 10. Safe automation launch sequence
 
-Build for reversibility. The composing rule is **`validate_only` → PAUSED → human
-enable**, in that order, on every object.
+Build for reversibility. Composing rule: **`validate_only` → PAUSED → human enable**, in that order, on every object.
 
-One limit worth stating up front: an object that references a parent which does not exist
-yet (an ad set needs a `campaign_id`, an ad needs `adset_id` + `creative_id`) cannot be
-validated ahead of the run — the call would fail on the missing parent, not on your
-payload. Campaigns and ad creatives have no such dependency and can be validated any time.
-So a pre-flight pass covers campaign and creative; ad sets and ads are validated in
-sequence during the real build, immediately before each create.
+Limit: an object referencing a parent that doesn't exist yet (ad set needs `campaign_id`; ad needs `adset_id`+`creative_id`) can't be validated ahead of the run — fails on the missing parent, not the payload. Campaigns and creatives have no such dependency, validate any time. Pre-flight covers campaign+creative; ad sets/ads validate in sequence during the real build, immediately before each create.
 
 ### 10.0 `execution_options` — the zero-cost dry run
 
-Meta validates a payload without mutating anything. Use it before every create; it is
-the guardrail that keeps a malformed payload from becoming a real object, and it costs
-no spend and no account risk. [doc-confirmed, v26.0 reference, verified 2026-08-31]
+Meta validates a payload without mutating anything — use before every create; costs no spend, no account risk. [doc-confirmed, v26.0 reference, verified 2026-08-31]
 
 | Endpoint | Accepted values |
 |---|---|
@@ -353,55 +169,33 @@ no spend and no account risk. [doc-confirmed, v26.0 reference, verified 2026-08-
 | `POST /act_X/adcreatives` | `validate_only` only |
 | `POST /{adcreative_id}` (update) | **not supported** — validate a creative at create time or not at all |
 
-- `validate_only`: "will not perform the mutation but will run through the validation
-  rules against values of each field." Passes → `{"success": true}`; fails → a normal
-  error envelope whose **`error_data.blame_field_specs`** names the exact field path at
-  fault. Read that array first — it is the fastest payload debugger Meta ships.
-- `synchronous_ad_review`: must be paired with `validate_only`. Adds Ads Integrity
-  checks (message language, image text rule, …) **before the object exists**. On ad
-  endpoints only. Cheapest available read on whether a creative survives review.
+- `validate_only`: "will not perform the mutation but will run through the validation rules against values of each field." Pass → `{"success": true}`; fail → normal error envelope whose **`error_data.blame_field_specs`** names the exact field path at fault — read that first, fastest payload debugger Meta ships.
+- `synchronous_ad_review`: must pair with `validate_only`. Adds Ads Integrity checks (message language, image text rule, …) **before the object exists**. Ad endpoints only. Cheapest read on whether a creative survives review.
 - `include_recommendations`: cannot be used alone.
-- What it catches: bad values, wrong types, missing required fields. Whether it catches
-  wrong *nesting* is [unverified] — `blame_field_specs` encodes a field's location in
-  the spec, which implies it does, but no doc says so. It is not a policy verdict:
-  full ad review still happens after creation.
-- Inside a batch: [unverified], and do not mix it with chained creation — a
-  validate-only op returns no `id`, so every `{result=…:$.id}` reference breaks.
+- Catches bad values/wrong types/missing required fields. Whether it catches wrong *nesting* is [unverified] — `blame_field_specs` encodes a field's spec location, implying yes, but no doc confirms. Not a policy verdict — full ad review still happens post-creation.
+- Inside a batch: [unverified]; don't mix with chained creation — a validate-only op returns no `id`, breaking every `{result=…:$.id}` reference.
 
 ### 10.1 Sequence
 
-1. Confirm ownership, privileged users, 2FA, Account Quality, Billing, currency,
-   time zone, payment type, spending limits, and Page/Instagram linkage.
+1. Confirm ownership, privileged users, 2FA, Account Quality, Billing, currency, time zone, payment type, spending limits, Page/Instagram linkage.
 2. Validate measurement/destination and applicable policy/special category.
 3. Run token, asset, write, and identity probes.
-4. Create campaign, ad set, creatives, and ads with every level `PAUSED`.
-5. Read back stable IDs and all critical fields. Check budget units, bid
-   strategy, objective, promoted object, optimization event, geo, age, schedule,
-   attribution, placements, Page/Instagram identity, CTA, destination, URLs,
-   UTMs, and creative enhancements.
-6. Preview each placement. Match 4:5 to feeds and 9:16 to Stories/Reels; verify
-   safe zones and no unintended cropping.
-7. Refresh start/end times immediately before activation. A paused build can
-   become invalid or shorten its intended lifetime while access/billing issues
-   are resolved.
+4. Create campaign, ad set, creatives, ads with every level `PAUSED`.
+5. Read back stable IDs and all critical fields: budget units, bid strategy, objective, promoted object, optimization event, geo, age, schedule, attribution, placements, Page/Instagram identity, CTA, destination, URLs, UTMs, creative enhancements.
+6. Preview each placement — 4:5 to feeds, 9:16 to Stories/Reels; verify safe zones, no unintended cropping.
+7. Refresh start/end times immediately before activation — a paused build can invalidate or shorten its lifetime while access/billing issues resolve.
 8. Recheck effective statuses and account restrictions after publication/review.
-9. Activate deliberately, respecting object dependencies, and immediately read
-   back delivery. Never assume a successful mutation means spend started.
-10. Monitor the first hour/day for rejection, delivery, spend, destination,
-    tracking, messaging/lead receipt, and billing anomalies. Pause on any
-    identity, destination, measurement, or budget mismatch.
+9. Activate deliberately, respecting object dependencies; immediately read back delivery — a successful mutation ≠ spend started.
+10. Monitor first hour/day for rejection, delivery, spend, destination, tracking, messaging/lead receipt, billing anomalies. Pause on any identity/destination/measurement/budget mismatch.
 
-Activation is spend-producing and must follow the user's explicit approval of
-the final budget, schedule, destination, and creative set. “Do everything”
-authorizes setup within scope, not hidden changes to privacy choices, card
-details, legal declarations, or unrestricted spend.
+Activation is spend-producing, must follow the user's explicit approval of final budget/schedule/destination/creative set. "Do everything" authorizes setup within scope, not hidden changes to privacy choices, card details, legal declarations, or unrestricted spend.
 
 ## 11. Failure map
 
 | Symptom | First checks |
 |---|---|
 | Token works for `GET`, fails on `POST` | Granted scopes, System User write tasks, exact account restriction |
-| Asset visible to person, absent to token | Assign it to the System User and app; inspect business relationship |
+| Asset visible to person, absent to token | Assign to System User and app; inspect business relationship |
 | Instagram visible but creative fails | Page link, actor ID type, Page/IG assignments, paused identity probe |
 | Token generation fails | Same-business app/System User, admin rights, app installation, app-secret proof |
 | App asks to go Live | Exact API error, use case, own vs third-party asset, dashboard requirements |
@@ -415,31 +209,6 @@ Full post-mortem → `10-practical-case-library.md` §6G (technical-readiness pa
 
 ## 13. Sources and uncertainty
 
-Official/current sources to verify:
+[Marketing API overview](https://developers.facebook.com/docs/marketing-apis/) · [official Postman collection](https://www.postman.com/meta/facebook-marketing-api/documentation/0zr4mes/facebook-marketing-api-mapi) · [Business SDKs/App Secret Proof](https://github.com/facebook/facebook-python-business-sdk) · [Advertising Standards](https://transparency.meta.com/policies/ad-standards/) · [Account Status](https://www.facebook.com/help/1392616391875085/) · [ad-review/restriction/support guide](https://www.facebook.com/business/ads/review-policy-guidelines) · [Business Support Home](https://business.facebook.com/business-support-home/) · [Meta Status](https://metastatus.com/) · Ads MCP controls report (secondary, verify live): https://fbki.la/v-business-suite-upravljat-servera-ads-mcp — superseded by public Ads MCP docs (`developers.facebook.com/documentation/ads-commerce/ads-ai-connectors/ads-mcp-server/*`, fetched 2026-09-02).
 
-- Marketing API overview: https://developers.facebook.com/docs/marketing-apis/
-- Meta Marketing API official Postman collection:
-  https://www.postman.com/meta/facebook-marketing-api/documentation/0zr4mes/facebook-marketing-api-mapi
-- Meta Business SDKs and App Secret Proof guidance:
-  https://github.com/facebook/facebook-python-business-sdk
-- Meta Advertising Standards:
-  https://transparency.meta.com/policies/ad-standards/
-- Facebook Account Status:
-  https://www.facebook.com/help/1392616391875085/
-- Meta ad-review, restriction, and support guide:
-  https://www.facebook.com/business/ads/review-policy-guidelines
-- Business Support Home: https://business.facebook.com/business-support-home/
-- Meta Status: https://metastatus.com/
-- Ads MCP controls report (secondary; verify in live Business Suite):
-  https://fbki.la/v-business-suite-upravljat-servera-ads-mcp
-
-The official Postman collection documents bearer authorization, System User
-token options, Standard versus Advanced Access for own versus third-party ad
-accounts, and paused ad creation with Page/Instagram identity. Business Help
-Center pages often require a live login, so exact billing and support click
-paths must be verified in-product. Error subcodes, app-mode requirements,
-permission combinations, and Accounts Center privacy prompts are
-rollout/account-specific unless a current primary source states otherwise.
-No public primary Meta documentation confirming the reported Ads MCP control
-path and defaults was located during the 2026-07-28 review; keep those details
-unverified until the live portfolio or an official Meta source confirms them.
+Business Help Center often requires live login — verify exact billing/support click paths in-product. Error subcodes, app-mode requirements, permission combinations, Accounts Center privacy prompts are rollout/account-specific unless a current primary source says otherwise.

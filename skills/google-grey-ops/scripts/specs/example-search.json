@@ -1,0 +1,40 @@
+{
+  "schema": "googleops.spec/v1",
+  "run_id": "search-us-offer-2026-09-03",
+  "currency": "USD",
+  "_note": "Search launch: campaign PAUSED, Partners/Display off, PRESENCE geo, Maximize Conversions baseline. {tag} is stamped per customer by bulk-plan. Geo 2840 = United States, language 1000 = English. Tracking template must keep {lpurl}.",
+  "campaign": {
+    "kind": "search",
+    "name": "{tag}|US|offer|search|mc|2026-09-03",
+    "daily_budget_major": 50,
+    "bidding": {"strategy": "maximize_conversions"},
+    "geo": {"locations": ["2840"], "positive_geo_target_type": "PRESENCE"},
+    "languages": ["1000"],
+    "network": {"search_partners": false, "content": false},
+    "eu_political_advertising": false,
+    "tracking_url_template": "{lpurl}?gclid={gclid}&cmp={campaignid}&adg={adgroupid}&kw={keyword}",
+    "negative_keywords": [{"text": "free", "match_type": "BROAD"}]
+  },
+  "ad_groups": [
+    {
+      "name": "{tag}|core",
+      "keywords": [
+        {"text": "buy example offer", "match_type": "PHRASE"},
+        {"text": "example offer online", "match_type": "PHRASE"},
+        {"text": "[example offer]", "match_type": "EXACT"}
+      ],
+      "ads": [
+        {
+          "final_urls": ["https://example.com/offer"],
+          "headlines": ["Example Offer", "Official Site", "Order Today", "Fast Shipping", "Trusted By Thousands"],
+          "descriptions": ["Premium quality, delivered fast.", "Order online in two minutes.", "Secure checkout."],
+          "path1": "offer",
+          "pins": {"0": "HEADLINE_1"}
+        }
+      ],
+      "sitelinks": [
+        {"link_text": "Pricing", "final_urls": ["https://example.com/pricing"]}
+      ]
+    }
+  ]
+}

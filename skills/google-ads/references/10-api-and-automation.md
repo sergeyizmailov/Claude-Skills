@@ -1,6 +1,6 @@
 # 10 — Google Ads API, Scripts, AI automation
 
-Reviewed 2026-08-27. API versions move monthly 🔺 — verify at request time. Errors →
+Reviewed 2026-09-02 (service accounts, v25 fields, [R] pruning). API versions move monthly 🔺 — verify at request time. Errors →
 `11-api-error-catalog.md`.
 
 ## Access
@@ -24,11 +24,15 @@ description not matching what exists. **RMF applies only to Standard application
   **Production**. In **Testing** status refresh tokens expire after **7 days** — the most common
   "it worked yesterday" bug.
 - **Web application** — supported; needs a loopback redirect URI for local dev.
-- **Service account — NOT supported** for standard Google Ads API access. There is no
-  server-to-server grant analogous to other Google Cloud APIs, and domain-wide delegation is not a
-  documented path. 🔺 Treat any tutorial claiming service-account auth **for the Ads API** with
-  suspicion. **Exception:** Data Manager API (`auth/datamanager`) **does** take a GCP service
-  account — that is not Ads API auth. See `tracker-ops/04`.
+- **Service account — supported, no Workspace delegation needed** (verified 2026-09-02,
+  `docs/oauth/service-accounts`): create a GCP service account + JSON key, then in Google Ads
+  **Admin → Access and security → Users → +** add the service-account email like a human user
+  (admin rights need a separate upgrade step; ≤20 accounts per email — link under an MCC beyond
+  that). Config: `json_key_file_path` in `google-ads.yaml` / `GOOGLE_ADS_JSON_KEY_FILE_PATH`.
+  Headless, no 7-day refresh-token death. Older docs (and most tutorials) said "unsupported" or
+  "domain-wide delegation only" — both stale. Grey overlay: the SA is a GCP-project identity tied
+  to a billing account; treat it as a linking signal (`google-grey-ops/01`). Data Manager API
+  (`auth/datamanager`) takes a service account too — see `tracker-ops/04`.
 
 Revocation triggers: user revokes app access · password change (some configs) · OAuth client deleted
 or regenerated · 6 months unused · consent screen falling out of Production.
@@ -80,15 +84,8 @@ dependency-upgrade problem, not a runtime query.
 
 ## GAQL
 
-```
-SELECT field, … FROM resource [WHERE cond AND …] [ORDER BY field ASC|DESC] [LIMIT n] [PARAMETERS k=v]
-```
-
-Operators: `= != > >= < <=` · `IN NOT IN` · `LIKE NOT LIKE` · `REGEXP_MATCH NOT REGEXP_MATCH` ·
-`CONTAINS ANY|ALL|NONE` · `IS NULL` · `BETWEEN` · `DURING`. `IN` caps at **20,000** items.
-
-Date literals: `TODAY YESTERDAY LAST_7_DAYS LAST_14_DAYS LAST_30_DAYS LAST_BUSINESS_WEEK
-LAST_WEEK_MON_SUN LAST_WEEK_SUN_SAT LAST_MONTH THIS_MONTH THIS_WEEK_MON_TODAY THIS_WEEK_SUN_TODAY`.
+Non-obvious limits only: `IN` caps at **20,000** items; `DURING` takes the fixed literals
+(`LAST_7_DAYS`, `LAST_WEEK_MON_SUN`, `THIS_WEEK_MON_TODAY`, …) — arbitrary ranges use `BETWEEN`.
 
 **Not general SQL.** One resource in `FROM` fixes the row grain. You may select fields from
 *attributed* resources (`campaign.name` when `FROM ad_group`) but cannot join two independent
@@ -114,20 +111,8 @@ inventory regardless of activity, query the **entity resource with no metrics fi
 once against quota. **Default to it for reporting.** Use `Search` only when you need fixed-size pages
 or the REST binding.
 
-```python
-ga = client.get_service("GoogleAdsService")
-for batch in ga.search_stream(customer_id=cid, query=query):
-    for row in batch.results:
-        print(row.campaign.id, row.metrics.clicks)
-```
-
-Introspect the schema via `GoogleAdsFieldService`:
-
-```python
-client.get_service("GoogleAdsFieldService").search_google_ads_fields(
-    query="SELECT name, category, selectable, selectable_with "
-          "FROM google_ads_field WHERE name = 'campaign.status'")
-```
+`search_stream` for reports; field compatibility via `GoogleAdsFieldService` (`SELECT name,
+selectable_with FROM google_ads_field WHERE name = '…'`).
 
 ### Query library
 
@@ -221,67 +206,8 @@ types in **one atomic request** — all succeed or all fail.
 A temp ID can only be referenced **after** the operation defining it — order matters. **Temp IDs do
 not survive across separate calls.**
 
-```python
-ops = []
-
-# 1. Budget (-1)
-op = client.get_type("MutateOperation")
-b = op.campaign_budget_operation.create
-b.resource_name = client.get_service("CampaignBudgetService").campaign_budget_path(cid, "-1")
-b.name = "Launch Budget"
-b.amount_micros = 50_000_000
-b.delivery_method = client.enums.BudgetDeliveryMethodEnum.STANDARD
-ops.append(op)
-
-# 2. Campaign (-2) referencing budget -1
-op = client.get_type("MutateOperation")
-c = op.campaign_operation.create
-c.resource_name = client.get_service("CampaignService").campaign_path(cid, "-2")
-c.name = "Search Launch"
-c.advertising_channel_type = client.enums.AdvertisingChannelTypeEnum.SEARCH
-c.status = client.enums.CampaignStatusEnum.PAUSED          # PAUSED-first guardrail
-c.campaign_budget = client.get_service("CampaignBudgetService").campaign_budget_path(cid, "-1")
-c.manual_cpc = client.get_type("ManualCpc")
-c.network_settings.target_google_search = True
-c.network_settings.target_search_network = True
-c.network_settings.target_partner_search_network = False   # Search Partners off by default
-c.network_settings.target_content_network = False          # Display Expansion off
-ops.append(op)
-
-# 3. Ad group (-3)
-op = client.get_type("MutateOperation")
-ag = op.ad_group_operation.create
-ag.resource_name = client.get_service("AdGroupService").ad_group_path(cid, "-3")
-ag.name = "AG 1"
-ag.campaign = client.get_service("CampaignService").campaign_path(cid, "-2")
-ag.status = client.enums.AdGroupStatusEnum.ENABLED
-ops.append(op)
-
-# 4. Keyword
-op = client.get_type("MutateOperation")
-kw = op.ad_group_criterion_operation.create
-kw.ad_group = client.get_service("AdGroupService").ad_group_path(cid, "-3")
-kw.status = client.enums.AdGroupCriterionStatusEnum.ENABLED
-kw.keyword.text = "running shoes"
-kw.keyword.match_type = client.enums.KeywordMatchTypeEnum.PHRASE
-ops.append(op)
-
-# 5. RSA
-op = client.get_type("MutateOperation")
-ad = op.ad_group_ad_operation.create
-ad.ad_group = client.get_service("AdGroupService").ad_group_path(cid, "-3")
-ad.status = client.enums.AdGroupAdStatusEnum.PAUSED
-ad.ad.final_urls.append("https://example.com/shoes")
-for t in ["Buy Running Shoes", "Free Shipping Today", "Shop the New Collection"]:
-    a = client.get_type("AdTextAsset"); a.text = t
-    ad.ad.responsive_search_ad.headlines.append(a)
-for t in ["Premium comfort for every run.", "Order today, ships in 24 hours."]:
-    a = client.get_type("AdTextAsset"); a.text = t
-    ad.ad.responsive_search_ad.descriptions.append(a)
-ops.append(op)
-
-response = client.get_service("GoogleAdsService").mutate(customer_id=cid, mutate_operations=ops)
-```
+Worked graph (budget → campaign → ad group → keywords → RSA, all PAUSED, partners/content off)
+is encoded in `google-grey-ops/scripts/gads_build.py`; run `googleops plan` instead of retyping it.
 
 ### `validate_only` — the zero-spend write probe
 
@@ -328,6 +254,20 @@ CampaignBudget (-1)                       # non-shared, DAILY period — mandato
 
 **Non-retail PMax asset groups and their assets must be created in a single bulk mutate** to satisfy
 minimum-asset requirements. A partial creation not meeting minimums is rejected outright.
+
+v25 field facts that break old code (verified against the installed client 2026-09-02):
+`campaign.url_expansion_opt_out` **no longer exists** — final URL expansion is
+`campaign.asset_automation_settings[]` with `asset_automation_type =
+FINAL_URL_EXPANSION_TEXT_ASSET_AUTOMATION` and status `OPTED_OUT`/`OPTED_IN`; brand exclusion is a
+negative `campaign_criterion.brand_list.shared_set`; `contains_eu_political_advertising` is a
+required campaign field; `asset_operation`s must precede `asset_group_asset_operation`s in the same
+request and text assets are created in a **prior** request; retail listing-group root is
+`type=UNIT_INCLUDED, listing_source=SHOPPING`; Standard Shopping ad groups are `SHOPPING_PRODUCT_ADS`
+with an empty `ShoppingProductAdInfo`. **Merchant Center linking:** `ProductLinkService` /
+`ProductLinkInvitationService` (`product_link`, `product_link_invitation` in GAQL); the
+`merchant_center_link` resource and `MerchantCenterLinkService` are gone — the link must be
+proposed from Merchant Center, Ads only accepts. All of this is encoded in
+`google-grey-ops/scripts/gads_build.py`; prefer `googleops` over rewriting it.
 
 ```python
 # audience signal
@@ -408,15 +348,8 @@ client.get_service("ConversionUploadService").upload_click_conversions(request=r
 `RETRACTION` invalidates a conversion (fraud, duplicate) · `ENHANCEMENT` adds user-identifying data
 without changing value or date.
 
-```python
-def normalize_and_hash_email(email: str) -> str:
-    normalized = email.strip().lower()
-    local, _, domain = normalized.partition("@")
-    if domain in ("gmail.com", "googlemail.com"):
-        local = local.replace(".", "").split("+")[0]
-        normalized = f"{local}@{domain}"
-    return hashlib.sha256(normalized.encode()).hexdigest()
-```
+Hash rule for enhanced conversions: lowercase, trim whitespace, **gmail.com/googlemail.com: remove
+dots in the local part**, then SHA-256 hex. Phone numbers E.164 before hashing.
 
 Failure enums: `INVALID_EMAIL` · `INVALID_PHONE_NUMBER` (not E.164) · `MISSING_CONVERSION_ACTION` ·
 `CONVERSION_ALREADY_EXISTS` · `INVALID_CONVERSION_DATE_TIME` (missing offset) ·

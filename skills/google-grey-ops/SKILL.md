@@ -1,12 +1,27 @@
 ---
 name: google-grey-ops
-description: "Google Ads grey-market buying: agency/MCC account supply, identity/payment infra, AdsBot/cloaking/review-layer filters, RSA/unicode/path tricks, selfie/BOV verification, geo isolation, Demand Gen/App no-cloak surfaces, ban replacement, domains/redirects/trackers, enforcement tracks, failure forensics, per-vertical playbooks (gambling, finance/crypto, nutra, dating, loans, apps). Infra+survival layer. Clean = google-ads; feeds = google-feed-ops; metrics = tracker-ops."
+description: "Launch and run Google Ads via the API from a developer token + OAuth/service account — the googleops CLI (workspace, doctor, plan=validate_only, apply PAUSED, verify read-back, activate, bulk across customers under an MCC), gmcops for Merchant Center — plus grey-market survival: agency/MCC account supply, identity/payment infra, AdsBot/cloaking/review-layer filters, RSA/unicode/path tricks, selfie/BOV verification, geo isolation, no-cloak surfaces, ban replacement, enforcement tracks, failure forensics, MC cascade, per-vertical playbooks (gambling, finance/crypto, nutra, dating, loans, apps). Use for: 'launch Google ads through the API', 'I have a developer token / MCC, set up campaigns', 'bulk launch on N customer ids', 'PMax/Shopping/Search via script', 'why did the mutate fail', 'USER_PERMISSION_DENIED'. Clean buying theory = google-ads; feed spec/GMC launch = google-feed-ops; metrics = tracker-ops."
 ---
 
 # Google Grey Ops
 
-Run aggressive verticals on Google without losing accounts, domains, and payment identities.
-Vertical-agnostic infra and survival, plus per-vertical playbooks.
+Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
+Launch/operate via API on your own MCC credentials (`googleops`, `10`) + survive aggressive
+verticals without losing accounts, domains, and payment identities.
+
+## Start here
+
+| You are… | Read | Then |
+|---|---|---|
+| In a directory with `workspace.json` | `references/10-googleops-agent-cli.md` | `googleops --workspace . --json …`; stop reading |
+| Handed a developer token / asked to launch anything via API | `references/00-launch-runbook.md` | create a workspace in a project dir outside the skill (`scripts/specs/example-workspace.json`), `doctor`, then `plan → apply → verify → activate` |
+| Setting up access (OAuth vs service account, MCC, refresh-token death) | `00` §1, `google-ads/10` §Access | back to `00` |
+| Merchant Center: gates, link, products | `google-feed-ops/04` + `gmcops` (`10`) | grey cascade rules in `12` |
+| Hit an error, a gate, a suspension | `00` § "When a step fails" | the one file it names |
+
+**Agent writes a JSON spec; `googleops` validates, creates PAUSED, reads back, activates.**
+Never hand-assemble a `MutateOperation` or call a mutate outside the CLI. New shape → extend
+`gads_spec`/`gads_build`/`gads_verify` and `test_googleops.py`.
 
 Boundary: **"buy well"** → `google-ads` · **"don't get killed / source accounts / scale"** → here ·
 **"feed and Merchant Center"** → `google-feed-ops` · **"count and sync"** → `tracker-ops` ·
@@ -66,7 +81,28 @@ under-invests in payment consistency and landing-page integrity.
 | Geo isolation: OFAC vs RU pause, tz/currency locks, billing vs serve | `references/07-geo-isolation.md` |
 | Demand Gen sensitive inventory, App campaigns (no cloak), adult/CBD no-path table | `references/08-surfaces-and-no-path.md` |
 | API errors → survival response (freeze/replace/rotate); canonical code→fix in `google-ads/11` | `references/09-api-errors-grey-response.md` |
+| **Ordered API launch path — START HERE for any launch** | `references/00-launch-runbook.md` |
+| **`googleops` / `gmcops` contract**: commands, spec→API mapping, failure contract, offline checks | `references/10-googleops-agent-cli.md` |
+| Autolaunch parity: why no Dolphin/FBTool for Google, farming tooling, aged-account market | `references/11-autolaunch-parity.md` |
+| **Merchant Center grey lane**: MC↔Ads cascade, second-account trap, no Shopping cloak, dropship triggers, appeals | `references/12-merchant-center-grey-lane.md` |
 | Per-vertical playbooks | `playbooks/` |
+
+## Scripts
+
+`googleops` is the agent write boundary (from this folder: `uv tool install .`, or prefix
+`uv run --project .`). Workspaces inside the skill
+store are rejected; state lives in the project's `.googleops/`.
+
+| Script | Does | Spends? |
+|---|---|---|
+| `googleops.py` | workspace/doctor → hash-bound plan (`validate_only`) → apply PAUSED → verify → explicit activate; bulk-plan/apply/activate; report/monitor/link | only `activate`/`bulk-activate` with `--confirm SPEND` |
+| `gmcops.py` | Merchant Center doctor (gates, programs, issues, link, product counts), products insert/status, API data sources, homepage claim, ToS, propose Ads link | no spend |
+| `gads_spec.py` · `gads_build.py` · `gads_verify.py` · `gads_client.py` · `gads_workspace.py` | implementation: spec rules, mutate graph, GAQL read-back, client/env, workspace | — |
+| `test_googleops.py` | offline tests (no network) | — |
+
+Env: `GADS_DEVELOPER_TOKEN` + (`GADS_CLIENT_ID`/`GADS_CLIENT_SECRET`/`GADS_REFRESH_TOKEN` or
+`GADS_JSON_KEY_FILE`), `GADS_PROXY` or `GADS_ALLOW_NO_PROXY=1`; `GMC_JSON_KEY_FILE` or
+`GMC_REFRESH_TOKEN` for `gmcops`. Never pass a credential on argv.
 
 Policy taxonomy, certifications, and the full appeal process live in `google-ads/09` — read it before
 any regulated vertical.
@@ -84,7 +120,7 @@ any regulated vertical.
    all (the 2026-06-15 cutoff, `google-ads/06`). Do not discover this after launch.
 5. **Naming before first launch.** The campaign name must encode whatever the tracker needs to split
    on; the mapping is not automatic (`tracker-ops`).
-6. **Launch PAUSED via `validate_only` first** if using the API (`google-ads/10`).
+6. **Launch through `googleops`** (`00`): doctor → plan (`validate_only`) → apply PAUSED → verify → activate.
 7. **Review layer.** Final URL is the white, same registrable domain, cloak **off** until the ad is
    serving. Do not PMax. Do not cloak App campaigns (`08`). Filter stack in `05`. Confirm tz/currency
    and OFAC vs serve-geo (`07`) before first spend.

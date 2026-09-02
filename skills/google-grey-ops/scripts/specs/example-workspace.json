@@ -1,0 +1,24 @@
+{
+  "schema": "googleops.workspace/v1",
+  "name": "<project-name>",
+  "api_version": "v25",
+  "blocked_customers": [],
+  "profiles": {
+    "<profile>": {
+      "login_customer_id": "<mcc-id-10-digits>",
+      "customer_id": "<client-customer-id-10-digits>",
+      "merchant_id": "<merchant-center-id-or-omit>",
+      "conversion_actions": {
+        "purchase": "<conversion-action-id-or-omit>"
+      },
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "budget_cap_major": 200
+    }
+  },
+  "defaults": {
+    "profile": "<profile>",
+    "auth": "oauth",
+    "state_dir": ".googleops"
+  }
+}

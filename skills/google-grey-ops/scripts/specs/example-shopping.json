@@ -1,0 +1,29 @@
+{
+  "schema": "googleops.spec/v1",
+  "run_id": "shopping-brand-low-2026-09-03",
+  "currency": "USD",
+  "_note": "Standard Shopping, Low priority (0), manual CPC. listing_groups: root subdivided by brand; units get their own bids; others = everything else leaf (bid or 'exclude'). Priority only matters when another Shopping campaign covers the same products in the same country/language.",
+  "campaign": {
+    "kind": "shopping",
+    "name": "{tag}|US|shopping|brand|low|2026-09-03",
+    "daily_budget_major": 30,
+    "bidding": {"strategy": "manual_cpc", "enhanced_cpc": false},
+    "geo": {"locations": ["2840"], "positive_geo_target_type": "PRESENCE"},
+    "languages": ["1000"],
+    "eu_political_advertising": false,
+    "feed_label": "US",
+    "campaign_priority": 0,
+    "tracking_url_template": "{lpurl}?gclid={gclid}&cmp={campaignid}"
+  },
+  "ad_groups": [
+    {
+      "name": "{tag}|all-products",
+      "cpc_bid_major": 0.40,
+      "listing_groups": {
+        "dimension": "brand",
+        "units": [{"value": "Acme", "cpc_bid_major": 0.60}],
+        "others": {"cpc_bid_major": 0.30}
+      }
+    }
+  ]
+}

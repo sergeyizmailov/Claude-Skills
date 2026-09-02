@@ -1,24 +1,30 @@
 ---
 name: google-feed-ops
-description: "Merchant Center, product feeds, and Shopping eligibility: feed spec and attributes, Merchant API, feed rules and supplemental feeds, title optimization, custom_label schema, GTIN, Merchant Center suspensions, free listings, CSS. The retail data layer. Campaign types and PMax bidding live in google-ads."
+description: "Google Merchant Center (GMC) launch and operation plus the retail data layer: new-account launch sequence (site trust → ToS → verify+claim → business info → shipping/tax → data source → review → programs → Ads link → first campaign), Merchant API v1 mechanics and the gmcops CLI, feed spec and attributes, feed rules and supplemental sources, titles, custom_label schema, GTIN, suspensions and appeals, MC↔Ads link, free listings, CSS. Use for: 'set up Merchant Center for a new store', 'products not showing / disapproved', 'GMC suspended Misrepresentation', 'push products via API', 'link Merchant Center to Google Ads'. Campaign types and PMax bidding live in google-ads; grey cascade in google-grey-ops."
 ---
 
 # Google Feed Ops
 
+Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
 The retail data layer. Google Ads buys the traffic; **the feed decides what is eligible, what it
-costs, and what gets suspended.** No Facebook analogue exists at this depth — this is where US
-e-commerce accounts are won or lost.
+costs, and what gets suspended** — and the Merchant Center account is reviewed on the *site*, not
+the feed. No Facebook analogue exists at this depth.
 
-Route: buy mechanics → `google-ads` · infra/survival/agency accounts → `google-grey-ops` · counting →
-`tracker-ops` · portfolio decisions → `senior-buyer-ops`.
+Route: buy mechanics → `google-ads` · infra/survival/agency accounts and MC↔Ads cascade →
+`google-grey-ops` (`12`) · counting → `tracker-ops` · portfolio decisions → `senior-buyer-ops`.
 
 ## Check first
 
 | Need | Reference |
 |---|---|
-| Attributes, limits, submission methods, Merchant API, titles, custom labels | `references/01-feed-spec-and-submission.md` |
+| **New account → products serving, in order; first campaign on a fresh pair** | `references/04-gmc-launch-runbook.md` |
+| **Merchant API v1 facts, what the API cannot do, `gmcops` doctor gates** | `references/05-merchant-api-ops.md` |
+| Attributes, limits, submission methods, titles, custom labels | `references/01-feed-spec-and-submission.md` |
 | Suspensions, the gates that block review, required website elements, ratings | `references/02-merchant-center-suspensions.md` |
 | Standard Shopping priority ladder, PMax retail structure, product-level reporting, CSS | `references/03-shopping-pmax-retail.md` |
+
+`gmcops` lives in `google-grey-ops/scripts/` (one uv project with `googleops`); usage in
+`google-grey-ops/10`. Read-only doctor first: `gmcops --account <id> --json doctor --country US`.
 
 ## Three things that break accounts
 
@@ -81,8 +87,16 @@ how per-segment economics happen without per-SKU bidding.
   templates with fallback chains.
 - **CSS is EEA/Switzerland/UK only. The ~20% figure has zero US applicability** — never cite it to a US
   advertiser.
-- Merchant Center suspensions and Google Ads suspensions are **separate systems** with separate
-  appeals. Do not conflate them.
+- Merchant Center and Google Ads suspensions are **separate systems with separate appeals, but a
+  linked pair is one blast radius**: a suspended Ads account linked to the MC suspends the MC, and
+  unlinking afterwards does not clear it (official). Fix the Ads side first, then request MC review.
+- **Never open a second MC account to escape a suspension** — same domain/store/identity gets
+  suspended again and reframed as Circumventing systems.
+- **Fix everything before requesting review.** 1–3 attempts before the button locks; each denial
+  adds a growing cool-down. `issueresolution.triggeraction` (programmatic appeal) is allowlist-gated.
+- Products are only writable via API into API-type data sources; processed products appear after
+  several minutes; the key is `contentLanguage~feedLabel~offerId`.
+- US tax settings, phone/address verification, and identity documents have no API surface — UI.
 
 ## Output
 

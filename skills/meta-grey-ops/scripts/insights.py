@@ -84,7 +84,7 @@ def main() -> int:
     ap.add_argument("--json", help="Write the raw rows here")
     args = ap.parse_args()
 
-    account = args.account if args.account.startswith("act_") else f"act_{args.account}"
+    account = graph.normalize_account(args.account)
 
     acct = graph.get(account, params={"fields": "timezone_name,currency"}, context="account tz")
     print(f"{account}  tz={acct.get('timezone_name')}  currency={acct.get('currency')}")

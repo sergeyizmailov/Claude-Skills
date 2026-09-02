@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metaops.local/schemas/workspace.v1.json",
+  "title": "MetaOps workspace",
+  "type": "object",
+  "required": ["schema", "name", "api_version", "profiles", "defaults"],
+  "properties": {
+    "schema": {"const": "metaops.workspace/v1"},
+    "name": {"type": "string", "minLength": 1},
+    "api_version": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+$"},
+    "blocked_accounts": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^act_[0-9]+$"},
+      "uniqueItems": true
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$"},
+      "additionalProperties": {"$ref": "#/$defs/profile"}
+    },
+    "defaults": {
+      "type": "object",
+      "required": ["profile"],
+      "properties": {
+        "profile": {"type": "string", "minLength": 1},
+        "token_env": {"type": "string", "pattern": "^[A-Z_][A-Z0-9_]*$"},
+        "allow_no_proxy": {"type": "boolean"},
+        "state_dir": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": [
+        "business_id", "app_id", "system_user_id", "ad_account_id", "page_id",
+        "dataset_id", "currency", "timezone"
+      ],
+      "properties": {
+        "business_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "app_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "system_user_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "ad_account_id": {"type": "string", "pattern": "^act_[0-9]+$"},
+        "page_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "instagram_user_id": {"type": "string", "pattern": "^(auto|[0-9]+)$"},
+        "dataset_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "catalog_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "product_sets": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$"},
+          "additionalProperties": {"type": "string", "pattern": "^[0-9]+$"}
+        },
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "timezone": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

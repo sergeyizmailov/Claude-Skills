@@ -1,0 +1,120 @@
+{
+  "run_id": "abo-screen-2026-09-02",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "url_tags": "utm_source=fb&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&adset={{adset.name}}",
+  "_note": "ABO 1-3-1 screening: NO campaign.daily_budget_minor; every ad set carries its own. Attribution is omitted on purpose — launch.py defaults to 1d click / 1d engaged-view / 1d view. advantage_audience must be explicit. Names use {tag} so bulk.py can stamp the account code.",
+  "campaign": {
+    "name": "{tag}|TR|casino|reg|abo|2026-09-02",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": []
+  },
+  "adsets": [
+    {
+      "name": "{tag}|S1|slots-bigwin",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "daily_budget_minor": 3000,
+      "bid_strategy": "LOWEST_COST_WITHOUT_CAP",
+      "start_time": "2026-09-03T07:00:00+03:00",
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "slots-bigwin-01",
+          "creative": {
+            "kind": "link_video",
+            "video_id": "REPLACE_ME",
+            "image_hash": "REPLACE_ME_thumb",
+            "link": "https://example-lander.tld/?sub1={{ad.name}}",
+            "message": "Primary text.",
+            "headline": "Headline",
+            "cta": "PLAY_GAME"
+          }
+        }
+      ]
+    },
+    {
+      "name": "{tag}|S2|wheel-bonus",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "daily_budget_minor": 3000,
+      "start_time": "2026-09-03T07:00:00+03:00",
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "wheel-bonus-01",
+          "creative": {
+            "kind": "link_image",
+            "image_hash": "REPLACE_ME",
+            "link": "https://example-lander.tld/?sub1={{ad.name}}",
+            "message": "Primary text.",
+            "headline": "Headline",
+            "cta": "PLAY_GAME"
+          }
+        }
+      ]
+    },
+    {
+      "name": "{tag}|S3|carousel",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "custom_event_type": "COMPLETE_REGISTRATION",
+      "daily_budget_minor": 3000,
+      "start_time": "2026-09-03T07:00:00+03:00",
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "TR"
+          ]
+        },
+        "age_min": 21,
+        "age_max": 65,
+        "advantage_audience": false
+      },
+      "ads": [
+        {
+          "name": "carousel-01",
+          "creative": {
+            "kind": "link_carousel",
+            "link": "https://example-lander.tld/?sub1={{ad.name}}",
+            "message": "Primary text.",
+            "cta": "PLAY_GAME",
+            "cards": [
+              {
+                "image_hash": "REPLACE_ME_1",
+                "headline": "Card 1"
+              },
+              {
+                "image_hash": "REPLACE_ME_2",
+                "headline": "Card 2"
+              },
+              {
+                "image_hash": "REPLACE_ME_3",
+                "headline": "Card 3"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

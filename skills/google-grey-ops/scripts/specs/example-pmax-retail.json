@@ -1,0 +1,37 @@
+{
+  "schema": "googleops.spec/v1",
+  "run_id": "pmax-retail-top10-2026-09-03",
+  "currency": "USD",
+  "_note": "PMax retail, feed + assets. merchant_id comes from the profile unless set here. listing_filter splits on custom_label_0 = top10 and EXCLUDES everything else; omit listing_filter to include the whole feed. final_url_expansion false = opted out. Images: local file paths (uploaded as image assets in a first request) or existing asset ids.",
+  "campaign": {
+    "kind": "pmax_retail",
+    "name": "{tag}|US|pmax|top10|2026-09-03",
+    "daily_budget_major": 100,
+    "bidding": {"strategy": "maximize_conversion_value", "target_roas": 3.0},
+    "geo": {"locations": ["2840"], "positive_geo_target_type": "PRESENCE"},
+    "languages": ["1000"],
+    "eu_political_advertising": false,
+    "feed_label": "US",
+    "final_url_expansion": false,
+    "brand_exclusion_shared_set_id": null,
+    "tracking_url_template": "{lpurl}?gclid={gclid}&cmp={campaignid}"
+  },
+  "asset_groups": [
+    {
+      "name": "{tag}|top10",
+      "final_urls": ["https://example.com/"],
+      "headlines": ["Example Store", "Top Rated Gear", "Free Returns"],
+      "long_headlines": ["Shop the ten best sellers at Example Store"],
+      "descriptions": ["Fast shipping across the US.", "Secure checkout, easy returns."],
+      "business_name": "Example Store",
+      "images": {
+        "marketing": ["creatives/marketing-1200x628.jpg"],
+        "square": ["creatives/square-1200x1200.jpg"],
+        "logo": ["creatives/logo-1200x1200.png"]
+      },
+      "search_themes": ["best sellers example store"],
+      "audience_ids": [],
+      "listing_filter": {"dimension": "custom_label_0", "units": [{"value": "top10"}], "others": "exclude"}
+    }
+  ]
+}

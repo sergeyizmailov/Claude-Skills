@@ -1,205 +1,119 @@
 # 09 — Verification gates (Meta)
 
-Researched 2026-08-27. Which wall you hit, when, what clears it. Labels: **[official]** with article ID ·
-**[practitioner]** · **[unverified]** · 🔺 = re-verify before acting.
+Researched 2026-08-27. Labels: **[official]** with article ID · **[practitioner]** · **[unverified]** · 🔺 = re-verify before acting. **Meta publishes no SLA for any gate** — every day-count below is a practitioner estimate unless [official], and estimates conflict with each other.
 
-**Meta publishes no SLA for any of these.** Every day-count is a practitioner estimate unless tagged
-[official], and the estimates conflict with each other.
+## Gate summary — trigger → unlocks → order
 
-## 1. Business Verification — the prerequisite for everything else
+| # | Gate | Trigger | What it unlocks | Order |
+|---|---|---|---|---|
+| 1 | Business Verification | Prerequisite, not event-fired | Higher spend limits, dev/WhatsApp features, Commerce/Shops eligibility, most category authorizations | 1st — everything else assumes it |
+| 2.1 | Identity ("Confirm your identity") | Unpublished — new payment instruments, spend surges, policy flags [practitioner] | Account recovery / integrity clearance | Fires opportunistically, front-load if vertical is financial |
+| 2.2 | SIEP identity confirmation | Country-selector gated | Political/social-issue/elections ads | Start day 1 (postal mail = long pole) |
+| 2.3 | Financial-advertiser check | Meta's discretion, "ongoing review" | Financial-products ads | Parallel with 1 |
+| 3 | Beneficial owner | ≥10% share ownership | Commerce/Shops eligibility (same rule, not a separate revenue gate) | With 1, if Commerce in scope |
+| 4.1 | SIEP (politics) | Self-serve; broader than politics — healthcare/climate/immigration copy catches it | Political/social-issue ad serving | Day 1, parallel |
+| 4.2 | Financial products auth | Insurance/mortgages/loans/investment/credit cards | Ad serving for these verticals | Regulator number is usually the blocking dependency |
+| 4.3 | Gambling & games auth | Any monetary-value entry/prize mechanic | Ad serving for that territory/portfolio/account | Parallel with 1, file before any ad exists |
+| 4.4 | Crypto auth | Trading/lending/enhanced wallets/mining SW/solicitation | Ad serving for that country | Parallel with 1, file before any ad exists |
+| 5 | Payment method verification | New billing instrument | Spend capacity (not itself a policy hold) | Before heavy spend |
+| 6 | Ad-level review | Every ad, every time | Independent of all gates above — authorization never immunizes a creative | Last, always |
 
-Gates higher spend limits, developer/WhatsApp features, Commerce/Shops eligibility, and most category
-authorizations. **Not** the paid "Meta Verified" badge. Path: Business Suite → Security Center.
-[official 1095661473946872]
+## 1. Business Verification
+
+Path: Business Suite → Security Center. [official 1095661473946872]. NOT the paid "Meta Verified" badge.
 
 | Document | Validates | Note |
 |---|---|---|
 | Articles/Certificate of Incorporation | Legal name | |
-| Business registration / license | Legal name | |
-| Government business tax document | Legal name | **Self-filed tax docs rejected** |
+| Business registration/license | Legal name | |
+| Government business tax document | Legal name | Self-filed tax docs rejected |
 | Business bank statement | Legal name + address | |
-| Utility bill | Address/phone **only** | Cannot validate legal name |
+| Utility bill | Address/phone only | Cannot validate legal name |
 
-[official 159334372093366] Must show the **legal entity name as entered in Business Manager** — not a
-DBA/trading name — plus registered address or phone. Not expired. Redact unrelated personal IDs.
-19 accepted languages; anything else needs a stamped translation.
+[159334372093366] Must show legal entity name **as entered in BM** (not DBA), plus registered address/phone. Not expired. Redact unrelated personal IDs. 19 accepted languages, else stamped translation.
+Alternate: business bank account verification via 3rd-party vendor, marked deposit, re-enter amount, max 3 attempts then resubmit. [561730264791590] 🔺 source article was China-locale variant — treat deposit-match as shape, not universal flow.
+**Official rejection reasons** [2342133782492969]: false/misleading info · verifying a business you don't own/represent · circumventing review · **website fails to load / no HTTPS / broken links** (cheapest to pre-clear, most often missed).
+No published attempt cap or cooldown for resubmission. Failed business verification blocks the gated feature only — does not auto-suspend. False info/impersonation → permanent denial or suspension [1095661473946872].
+🔺 [unverified, mutually inconsistent]: domain verification 1–2 biz days · doc review 3–7 days (up to 10) · ~24h cooldown before resubmit · throttling after ~4 rejections · "file Request Review instead of 3rd resubmission." None confirmed.
 
-**Alternate path:** business bank account verification via a third-party vendor — marked deposit,
-re-enter the amount, **max 3 attempts** then resubmit bank info. [official 561730264791590]
-🔺 The fetched article was a China-locale variant; treat the deposit-match pattern as the shape, not
-the universal flow.
+## 2. Identity / selfie — two separate programs, do not conflate
 
-**Official rejection reasons** [official 2342133782492969]: false/misleading info · verifying a business
-you don't own or represent · circumventing review · **website fails to load, no HTTPS, or broken links**.
-That last one is the cheapest to pre-clear and the most often missed.
+**2.1 General "Confirm your identity"** — account recovery/integrity risk. One government ID (licence/national ID/passport/birth cert, name+DOB or name+photo) **or** two non-government docs (student/library/refugee card, employment letter, diploma, loyalty card — one must carry DOB/photo, names match). Physical redaction OK, digital alteration not. [159096464162185]. Notary-form backup path exists [346296532662771]. Trigger logic unpublished, no fixed recurrence [practitioner].
+Selfie/liveness video: matched against profile photos or submitted ID; Meta says not used for face recognition, deleted after "a limited period" — no number published [unverified].
 
-Resubmission is allowed; Meta publishes **no attempt cap and no cooldown**. A failed *business*
-verification blocks the gated feature, it does not auto-suspend the account. But submitting false info
-or claiming a business you don't represent → **permanent verification denial or suspension**
-[official 1095661473946872].
+**2.2 SIEP identity confirmation** (§4.1) — govt photo ID issued by country you advertise in + residential address confirmed by a physical postal code Meta mails. 🔺 Country-selector gated, exact per-country text not extractable live.
 
-🔺 [unverified, practitioner, mutually inconsistent]: domain verification 1–2 business days · document
-review 3–7 days (up to 10) · ~24h cooldown before resubmitting · throttling after ~4 rejections ·
-"file Request Review instead of a 3rd resubmission." None confirmed by Meta.
+**2.3 Financial-advertiser check** (§4.2) — live selfie/video vs submitted ID, business and/or individual level at Meta's discretion, "subject to ongoing review" [unverified, no primary article; recurrence claim directional].
 
-## 2. Identity and selfie verification — two separate programs
+## 3. Beneficial owner
 
-**Do not conflate them.**
-
-**2.1 General "Confirm your identity"** — account recovery and integrity risk. Accepts one government ID
-(licence / national ID / passport / birth certificate, showing name+DOB or name+photo) **or two**
-non-government documents (student/library/refugee card, employment letter, diploma, loyalty card — one
-must carry DOB or photo, names must match). Physical redaction of non-essential numbers is allowed;
-**digital alteration is not**. [official 159096464162185]
-A **notary form** path exists as a backup when standard ID submission fails [official 346296532662771].
-Trigger logic is unpublished — fires on new payment instruments, spend surges, policy flags
-[practitioner, unverified]. No fixed recurrence cycle; can re-fire at any time.
-
-**Selfie/liveness video:** short multi-angle face video matched against existing profile photos or the
-submitted ID. Meta states it is not used for face recognition and is deleted after "a limited period" —
-**no number published**. [unverified retention]
-
-**2.2 SIEP identity confirmation** (§4.1) — separate flow: government photo ID issued by the country you
-advertise in, plus a residential address confirmed by a **physical postal code Meta mails you**.
-🔺 Country-selector gated; exact per-country text not extractable by automated fetch.
-
-**2.3 Financial-advertiser check** (§4.2) — live selfie or video against the submitted ID, at business
-**and/or** individual level at Meta's discretion, "subject to ongoing review." [unverified — no primary
-article captured; recurrence claim is directional]
-
-## 3. Beneficial owner — the threshold is ownership, not revenue
-
-**≥10% of total shares** = beneficial owner, and must be documented. [official 193400874040813]
-Per owner: government photo ID **front and back** (passport preferred) · a formation document naming the
-owner (charter / certificate of incorporation / company registration) · company TIN, plus a possible
-extra tax form by country of residence.
-
-🔺 **There is no "$50k lifetime Shops revenue" trigger.** Two independent verification passes failed to
-find any Meta page stating one. Commerce eligibility gates on Business Verification and account
-trustworthiness [official 1627591223954487] — the same ≥10% rule, not a second revenue threshold.
-Practitioner-cited triggers are *ad-spend* based (~$5k lifetime), a different metric entirely.
-Not completing it leaves Commerce/Shops "Ineligible"; non-Commerce ads keep running.
+**≥10% of total shares** = beneficial owner, must be documented [193400874040813]. Per owner: govt photo ID front+back (passport preferred) · formation doc naming owner · company TIN · possible extra tax form by residence.
+🔺 **No "$50k lifetime Shops revenue" trigger exists** — two independent passes found none. Commerce eligibility gates on Business Verification + trustworthiness [1627591223954487] = same ≥10% rule, not a second threshold. Practitioner-cited triggers (~$5k lifetime ad-spend) are a different metric. Not completing it: Commerce/Shops "Ineligible," non-Commerce ads keep running.
 
 ## 4. Category authorizations
 
-### 4.1 SIEP (social issues, elections, politics)
-
-Self-serve, **not** written permission. Trigger is broader than politics — healthcare, climate and
-immigration-adjacent copy get caught. [official 208949576550051]
-US proof: government photo ID + residential address confirmed by mailed postal code. Mandatory
-"Paid for by" disclaimer whose name must match the entity registered with the campaign-finance
-authority. Ads stored in Ad Library **7 years** [official transparency.meta.com SIEP].
-
-**EU: Meta stopped serving political/social-issue/electoral ads entirely from Oct 2025.** Do not build
-an EU authorization flow — it is moot. [official, about.fb.com 2025-07]
-
-🔺 Postal mail makes this the **slowest gate** — ~5–10 business days for the code alone, 2–3 weeks total
-[practitioner consensus, no SLA]. Start it day 1, in parallel with business verification.
-🔺 2026: AI-content disclosure required when a real person/place/event is generated or materially
-altered [practitioner-paraphrase, unverified primary wording].
-🔺 A "60 days to reconfirm identity / 21 days location" re-verification claim could not be traced to any
-primary article. Do not repeat it.
+### 4.1 SIEP
+Self-serve, not written permission. US proof: govt photo ID + address via mailed postal code. Mandatory "Paid for by" disclaimer matching campaign-finance-registered entity name. Ads stored in Ad Library **7 years** [208949576550051, transparency.meta.com].
+**EU: Meta stopped serving political/social-issue/electoral ads entirely from Oct 2025** — do not build an EU flow, it's moot [official, about.fb.com 2025-07].
+🔺 Postal mail = slowest gate, ~5–10 biz days for code alone, 2–3 weeks total [practitioner, no SLA]. Start day 1.
+🔺 2026: AI-content disclosure required when a real person/place/event is generated/materially altered [paraphrase, unverified wording].
+🔺 "60 days reconfirm identity / 21 days location" claim untraceable to any primary article — do not repeat.
 
 ### 4.2 Financial products
-
-Meta's own text: advertisers "may be required to verify business and/or individual identity and
-demonstrate authorization by the relevant regulatory authority," and authorization "may be subject to
-review by Meta" at any time. In scope: insurance, mortgages, loans, investment products, credit cards.
+In scope: insurance, mortgages, loans, investment products, credit cards. Meta: advertisers "may be required to verify business and/or individual identity and demonstrate authorization by the relevant regulatory authority," reviewable any time.
 
 | Geo | Proof | Note |
 |---|---|---|
-| UK | FCA firm reference number | Cross-checked against the FCA register via email domain or phone |
+| UK | FCA firm reference number | Cross-checked vs FCA register via email domain/phone |
 | Australia | AFSL number or declared exemption | Plus beneficiary/payer verification 🔺 |
-| Taiwan | Beneficiary + payer, **mandatory for all ads targeting TW** once the financial toggle is on | [vendor-sourced] |
+| Taiwan | Beneficiary + payer | Mandatory for ALL ads targeting TW once financial toggle on [vendor-sourced] |
 | Singapore | Beneficiary/payer verification | [vendor-sourced] |
 
-🔺 **Sources conflict hard on the country count** — one lists 10 (AU, HK, IN, IE, IL, ES, TW, TH, UK, US),
-another claims 38. Neither verified against Meta's live list. Never quote a count; check the live list
-per target geo. This surface expands by geography over time.
-
-Beneficiary/payer fields are asked **inside Ads Composer at ad-set level** — have the regulator number
-in hand before campaign build, not after.
+🔺 Country-count sources conflict hard (one lists 10: AU/HK/IN/IE/IL/ES/TW/TH/UK/US, another claims 38) — neither verified live. Never quote a count; check live list per geo, surface expands over time.
+Beneficiary/payer fields asked inside Ads Composer at ad-set level — have regulator number in hand before campaign build.
 
 ### 4.3 Gambling and games
-
-Policy definition is wide: "any product or service where anything of monetary value is included as part
-of a method of entry and prize" — casinos, sportsbooks, poker, bingo, lotteries, fantasy sports,
-sweepstakes casinos, skill-based prize contests.
-
-Route: **Authorizations and Verifications tab in Business Suite** — declare operator/aggregator/affiliate
-role, target territories, exact destination URLs. Not a free-text email application.
-Proof: current regulator licence per targeted territory. **Approvals attach to specific business
-portfolios and ad accounts**, not to you as an advertiser — a new account needs a new approval.
-
-**Affiliates get no exemption.** A landing page referencing real-money play, bonuses, promo codes, or
-redirecting to an operator is a gambling ad. Meta crawls the redirect path.
-
-Minimum 18+ (or local legal age) targeting, strict geo-fencing.
-The **19 unsupported markets** (no gambling ads at any authorization level) are official and current —
-named list in `10`. 🔺 [single practitioner source, unverified]: the move to the A&V tab in Jul 2025, and
-the 2026-02-23 date for the 19-market list. The list is confirmed; the date is not.
+Definition wide: "anything of monetary value as part of a method of entry and prize" — casinos, sportsbooks, poker, bingo, lotteries, fantasy sports, sweepstakes casinos, skill-prize contests.
+Route: Authorizations and Verifications tab, Business Suite — declare operator/aggregator/affiliate role, target territories, exact destination URLs (not free-text email). Proof: current regulator licence per targeted territory. **Approvals attach to specific business portfolio + ad account** — new account needs new approval.
+**Affiliates get no exemption** — a LP referencing real-money play/bonuses/promo codes or redirecting to an operator is a gambling ad; Meta crawls the redirect path.
+Min 18+ (or local legal age), strict geo-fencing. **19 unsupported markets** (no gambling ads, any authorization level) — official, current, named list in `10`. 🔺 [single practitioner source, unverified]: move to A&V tab Jul 2025; 2026-02-23 date for the 19-market list. List confirmed, date not.
 
 ### 4.4 Crypto
-
-**Prior written permission**, via the same Authorizations and Verifications tab.
-
-Needs permission: trading/exchange platforms (spot, margin, futures) · lending/borrowing · enhanced
-wallets that buy/sell/swap/stake · mining **software** · solicitation to invest, **including affiliate
-sites**.
-Exempt: tax services for crypto firms · educational/news content · NFTs and non-currency blockchain
-products · storage-only wallets · mining **hardware**. 🔺 This exemption boundary was flagged uncertain
-even within the sourced material — check live.
-
-Meta recognizes 25+ jurisdictional licences (FCA, MAS, NY BitLicense, AUSTRAC/ASIC, FINTRAC, FinCEN,
-FSA…) [practitioner, no primary Meta list captured].
-
-**Permission does not immunize a creative.** Every ad is still reviewed independently against
-Advertising Standards, landing page included.
+Prior written permission, same A&V tab.
+Needs permission: trading/exchange (spot/margin/futures) · lending/borrowing · enhanced wallets (buy/sell/swap/stake) · mining **software** · investment solicitation incl. affiliate sites.
+Exempt: tax services for crypto firms · educational/news content · NFTs/non-currency blockchain products · storage-only wallets · mining **hardware**. 🔺 Exemption boundary flagged uncertain even in source material — check live.
+Meta recognizes 25+ jurisdictional licences (FCA, MAS, NY BitLicense, AUSTRAC/ASIC, FINTRAC, FinCEN, FSA…) [practitioner, no primary list captured].
+**Permission does not immunize a creative** — every ad still reviewed independently against Advertising Standards, LP included.
 
 ## 5. Payment method verification
 
 | Method | Mechanism | Failure |
 |---|---|---|
-| Card | Temporary authorization hold, auto-reversed. 🔺 The "$1–3 + descriptor code" figure is **[unverified]** — Meta's article is login-gated, secondary sources say "$1.01" or "4-digit code" and disagree | Hold expires; not itself a disablement |
-| Bank via online-banking login | Instant [official 260929950658464] | — |
-| Bank manual deposit | Meta deposits **$0.01–$0.99**, re-enter the exact amount. Completes within **3 business days**, **max 3 attempts** [official 260929950658464] | Resubmit bank details from scratch |
+| Card | Temp auth hold, auto-reversed. 🔺 "$1–3 + descriptor code" figure **unverified** — article login-gated, sources disagree ($1.01 vs 4-digit code) | Hold expires; not itself a disablement |
+| Bank via online-banking login | Instant [260929950658464] | — |
+| Bank manual deposit | Meta deposits $0.01–$0.99, re-enter exact amount. Completes ≤3 biz days, max 3 attempts [260929950658464] | Resubmit bank details from scratch |
 
-Statement descriptors seen: `METAPAY` · `META PAY` · `METAADS` · `FACEBKADS` · `FACEBK MENLO PARK` ·
-`FBMARKETPLACE` · `FACEBOOK PAYMENT` · `FACEBK*`+10 chars. [practitioner, cosmetic, changes] 🔺
+Statement descriptors seen (cosmetic, changes 🔺 [practitioner]): `METAPAY` · `META PAY` · `METAADS` · `FACEBKADS` · `FACEBK MENLO PARK` · `FBMARKETPLACE` · `FACEBOOK PAYMENT` · `FACEBK*`+10 chars.
+Billing "disabled" ≠ policy "disabled" — notification should name billing specifically. Repeated failed charges → suspension after retry cycle (🔺 24–72h, unverified). Card/account name mismatch = documented risk trigger. Chargebacks freeze billing + trigger review; permanent ban possible, not automatic.
+🔺 Circulating "7-day disablement → guaranteed learning-phase reset" tier table with dollar-cost model = one vendor blog's construction, not Meta-sourced. Same for "invoice billing needs 3 months $10k+/month" [unverified].
 
-**A billing "disabled" is not a policy "disabled"** — the notification should name billing specifically.
-Repeated failed charges lead to suspension after a retry cycle (🔺 24–72h, [unverified]).
-Card/account **name mismatch** is a documented risk trigger. Chargebacks freeze billing and trigger
-review; permanent ban is possible but not automatic.
+## 6. Pre-clear order for a restricted vertical (operational inference, not Meta-published)
 
-🔺 The circulating "7-day disablement → guaranteed learning-phase reset" tier table with its dollar-cost
-model is **one vendor blog's construction**, not measured and not Meta-sourced. Illustrative only.
-Same for "invoice billing needs 3 months of $10k+/month" [unverified].
-
-## 6. Pre-clear order for a restricted vertical
-
-Operational inference, not a Meta-published sequence.
-
-1. **Business Verification** — everything else assumes it. Pre-clear the website first: loads, HTTPS,
-   no broken links (an official rejection reason and the cheapest to fix).
-2. **Beneficial owner docs** — same round-trip if a ≥10% owner exists and Commerce is in scope.
-3. **Payment method** — before heavy spend, so a billing suspension never compounds a policy hold.
-4. **Identity/selfie** — fires opportunistically, not schedulable. Front-load if the vertical is financial.
-5. **Category authorization** — **parallelize with 1, don't sequence after it.** Gambling/crypto file in
-   A&V before any ad exists; financial needs the regulator number sourced externally (usually the
-   blocking dependency); SIEP starts day 1 because postal mail is the long pole.
-6. **Ad-level review** — independent of every gate above. Authorization never immunizes a creative.
+1. Business Verification — pre-clear website first (loads/HTTPS/no broken links).
+2. Beneficial owner docs — same round-trip if ≥10% owner exists and Commerce in scope.
+3. Payment method — before heavy spend, so billing suspension never compounds a policy hold.
+4. Identity/selfie — opportunistic, not schedulable; front-load if vertical is financial.
+5. Category authorization — **parallelize with 1, don't sequence after**: gambling/crypto file in A&V before any ad exists; financial needs externally-sourced regulator number (usually blocking); SIEP starts day 1 (postal mail = long pole).
+6. Ad-level review — independent of every gate above; authorization never immunizes a creative.
 
 ## Gaps — do not fill with plausible guesses
 
-1. No primary SLA for business-verification review; practitioner estimates conflict (2–5 / 3–7 / ≤10 days).
+1. No primary SLA for business-verification review (2–5 / 3–7 / ≤10 days conflict).
 2. No published attempt cap before permanent denial.
 3. No published selfie/ID video retention period or re-verification cadence.
-4. No Commerce-specific beneficial-owner threshold found separate from the ≥10% rule.
+4. No Commerce-specific beneficial-owner threshold separate from ≥10%.
 5. Financial-products country list: 10 vs 38, unresolved.
-6. Australia AFSL beneficiary/payer rollout — "early February" of an ambiguous year.
-7. Jul 2025 gambling move to the A&V tab — single practitioner source.
-8. Current crypto exemption boundary — uncertain in the source material itself.
-9. These pages are JS-rendered or login-gated and could not be fully extracted; re-fetch live before
-   quoting exact wording: `transparency.meta.com/policies/ad-standards/restricted-goods-services/financial-services/`,
-   `facebook.com/business/help/208949576550051`, `facebook.com/business/help/2992964394067299`.
+6. Australia AFSL beneficiary/payer rollout date ambiguous ("early February," year unstated).
+7. Jul 2025 gambling move to A&V tab — single practitioner source.
+8. Crypto exemption boundary — uncertain in source material itself.
+9. JS-rendered/login-gated pages, re-fetch live before quoting: `transparency.meta.com/policies/ad-standards/restricted-goods-services/financial-services/`, `facebook.com/business/help/208949576550051`, `facebook.com/business/help/2992964394067299`.

@@ -1,109 +1,108 @@
 ---
 name: meta-grey-ops
-description: "Meta (FB/IG) grey-market buying: antidetect/proxy/session survival, agency accounts, token death, API mass-launch, cloaking/review-layer filters, DLO/catalog/CTM/unicode tricks, verification gates (business/beneficial-owner/identity, category authorization), which verticals have no path at all, location fees, WABA, per-vertical playbooks (nutra, gambling, crypto, news). Infra+survival layer. Clean marketing = meta-ads; metrics = tracker-ops."
+description: "Launch and run Meta (FB/IG) ads via the Marketing API from a token — access/scopes/System User, MCP vs API, PAUSED bulk launch across ad accounts, catalog/DLO/carousel creatives, attribution 1/1/1, Advantage+ and multi-advertiser opt-out, EU DSA, plus grey-market survival: antidetect/proxy/session hygiene, agency accounts, token death, cloaking/review-layer tricks, verification gates, no-path verticals, per-vertical playbooks (casino, nutra, crypto, news-tg). Use for: 'launch FB ads through the API', 'I have a BM access token, set up campaigns', 'bulk launch on N accounts', 'connect Claude to Meta ads / MCP', 'why did the ad set create fail'. Clean marketing theory = meta-ads; tracker metrics = tracker-ops."
 ---
 
 # Meta Grey Ops
 
-Launch grey verticals at scale without getting accounts/tokens/sessions killed.
-Vertical-agnostic infra + survival. Boundary: "buy well" → meta-ads ·
-"don't get killed / launch at scale" → here · "count & sync" → tracker-ops ·
-"portfolio / TL decisions / creative + funnel ops" → senior-buyer-ops.
+Reviewed 2026-09-02. Launch/operate via API on your own token (= autolaunch SaaS without UI, `13`) + grey survival. "buy well" → `meta-ads` · "count & sync" → `tracker-ops` · "portfolio decisions" → `senior-buyer-ops`.
 
-Authority (they are NOT one ruleset): this skill governs grey-vertical
-execution; meta-ads' clean-marketing guardrails are authoritative for
-compliant accounts, not for grey work. Route by lane; don't merge the two
-normative stances or treat them as mutually authoritative.
+## Start here
 
-Stack-agnostic: antidetect (Dolphin/AdsPower/GoLogin/Octo/Multilogin),
-proxies, trackers all interchange — the discipline below is what matters, not
-the brand.
+| You are… | Read | Then |
+|---|---|---|
+| In a directory with `workspace.json` | `references/16-metaops-agent-cli.md` | use `metaops --workspace … --json`; stop reading |
+| Handed a token / asked to launch anything via API | `references/00-launch-runbook.md` | create a workspace in a project dir outside the skill (`scripts/specs/example-workspace.json`), validate it, then use `metaops` |
+| Setting up access, deciding MCP vs API, minting/handing over a token | `references/02-access-tokens-and-mcp.md` | come back to `00` |
+| Hit an error, a gate, a rejection, a dead token | `00` § "When a step fails" | the one file it names |
+
+**Agent writes a JSON spec; `metaops` controls the lifecycle; `launch.py` writes Graph
+payloads.** Never hand-assemble a payload or invoke a low-level Graph mutation directly.
+New shape → extend `metaops`/the implementation and its tests.
+
+## Launch defaults (what every ad set/ad gets unless the spec says otherwise)
+
+| Setting | Default | Enforced by | Override |
+|---|---|---|---|
+| Object status at create | `PAUSED`, all levels | internal launcher; spend only via `metaops activate --confirm SPEND` | none |
+| Attribution | 1d click / 1d engaged-view / 1d view on conversion goals; **1d click only** on LINK_CLICKS/REACH/etc. (Meta rejects view windows there, 1885501). Set at CREATE (immutable after, 1504040) | `launch.py` `DEFAULT_ATTRIBUTION`; `verify.py` reads it back | `attribution: {...}` or `"account_default"` |
+| Advantage+ creative enhancements | every feature `OPT_OUT` incl. `adapt_to_placement`; music via `audios: []` | `launch.py` `DEFAULT_OPT_OUT`; `verify.py` flags any `OPT_IN` | `creative.opt_out_features` |
+| Multi-advertiser ads | `contextual_multi_ads: OPT_OUT` on every creative (Meta Ads MCP cannot set it — its creatives inherit OPT_IN) | `launch.py`; readable on link/template creatives, **UI check while PAUSED** on FORMAT_AUTOMATION collections | `creative.multi_advertiser: true` |
+| Advantage+ audience | must be explicit `true/false` in `targeting` | spec rejected without it (v23+ Graph rule) | — |
+| Placements | Advantage+ (all) | pass `publisher_platforms`/positions to restrict; `["facebook"]` alone is warned (it is the wrong 1772103 fix) | targeting keys |
+| Budget mode | CBO (`campaign.daily_budget_minor`) **or** ABO (every `adsets[].daily_budget_minor`) | spec rejected if both/neither; cap strategies need `bid_amount_minor` | — |
+| Budget unit | integer minor units; **whole units on no-offset currencies (TWD, JPY, KRW, HUF…)** | `launch.py` prints every budget in major units and fails on `spec.currency` ≠ account currency | put `currency` in the spec |
+| `start_time` | conversions 06:00–08:00 geo-time, never 00:00; reach/traffic next 00:00 | spec required; `metaops activate --refresh-start` | — |
+| Identity | Page + PBIA (`instagram_user_id: "auto"`) | internal launcher resolves it; `metaops doctor --create-pbia` creates it | explicit id |
+| EU/EEA geo | `dsa_beneficiary` + `dsa_payor` required | spec rejected without them | — |
+| Tracking | spec-level `url_tags` inherited by every ad; catalog cards need `template_url` | `launch.py`; `verify.py` diffs destination per creative kind | per-creative `url_tags` |
+| Special ad categories | must be declared explicitly (`[]` or the real one) | spec rejected if absent | — |
+
+Not in the scripts and therefore on you: account-level "test new optimizations" enrollment
+(Advertising Settings, UI only), Business Suite MCP rules, billing warm-up, kill rules.
 
 ## Non-negotiables (always apply)
 
-1. One identity = one IP (session hygiene, not a Meta auth requirement). FB
-   profile lives in ONE antidetect profile, ONE proxy; every browser/user-token
-   touch (API via user token, token gen, developers.facebook.com) exits the SAME
-   IP. Bake the proxy into scripts so it can't be forgotten. Exception:
-   server-side System User calls don't ride a browser session (01/02) — but
-   agency tenants rarely have one, so same-IP is the default.
-2. A token rides a login session. Anything that kills the session (logout,
-   password change, Meta security rotation, multi-session flag) kills every
-   token from it — even 60-day long-lived.
-3. During a restriction/checkpoint: FREEZE. No re-logins, token regen, or
-   profile edits — each action extends the flag.
-4. Never touch a work identity from a personal browser/IP. No exceptions.
-5. Fresh agency accounts are fragile. The "~2x CPM / ~half DOA" figures are one
-   team's prior on their stock, not a universal property of agency accounts —
-   but the DISCIPLINE is general: judge after $30-50 spend (not first hours) and
-   keep a replacement reserve.
+1. **One identity = one egress profile.** Browser, API, and token operations use the BM/operator's
+   assigned IP or proxy. Token type does not waive this rule. Scripts refuse to run without
+   `META_PROXY` unless `META_ALLOW_NO_PROXY=1` deliberately confirms that direct egress from the
+   current IP is expected for this BM (`01`, `02`).
+2. **A token rides a login session.** Logout / password change / security rotation kills every
+   token minted from it, 60-day included. System User tokens are session-independent — prefer
+   them when the BM is yours (`02`).
+3. **Restriction / checkpoint = FREEZE.** No re-logins, token regen, profile edits (`01`).
+4. **Never touch a work identity from a personal browser or IP.**
+5. **Judge accounts after $30–50 spend, not the first hours.** Keep a replacement reserve (`03`).
+6. **Bulk = one creative per account.** Identical creative across accounts overheats your own
+   auction; `bulk.py` warns, you decide (`03`).
 
-## Route references
-
-**Launching anything via API? Read `references/00-launch-runbook.md` and stop there.**
-It is the ordered path (gate → access → media → spec → dry run → PAUSED → verify →
-activate → kill rules) and it names which file below to open *when a step fails*. The
-rest of this table is exception handling — reading it up front costs ~25k tokens you
-do not need.
-
-Deterministic launch tooling lives in `scripts/` (`probe.py`, `media.py`, `launch.py`,
-`verify.py`, `activate.py`, `mutate_set.py`, `insights.py`, plus `selftest.py` — offline
-regression checks, run it after editing any of them). **The agent writes the JSON spec; the
-scripts write the API calls.** Hand-assembling a Graph payload from prose is the single
-largest source of launch errors here — every unit, nesting and ordering rule that three
-different error codes punish is encoded in `launch.py` once.
+## References
 
 | Need | Reference |
 |---|---|
-| **Ordered launch path, any vertical — START HERE** | `references/00-launch-runbook.md` |
-| Antidetect, proxies, IP/session discipline, checkpoints, restrictions, domain/pixel rotation cadence | `references/01-infra-and-identity.md` |
-| App setup, Live mode, permissions, token lifecycle, System User, death codes | `references/02-meta-app-and-tokens.md` |
-| Agency setups, BMs, asset sharing, BM-ban & asset recovery, billing gotchas & fees, naming, replacements | `references/03-agency-accounts-and-bm.md` |
-| API mass launch: structures, params, bid strategies, scheduling, images, spend warm-up | `references/04-mass-launch-api.md` |
-| API errors — grey survival response (freeze/replace/rotate); canonical code→fix in meta-ads/14 | `references/05-api-error-catalog.md` |
-| Why accounts die, attributed: hazard-rate forensics, balanced infra tests, anomaly pivots, incident fingerprints | `references/06-portfolio-forensics.md` |
+| **Ordered launch path — START HERE** | `references/00-launch-runbook.md` |
+| Antidetect, proxies, IP/session discipline, checkpoints, domain/pixel rotation | `references/01-infra-and-identity.md` |
+| **Access: app use cases, scopes, System User vs user token, token death, MCP vs API vs CLI, operator handoff checklist** | `references/02-access-tokens-and-mcp.md` |
+| Agency setups, BMs, asset sharing, BM-ban recovery, billing gotchas, naming, replacements | `references/03-agency-accounts-and-bm.md` |
+| Why the scripts do what they do: structures, params, bid strategies, scheduling, DLO, catalog quirks, media, warm-up, re-moderation | `references/04-mass-launch-api.md` |
+| API errors — grey survival response (freeze/replace/rotate); canonical code→fix is `meta-ads/14` | `references/05-api-error-catalog.md` |
+| Why accounts die, attributed: hazard-rate forensics, balanced infra tests | `references/06-portfolio-forensics.md` |
 | Review-layer filters, cloaking, DLO/catalog/unicode/CTM tricks, BM verification | `references/07-review-layer-and-cloaking.md` |
-| Location fees (DST), tz/currency 60d lock, sanctioned targeting, WABA, Meta CBD | `references/08-geo-fees-and-waba.md` |
-| PWA funnel builders (pwa.bot, MonsterPWA, APEX...): join macros, postback contracts, CAPI, cloak, QA gates | `references/11-pwa-funnel-builders.md` |
-| Verification gates: business/beneficial-owner/identity+selfie, SIEP + financial + gambling + crypto authorization, payment verification, pre-clear order | `references/09-verification-gates.md` |
-| **Does this vertical have a path at all** — permission-before-spend list, no-path list, per-vertical status/geo/conditions | `references/10-no-path-and-permissions.md` |
-| Per-vertical playbooks | `playbooks/` |
+| Location fees, tz/currency 60d lock, sanctioned targeting, WABA | `references/08-geo-fees-and-waba.md` |
+| Verification gates: business / beneficial-owner / identity, gambling+crypto+financial authorization, order | `references/09-verification-gates.md` |
+| **Does this vertical have a path at all** — permission-before-spend and no-path lists | `references/10-no-path-and-permissions.md` |
+| PWA funnel builders: join macros, postbacks, CAPI, QA gates | `references/11-pwa-funnel-builders.md` |
+| **Meta Ads CLI** (`pip install meta-ads`): what it can do, flags, traps — read before reaching for it | `references/12-meta-ads-cli.md` |
+| **Autolaunch parity**: what Dolphin Cloud / FBTool / cabinet.partners do, how (EAAB tokens), feature → our script or UI-only | `references/13-autolaunch-parity.md` |
+| Meta Ads MCP live tool inventory (106 tools, params) | `references/15-mcp-tools-live.md` |
+| **Agent launcher**: plan/apply/verify/activate contract, JSON output, locks | `references/16-metaops-agent-cli.md` |
+| Per-vertical playbooks (casino, nutra, crypto-trading, news-tg) | `playbooks/` — numbers are dated vendor/team priors, replace with live data |
 
-Declared gaps: no dating or loans playbook. `APP_PROMOTION` / rented WebView is
-directional in `playbooks/casino.md` (vendor MagicClick) — not a full app-install
-skill. `google-grey-ops` covers the Google side; do not port its mechanics blindly.
+Declared gaps: no dating or loans playbook; `APP_PROMOTION` only directional in `playbooks/casino.md`.
 
-Playbooks: news-tg.md is filled (one team); nutra/casino/crypto-trading carry
-directional vendor benchmarks (dated/sourced) + event ladders — replace the
-numbers with your live data. The shape ports to any vertical (dating, sweeps,
-ecom, apps, loans, adult...).
+## Scripts
 
-## New-job bootstrap (proven order)
+`metaops` is the agent write boundary. It rejects workspaces inside the configured skills directory;
+generated files belong in the current project workspace. Low-level scripts may be used directly only for
+read-only inspection; their POST/DELETE transport is enabled only inside a validated
+workspace-bound `metaops` process. Run the isolated checks in `16` after any edit.
 
-Superseded in detail by `references/00-launch-runbook.md` — that file is the executable
-version of this list. Kept here as the one-screen summary.
+| Script | Does | Spends? |
+|---|---|---|
+| `metaops.py` | agent interface: workspace/assets/doctor/media, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate | only explicit activate commands |
+| `probe.py` | internal doctor implementation: identity/scopes/account/PBIA/dataset/write gates | no spend |
+| `media.py` | internal `metaops media` implementation | no spend |
+| `launch.py` | spec → `validate_only` → create PAUSED; resume-safe state | no |
+| `bulk.py` | internal bulk-plan/apply implementation | no |
+| `verify.py` | read-back diff of every spec field; exit 0 writes `<state>.verified.json` | no |
+| `activate.py` | internal single/bulk activation implementation; receipt required | **yes** |
+| `edit.py` · `clone.py` · `rules.py` | implementation backlog; not agent-exposed until wrapped by workspace-bound `metaops` commands | mutating |
+| `monitor.py` | N-account status/spend sweep → verdicts, JSONL | no |
+| `insights.py` | spend/delivery, explicit attribution window, CSV for tracker | no |
+| `comments.py` | comment reads remain usable; hide/delete is not agent-exposed | no spend |
+| `mcp.py` | official Meta Ads MCP: tools, rollout diagnostics, allowlisted reads only; mutating tools are rejected in code | no |
+| `mutate_set.py` | internal `metaops assets set-products` implementation | no spend |
+| `uniquify.py` · `page.py` | local creative variants · Page writes (Page writes not agent-exposed) | no spend |
 
-0. **Does the vertical have a path at all?** `10` first — Q1 (permission before spend) and Q2 (no path
-   in any geo). Iterating creatives against a prohibited vertical burns the account for nothing.
-   Then clear the gate: gambling and crypto need authorization filed in the
-   Authorizations & Verifications tab **before any ad exists** — launching without it is a policy
-   violation, not a rejected ad. Financial products need the regulator number (FCA FRN, AFSL) sourced
-   externally. SIEP needs a postal code mailed to a residential address (2–3 weeks). Approvals bind to a
-   **specific portfolio and ad account**, so a replacement account needs a new approval. Gates, proofs
-   and order → `09`.
-1. Collect access (ad account IDs, BM, pages, pixel, tracker campaign URL,
-   proxy) → project notes, verbatim, gitignored.
-2. Meta app: Live mode → mint user token in the antidetect profile → exchange
-   long-lived → store. All API calls via the setup proxy.
-3. Tracker API key → verify a read report.
-4. Naming BEFORE first launch: campaign name encodes the ad account — this only
-   splits in the tracker because the campaign URL maps it into a tracker param
-   (not automatic; tracker-ops mapping contract). Ad name = creative name. Map
-   ad → creative.
-5. Launch champions structure (04). `start_time` by optimization goal — conversions
-   06:00-08:00 geo-time, NEVER 00:00; reach/traffic next 00:00 (04 → Scheduling).
-   Review layer: cloak **off** until the ad is serving; filter stack in `07`.
-6. Daily sync (Meta spend → tracker cost → report) before the team deadline;
-   verify one day manually, then trust it.
-7. Kill rules with the TL in writing: spend-without-lead cap, CPL cap, account
-   verdict threshold.
+Env: `META_TOKEN` (required), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
+(adds `appsecret_proof`), `META_API_VERSION` (pinned `v26.0`). Never pass a token on argv.

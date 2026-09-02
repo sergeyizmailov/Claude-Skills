@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Build a campaign from a JSON spec. Dry-run first, PAUSED always, resume-safe.
 
-    python3 launch.py --spec specs/example-link-video.json
-    python3 launch.py --spec ... --dry-run        # validate_only only, create nothing
-    python3 launch.py --spec ...                  # validate, then create PAUSED
-    python3 verify.py --state .meta-launch/<run_id>.json
-    python3 activate.py --state .meta-launch/<run_id>.json   # separate, human-gated
+This is an internal implementation invoked by workspace-bound `metaops plan/apply`.
+Direct Graph writes are rejected by graph.py.
 
 The LLM writes the spec. This file writes the API calls. That split exists because
 every recurring launch bug in this corpus is a payload bug — wrong nesting, wrong
@@ -27,12 +24,20 @@ What this enforces so you cannot forget it:
     and `adapt_to_placement` is ON unless you name it
   · every created id is written to the state file before the next call, so a crashed
     run resumes instead of duplicating
+  · attribution defaults to 1d click / 1d engaged-video-view / 1d view when the spec is
+    silent — Meta's own default (7d click) silently inflates every CPL
+  · `contextual_multi_ads` (Multi-advertiser ads) is OPT_OUT on every creative
+  · `targeting.advantage_audience` must be explicit (v23+ rejects the omission on CREATE)
+  · budget mode is CBO (campaign.daily_budget_minor) OR ABO (adsets[].daily_budget_minor),
+    never both, never neither
+  · EU/EEA geo without `dsa_beneficiary` + `dsa_payor` is rejected locally before Graph does
 """
 
 from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -40,13 +45,65 @@ from typing import Any
 
 import graph
 
-STATE_DIR = ".meta-launch"
+STATE_DIR = os.environ.get("METAOPS_STATE_DIR", ".metaops")
+
+# Default attribution when the spec is silent. Meta's product default is 7d click / 1d view,
+# which reports more conversions than a 1-day funnel earned and desyncs from the tracker.
+# ENGAGED_VIDEO_VIEW is the UI's middle "Engaged view" row; it only fires on >=10s video
+# watches, harmless on image ad sets. Set `"attribution": "account_default"` on an ad set
+# to send nothing and inherit the account default — then READ IT BACK (verify.py does); no
+# ad-account field reliably reports that default (v26.0 reference, verified 2026-09-02).
+DEFAULT_ATTRIBUTION = {"click_days": 1, "engaged_video_view_days": 1, "view_days": 1}
+
+# Optimization goals that are not conversions: Meta rejects any view-through / engaged-view
+# window for them (code 100 / subcode 1885501, "supported combination ... is (1, 0)").
+# LINK_CLICKS verified live 2026-09-02; the rest are the same non-conversion family. When the
+# spec is silent, build_attribution sends 1d click only for these instead of 1/1/1. An explicit
+# `attribution` object is sent as written — Graph will reject it, which is the right outcome.
+CLICK_ONLY_ATTRIBUTION_GOALS = {
+    "LINK_CLICKS", "LANDING_PAGE_VIEWS", "REACH", "IMPRESSIONS", "THRUPLAY", "POST_ENGAGEMENT",
+    "PAGE_LIKES", "VIDEO_VIEWS", "TWO_SECOND_CONTINUOUS_VIDEO_VIEWS", "AD_RECALL_LIFT",
+    "PROFILE_VISIT", "VISIT_INSTAGRAM_PROFILE", "PROFILE_AND_PAGE_ENGAGEMENT", "REMINDERS_SET",
+    "ENGAGED_USERS",
+}
+
+# Currencies Meta bills in WHOLE units — no minor-unit offset. For these, `*_minor` keys
+# are the plain amount: TWD 300 → 300, not 30000. A verified incident (claude-code#62376,
+# 2026): an agent assumed cents on a TWD account and set NT$30,000/day instead of NT$300 —
+# 100x overspend. launch.py reads the account currency and prints every budget in major
+# units so the operator sees "300 TWD", and refuses to run when spec.currency disagrees
+# with the account. Source: Marketing API "Currencies" reference (offset column).
+NO_OFFSET_CURRENCIES = {"CLP", "HUF", "ISK", "JPY", "KRW", "PYG", "TWD", "VND", "COP", "IDR", "UGX", "XAF", "XOF"}
+
+
+def currency_offset(code: str) -> int:
+    return 1 if code in NO_OFFSET_CURRENCIES else 100
+
+
+def major(amount_minor: int, code: str) -> str:
+    off = currency_offset(code)
+    return f"{amount_minor / off:,.2f} {code}" if off == 100 else f"{amount_minor:,} {code}"
+
+
+# Countries where an ad set must carry DSA beneficiary + payor (EU Digital Services Act).
+# Graph rejects the ad set without them; failing locally names the fix instead of a code.
+DSA_COUNTRIES = {
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT",
+    "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",  # EU-27
+    "IS", "LI", "NO",  # EEA
+}
 
 class SpecError(SystemExit):
     pass
 
 
 # --------------------------------------------------------------------------- state
+
+
+def spec_hash(spec: dict) -> str:
+    """Stable fingerprint of a resolved spec (sorted keys). Stored in the state file so
+    verify.py / activate.py can tell that the objects were built from THIS spec."""
+    return hashlib.sha256(json.dumps(spec, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
 
 class State:
@@ -135,7 +192,14 @@ def load_spec(path: str) -> dict:
     for key in ("name", "objective"):
         if key not in camp:
             raise SpecError(f"campaign is missing required key: {key}")
-    _int_minor(camp.get("daily_budget_minor"), "campaign.daily_budget_minor")
+
+    # Budget mode. CBO = the campaign carries daily_budget_minor and ad sets carry none.
+    # ABO = every ad set carries its own daily_budget_minor and the campaign carries none.
+    # Mixed or absent is a spec bug, not a Graph question.
+    cbo = "daily_budget_minor" in camp
+    if cbo:
+        _int_minor(camp["daily_budget_minor"], "campaign.daily_budget_minor")
+    spec["budget_mode"] = "CBO" if cbo else "ABO"
 
     if "special_ad_categories" not in camp:
         raise SpecError(
@@ -150,13 +214,48 @@ def load_spec(path: str) -> dict:
         for key in ("name", "optimization_goal", "targeting", "start_time"):
             if key not in aset:
                 raise SpecError(f"adsets[{i}] is missing required key: {key}")
-        if "daily_budget_minor" in aset:
+        if cbo and ("daily_budget_minor" in aset or "bid_strategy" in aset):
             raise SpecError(
-                f"adsets[{i}] carries its own budget while the campaign has one (CBO). "
-                "Under CBO the ad set must have neither budget nor bid_strategy."
+                f"adsets[{i}] carries its own budget/bid_strategy while the campaign has a "
+                "budget (CBO). Under CBO the ad set must have neither. For ABO remove "
+                "campaign.daily_budget_minor and give EVERY ad set daily_budget_minor."
             )
+        if not cbo:
+            if "daily_budget_minor" not in aset:
+                raise SpecError(
+                    f"adsets[{i}] has no daily_budget_minor and the campaign has none either. "
+                    "Pick one: campaign.daily_budget_minor (CBO) or a budget on every ad set (ABO)."
+                )
+            _int_minor(aset["daily_budget_minor"], f"adsets[{i}].daily_budget_minor")
+            strat = aset.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP")
+            if strat in ("COST_CAP", "LOWEST_COST_WITH_BID_CAP") and not aset.get("bid_amount_minor"):
+                raise SpecError(f"adsets[{i}].bid_strategy={strat} needs bid_amount_minor (1815857)")
         if not aset.get("ads"):
             raise SpecError(f"adsets[{i}] has no ads")
+
+        t = aset["targeting"]
+        if "advantage_audience" not in t and "advantage_audience" not in (t.get("targeting_automation") or {}):
+            raise SpecError(
+                f"adsets[{i}].targeting.advantage_audience must be explicit (true/false). "
+                "Since v23.0 Graph rejects an ad set CREATE that omits it for any non-default "
+                "targeting, and since v26.0 for HEC-F categories as well."
+            )
+
+        countries = set((t.get("geo_locations") or {}).get("countries") or [])
+        has_b, has_p = bool(aset.get("dsa_beneficiary")), bool(aset.get("dsa_payor"))
+        if has_b != has_p:
+            raise SpecError(f"adsets[{i}]: dsa_beneficiary and dsa_payor must be set together")
+        if countries & DSA_COUNTRIES and not (has_b and has_p) and not spec.get("dsa_from_account_defaults"):
+            raise SpecError(
+                f"adsets[{i}] targets {sorted(countries & DSA_COUNTRIES)} and must carry "
+                "dsa_beneficiary + dsa_payor (EU DSA; Graph error 3858152 otherwise). If the ad "
+                "account has default_dsa_beneficiary/default_dsa_payor set (Business Settings), put "
+                "\"dsa_from_account_defaults\": true at spec top level to rely on them."
+            )
+
+        att = aset.get("attribution")
+        if att is not None and att != "account_default" and not isinstance(att, dict):
+            raise SpecError(f"adsets[{i}].attribution must be an object or \"account_default\"")
 
     spec.setdefault("run_id", os.path.splitext(os.path.basename(path))[0])
     return spec
@@ -180,6 +279,13 @@ def build_targeting(aset: dict) -> dict:
 
     if "geo_locations" not in t:
         raise SpecError("targeting.geo_locations is required")
+
+    # publisher_platforms=["facebook"] is the classic wrong fix for 1772103: it makes the
+    # error vanish while silently deleting IG + Audience Network + Messenger inventory.
+    if t.get("publisher_platforms") == ["facebook"]:
+        print("    ! targeting.publisher_platforms=['facebook'] — Instagram, Audience Network and "
+              "Messenger are excluded for this ad set. If this is a 1772103 workaround, fix the "
+              "identity (instagram_user_id: 'auto') instead.", file=sys.stderr)
     return t
 
 
@@ -194,12 +300,18 @@ def build_attribution(aset: dict) -> list | None:
     computed against a believed 1-day window is then wrong. verify.py reads the spec
     back for exactly this reason.
 
-    Meta's product default is 7-day click / 1-day view; read the account's actual
-    default from `default_unified_attribution_spec` rather than assuming.
-    Editing it on a live ad set is a significant edit and re-enters learning."""
+    Meta's product default is 7-day click / 1-day view. Field-observed 2026-09-01: the
+    window is immutable after create (1504040 "attribution window update no longer
+    supported") — a wrong window means a new ad set, so it is set here, every time."""
     att = aset.get("attribution")
-    if not att:
+    if att == "account_default":
         return None
+    if not att:
+        att = DEFAULT_ATTRIBUTION
+        if aset.get("optimization_goal") in CLICK_ONLY_ATTRIBUTION_GOALS:
+            # Live 2026-09-02 (1885501): for non-conversion optimization goals Meta accepts
+            # only click 1 / view 0 — view-through and engaged-view windows are rejected.
+            att = {"click_days": 1}
     spec = []
     if att.get("click_days"):
         spec.append({"event_type": "CLICK_THROUGH", "window_days": int(att["click_days"])})
@@ -241,23 +353,102 @@ def resolve_identity(spec: dict, create: bool = True) -> str | None:
     return created["id"]
 
 
-# There is NO single switch that disables Advantage+ creative enhancements. The
-# `standard_enhancements` bundle stopped being settable at v22.0 (the field still exists
-# in the schema, which is why toggling it looks like it worked), so every feature must be
-# named individually. Two traps:
+# There is NO single switch that disables Advantage+ creative enhancements, and the
+# `standard_enhancements` KEY IS REJECTED at create: validate_only on v26.0 returned
+# code 100 / subcode 3858504 "standard enhancements field no longer supported, set individual
+# features instead" (live, 2026-09-02). Every feature must be named individually.
 #   · `adapt_to_placement` is OPT-IN BY DEFAULT — omit it and it stays on.
-#   · Music is not in creative_features_spec at all; opt out with asset_feed_spec.audios=[].
-# Meta's own docs disagree about which keys are writable: the v26.0 reference field table
-# and the Advantage+ guide list different sets. These are the keys present in the v26.0
-# reference plus the three added by the 2026-06-28 out-of-cycle change. If your account
-# rejects one, --dry-run catches it before anything is created — drop it from
-# `creative.opt_out_features` in the spec.
+#   · `music_generation` IS a key here (live read-back); `asset_feed_spec.audios: []` is kept too.
+# This list is the full creative_features_spec read back from a live v26.0 creative that was
+# created with every feature OPT_OUT (83 keys, 2026-09-02) — not the shorter doc table. If a
+# future version rejects one, --dry-run says which; drop it via `creative.opt_out_features`.
+# Catalog creatives that want video/metadata automation keep `media_type_automation`,
+# `product_metadata_automation`, `standard_enhancements_catalog` OPT_IN by passing a list
+# without them.
 DEFAULT_OPT_OUT = [
-    "adapt_to_placement", "add_text_overlay", "creative_stickers", "description_automation",
-    "image_animation", "image_background_gen", "image_templates", "image_touchups",
-    "inline_comment", "media_type_automation", "pac_relaxation", "product_extensions",
-    "reveal_details_over_time", "standard_enhancements", "text_optimizations",
-    "text_translation", "translate_voiceover", "video_filtering", "video_uncrop",
+    "adapt_to_placement",
+    "add_text_overlay",
+    "ads_with_benefits",
+    "advantage_plus_creative",
+    "app_highlights",
+    "audio",
+    "auto_promotion_tag",
+    "biz_ai",
+    "carousel_to_video",
+    "catalog_feed_tag",
+    "creative_stickers",
+    "customize_product_recommendation",
+    "cv_transformation",
+    "description_automation",
+    "dha_optimization",
+    "dynamic_cta_text",
+    "dynamic_partner_content",
+    "enable_ncs_testimonials",
+    "enhance_cta",
+    "fb_feed_tag",
+    "fb_reels_tag",
+    "fb_story_tag",
+    "feed_caption_optimization",
+    "generate_cta",
+    "hide_price",
+    "hyperlink_formatting",
+    "ig_feed_tag",
+    "ig_glados_feed",
+    "ig_reels_tag",
+    "ig_stream_tag",
+    "ig_video_native_subtitle",
+    "image_animation",
+    "image_auto_crop",
+    "image_background_gen",
+    "image_banner",
+    "image_brightness_and_contrast",
+    "image_end_card",
+    "image_enhancement",
+    "image_templates",
+    "image_text_translation",
+    "image_touchups",
+    "image_uncrop",
+    "inline_comment",
+    "local_store_extension",
+    "media_liquidity_animated_image",
+    "media_order",
+    "media_type_automation",
+    "multi_creative_post_carousel",
+    "multi_photo_to_video",
+    "music_generation",
+    "pac_genai_recomposition",
+    "pac_recomposition",
+    "pac_relaxation",
+    "product_browsing",
+    "product_extensions",
+    "product_metadata_automation",
+    "product_tags",
+    "profile_card",
+    "profile_extension",
+    "replace_media_text",
+    "reveal_details_over_time",
+    "show_destination_blurbs",
+    "show_summary",
+    "site_extensions",
+    "standard_enhancements_catalog",
+    "text_extraction_for_headline",
+    "text_extraction_for_tap_target",
+    "text_formatting_optimization",
+    "text_generation",
+    "text_optimizations",
+    "text_overlay_translation",
+    "text_translation",
+    "translate_voiceover",
+    "video_auto_crop",
+    "video_filtering",
+    "video_highlight",
+    "video_highlights",
+    "video_to_image",
+    "video_uncrop",
+    "video_uncrop_9x16_to_9x18",
+    "video_voiceover",
+    "wa_mm_image_filtering",
+    "wa_mm_text_truncation_length",
 ]
 
 
@@ -379,6 +570,13 @@ def _finish(payload: dict, c: dict) -> dict:
         features = DEFAULT_OPT_OUT
     if features:
         payload["degrees_of_freedom_spec"] = opt_out_enhancements(features)
+    # Multi-advertiser ads. ON by default; the API field is `contextual_multi_ads` with an
+    # enroll_status. Field-verified 2026-09-01 on template_data catalog creatives (reads back
+    # OPT_OUT, checkbox off in UI). On FORMAT_AUTOMATION collection creatives the read-back
+    # says "nonexisting field" — the param is still sent, and verify.py tells you to check
+    # the UI while the ad is PAUSED. Override with `"multi_advertiser": true`.
+    if not c.get("multi_advertiser"):
+        payload["contextual_multi_ads"] = {"enroll_status": "OPT_OUT"}
     return _prune(payload)
 
 
@@ -393,6 +591,7 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
     required = {
         "link_image": ("link", "image_hash"),
         "link_video": ("link", "video_id"),
+        "link_carousel": ("link", "cards"),
         "dlo": ("locales",),
         "catalog_collection": ("link", "product_set_id"),
         "catalog_single": ("link", "product_set_id"),
@@ -400,7 +599,7 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
     if required is None:
         raise SpecError(
             f"ad {ad.get('name', '?')}: unknown creative.kind {kind!r}. "
-            "Known: link_image, link_video, dlo, catalog_collection, catalog_single."
+            "Known: link_image, link_video, link_carousel, dlo, catalog_collection, catalog_single."
         )
     missing = [f for f in required if not c.get(f)]
     if missing:
@@ -410,8 +609,11 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
         story["instagram_user_id"] = ig_id
 
     payload: dict[str, Any] = {"name": ad["name"]}
-    if c.get("url_tags"):
-        payload["url_tags"] = c["url_tags"]
+    # Per-creative url_tags win; otherwise the spec-level default applies to every ad, so
+    # one forgotten creative does not land untracked.
+    url_tags = c.get("url_tags", spec.get("url_tags"))
+    if url_tags:
+        payload["url_tags"] = url_tags
 
     cta = {"type": c.get("cta", "LEARN_MORE"),
            "value": {"link": c["link"]} if c.get("link") else {}}
@@ -425,6 +627,35 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
             "caption": c.get("display_link"),
             "image_hash": c["image_hash"],
             "call_to_action": cta,
+        }
+    elif kind == "link_carousel":
+        # Manual carousel: 2-10 child_attachments; `link` + `message` become required on
+        # link_data. Each card: image_hash XOR video_id, link, name, description.
+        cards = c["cards"]
+        if not isinstance(cards, list) or not 2 <= len(cards) <= 10:
+            raise SpecError(f"creative {ad['name']}: link_carousel needs 2-10 cards, got "
+                            f"{len(cards) if isinstance(cards, list) else type(cards).__name__}")
+        children = []
+        for n, card in enumerate(cards):
+            if bool(card.get("image_hash")) == bool(card.get("video_id")):
+                raise SpecError(f"creative {ad['name']}: cards[{n}] needs image_hash XOR video_id")
+            child = {
+                "link": card.get("link", c["link"]),
+                "name": card.get("headline"),
+                "description": card.get("description"),
+                "image_hash": card.get("image_hash"),
+                "video_id": card.get("video_id"),
+                "call_to_action": {"type": card.get("cta", c.get("cta", "LEARN_MORE")),
+                                   "value": {"link": card.get("link", c["link"])}},
+            }
+            children.append(child)
+        story["link_data"] = {
+            "link": c["link"],
+            "message": c.get("message", ""),
+            "caption": c.get("display_link"),
+            "child_attachments": children,
+            "multi_share_optimized": c.get("multi_share_optimized", False),
+            "multi_share_end_card": c.get("multi_share_end_card", False),
         }
     elif kind == "link_video":
         story["video_data"] = {
@@ -474,6 +705,8 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
             "message": c.get("message", ""),
             "call_to_action": cta,
         }
+        if c.get("display_link"):
+            template["caption"] = c["display_link"]
         if kind == "catalog_collection":
             # COLLECTION needs >=4 items in the set (2490457 at build). The video hero
             # goes through asset_feed_spec, NOT video_data: link_data.video_data with a
@@ -488,11 +721,13 @@ def build_creative(spec: dict, ad: dict, ig_id: str | None) -> dict:
             if c.get("video_id"):
                 feed["videos"] = [{"video_id": str(c["video_id"])}]
             payload["asset_feed_spec"] = feed
-            # Multi-advertiser ads default ON for FORMAT_AUTOMATION catalog creatives and
-            # no API field disables them. Build PAUSED, bulk-uncheck in Ads Manager, then
-            # activate — toggling it post-approval is re-moderation (04).
-            print("    ! catalog_collection: multi-advertiser ads default ON and cannot be "
-                  "disabled via API. Uncheck in Ads Manager before activating.")
+            # Multi-advertiser ads default ON for FORMAT_AUTOMATION catalog creatives. The
+            # `contextual_multi_ads` OPT_OUT is sent by _finish, but on THIS format the
+            # field is not readable back (field-observed 2026-09-01), so the UI checkbox is
+            # the only proof. Check it while PAUSED — toggling post-approval is re-moderation.
+            print("    ! catalog_collection: contextual_multi_ads OPT_OUT is sent but is not "
+                  "readable on FORMAT_AUTOMATION creatives. Confirm the Multi-advertiser "
+                  "checkbox is OFF in Ads Manager BEFORE activating.")
             if c.get("opt_out_features") is None:
                 print("    ! catalog_collection: media_type_automation is being OPT_OUT by "
                       "default, which strips video from Dynamic Media. Pass "
@@ -594,9 +829,45 @@ def _create(node: str, path: str, payload: dict, state: State, dry: bool) -> str
     return obj_id
 
 
+def account_currency(spec: dict) -> str:
+    """Read the live account currency and check it against spec.currency when given.
+
+    The mismatch this catches is not cosmetic: the same integer means 100x more money on
+    a no-offset currency. Any spec meant for money should carry `currency` so a template
+    copied to a differently-billed account fails here, not on the invoice."""
+    acct = graph.get(spec["account_id"], params={"fields": "currency,timezone_name"}, context="account currency")
+    code = acct.get("currency", "?")
+    want = spec.get("currency")
+    if want and want != code:
+        raise SpecError(
+            f"spec.currency={want} but {spec['account_id']} bills in {code}. Budgets in this spec "
+            f"were written for {want}; re-express them for {code} (offset {currency_offset(code)})."
+        )
+    print(f"  account: {code} · tz {acct.get('timezone_name')} · budget unit "
+          f"{'WHOLE units (no cents)' if currency_offset(code) == 1 else 'minor units (1/100)'}")
+    return code
+
+
 def run(spec: dict, state: State, dry: bool) -> None:
     account = spec["account_id"]
+    h = spec_hash(spec)
+    if state.data.get("spec_sha") and state.data["spec_sha"] != h and state.data["objects"]:
+        raise SpecError(
+            f"state {state.path} was built from a different spec (sha {state.data['spec_sha']} ≠ "
+            f"{h}). Objects already exist; editing the spec and resuming would mix two builds. "
+            "Use a new run_id/state, or delete the tree first."
+        )
+    state.data["spec_sha"] = h
+    state.data["spec_account"] = account
+    if not dry:
+        state.save()
     camp = spec["campaign"]
+    cur = account_currency(spec)
+    if spec["budget_mode"] == "CBO":
+        print(f"  campaign daily budget: {major(camp['daily_budget_minor'], cur)}")
+    else:
+        for i, a in enumerate(spec["adsets"]):
+            print(f"  adsets[{i}] daily budget: {major(a['daily_budget_minor'], cur)}")
 
     # Resolve in dry-run as well. Validating a creative without the IG identity is a
     # false pass: the real run would then fail 1772103 at POST /ads, which is exactly
@@ -606,8 +877,17 @@ def run(spec: dict, state: State, dry: bool) -> None:
     if ig_id:
         print(f"  identity: instagram_user_id={ig_id}")
     elif spec.get("instagram_user_id") == "auto":
-        print("  ! no PBIA on this Page. Any ad set including Instagram placements will "
-              "fail 1772103. Run: probe.py --page <id> --create-pbia", file=sys.stderr)
+        uses_instagram = any(
+            "instagram" in (adset.get("targeting", {}).get("publisher_platforms") or ["instagram"])
+            for adset in spec["adsets"]
+        )
+        if uses_instagram:
+            raise SpecError(
+                "no PBIA exists for this Page, but the spec includes Instagram placements; "
+                "run metaops doctor --create-pbia for the selected workspace profile"
+            )
+        print("  ! no PBIA on this Page; allowed only because every ad set excludes Instagram",
+              file=sys.stderr)
 
     # Step 1 — campaign WITHOUT budget and WITHOUT bid_strategy.
     # bid_strategy on a campaign that has no budget yet fails 1885737;
@@ -628,14 +908,16 @@ def run(spec: dict, state: State, dry: bool) -> None:
     if not campaign_id:
         campaign_id = "<dry-run>"
 
-    # Step 2 — budget and bid strategy onto the existing campaign.
+    # Step 2 (CBO only) — budget and bid strategy onto the existing campaign.
     # No in-flight marker here, deliberately: re-POSTing the same daily_budget and
     # bid_strategy is idempotent, so a crash mid-PATCH costs a harmless repeat on the
     # next run. A marker would only turn that into a false "reconcile by hand" stop.
     # It DOES need the same error handling and dry-run probe as every other write —
     # without them a failure here surfaced as a bare traceback, and --dry-run never
     # checked the budget or bid strategy at all.
-    if not state.get("campaign_budget"):
+    # Under ABO the campaign stays budget-less (is_adset_budget_sharing_enabled=false was
+    # sent at create, which is what v24+ requires) and each ad set carries its own.
+    if spec["budget_mode"] == "CBO" and not state.get("campaign_budget"):
         budget_payload = {
             "daily_budget": _int_minor(camp["daily_budget_minor"], "campaign.daily_budget_minor"),
             "bid_strategy": camp.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP"),
@@ -672,7 +954,8 @@ def run(spec: dict, state: State, dry: bool) -> None:
                   f"{budget_payload['bid_strategy']}")
 
     for i, aset in enumerate(spec["adsets"]):
-        # Step 3 — ad set with NO budget and NO bid_strategy (the campaign owns both).
+        # Step 3 — ad set. CBO: NO budget and NO bid_strategy (the campaign owns both).
+        # ABO: daily_budget + bid_strategy (+ bid_amount for cap strategies) live here.
         payload: dict[str, Any] = {
             "name": aset["name"],
             "campaign_id": campaign_id,
@@ -682,13 +965,30 @@ def run(spec: dict, state: State, dry: bool) -> None:
             "targeting": build_targeting(aset),
             "start_time": aset["start_time"],
         }
+        if spec["budget_mode"] == "ABO":
+            payload["daily_budget"] = _int_minor(aset["daily_budget_minor"], f"adsets[{i}].daily_budget_minor")
+            payload["bid_strategy"] = aset.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP")
+            if aset.get("bid_amount_minor"):
+                payload["bid_amount"] = _int_minor(aset["bid_amount_minor"], f"adsets[{i}].bid_amount_minor")
         if aset.get("end_time"):
             payload["end_time"] = aset["end_time"]
-        if spec.get("pixel_id") and aset.get("custom_event_type"):
+        # promoted_object: explicit object wins (custom_conversion_id, application_id +
+        # object_store_url, page_id...); else the pixel + event shorthand.
+        if aset.get("promoted_object"):
+            payload["promoted_object"] = aset["promoted_object"]
+        elif spec.get("pixel_id") and aset.get("custom_event_type"):
             payload["promoted_object"] = {
                 "pixel_id": str(spec["pixel_id"]),
                 "custom_event_type": aset["custom_event_type"],
             }
+        # dsa_* = EU DSA. regional_regulated_categories + regional_regulation_identities =
+        # Taiwan / Australia / Singapore financial-ads disclosure (a different mechanism,
+        # present in the business SDK adset model; shapes in 04).
+        for key in ("dsa_beneficiary", "dsa_payor", "destination_type", "is_dynamic_creative",
+                    "regional_regulated_categories", "regional_regulation_identities",
+                    "daily_min_spend_target", "daily_spend_cap"):
+            if aset.get(key) is not None:
+                payload[key] = aset[key]
         att = build_attribution(aset)
         if att:
             payload["attribution_spec"] = att
@@ -700,17 +1000,15 @@ def run(spec: dict, state: State, dry: bool) -> None:
             creative_id = _create(
                 f"creative[{i}.{j}]", f"{account}/adcreatives", creative_payload, state, dry
             ) or "<dry-run>"
-            _create(
-                f"ad[{i}.{j}]",
-                f"{account}/ads",
-                {
-                    "name": ad["name"],
-                    "adset_id": adset_id,
-                    "creative": {"creative_id": creative_id},
-                    "status": "PAUSED",
-                },
-                state, dry,
-            )
+            ad_payload: dict[str, Any] = {
+                "name": ad["name"],
+                "adset_id": adset_id,
+                "creative": {"creative_id": creative_id},
+                "status": "PAUSED",
+            }
+            if ad.get("conversion_domain", spec.get("conversion_domain")):
+                ad_payload["conversion_domain"] = ad.get("conversion_domain", spec.get("conversion_domain"))
+            _create(f"ad[{i}.{j}]", f"{account}/ads", ad_payload, state, dry)
 
 
 def main() -> int:
@@ -721,20 +1019,23 @@ def main() -> int:
     args = ap.parse_args()
 
     spec = load_spec(args.spec)
+    graph.require_write_authority("POST", f"{spec['account_id']}/campaigns")
     state_path = args.state or os.path.join(STATE_DIR, f"{spec['run_id']}.json")
     state = State(state_path)
 
     mode = "DRY RUN (validate_only)" if args.dry_run else "CREATE (all objects PAUSED)"
-    print(f"Graph {graph.API_VERSION} · {spec['account_id']} · {mode}")
+    print(f"Graph {graph.API_VERSION} · {spec['account_id']} · {mode} · {spec['budget_mode']}")
     print(f"state → {state_path}\n")
 
     run(spec, state, args.dry_run)
 
     if args.dry_run:
-        print("\nSpec validates. Re-run without --dry-run to create.")
+        print("\nDry run passed: campaign and creatives validated by the API (validate_only); "
+              "ad sets and ads validated LOCALLY only — their parents do not exist yet. The real "
+              "run validate_only-probes each of them against the live parent before creating it.")
     else:
-        print(f"\nCreated PAUSED. Next: python3 verify.py --state {state_path}")
-        print("Nothing spends until activate.py, which needs explicit human approval.")
+        print(f"\nCreated PAUSED in {state_path}. Return to metaops verify.")
+        print("Nothing spends until workspace-bound metaops activation with explicit approval.")
     return 0
 
 

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metaops.local/schemas/result.v1.json",
+  "title": "MetaOps command result",
+  "type": "object",
+  "required": ["schema", "ok", "command", "phase", "artifacts", "data", "error", "next_action"],
+  "properties": {
+    "schema": {"const": "metaops.result/v1"},
+    "ok": {"type": "boolean"},
+    "command": {"type": "string"},
+    "phase": {"type": "string"},
+    "artifacts": {"type": "object"},
+    "data": {"type": "object"},
+    "error": {"type": ["object", "null"]},
+    "next_action": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}

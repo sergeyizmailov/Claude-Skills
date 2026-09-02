@@ -1,77 +1,70 @@
 # 06 — Portfolio forensics (why accounts die, attributed)
 
-Reviewed 2026-08-28. **Method, not measurement.** The statistics are standard survival analysis; no
-figure here is Meta-sourced or benchmarked, and none is meant to be quoted as one.
+Reviewed 2026-08-28. **Method, not measurement.** Standard survival analysis; no
+figure here is Meta-sourced or benchmarked, none is meant to be quoted as one.
 
-senior-buyer-ops/01 says "diagnose which cause" for a ban-rate spike. This is the
-HOW: turn a pile of dead accounts into an attributed hazard so you fix the real
-driver instead of superstitiously changing everything at once.
+`senior-buyer-ops/01` says "diagnose which cause" for a ban-rate spike. This is the
+HOW: turn dead accounts into an attributed hazard so you fix the real driver
+instead of superstitiously changing everything at once.
 
-## Log the survival dimensions (or you can't attribute anything)
+## Log the survival dimensions (or nothing is attributable)
 
-For every account log, from birth: supplier/batch (which agency shipment),
-account age at first spend and at death, antidetect profile + proxy cluster
-(subnet/ASN, not just the single IP), domain(s) used, creative family (the
-attribute bundle from senior-buyer-ops/02), launch method (API vs manual,
-schedule, day-0 spend jump), spend-at-death, and the death signal (checkpoint /
-disable / restriction / soft throttle). Death without these fields = an anecdote.
+Per account, from birth: supplier/batch, account age at first spend and at death,
+antidetect profile + proxy cluster (subnet/ASN, not just IP), domain(s), creative
+family (`senior-buyer-ops/02` attribute bundle), launch method (API vs manual,
+schedule, day-0 spend jump), spend-at-death, death signal (checkpoint / disable /
+restriction / soft throttle). Death without these fields = an anecdote.
 
-## Failure rate, not raw count (and know which rate)
+## Failure rate, not raw count
 
-Rank each dimension by a RATE, not raw deaths — the most-used domain/proxy/creative
-shows the most deaths simply because it ran most. Two rates, don't conflate them:
-- `deaths ÷ accounts exposed` = cumulative failure rate (share dead so far).
-  Fine for a quick pass, but it ignores how long each account survived and
-  censors nothing.
-- Exposure-adjusted rate = deaths ÷ account-days AT RISK, censoring accounts still
-  alive — separates "dies fast" from "dies eventually" that the cumulative rate
-  blurs. For the shape over account age, use Kaplan–Meier or a discrete-time
-  hazard model, once you have enough history.
-Set a minimum-exposure floor before trusting either: 3 accounts at 100% death
-outranks a 200-account batch at 30% but is noise — need enough accounts (and
-account-days) on a dimension before its rate means anything. Survival TIME is the
-same signal directionally: died at $5 pre-spend = DOA supply problem; died at $400
-after 10 days = scaling/creative-heat problem — opposite fixes.
+Rank each dimension by RATE — the most-used domain/proxy/creative shows the most
+deaths simply from running most. Two rates, don't conflate:
 
-## Confounding is the whole trap → balanced designs
+- `deaths ÷ accounts exposed` = cumulative failure rate. Quick, but ignores
+  survival time and censors nothing.
+- `deaths ÷ account-days at risk` (exposure-adjusted, censoring accounts still
+  alive) — separates "dies fast" from "dies eventually." For shape over account
+  age: Kaplan–Meier or discrete-time hazard once enough history exists.
 
-New domain + new creative + new account batch launched together → a ban wave
-can't be pinned on any one. To keep attribution possible, vary ONE infra axis at
-a time across an otherwise-balanced set:
+Set a minimum-exposure floor: 3 accounts at 100% death outranks a 200-account
+batch at 30% but is noise. Survival TIME is directional too: died at $5 pre-spend
+= DOA supply problem; died at $400 after 10 days = scaling/creative-heat problem —
+opposite fixes.
 
-- Infrastructure test mode: run the SAME proven creative across accounts that
-  differ only in the axis under test (domain A vs B; proxy cluster A vs B; supplier
-  batch A vs B), balanced counts. Divergent death/CPM/delivery then isolates that
-  axis. This is the infra-fixed inversion of a creative test — the third testing
-  mode (measurement-experimentation-ops). Never move both axes at once when
-  something is dying.
-- When you must change several things (new vertical launch), at least stagger
-  them so the timeline separates the effects.
+## Confounding is the trap → balanced designs
+
+New domain + new creative + new batch launched together → a ban wave can't be
+pinned on any one. Vary ONE infra axis at a time across an otherwise-balanced set:
+same proven creative across accounts differing only in the tested axis (domain A
+vs B; proxy cluster A vs B; supplier batch A vs B), balanced counts — divergent
+death/CPM/delivery isolates that axis. This is the infra-fixed inversion of a
+creative test (the third testing mode, `measurement-experimentation-ops`). Never
+move two axes at once when something is dying. When you must change several
+things (new vertical launch), at least stagger them to separate the effects.
 
 ## Cross-account anomaly detection
 
-Bans cluster by shared cause. When several accounts fail close together, pivot on
-the shared attribute: same subnet/ASN (proxy cluster burned), same domain (domain
-flagged → rotate, tracker-ops/03 signal), same supplier batch (bad shipment →
-stop launching it, claim replacements), same creative family (policy pattern
-tripping review → pull it everywhere, not just the banned account), same launch
-script/timing (automation fingerprint). One account dying is background rate;
-three sharing an attribute makes that attribute the PRIME SUSPECT — a hypothesis
-to confirm with a balanced/controlled check (above), not a proven cause (it can
-be a confounder, and clustered deaths can be coincidence at low counts).
+Bans cluster by shared cause. When several fail close together, pivot on the
+shared attribute: same subnet/ASN (proxy cluster burned), same domain (rotate,
+`tracker-ops/03` signal), same supplier batch (bad shipment, stop launching it),
+same creative family (pull it everywhere, not just the banned account), same
+launch script/timing (automation fingerprint). One account dying is background
+rate; three sharing an attribute makes it the PRIME SUSPECT — confirm with a
+balanced/controlled check above, not a proven cause (can be a confounder;
+clustered deaths can be coincidence at low counts).
 
-## Incident fingerprints (match new deaths to a known pattern)
+## Incident fingerprints
 
-Keep a short library of past incidents as {symptom + timing + shared attribute →
-confirmed cause → fix}. A new wave usually rhymes with an old one; matching the
-fingerprint skips the re-diagnosis. Examples of distinct fingerprints: instant
-day-0 disable across a batch (supply/verification), gradual CPM climb then death
-(creative heat / policy drift), simultaneous checkpoint across one subnet (proxy
-cluster / geo-mismatch), single-domain collapse to ~0 LP CTR (domain/SSL/cloaca,
-not a ban — funnel fault, senior-buyer-ops/03).
+Keep a short library: {symptom + timing + shared attribute → confirmed cause →
+fix}. A new wave usually rhymes with an old one — matching the fingerprint skips
+re-diagnosis. Distinct fingerprints: instant day-0 disable across a batch
+(supply/verification); gradual CPM climb then death (creative heat/policy drift);
+simultaneous checkpoint across one subnet (proxy cluster/geo-mismatch);
+single-domain collapse to ~0 LP CTR (domain/SSL/cloak fault, not a ban —
+`senior-buyer-ops/03`).
 
 ## Boundary
 
-This is diagnosis/attribution METHOD. The reactions (freeze, rotate domain,
-replace batch, kill creative) live in 01/05 and tracker-ops; the portfolio-level
-decision (shift budget to testing after a wave) is senior-buyer-ops/01.
+This is diagnosis/attribution METHOD. Reactions (freeze, rotate domain, replace
+batch, kill creative) live in `01`/`05`/`tracker-ops`; the portfolio-level decision
+(shift budget after a wave) is `senior-buyer-ops/01`.

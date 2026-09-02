@@ -90,6 +90,28 @@ long-lived immediately, store in a secrets manager.
   `instagram_user_id` is accepted. Check the field name before concluding the
   identity is invalid.
 
+- 100 / subcode **3858504** (live, validate_only, v26.0, 2026-09-02): `standard_enhancements` key
+  present in `degrees_of_freedom_spec.creative_features_spec` → "standard enhancements field no
+  longer supported, set individual features instead". Remove the key; opt out every other feature
+  by name (`meta-grey-ops/scripts/launch.py DEFAULT_OPT_OUT`, 83 live keys).
+
+- **HTTP 503 with no Graph error body** (live 2026-09-02 on `POST /act_X/adcreatives`): Meta's
+  edge answered, the API did not. The outcome is unknown — nothing existed afterwards in this
+  case, but nothing proves that in general. `graph.py` does not retry a non-idempotent create
+  on it; `launch.py` keeps the `in_flight` marker; `verify.py`/`activate.py` refuse until the
+  operator reconciles (check Ads Manager, then clear `in_flight` or record the id).
+
+- 100 / subcode **1885501** (live 2026-09-02, ad set create): "supported combination of click and
+  view windows for your objective/optimization goal is (1, 0)" — any VIEW_THROUGH or
+  ENGAGED_VIDEO_VIEW window on a non-conversion optimization goal (LINK_CLICKS verified; REACH,
+  LANDING_PAGE_VIEWS, THRUPLAY… same family). Send 1d click only (`launch.py
+  CLICK_ONLY_ATTRIBUTION_GOALS`). Message arrives localised — match the number.
+
+- 100 / subcode **1885194** (live 2026-09-02) on `POST /{campaign_id}/copies` with `deep_copy=true`:
+  "total number of ads, ad sets and campaigns copied at once must be less than 3". Copy level by
+  level instead (`meta-grey-ops/scripts/clone.py`). A bare code 1 (ad set: code 1 / sub 99) on
+  `/copies` seconds after the source was created = source still IN_PROCESS; wait.
+
 ## Creative enhancements note (v22.0+ change)
 
 `enable_standard_enhancements` (top-level boolean) is obsolete, and since v22.0
@@ -153,7 +175,7 @@ page.)
 | 80000 (sub 2446079) | yes | ads_insights BUC limit |
 | 80003 | yes | custom_audience BUC limit |
 | **613** | yes | account-level / QPS. Subcode **5044001** = the 100 req/s cap on mutation endpoints; 1996 = inconsistent request volume |
-| **17** (sub 2446079) | yes | "User request limit reached" — the **ad-account score cap** was hit (Ad Account Level API-Level Limits): 60 on development access, 9000 on full. Not a Limited-tier-only error; the tier only decides which cap and which block duration applies. ⚠ The two Meta pages disagree: the Graph BUC table scopes this subcode to "V3.3 and Older Ads API excluding Ads Insights", the Marketing API page presents it as current. Follow the Marketing API page and treat the Graph scoping as stale. Slow down; raising the tier needs business verification (13) |
+| **17** (sub 2446079) | yes — **hit live 2026-09-02 after ~150 calls/40 min on one Limited-tier account; cleared in minutes** | "User request limit reached" — the **ad-account score cap** was hit (Ad Account Level API-Level Limits): 60 on development access, 9000 on full. Not a Limited-tier-only error; the tier only decides which cap and which block duration applies. ⚠ The two Meta pages disagree: the Graph BUC table scopes this subcode to "V3.3 and Older Ads API excluding Ads Insights", the Marketing API page presents it as current. Follow the Marketing API page and treat the Graph scoping as stale. Slow down; raising the tier needs business verification (13) |
 | 4 | indirectly | app-level platform limit (app access token) |
 | 32 | **no** | Pages API — not a Marketing API throttle |
 

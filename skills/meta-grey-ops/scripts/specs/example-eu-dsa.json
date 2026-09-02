@@ -1,0 +1,46 @@
+{
+  "run_id": "eu-dsa-2026-09-02",
+  "account_id": "act_REPLACE_ME",
+  "page_id": "REPLACE_ME",
+  "instagram_user_id": "auto",
+  "pixel_id": "REPLACE_ME",
+  "_note": "EU/EEA geo: dsa_beneficiary + dsa_payor are REQUIRED on every ad set (Digital Services Act). launch.py refuses the spec without them. Values are the legal names shown in the ad's 'Paid for by' disclosure.",
+  "campaign": {
+    "name": "DE|leads|2026-09-02",
+    "objective": "OUTCOME_LEADS",
+    "special_ad_categories": [],
+    "daily_budget_minor": 5000
+  },
+  "adsets": [
+    {
+      "name": "DE|25+|broad",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "custom_event_type": "LEAD",
+      "start_time": "2026-09-03T07:00:00+02:00",
+      "dsa_beneficiary": "REPLACE_ME Legal Entity GmbH",
+      "dsa_payor": "REPLACE_ME Legal Entity GmbH",
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "DE"
+          ]
+        },
+        "age_min": 25,
+        "advantage_audience": true
+      },
+      "ads": [
+        {
+          "name": "img-01",
+          "creative": {
+            "kind": "link_image",
+            "image_hash": "REPLACE_ME",
+            "link": "https://example.tld/",
+            "message": "Text",
+            "headline": "Headline",
+            "cta": "LEARN_MORE"
+          }
+        }
+      ]
+    }
+  ]
+}

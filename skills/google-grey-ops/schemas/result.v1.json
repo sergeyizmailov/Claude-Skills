@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://googleops.local/schemas/result.v1.json",
+  "title": "googleops command result",
+  "type": "object",
+  "required": ["schema", "ok", "command", "phase", "artifacts", "data", "error", "next_action"],
+  "properties": {
+    "schema": {"const": "googleops.result/v1"},
+    "ok": {"type": "boolean"},
+    "command": {"type": "string"},
+    "phase": {"type": "string"},
+    "artifacts": {"type": "object"},
+    "data": {"type": "object"},
+    "error": {"type": ["object", "null"]},
+    "next_action": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}

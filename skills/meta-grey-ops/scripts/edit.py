@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+"""Mass status / budget edits with the guards a human forgets at 22:00.
+
+    python3 edit.py --ids 111,222 --status PAUSED
+    python3 edit.py --state .metaops/run.json --level adset --status PAUSED
+    python3 edit.py --ids 333 --budget-minor 6000                # +20% cap unless --force-step
+    python3 edit.py --ids 333 --budget-pct +20
+    python3 edit.py --ids 333 --budget-minor 12000 --force-step  # you accept the learning reset
+    python3 edit.py --ids 444,555 --rename-prefix "J41-16|"
+    python3 edit.py --account act_1 --level campaign --status PAUSED --all   # kill switch
+
+Guards (04 → Spend warm-up, Metric levers):
+  · a budget change > +20% or < -20% per edit is refused without --force-step — that is the
+    practitioner threshold for re-entering learning, and a +200% evening raise on a fresh
+    account produced an account-wide delivery freeze (field 2026-08-31)
+  · a budget raise in the last 2 hours of the account's day is refused without --force-step
+    (Meta's own troubleshooting doc: a doubled budget at 22:00 has 2 h to spend)
+  · every edit is read back; the printed value is what Graph holds, not what was sent
+  · edits are idempotent, so transport retries are allowed
+  · budget edits go to whichever level owns the budget; a CBO ad set has none and Graph says so
+
+This does not activate PAUSED launches — activate.py does, behind --confirm SPEND. Setting
+--status ACTIVE here on an object that never ran asks for the same confirmation.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import sys
+
+import graph
+
+STEP_LIMIT = 0.20
+
+
+def ids_from_state(path: str, level: str) -> list[str]:
+    with open(path, encoding="utf-8") as fh:
+        objects = json.load(fh)["objects"]
+    prefix = {"campaign": "campaign", "adset": "adset[", "ad": "ad["}[level]
+    return [v for k, v in objects.items() if k == prefix or k.startswith(prefix)]
+
+
+def ids_from_account(account: str, level: str) -> list[str]:
+    edge = {"campaign": "campaigns", "adset": "adsets", "ad": "ads"}[level]
+    out, path, params = [], f"{account}/{edge}", {
+        "fields": "id", "limit": 500,
+        "effective_status": json.dumps(["ACTIVE"])}
+    while True:
+        resp = graph.get(path, params=params, context=edge)
+        out.extend(o["id"] for o in resp.get("data", []))
+        nxt = (resp.get("paging") or {}).get("next")
+        if not nxt:
+            return out
+        path, params = nxt, {}
+
+
+def account_hour(obj: dict) -> int | None:
+    acct = obj.get("account_id")
+    if not acct:
+        return None
+    a = graph.get(f"act_{acct}", params={"fields": "timezone_offset_hours_utc"}, context="tz")
+    off = a.get("timezone_offset_hours_utc")
+    if off is None:
+        return None
+    return (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=float(off))).hour
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--ids", help="comma-separated object ids")
+    src.add_argument("--state", help="launch.py state file")
+    src.add_argument("--account", help="act_<id> with --all")
+    ap.add_argument("--level", choices=["campaign", "adset", "ad"], help="needed with --state / --account")
+    ap.add_argument("--all", action="store_true", help="with --account: every ACTIVE object at --level")
+    ap.add_argument("--status", choices=["ACTIVE", "PAUSED", "ARCHIVED"])
+    ap.add_argument("--budget-minor", type=int, help="new daily_budget, integer minor units")
+    ap.add_argument("--budget-pct", help="relative change, e.g. +20 or -15")
+    ap.add_argument("--rename-prefix")
+    ap.add_argument("--rename-suffix")
+    ap.add_argument("--force-step", action="store_true", help="bypass the 20%% / late-day guards")
+    ap.add_argument("--confirm", help="literal ACTIVATE when setting --status ACTIVE")
+    ap.add_argument("--dry-run", action="store_true")
+    args = ap.parse_args()
+
+    graph.require_write_authority(
+        "POST",
+        f"{graph.normalize_account(args.account)}/objects" if args.account else "object",
+    )
+
+    if args.ids:
+        ids = [i.strip() for i in args.ids.split(",") if i.strip()]
+    elif args.state:
+        if not args.level:
+            sys.exit("--state needs --level")
+        ids = ids_from_state(args.state, args.level)
+    else:
+        if not (args.level and args.all):
+            sys.exit("--account needs --level and --all")
+        ids = ids_from_account(graph.normalize_account(args.account), args.level)
+    if not ids:
+        sys.exit("no ids")
+    if not any([args.status, args.budget_minor is not None, args.budget_pct is not None, args.rename_prefix, args.rename_suffix]):
+        sys.exit("nothing to do")
+    if args.status == "ACTIVE" and args.confirm != "ACTIVATE":
+        sys.exit("--status ACTIVE is spend-producing: pass --confirm ACTIVATE (or use activate.py "
+                 "for a fresh launch, which also refreshes start_time).")
+
+    bad = 0
+    for oid in ids:
+        obj = graph.get(oid, params={"fields": "name,status,daily_budget,lifetime_budget,account_id,effective_status"},
+                        context=f"read {oid}")
+        payload: dict = {}
+        if args.status:
+            payload["status"] = args.status
+        if args.rename_prefix or args.rename_suffix:
+            payload["name"] = f"{args.rename_prefix or ''}{obj.get('name', '')}{args.rename_suffix or ''}"
+        if args.budget_minor is not None or args.budget_pct is not None:
+            cur = int(obj.get("daily_budget") or 0)
+            if not cur:
+                print(f"  x {oid} {obj.get('name')}: no daily_budget on this level (CBO child or lifetime "
+                      f"budget) — edit the level that owns it", file=sys.stderr)
+                bad += 1
+                continue
+            if args.budget_pct:
+                new = round(cur * (1 + float(args.budget_pct.replace('+', '')) / 100))
+            else:
+                new = args.budget_minor
+            step = (new - cur) / cur
+            if abs(step) > STEP_LIMIT and not args.force_step:
+                print(f"  x {oid} {obj.get('name')}: {cur} → {new} is {step:+.0%}; > ±20% per edit "
+                      f"re-enters learning and on fresh accounts has frozen delivery. Step in ≤20% "
+                      f"moves 48-72 h apart, or --force-step.", file=sys.stderr)
+                bad += 1
+                continue
+            hour = account_hour(obj)
+            if step > 0 and hour is not None and hour >= 22 and not args.force_step:
+                print(f"  x {oid} {obj.get('name')}: raising at {hour:02d}:00 account time leaves "
+                      f"<2 h to spend it. Raise in the morning, or --force-step.", file=sys.stderr)
+                bad += 1
+                continue
+            payload["daily_budget"] = int(new)
+        if args.dry_run:
+            print(f"  would POST /{oid} {json.dumps(payload)}  (now: status={obj.get('status')} "
+                  f"budget={obj.get('daily_budget')})")
+            continue
+        try:
+            graph.post(oid, payload, context=f"edit {oid}", idempotent=True)
+            back = graph.get(oid, params={"fields": "name,status,daily_budget,effective_status"}, context="readback")
+            print(f"  ✓ {oid} {back.get('name')}: status={back.get('status')} "
+                  f"effective={back.get('effective_status')} daily_budget={back.get('daily_budget')}")
+        except graph.GraphError as e:
+            print(f"  x {oid}: {e}", file=sys.stderr)
+            bad += 1
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

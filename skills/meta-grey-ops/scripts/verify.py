@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-"""Read every created object back and diff it against the spec that built it.
-
-    python3 verify.py --state .meta-launch/<run_id>.json --spec specs/<spec>.json
+"""Internal read-back verifier for workspace-bound metaops.
 
 A successful mutation is not proof the object holds what you sent: budgets land in
 minor units, targeting gets replaced wholesale, and enum defaults fill silently. Run
-this before activate.py. Exit 1 on any mismatch or any non-deliverable effective status.
+this before activation. Exit 1 on any mismatch or any non-deliverable effective status.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 import graph
 import launch
@@ -25,19 +24,22 @@ CAMPAIGN_FIELDS = (
 )
 ADSET_FIELDS = (
     "id,name,status,effective_status,optimization_goal,billing_event,bid_strategy,"
-    "daily_budget,start_time,end_time,promoted_object,attribution_spec,"
-    "targeting,issues_info"
+    "bid_amount,daily_budget,start_time,end_time,promoted_object,attribution_spec,"
+    "targeting,dsa_beneficiary,dsa_payor,issues_info"
 )
 AD_FIELDS = (
-    "id,name,status,effective_status,issues_info,"
-    "creative{id,object_story_spec,asset_feed_spec,template_url_spec,url_tags}"
+    "id,name,status,effective_status,issues_info,conversion_domain,"
+    "creative{id,object_story_spec,asset_feed_spec,template_url_spec,url_tags,product_set_id,"
+    "degrees_of_freedom_spec,contextual_multi_ads}"
 )
 
 # effective_status values that mean "activating will not fix this".
 BLOCKING = {"DISAPPROVED", "WITH_ISSUES", "DELETED", "ARCHIVED", "ADSET_DELETED",
             "CAMPAIGN_DELETED", "DISABLED"}
 # Expected on a freshly built PAUSED tree — reported, never counted as a failure.
-EXPECTED = {"PAUSED", "ADSET_PAUSED", "CAMPAIGN_PAUSED", "PENDING_REVIEW", "PREAPPROVED"}
+# IN_PROCESS: Meta's transient state right after create (live 2026-09-02, every level of a
+# fresh PAUSED tree) — clears within minutes; not a defect.
+EXPECTED = {"PAUSED", "ADSET_PAUSED", "CAMPAIGN_PAUSED", "PENDING_REVIEW", "PREAPPROVED", "IN_PROCESS"}
 
 
 def _as_instant(v):
@@ -181,6 +183,33 @@ def check_destination(d: Diff, want_c: dict | None, creative: dict) -> None:
                   "URL from the feed and carry no subids")
 
 
+def completeness(d: Diff, state: dict, spec: dict | None) -> None:
+    """Refuse to bless a tree that did not finish building.
+
+    An in-flight marker means a create's outcome is unknown (transport failure / 5xx without
+    a Graph body) and an object may or may not exist — reconcile in Ads Manager first. A
+    spec'd run must also hold every ad set and ad the spec describes: a tree that lost its
+    ad to a 503 passes every field check and then spends nothing, or on the wrong subset.
+    Live 2026-09-02: exactly that happened and the old verify wrote a receipt for it."""
+    objects = state["objects"]
+    pending = state.get("in_flight") or {}
+    if pending:
+        print(f"INCOMPLETE  unresolved in-flight creates: {sorted(pending)} — check Ads Manager for "
+              f"the object, then put its id under objects.<key> or clear in_flight.<key> and re-run "
+              f"launch.py to resume", file=sys.stderr)
+        d.bad += 1
+    if spec:
+        missing = []
+        for ai, aset in enumerate(spec["adsets"]):
+            if f"adset[{ai}]" not in objects:
+                missing.append(f"adset[{ai}]")
+            missing += [f"ad[{ai}.{aj}]" for aj in range(len(aset["ads"])) if f"ad[{ai}.{aj}]" not in objects]
+        if missing:
+            print(f"INCOMPLETE  spec objects not in state: {missing} — re-run launch.py to resume",
+                  file=sys.stderr)
+            d.bad += 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--state", required=True)
@@ -193,6 +222,12 @@ def main() -> int:
     spec = launch.load_spec(args.spec) if args.spec else None
     d = Diff()
 
+    completeness(d, state, spec)
+    if spec and state.get("spec_sha") and state["spec_sha"] != launch.spec_hash(spec):
+        print("MISMATCH  the spec file differs from the one that built this state (spec_sha) — "
+              "verify against the spec that was launched", file=sys.stderr)
+        d.bad += 1
+
     campaign_id = objects.get("campaign")
     if not campaign_id:
         sys.exit("state file holds no campaign id — nothing to verify")
@@ -202,8 +237,12 @@ def main() -> int:
     if spec:
         c = spec["campaign"]
         d.check("objective", c["objective"], camp.get("objective"))
-        d.check("daily_budget (minor)", c["daily_budget_minor"], camp.get("daily_budget"))
-        d.check("bid_strategy", c.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP"), camp.get("bid_strategy"))
+        if spec["budget_mode"] == "CBO":
+            d.check("daily_budget (minor)", c["daily_budget_minor"], camp.get("daily_budget"))
+            d.check("bid_strategy", c.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP"), camp.get("bid_strategy"))
+        elif camp.get("daily_budget"):
+            print(f"    MISMATCH  campaign carries a budget ({camp['daily_budget']}) under ABO")
+            d.bad += 1
         d.check("special_ad_categories", c["special_ad_categories"], camp.get("special_ad_categories"))
     d.check("status", "PAUSED", camp.get("status"))
     d.status("effective_status", camp.get("effective_status"))
@@ -216,30 +255,64 @@ def main() -> int:
         if spec:
             s = spec["adsets"][i]
             d.check("optimization_goal", s["optimization_goal"], a.get("optimization_goal"))
+            d.check("billing_event", s.get("billing_event", "IMPRESSIONS"), a.get("billing_event"))
             d.check("start_time", s["start_time"], a.get("start_time"))
-            if s.get("custom_event_type"):
-                d.check("promoted_object.custom_event_type",
-                        s["custom_event_type"],
-                        (a.get("promoted_object") or {}).get("custom_event_type"))
+            if s.get("end_time"):
+                d.check("end_time", s["end_time"], a.get("end_time"))
+            # promoted_object: the same precedence launch.py uses (explicit object, else
+            # pixel + event). Subset semantics — Graph adds keys of its own.
+            if s.get("promoted_object"):
+                d.check("promoted_object", s["promoted_object"], a.get("promoted_object"))
+            elif spec.get("pixel_id") and s.get("custom_event_type"):
+                d.check("promoted_object",
+                        {"pixel_id": str(spec["pixel_id"]), "custom_event_type": s["custom_event_type"]},
+                        a.get("promoted_object"))
+            for key in ("destination_type", "is_dynamic_creative"):
+                if s.get(key) is not None:
+                    d.check(key, s[key], a.get(key))
+            # Whole targeting object, every key the spec asserted (subset semantics per key:
+            # Graph enriches with location_types etc., lists compare order-insensitively).
             expected_t = launch.build_targeting(s)
             actual_t = a.get("targeting") or {}
-            for key in ("geo_locations", "age_min", "age_max", "targeting_automation"):
-                if key in expected_t:
-                    d.check(f"targeting.{key}", expected_t[key], actual_t.get(key))
-        if a.get("daily_budget"):
+            for key in expected_t:
+                d.check(f"targeting.{key}", expected_t[key], actual_t.get(key))
+        if spec and spec["budget_mode"] == "ABO":
+            d.check("daily_budget (minor)", s["daily_budget_minor"], a.get("daily_budget"))
+            d.check("bid_strategy", s.get("bid_strategy", "LOWEST_COST_WITHOUT_CAP"), a.get("bid_strategy"))
+            if s.get("bid_amount_minor"):
+                d.check("bid_amount (minor)", s["bid_amount_minor"], a.get("bid_amount"))
+        elif spec and a.get("daily_budget"):
             print(f"    MISMATCH  ad set carries its own budget ({a['daily_budget']}) under CBO")
             d.bad += 1
         # Reading this back is not cosmetic: an unknown key inside attribution_spec is
         # ignored by Graph, so a wrong field name looks like a success and leaves the
-        # account default in place.
-        if spec and s.get("attribution"):
+        # account default in place. launch.py always sends one unless the spec opted into
+        # "account_default", so it is diffed on every spec'd run.
+        if spec:
             want = launch.build_attribution(s)
             got = a.get("attribution_spec")
             got_norm = [{"event_type": e.get("event_type"), "window_days": e.get("window_days")}
                         for e in (got or [])]
-            d.check("attribution_spec", want, got_norm)
+            if want is None:
+                d.note("attribution_spec (account default)", got_norm)
+            else:
+                d.check("attribution_spec", want, got_norm)
         else:
             d.note("attribution_spec", a.get("attribution_spec"))
+        if spec:
+            countries = set(((s.get("targeting") or {}).get("geo_locations") or {}).get("countries") or [])
+            for key in ("dsa_beneficiary", "dsa_payor"):
+                if s.get(key):
+                    d.check(key, s[key], a.get(key))
+                elif countries & launch.DSA_COUNTRIES:
+                    # spec relied on dsa_from_account_defaults: the field must still be non-empty
+                    # on the ad set, or the EU ad is non-compliant and passes verify silently.
+                    if a.get(key):
+                        d.note(f"{key} (from account default)", a.get(key))
+                    else:
+                        print(f"    MISMATCH  {key} empty on an EU/EEA ad set — account defaults did "
+                              "not fill it (Business Settings → default_dsa_*)")
+                        d.bad += 1
         d.status("effective_status", a.get("effective_status"))
         if a.get("issues_info"):
             print(f"    ISSUES  {a['issues_info']}")
@@ -253,13 +326,75 @@ def main() -> int:
             story = creative.get("object_story_spec") or {}
             print(f"      ad[{i}.{j}] {ad_id}  {ad.get('name')}")
             print(f"        identity page={story.get('page_id')} ig={story.get('instagram_user_id')}")
+            if spec:
+                d.check("        page_id", str(spec.get("page_id")), story.get("page_id"))
+                want_ig = spec.get("instagram_user_id")
+                if want_ig and want_ig != "auto":
+                    d.check("        instagram_user_id", str(want_ig), story.get("instagram_user_id"))
+                wc = (spec["adsets"][i]["ads"][j].get("creative") or {})
+                node = story.get("link_data") or story.get("video_data") or {}
+                if wc.get("kind", "link_image") in ("link_image", "link_video"):
+                    d.check("        message", wc.get("message", ""), node.get("message"))
+                    d.check("        headline", wc.get("headline"), node.get("name"))
+                    d.check("        cta", wc.get("cta", "LEARN_MORE"), (node.get("call_to_action") or {}).get("type"))
+                    if wc.get("image_hash"):
+                        d.check("        image_hash", wc["image_hash"], node.get("image_hash"))
+                    if wc.get("video_id"):
+                        d.check("        video_id", wc["video_id"], node.get("video_id"))
+                elif wc.get("kind") == "link_carousel":
+                    got_cards = node.get("child_attachments") or []
+                    want_cards = [{k: v for k, v in {
+                        "link": card.get("link", wc.get("link")),
+                        "name": card.get("headline"),
+                        "image_hash": card.get("image_hash"),
+                        "video_id": card.get("video_id")}.items() if v is not None}
+                        for card in wc.get("cards") or []]
+                    d.check("        cards (count)", len(want_cards), len(got_cards))
+                    d.check("        cards", want_cards, got_cards)
+                    d.check("        message", wc.get("message", ""), node.get("message"))
+                elif wc.get("kind") == "dlo":
+                    feed = creative.get("asset_feed_spec") or {}
+                    d.check("        dlo bodies (count)", len(wc.get("locales") or []), len(feed.get("bodies") or []))
+                    d.check("        dlo image_hash", wc.get("image_hash"),
+                            next((im.get("hash") for im in feed.get("images") or []), None))
+                elif str(wc.get("kind", "")).startswith("catalog"):
+                    d.check("        product_set_id", str(wc.get("product_set_id")), creative.get("product_set_id"))
+                d.check("        name", spec["adsets"][i]["ads"][j].get("name"), ad.get("name"))
             if not story.get("instagram_user_id"):
                 print("        WARN  no instagram_user_id — any IG placement will fail 1772103")
             # Printing it was not verification. The destination is the one field where a
             # wrong value spends real money into the wrong funnel, so diff it.
             want_c = (spec["adsets"][i]["ads"][j].get("creative") or {}) if spec else None
             check_destination(d, want_c, creative)
-            print(f"        url_tags {creative.get('url_tags')}")
+            want_tags = (want_c.get("url_tags", spec.get("url_tags")) if spec else None)
+            if want_tags:
+                d.check("        url_tags", want_tags, creative.get("url_tags"))
+            else:
+                print(f"        url_tags {creative.get('url_tags')}")
+            # Multi-advertiser ads. OPT_OUT reads back on template_data/link creatives; on
+            # FORMAT_AUTOMATION collection creatives the field is not readable, so the UI
+            # checkbox (while PAUSED) is the only proof — say so instead of passing silently.
+            cma = (creative.get("contextual_multi_ads") or {}).get("enroll_status")
+            want_multi = bool(want_c.get("multi_advertiser")) if want_c else False
+            if cma is None:
+                print("        WARN  contextual_multi_ads not readable — confirm the Multi-advertiser "
+                      "checkbox is OFF in Ads Manager while PAUSED")
+            elif not want_multi and cma != "OPT_OUT":
+                print(f"        MISMATCH  contextual_multi_ads={cma}, expected OPT_OUT")
+                d.bad += 1
+            else:
+                print(f"        ..    contextual_multi_ads {cma}")
+            # Advantage+ enhancements: any key left OPT_IN that the spec opted out is a leak.
+            feats = ((creative.get("degrees_of_freedom_spec") or {}).get("creative_features_spec") or {})
+            opted_in = sorted(k for k, v in feats.items() if (v or {}).get("enroll_status") == "OPT_IN")
+            wanted_out = set(launch.DEFAULT_OPT_OUT if not want_c or want_c.get("opt_out_features") is None
+                             else want_c.get("opt_out_features") or [])
+            leak = [k for k in opted_in if k in wanted_out]
+            if leak:
+                print(f"        MISMATCH  Advantage+ features still OPT_IN: {leak}")
+                d.bad += 1
+            else:
+                print(f"        ..    enhancements OPT_IN: {opted_in or 'none'}")
             d.status("        effective_status", ad.get("effective_status"))
             if ad.get("issues_info"):
                 print(f"        ISSUES  {ad['issues_info']}")
@@ -270,9 +405,30 @@ def main() -> int:
     if d.bad:
         print(f"\n{d.bad} problem(s). Do NOT activate.", file=sys.stderr)
         return 1
-    print("\nEverything matches the spec and nothing is blocked. "
-          "Preview each placement in Ads Manager, then activate.py.")
+    write_receipt(args.state, args.spec, spec)
+    if spec:
+        scope = ("the fields listed above (budgets, bid, attribution, targeting, promoted_object, DSA, "
+                 "identity, copy/media per creative kind, destination, url_tags, enhancements, "
+                 "multi-advertiser, statuses)")
+    else:
+        scope = "statuses and destinations only (no --spec) — this receipt does NOT satisfy activate.py"
+    print(f"\nVerified {scope}; nothing is blocked. Receipt written next to the state file. "
+          "Anything the spec did not set was not compared — preview each placement in Ads Manager "
+          "before activate.py.")
     return 0
+
+
+def write_receipt(state_path: str, spec_path: str | None, spec: dict | None) -> str:
+    """`<state>.verified.json` — proof for activate.py that verify passed on THIS state file.
+    The hash is of the state file bytes; a resume that adds objects voids the receipt."""
+    with open(state_path, "rb") as fh:
+        state_sha = hashlib.sha256(fh.read()).hexdigest()[:16]
+    rp = state_path + ".verified.json"
+    with open(rp, "w", encoding="utf-8") as fh:
+        json.dump({"ok": True, "state_sha": state_sha, "spec": spec_path,
+                   "spec_sha": launch.spec_hash(spec) if spec else None,
+                   "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")}, fh, indent=1)
+    return rp
 
 
 if __name__ == "__main__":

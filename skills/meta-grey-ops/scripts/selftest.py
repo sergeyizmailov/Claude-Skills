@@ -16,13 +16,16 @@ import json
 import os
 import pathlib
 import sys
+import tempfile
 
 os.environ.setdefault("META_TOKEN", "TESTTOKEN/with+chars")
 os.environ.setdefault("META_PROXY", "socks5h://puser:ppass@1.2.3.4:1080")
 
-import graph  # noqa: E402
-import launch  # noqa: E402
-import verify  # noqa: E402
+import graph
+import launch
+import verify
+
+graph.authorize_writes({"act_1"})
 
 HERE = pathlib.Path(__file__).resolve().parent
 FAILED: list[str] = []
@@ -44,7 +47,7 @@ class FakeResponse:
 
     def json(self):
         if isinstance(self._body, str):
-            raise ValueError("not json")
+            raise ValueError("not json")  # noqa: TRY004 - mimics requests
         return self._body
 
 
@@ -57,6 +60,7 @@ class FakeSession:
 
     def request(self, *_a, **_kw):
         self.calls += 1
+        self.last_kw = _kw
         item = self.script[min(self.calls - 1, len(self.script) - 1)]
         if isinstance(item, Exception):
             raise item
@@ -140,6 +144,9 @@ def test_encoding() -> None:
 def test_specs() -> None:
     print("specs")
     for path in sorted((HERE / "specs").glob("*.json")):
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if "accounts" in path.name or document.get("schema") == "metaops.workspace/v1":
+            continue  # bulk/workspace examples are covered by their dedicated tests
         try:
             spec = launch.load_spec(str(path))
             for aset in spec["adsets"]:
@@ -158,6 +165,138 @@ def test_attribution() -> None:
     keys = {k for entry in got for k in entry}
     check("emits window_days, never event_window_days",
           "window_days" in keys and "event_window_days" not in keys, str(got))
+    click_only = launch.build_attribution({"optimization_goal": "LINK_CLICKS"})
+    check("click-only goals default to 1d click (1885501)",
+          click_only == [{"event_type": "CLICK_THROUGH", "window_days": 1}])
+    conv = launch.build_attribution({"optimization_goal": "OFFSITE_CONVERSIONS"})
+    check("conversion goals keep 1/1/1", len(conv) == 3)
+    dflt = launch.build_attribution({})
+    types = {e["event_type"] for e in dflt}
+    check("silent spec → 1/1/1 default",
+          types == {"CLICK_THROUGH", "ENGAGED_VIDEO_VIEW", "VIEW_THROUGH"}
+          and all(e["window_days"] == 1 for e in dflt), str(dflt))
+    check("account_default → nothing sent",
+          launch.build_attribution({"attribution": "account_default"}) is None)
+
+
+def _spec_from(obj: dict) -> dict:
+    tmp = HERE / ".selftest-spec.json"
+    tmp.write_text(json.dumps(obj))
+    try:
+        return launch.load_spec(str(tmp))
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _base_spec(**over) -> dict:
+    spec = {
+        "account_id": "act_1", "page_id": "2", "pixel_id": "3",
+        "campaign": {"name": "c", "objective": "OUTCOME_LEADS", "special_ad_categories": [],
+                     "daily_budget_minor": 1000},
+        "adsets": [{
+            "name": "a", "optimization_goal": "OFFSITE_CONVERSIONS", "start_time": "2026-09-03T07:00:00+03:00",
+            "targeting": {"geo_locations": {"countries": ["TR"]}, "advantage_audience": False},
+            "ads": [{"name": "ad", "creative": {"kind": "link_image", "image_hash": "h", "link": "https://x.tld/"}}],
+        }],
+    }
+    for k, v in over.items():
+        spec[k] = v
+    return spec
+
+
+def test_spec_rules() -> None:
+    print("spec rules")
+    ok = _spec_from(_base_spec())
+    check("CBO detected", ok["budget_mode"] == "CBO")
+
+    abo = _base_spec()
+    abo["campaign"].pop("daily_budget_minor")
+    abo["adsets"][0]["daily_budget_minor"] = 500
+    check("ABO detected", _spec_from(abo)["budget_mode"] == "ABO")
+
+    both = _base_spec()
+    both["adsets"][0]["daily_budget_minor"] = 500
+    try:
+        _spec_from(both)
+        check("CBO + adset budget rejected", False, "accepted")
+    except SystemExit:
+        check("CBO + adset budget rejected", True)
+
+    neither = _base_spec()
+    neither["campaign"].pop("daily_budget_minor")
+    try:
+        _spec_from(neither)
+        check("no budget anywhere rejected", False, "accepted")
+    except SystemExit:
+        check("no budget anywhere rejected", True)
+
+    cap = _base_spec()
+    cap["campaign"].pop("daily_budget_minor")
+    cap["adsets"][0].update({"daily_budget_minor": 500, "bid_strategy": "COST_CAP"})
+    try:
+        _spec_from(cap)
+        check("COST_CAP without bid_amount rejected", False, "accepted")
+    except SystemExit:
+        check("COST_CAP without bid_amount rejected", True)
+
+    noaa = _base_spec()
+    noaa["adsets"][0]["targeting"].pop("advantage_audience")
+    try:
+        _spec_from(noaa)
+        check("missing advantage_audience rejected", False, "accepted")
+    except SystemExit:
+        check("missing advantage_audience rejected", True)
+
+    eu = _base_spec()
+    eu["adsets"][0]["targeting"]["geo_locations"] = {"countries": ["DE"]}
+    try:
+        _spec_from(eu)
+        check("EU geo without DSA rejected", False, "accepted")
+    except SystemExit:
+        check("EU geo without DSA rejected", True)
+    eu["adsets"][0].update({"dsa_beneficiary": "X GmbH", "dsa_payor": "X GmbH"})
+    check("EU geo with DSA accepted", _spec_from(eu)["budget_mode"] == "CBO")
+
+    # float budget stays rejected
+    fl = _base_spec()
+    fl["campaign"]["daily_budget_minor"] = 60.0
+    try:
+        _spec_from(fl)
+        check("float budget rejected", False, "accepted")
+    except SystemExit:
+        check("float budget rejected", True)
+
+
+def test_creative_flags() -> None:
+    print("creative flags")
+    spec = _spec_from(_base_spec(url_tags="utm_source=fb"))
+    ad = spec["adsets"][0]["ads"][0]
+    payload = launch.build_creative(spec, ad, None)
+    check("contextual_multi_ads OPT_OUT by default",
+          payload.get("contextual_multi_ads") == {"enroll_status": "OPT_OUT"}, str(payload.get("contextual_multi_ads")))
+    check("spec-level url_tags inherited", payload.get("url_tags") == "utm_source=fb")
+    feats = payload["degrees_of_freedom_spec"]["creative_features_spec"]
+    check("adapt_to_placement opted out", feats.get("adapt_to_placement", {}).get("enroll_status") == "OPT_OUT")
+    check("every default feature OPT_OUT", all(v["enroll_status"] == "OPT_OUT" for v in feats.values()))
+
+    ad2 = {"name": "x", "creative": {"kind": "link_image", "image_hash": "h", "link": "https://x.tld/",
+                                     "multi_advertiser": True, "url_tags": "own=1"}}
+    p2 = launch.build_creative(spec, ad2, None)
+    check("multi_advertiser: true leaves the field off", "contextual_multi_ads" not in p2)
+    check("per-creative url_tags wins", p2.get("url_tags") == "own=1")
+
+    car = {"name": "car", "creative": {"kind": "link_carousel", "link": "https://x.tld/", "message": "m",
+           "cards": [{"image_hash": "a"}, {"image_hash": "b"}]}}
+    p3 = launch.build_creative(spec, car, "178")
+    ch = p3["object_story_spec"]["link_data"]["child_attachments"]
+    check("carousel emits child_attachments", len(ch) == 2 and ch[0]["image_hash"] == "a")
+    check("carousel cards inherit link", all(c["link"] == "https://x.tld/" for c in ch))
+    bad = {"name": "car", "creative": {"kind": "link_carousel", "link": "https://x.tld/", "cards": [{"image_hash": "a"}]}}
+    try:
+        launch.build_creative(spec, bad, None)
+        check("1-card carousel rejected", False, "accepted")
+    except SystemExit:
+        check("1-card carousel rejected", True)
 
 
 def test_dlo() -> None:
@@ -332,10 +471,167 @@ def test_equivalence() -> None:
     check("a real difference still fails", d.bad == 1, f"bad={d.bad}")
 
 
+def test_bulk() -> None:
+    print("bulk")
+    import bulk
+    tpl = _base_spec()
+    tpl["campaign"]["name"] = "{tag}|c"
+    tpl["adsets"][0]["name"] = "{tag}|a"
+    tpl["account_id"] = "act_REPLACE_ME"
+    row = {"account_id": "act_77", "page_id": "88", "pixel_id": "99", "tag": "J41-16",
+           "overrides": {"campaign": {"daily_budget_minor": 4200}},
+           "media": {"ad": {"image_hash": "acct77hash"}}}
+    previous_bulk_dir = bulk.BULK_DIR
+    with tempfile.TemporaryDirectory(prefix="metaops-selftest-") as td:
+        bulk.BULK_DIR = str(pathlib.Path(td) / "bulk")
+        try:
+            spec, _path = bulk.resolve(tpl, row, "selftest-run")
+            check("account substituted", spec["account_id"] == "act_77")
+            check("{tag} expanded in names", spec["campaign"]["name"] == "J41-16|c" and spec["adsets"][0]["name"] == "J41-16|a")
+            check("overrides deep-merged", spec["campaign"]["daily_budget_minor"] == 4200)
+            check("per-account media applied", spec["adsets"][0]["ads"][0]["creative"]["image_hash"] == "acct77hash")
+            check("run_id per account", spec["run_id"] == "selftest-run-J41-16")
+            check("no REPLACE_ME left", bulk.unresolved(spec) == [])
+        finally:
+            bulk.BULK_DIR = previous_bulk_dir
+
+
+def test_rules_ladder() -> None:
+    print("rules ladder")
+    import rules
+    # Reference multipliers from senior-buyer-ops/04 (95%): exact Poisson bounds.
+    ref = {0: 3.00, 1: 4.74, 2: 6.30, 3: 7.75, 5: 10.51, 10: 16.96, 20: 29.06}
+    for k, want in ref.items():
+        got = rules.multiplier(k, 0.95)
+        check(f"k={k} multiplier {want}", abs(got - want) < 0.02, f"got {got:.3f}")
+    check("90% kills sooner than 95%", rules.multiplier(0, 0.90) < rules.multiplier(0, 0.95))
+    lad = rules.ladder(1200, [0, 1], 0.95)
+    check("spend threshold in minor units (exact bound × target)",
+          abs(lad[0]["spend_minor"] - 3595) <= 3 and abs(lad[1]["spend_minor"] - 5693) <= 3, str(lad))
+    r = rules.build_rule("n", "ADSET", 2, 7560, "offsite_conversion.fb_pixel_lead", "pause", "LIFETIME",
+                         ["1", "2"], 500, "SEMI_HOURLY")
+    f = {x["field"]: x for x in r["evaluation_spec"]["filters"]}
+    check("count-form rung: spent > and count < k+1",
+          f["spent"]["operator"] == "GREATER_THAN" and f["offsite_conversion.fb_pixel_lead"]["value"] == 3)
+    check("no cost/ratio fields (scope ban)", not any(k.startswith("cost") or k == "cpa" for k in f))
+    check("no deprecated attribution_window", "attribution_window" not in f)
+    check("entity_type + id + time_preset present", {"entity_type", "id", "time_preset"} <= set(f))
+    check("pause mode → PAUSE", r["execution_spec"]["execution_type"] == "PAUSE")
+    check("notify mode → NOTIFICATION",
+          rules.build_rule("n", "AD", 0, 1, "results", "notify", "LAST_7D", None, None, "DAILY")
+          ["execution_spec"]["execution_type"] == "NOTIFICATION")
+
+
+def test_bearer_header() -> None:
+    print("bearer header")
+    os.environ["META_TOKEN"] = "TESTTOKEN/with+chars"
+    s = with_session([FakeResponse(200, {"id": "1"})])
+    graph.get("me")
+    kw = s.last_kw
+    check("token in Authorization header", kw.get("headers", {}).get("Authorization") == "Bearer TESTTOKEN/with+chars")
+    check("token NOT in query params", "access_token" not in (kw.get("params") or {}))
+
+
+def test_gates() -> None:
+    print("gates (dry-run marker, receipt, rules CLI)")
+    import tempfile
+
+    import activate
+    import bulk
+    import rules
+    import verify
+    tpl = {"campaign": {"name": "c", "daily_budget_minor": 100}}
+    rows = [{"account_id": "act_1"}]
+    h1 = bulk.inputs_hash(tpl, rows, None)
+    h2 = bulk.inputs_hash({"campaign": {"name": "c", "daily_budget_minor": 999}}, rows, None)
+    check("marker hash changes with template", h1 != h2)
+    with tempfile.TemporaryDirectory() as td:
+        m = bulk.pathlib.Path(td) / ".dry-run-ok"
+        check("missing marker is stale", bulk.marker_stale(m, h1) is not None)
+        m.write_text(json.dumps({"inputs_sha": h1}))
+        check("matching marker is valid", bulk.marker_stale(m, h1) is None)
+        check("edited inputs void the marker", bulk.marker_stale(m, h2) is not None)
+        m.write_text(json.dumps(["act_1"]))  # old-format marker
+        check("legacy list marker is stale", bulk.marker_stale(m, h1) is not None)
+
+        st = os.path.join(td, "run.json")
+        with open(st, "w") as fh:
+            json.dump({"objects": {"campaign": "1"}}, fh)
+        check("no receipt → refuse", activate.check_receipt(st) is not None)
+        verify.write_receipt(st, None, None)
+        check("spec-less receipt → refuse", activate.check_receipt(st) is not None)
+        spec_min = {"adsets": [{"ads": [{}]}]}
+        with open(st, "w") as fh:
+            json.dump({"objects": {"campaign": "1", "adset[0]": "2", "ad[0.0]": "3"},
+                       "spec_sha": launch.spec_hash(spec_min)}, fh)
+        verify.write_receipt(st, "x.json", spec_min)
+        check("spec'd receipt matching state → allowed", activate.check_receipt(st) is None)
+        with open(st, "w") as fh:
+            json.dump({"objects": {"campaign": "1", "adset[0]": "2", "ad[0.0]": "3"}}, fh)
+        verify.write_receipt(st, "x.json", spec_min)
+        check("state without spec_sha → refuse", "no spec_sha" in (activate.check_receipt(st) or ""))
+        with open(st, "w") as fh:
+            json.dump({"objects": {"campaign": "1", "adset[0]": "2", "ad[0.0]": "3"},
+                       "spec_sha": launch.spec_hash(spec_min)}, fh)
+        verify.write_receipt(st, "x.json", {"adsets": [{"ads": [{}, {}]}]})
+        check("receipt from another spec → refuse", "different spec" in (activate.check_receipt(st) or ""))
+        with open(st, "a") as fh:
+            fh.write("\n")
+        check("state changed after verify → refuse", "changed" in (activate.check_receipt(st) or ""))
+
+    # verify must refuse an incomplete tree even when every present object is fine
+    import contextlib
+    import io
+    with tempfile.TemporaryDirectory() as td:
+        st = os.path.join(td, "run.json")
+        with open(st, "w") as fh:
+            json.dump({"objects": {"campaign": "1", "adset[0]": "2"}, "in_flight": {"creative[0.0]": "x"}}, fh)
+        spec_min = {"adsets": [{"ads": [{}]}]}
+        dd = verify.Diff()
+        err = io.StringIO()
+        with open(st, encoding="utf-8") as fh:
+            st_data = json.load(fh)
+        with contextlib.redirect_stderr(err):
+            verify.completeness(dd, st_data, spec_min)
+        check("in-flight + missing ad → 2 problems", dd.bad == 2)
+        check("incomplete message names the ad", "ad[0.0]" in err.getvalue())
+
+    class A:  # argparse stand-in
+        ladder_only = False
+        list = False
+        execute = None
+        delete_prefix = None
+
+    a = A()
+    check("create run needs ladder", rules.needs_ladder(a))
+    a = A()
+    a.delete_prefix = "LADDER|"
+    check("--delete-prefix --dry-run needs no ladder", not rules.needs_ladder(a))
+    a = A()
+    a.list = True
+    check("--list needs no ladder", not rules.needs_ladder(a))
+
+
+def test_scripts_import() -> None:
+    """Every new script must at least import and parse --help without a token or network."""
+    print("scripts import")
+    import importlib
+    for name in (
+        "monitor", "clone", "comments", "edit", "rules", "uniquify", "page", "bulk",
+        "asset_graph", "meta_workspace", "metaops",
+    ):
+        try:
+            importlib.import_module(name)
+            check(f"{name}.py imports", True)
+        except Exception as e:  # noqa: BLE001
+            check(f"{name}.py imports", False, repr(e))
+
+
 def main() -> int:
-    for fn in (test_transport, test_encoding, test_specs, test_attribution, test_dlo,
-               test_catalog_template_url, test_destination, test_probe_is_retryable,
-               test_equivalence):
+    for fn in (test_transport, test_bearer_header, test_gates, test_encoding, test_specs, test_attribution, test_spec_rules,
+               test_creative_flags, test_dlo, test_catalog_template_url, test_destination,
+               test_probe_is_retryable, test_equivalence, test_bulk, test_rules_ladder,
+               test_scripts_import):
         fn()
     print()
     if FAILED:

@@ -28,7 +28,7 @@ Read only what the task needs:
 | Sourced cases and post-mortems | `references/10-practical-case-library.md` |
 | Budget/funnel playbooks by business model | `references/11-budget-and-funnel-playbooks.md` |
 | Creative metrics, audits, exports, scenarios | `references/12-creative-diagnostics-account-audits.md` |
-| API/MCP, tokens, identity, billing, launch gates | `references/13-api-access-billing-launch-operations.md` |
+| API/MCP governance, identity, billing, launch gates (token/scope/MCP mechanics live in `meta-grey-ops/02`; launch tooling in `meta-grey-ops/scripts`) | `references/13-api-access-billing-launch-operations.md` |
 | API errors: code → cause → fix | `references/14-api-error-catalog.md` |
 
 Always read 00 for current policy, eligibility, numerical claims, or external

@@ -5,136 +5,110 @@ only the API surface differs (01/02).
 
 ## CPL that doesn't lie
 
-Daily CPL (for BUYING) = click-date spend (account-tz day) ÷ that same click-date
-cohort's payout count. "Same day" only holds once the cohort has matured; while
-it's still lagging, use the matured or nowcast cohort count (cohort nowcasting
-below), NOT today's raw postback count — pairing click-date spend with
-conversion-date conversions is the classic apples-to-oranges CPL. Conversion-date
-basis (postback day) is for FINANCE/cashflow, not for buying decisions.
-- Spend truth: ad platform API per account/day. Field-observed gotcha (not a
-  documented Graph contract): a plain `/me/adaccounts` pull can omit disabled
-  accounts, so their spend silently drops from totals — verify what your
-  edge+fields actually return, and keep your own spend log (or agency billing)
-  for history with dead accounts.
-- Lead truth: tracker, the AGREED payout measure only (not "conversions" =
-  all postback records; how much that exceeds your leads is integration-specific,
-  not a fixed multiple — SKILL metric rule).
-- Cross-check: pixel leads ≈ tracker leads (±tolerance is account-specific, set
-  from a reconciled baseline — SKILL rule #3). A bigger gap = wrong metric or
+Daily CPL (for BUYING) = click-date spend (account-tz day) ÷ that same
+click-date cohort's payout count. "Same day" only holds once the cohort has
+matured; while lagging, use the matured or nowcast cohort count (below), NOT
+today's raw postback count — pairing click-date spend with conversion-date
+conversions is the classic apples-to-oranges CPL. Conversion-date basis
+(postback day) is for FINANCE/cashflow, not buying decisions.
+- Spend truth: ad platform API per account/day. Field-observed gotcha: a plain
+  `/me/adaccounts` pull can omit disabled accounts, silently dropping their
+  spend from totals — verify what your edge+fields return, keep your own
+  spend log (or agency billing) for history with dead accounts.
+- Lead truth: tracker, the AGREED payout measure only (not "conversions" = all
+  postback records; the excess over your leads is integration-specific, not a
+  fixed multiple — SKILL metric rule).
+- Cross-check: pixel leads ≈ tracker leads (±tolerance set from a reconciled
+  baseline, account-specific — SKILL rule #3). Bigger gap = wrong metric or
   broken tracking → stop and reconcile before reporting.
-- 🔺 Two priors, **not laws** — one practitioner's observed baselines, no published
-  source, never validated across accounts: fresh accounts pay ~2× CPM premium
-  (auction quality); judge click→lead CR on ≥100 clicks before reading a trend.
-  Replace both with your own reconciled numbers as soon as you have them; quoting
-  them to a TL as fact is exactly the error this file's metric rules exist to stop.
+- 🔺 Two priors, **not laws** (one practitioner's observed baselines, unvalidated
+  across accounts): fresh accounts pay ~2× CPM premium; judge click→lead CR on
+  ≥100 clicks before reading a trend. Replace with your own reconciled numbers
+  ASAP — quoting these to a TL as fact is the error this file exists to stop.
 
 ## Reconciliation tree (when Meta ≠ tracker)
 
-Branch on DIRECTION — the causes are different:
+Branch on DIRECTION — causes differ:
+- Meta > tracker: tracking loss before tracker (click-ID/subid dropped in
+  redirect/prelander, senior-buyer-ops/03; postback not firing, tracker-ops 01
+  replay; pixel double-counting/dedup); or wrong tracker metric picked
+  (deeper status than the pixel event).
+- Tracker > Meta: pixel under-fires (WebView/in-app browser strips it,
+  consent/ATT blocks it, CAPI not sending → prefer S2S truth, fix the pixel);
+  attribution-window/timezone mismatch (Meta modeled vs tracker raw);
+  bots/duplicate postbacks inflating tracker (check tid/overwrite, 01).
 
-Meta pixel leads > tracker leads (Meta sees more):
-- tracking loss before the tracker: click-ID/subid dropped in the redirect chain
-  or prelander (senior-buyer-ops/03), postback not firing/failed
-  (tracker-ops 01 replay), or pixel double-counting (dedup/event_id).
-- wrong tracker metric picked (counting a deeper status than the pixel event).
+Either way: reconcile ONE clean day end-to-end (fire a test conversion, follow
+both sides), set tolerance from that baseline, trust the delta — don't chase
+noise day to day.
 
-Tracker leads > Meta pixel (tracker sees more):
-- pixel under-fires: WebView/in-app browser strips it, consent/ATT blocks it,
-  CAPI not sending → prefer S2S truth, fix the pixel.
-- attribution-window / timezone mismatch (Meta modeled/attributed vs tracker raw).
-- bots/duplicate postbacks inflating tracker (check tid/overwrite, 01).
+### iOS ATT & the Meta↔tracker gap
 
-Either way: reconcile ONE clean day end-to-end first (fire a test conversion,
-follow it both sides), set your own tolerance from that baseline, then trust the
-delta — don't chase noise day to day.
-
-### iOS ATT & the Meta↔tracker gap (segment, don't assume direction)
-
-iOS ATT degrades USER-LEVEL signal: no consent → no IDFA, and app conversions
-lean on SKAdNetwork/AAK (aggregated, delayed, capped). But this does NOT mean
-Meta always shows fewer — Meta backfills with modeling + view-through, so its
-number can land EITHER side of tracker/backend (same as meta-ads/08: "either side
-can be higher"). What's real: iOS user-level attribution is noisier, and the gap
-is OS/GEO-dependent — larger on iOS-heavy T1 (US/UK/AU), smaller on Android-heavy
-T2/T3. **Canonical ATT figure for this skill set — quote it with the vendor, never bare.** Primary MMPs
-disagree by *denominator*, not by being wrong: **Adjust ≈ 35% (2025) → 38% (Q1 2026)**, broadest panel;
-**AppsFlyer ≈ 50%**, flat since Q1 2024, counting only users actually *shown* the prompt and weighted to
-large apps with optimized pre-prompts. AppsFlyer's own methodology note drops this to **~30%** once
-system-restricted users and the ~55% of apps that never deploy ATT are folded in. Use **~35–50% global,
-flat-to-rising since 2022**. 🔺 **Geo variance (Germany/Japan ~20–23% vs UAE/Brazil ~47–50%) is wider
-than the vendor gap and wider than vertical variance** — quote a geo before quoting a global number.
-Do **not** cite Singular's ~14–19%: gaming-weighted, per-app-equal-weighted, dragged by casino/trivia.
-Do **not** cite Flurry as current — that tracker has not materially updated since May 2022.
-Implications:
-- Segment Meta-vs-tracker deltas by OS/GEO before reconciling — an iOS-heavy
-  campaign's gap is expected noise, but don't presume its DIRECTION.
-- On iOS-heavy traffic treat S2S/postback as the more stable money-truth and
-  Meta's iOS figure as modeled — reconcile, don't blindly trust either side.
-- PWA/web funnels don't use SKAN (they're web, senior-buyer-ops/03) — this mainly
-  bites real native-app / store flows.
+Meta backfills iOS with modeling + view-through, so its number can land
+**EITHER side** of tracker/backend (same rule as meta-ads/08). Rule: segment
+Meta-vs-tracker deltas by OS/GEO before reconciling (iOS-heavy gap is expected
+noise, direction not assumed); on iOS-heavy traffic treat S2S/postback as
+money-truth, Meta's iOS figure as modeled. PWA/web funnels don't use SKAN
+(senior-buyer-ops/03) — this mainly bites native-app/store flows. ATT opt-in
+rate figures/vendor comparisons: not owned by this file — verify current, do
+not carry a stale number here.
 
 ## Multi-tracker sync & the conversion ledger
 
-Two trackers in the chain (your Keitaro + the network's tracker, or a redirect
-tracker + an analytics one) will NOT agree by default — different click-id keys,
-timezones, dedup, bot filters. Pick ONE as source of truth for money (usually the
-one that holds the payout postback); treat the other as cross-check, never a
+Two trackers in the chain (your Keitaro + network's tracker, or redirect
+tracker + analytics one) will NOT agree by default — different click-id keys,
+timezones, dedup, bot filters. Pick ONE as source of truth for money (usually
+whichever holds the payout postback); treat the other as cross-check, never a
 second total to add.
 
-- Join key: they reconcile only if a shared click id crosses both — carry your
-  subid/external_id into the network as its sub param and back on the postback, so
-  each conversion matches 1:1 across both. No shared key → you can only compare
-  aggregates, not rows.
-- Align timezone/window to the ad-account tz before comparing a day; a "gap" is
+- Join key: reconcile only if a shared click id crosses both — carry your
+  subid/external_id into the network as its sub param and back on the
+  postback, so each conversion matches 1:1. No shared key → aggregates only,
+  not rows.
+- Align timezone/window to ad-account tz before comparing a day; a "gap" is
   often just a boundary/lag mismatch (reconciliation tree above).
 
 Conversion ledger (raw, append-only): log every INCOMING postback verbatim —
-timestamp, subid, status, payout, tid, raw query — separate from the tracker's
-own mutable state. Why it's worth the trouble:
-
-- Rebuild/replay: if the tracker breaks or a status scheme changes, re-import
-  conversions (Keitaro imports via subid+status+payout+tid; the postback log is
-  the source) instead of losing the period.
-- Scrub disputes: you can prove exactly what the network sent, postback by
-  postback, when they later "adjust" approvals.
-- Dedup audit: distinct-tid vs overwrite behaviour is verifiable against the raw
-  stream. Append, never rewrite; key each row by an idempotency id (subid+tid+
-  status) so a replay can't double-count, and REDACT tokens/PII from the stored
-  query — don't keep secrets raw.
+timestamp, subid, status, payout, tid, raw query — separate from tracker's own
+mutable state.
+- Rebuild/replay: re-import conversions (Keitaro via subid+status+payout+tid;
+  postback log is the source) if tracker breaks or a status scheme changes,
+  instead of losing the period.
+- Scrub disputes: proves exactly what the network sent, postback by postback.
+- Dedup audit: distinct-tid vs overwrite verifiable against raw stream. Append,
+  never rewrite; key each row by idempotency id (subid+tid+status) so replay
+  can't double-count; REDACT tokens/PII from stored query.
 
 ## Cohort nowcasting (decide before the cohort matures)
 
 Today's CPA looks terrible because today's conversions haven't posted back yet
-(confirm/deposit/KYC lag). Don't wait blind and don't judge raw — project the
-mature number:
+(confirm/deposit/KYC lag). Project the mature number instead of waiting blind:
 
-1. Build the completion curve from history: take matured click-date cohorts,
+1. Build the completion curve from history: matured click-date cohorts,
    bucket each conversion by lag = conversion_time − click_time (Keitaro
-   `/conversions/log`: `postback_datetime` − `click_datetime`; Binom: the
-   built-in `Time since click` column, 02). p(d) = cumulative fraction of a
-   cohort's eventual conversions that have arrived by age d days.
-2. Nowcast a fresh cohort: `predicted_mature ≈ observed_to_date ÷ p(age_so_far)`;
-   `predicted_CPA = spend ÷ predicted_mature`. Decide kill/scale on the NOWCAST,
-   not the raw immature count (feeds senior-buyer-ops marginal scaling + team
-   stop-loss — both require MATURE numbers).
-3. Keep the two bases separate: click-date cohorts drive MEDIA decisions (a
-   conversion belongs to the click that caused it); conversion-date drives
-   FINANCE/cashflow (when money actually lands). Never mix them in one figure.
+   `/conversions/log`: postback_datetime − click_datetime; Binom: built-in
+   `Time since click`, 02). p(d) = cumulative fraction of a cohort's eventual
+   conversions arrived by age d days.
+2. Nowcast: `predicted_mature ≈ observed_to_date ÷ p(age_so_far)`;
+   `predicted_CPA = spend ÷ predicted_mature`. Decide kill/scale on the
+   NOWCAST, not raw immature count (feeds senior-buyer-ops marginal scaling +
+   team stop-loss — both require MATURE numbers).
+3. Keep bases separate: click-date drives MEDIA decisions; conversion-date
+   drives FINANCE/cashflow. Never mix in one figure.
 
-Caveats: the curve DRIFTS — a new offer/GEO/season changes the lag, so refit on
-recent cohorts, don't reuse a stale curve. Low-volume cohorts give a noisy
-nowcast (wide error) — treat as directional. And a never-arriving conversion
-isn't lag: a broken/failed postback looks identical to a slow one early on, so
-rule out a tracking break (01) before trusting the projection.
+Caveats: curve DRIFTS — new offer/GEO/season changes lag, refit on recent
+cohorts. Low-volume cohorts → noisy nowcast, treat as directional. A
+never-arriving conversion isn't lag — rule out a tracking break (01) before
+trusting the projection.
 
 ## Anti-fraud / cloaking signals (read as a set)
 
-- raw clicks >> unique: bot refresh / source re-fire — judge cost on payout
+- raw clicks >> unique: bot refresh/source re-fire — judge cost on payout
   count, not raw clicks.
-- rising bot_share / proxies: moderation crawlers on the white page; some is
-  normal on a cloaked funnel, a rising trend precedes domain/account bans. This
-  is the SIGNAL; the response (domain rotation) is a grey-ops action — Meta
-  `meta-grey-ops/01`, Google `google-grey-ops/03` + cloak stack `google-grey-ops/05`.
+- rising bot_share/proxies: moderation crawlers on the white page; some is
+  normal on a cloaked funnel, a rising trend precedes domain/account bans.
+  Signal only — response (domain rotation) is grey-ops: Meta `meta-grey-ops/01`,
+  Google `google-grey-ops/03` + cloak stack `google-grey-ops/05`.
 - near-zero LP CTR w/ normal clicks: cloaca over-filtering real users (or black
   page broken) — a tracking fault, not bad traffic; fix the filter, don't kill.
 - empty_referrers spike: stripped/direct traffic — correlate with bot_share.
@@ -143,9 +117,8 @@ rule out a tracking break (01) before trusting the projection.
 
 ## Markup & the mapping contract
 
-There is no automatic split — the tracker only knows what your campaign URL
-maps into its parameters. Nail down this contract before analysis (it's the
-single thing that makes per-account/per-ad numbers real):
+No automatic split — the tracker only knows what your campaign URL maps into
+its parameters:
 
 | Meta side (macro) | → tracker param | carries |
 |---|---|---|
@@ -154,102 +127,69 @@ single thing that makes per-account/per-ad numbers real):
 | FB click id (fbclid / macro) | external_id / subid | click identity for the return postback |
 | offer event (reg/FTD/sale) | postback `status` | which status = your PAYOUT metric |
 
-- FB substitutes macros at click time; the tracker splits by `ad_campaign_id`
-  ONLY because your URL feeds the campaign name into it — it is not intrinsic
-  (01). Per-ad splits need `{{ad.id}}`→sub_id_N mapped; confirm before assuming
-  per-ad analysis.
+- Tracker splits by `ad_campaign_id` ONLY because your URL feeds the campaign
+  name into it (01). Per-ad splits need `{{ad.id}}`→sub_id_N mapped.
 - FB naming discipline IS the tracking plan (meta-grey-ops/03): campaign name =
-  ad account, ad name = creative — so the contract above resolves cleanly.
+  ad account, ad name = creative.
 - Pin the payout `status` in the contract too — optimization event, tracker
-  status, and payout event must line up or CPL/ROI is measuring the wrong thing.
+  status, and payout event must line up or CPL/ROI measures the wrong thing.
 
 ## Backend optimization contract (which status → which CAPI event)
 
-Three events that people conflate but are usually DIFFERENT — pin each
-separately, because optimizing the wrong one is the most expensive silent error:
-
-- REPORTING event — what you show the team / call a "lead".
-- PAYOUT event — the tracker status you actually get paid on (senior-buyer-ops
+Three events people conflate but are usually DIFFERENT — pin each separately;
+optimizing the wrong one is the most expensive silent error:
+- REPORTING event — what you call a "lead" to the team.
+- PAYOUT event — tracker status you actually get paid on (senior-buyer-ops
   operating-contract #1).
-- OPTIMIZATION event — the CAPI/Pixel event the ad set bids toward. This is the
-  one Meta's delivery learns from; it drives who you get shown to.
+- OPTIMIZATION event — the CAPI/Pixel event the ad set bids toward; drives who
+  you get shown to.
 
-Wiring: tracker/CRM status → CAPI event back to Meta. The separate Offline
-Conversions API was discontinued (~May 2025, widely reported — confirm the
-dataset migration in Events Manager) — all CRM/backend stages now flow through
-standard CAPI into the dataset. Set `action_source` to where the conversion
-ACTUALLY happened, from the enum (`website`, `app`, `phone_call`, `chat`, `email`,
-`physical_store`, `business_messaging`, `system_generated`, `other`) — NOT
-`system_generated` for every server postback. `system_generated` is only for
-conversions that occur automatically with no customer interaction (e.g. a
-subscription auto-renewal). Set `action_source` PER EVENT by where THAT stage
-actually happened — don't auto-inherit it from the original lead's source. CAPI
-mechanics live in meta-ads/08; this is which status maps to what.
+Wiring: tracker/CRM status → CAPI event. Offline Conversions API discontinued
+(~May 2025) — all CRM/backend stages now flow through standard CAPI. Set
+`action_source` to where the conversion ACTUALLY happened (`website`, `app`,
+`phone_call`, `chat`, `email`, `physical_store`, `business_messaging`,
+`system_generated`, `other`) PER EVENT, not inherited from the original lead's
+source; `system_generated` only for conversions with no customer interaction
+(e.g. subscription auto-renewal). CAPI mechanics live in meta-ads/08; this file
+is which status maps to what.
 
 Choosing the optimization event = reliability × volume × correlation-with-payout:
-- Deeper event (FTD / confirmed sale) is best aligned with revenue but LOW volume
-  → an ad set may never clear the learning-phase volume floor (Meta's ~50
-  optimization events/ad set/7d — a documented heuristic, verify live), so Meta
-  optimizes badly. Shallower event (reg / lead) is high-volume and easy to
-  optimize but weakly correlated with payout → cheap junk that never converts
-  downstream.
-- Rule: optimize for the DEEPEST event that still clears the learning-volume bar.
-  If the payout event is too rare, optimize a reliable UPSTREAM proxy that
-  correlates with payout, and monitor that correlation (reg→FTD rate) so you're
-  not scaling volume that dies downstream.
-- Value optimization (VBO) needs `value`+`currency` and clears a volume gate thin
-  grey funnels often can't meet → optimize on conversion COUNT and control quality
-  via which status you send back, not VBO. (Exact VBO + Conversion-Leads
-  eligibility numbers live in meta-ads/08 — single source.)
-- Native lead forms: Meta's Conversion Leads goal (Lead Ads / Instant Forms) takes
-  CRM stage events via CAPI to optimize a down-funnel stage instead of raw form
-  fills — eligibility gates in meta-ads/08.
-- Only send events you can stand behind (deduped via event_id, real): the
-  optimization signal also feeds Meta's quality modeling — noisy/fake events
-  degrade delivery, not just reporting.
+- Deeper event (FTD/confirmed sale) aligns with revenue but LOW volume → may
+  never clear learning-phase volume floor (Meta's ~50 optimization events/ad
+  set/7d — verify live). Shallower event (reg/lead) is high-volume, easy to
+  optimize, weakly correlated with payout → cheap junk that never converts.
+- Rule: optimize the DEEPEST event that still clears the learning-volume bar.
+  If payout event is too rare, optimize a reliable UPSTREAM proxy correlated
+  with payout, and monitor that correlation (reg→FTD rate).
+- VBO needs `value`+`currency` and a volume gate thin grey funnels often can't
+  meet → optimize on conversion COUNT, control quality via which status you
+  send back. (VBO + Conversion-Leads eligibility numbers: meta-ads/08.)
+- Native lead forms: Meta's Conversion Leads goal takes CRM stage events via
+  CAPI to optimize a down-funnel stage instead of raw form fills; eligibility
+  gates in meta-ads/08.
+- Only send events you can stand behind (deduped via event_id, real) — the
+  signal also feeds Meta's quality modeling; noisy/fake events degrade
+  delivery, not just reporting.
 
 ## Telegram Mini App / bot — CAPI without a pixel
 
-Telegram WebView is not a reliable Pixel jar (`senior-buyer-ops/03`). Server CAPI
-is the path. The failure mode is stuffing `fbclid` into the Telegram deep link.
+Telegram WebView is not a reliable Pixel jar (senior-buyer-ops/03) → server
+CAPI is the path. Failure mode: stuffing `fbclid` into the Telegram deep link
+— it's case-sensitive, often >64 bytes, not `[\w-]`-safe. **Never put it in
+`start`/`startapp`.** Store it on the tracker click; put the tracker click id
+(or shorter alias) in the Telegram param instead (`t.me/<bot>/<app>?startapp=<token>`,
+512-byte limit, vs `t.me/<bot>?start=<token>` at 64 bytes).
 
-Two Telegram payloads, different limits — pick one and keep the token **short**:
-
-| Link | Where it lands | Limit | Charset |
-|---|---|---|---|
-| `t.me/<bot>?start=<token>` | Bot `/start <token>` | **64 bytes** (`START_PARAM_TOO_LONG`) | A–Z a–z 0–9 `_` `-` |
-| `t.me/<bot>/<app>?startapp=<token>` | Mini App `start_param` / `tgWebAppStartParam` | **512** | `^[\w-]{0,512}$` |
-
-`fbclid` is **case-sensitive**, often longer than 64 bytes, and not a `[\w-]`-safe
-opaque key. **Never put it in `start` / `startapp`.** Store it on the tracker
-click; put the tracker click id (or a shorter alias) in the Telegram param.
-
-```
-Meta ad Website URL
-  → tracker (captures fbclid, issues token)
-  → 302 t.me/<bot>/<app>?startapp=<token>
-Mini App / bot reads start_param
-  → lookup token → fbclid + subids
-  → on Lead / Purchase: CAPI below
-```
-
-Ad dest is still an **HTTPS hop you own**. Direct `t.me` as the ad URL skips the
-capture step. `action_source` = where **this** event happened — Mini App HTTPS
-page = `website` (then `event_source_url` + `client_user_agent` are **required**);
-bot-only with no page = `other` or `chat`, not a fake `website`.
-
-**Do not send Telegram’s webhook IP as `client_ip_address`.** Only the user’s IP
-from **your** Mini App HTTPS request. No user IP → omit the field. Same for UA.
-
-**Do not invent `fbp`.** `_fbp` is a first-party cookie on **your** domain. Bot-only
-events have none — omit. Mini App on your origin may mint `_fbp` there; otherwise
-omit. Official: send `fbp`/`fbc` when available; server-built `fbc` without a
-cookie uses subdomainIndex **1**.
-
-`fbc` = `fb.1.<unix_ms_when_fbclid_first_seen>.<fbclid>` — do not hash, do not
-rewrite case. `external_id` = the same token you put in `startapp` (hashing
-recommended; same format on every channel). Pixel never fires → no Pixel
-dedup pair; still send a stable `event_id` so retries don’t double-count.
+Contract: Meta ad URL → tracker (captures fbclid, issues token) → 302 to Mini
+App with `startapp=<token>` → app reads `start_param`, looks up token → fbclid
+- subids → on Lead/Purchase, fire CAPI. `action_source` = `website` when the
+Mini App is on your HTTPS origin (`event_source_url` + `client_user_agent`
+required then); `other`/`chat` for bot-only with no page. Never send
+Telegram's webhook IP as `client_ip_address`, never invent `fbp` (omit if no
+first-party cookie); server-built `fbc` without a cookie uses subdomainIndex 1
+(`fb.1.<unix_ms>.<fbclid>`, no hash/case rewrite). `external_id` = same token
+as `startapp` (hash recommended). No Pixel fire → no dedup pair, still send a
+stable `event_id`.
 
 ```bash
 curl -sS -X POST "https://graph.facebook.com/v21.0/${DATASET_ID}/events" \
@@ -269,18 +209,19 @@ curl -sS -X POST "https://graph.facebook.com/v21.0/${DATASET_ID}/events" \
   }]'
 ```
 
-Pin Graph version to whatever Events Manager shows — `v21.0` here is an example,
-not a freeze. Test-events code goes in `test_event_code` until the payload is
-green. Purchase still needs `custom_data.value` + `currency`. Which tracker
-status maps to `Lead` vs `Purchase` is the contract above, not this curl.
+Pin Graph version to whatever Events Manager shows (`v21.0` is an example, not
+a freeze). Use `test_event_code` until green. Purchase needs
+`custom_data.value`+`currency`. Status→event mapping is the contract above,
+not this curl.
 
 ## Daily routine (automate)
 
-For YESTERDAY (account tz): pull Meta spend/impr/clicks per live account → push
-total spend to tracker cost (idempotent) → pull tracker payout count → fill the
-team report (raw columns, formulas compute) → read per-account CPL vs target →
-kill/watch/scale → log snapshot. Missed days: re-run per date (scripts take a
-date arg).
+For YESTERDAY (account tz): pull Meta spend/impr/clicks per live account →
+push total spend to tracker cost (idempotent) → pull tracker payout count →
+fill team report (raw columns, formulas compute) → read per-account CPL vs
+target → kill/watch/scale → log snapshot. Missed days: re-run per date
+(`meta-grey-ops/scripts/insights.py --since/--until`, or your own script with
+a date arg).
 
 ## Reporting upward
 

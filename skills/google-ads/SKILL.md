@@ -1,6 +1,6 @@
 ---
 name: google-ads
-description: "Senior Google Ads, single-account layer: plan, launch, audit, diagnose, scale one account. Search, PMax, Demand Gen, Shopping, AI Max, Smart Bidding, RSA, tCPA/tROAS, tracking/OCI, API mass-launch. Clean-marketing layer — grey infra/survival is google-grey-ops, feeds/Merchant Center is google-feed-ops, trackers/metrics are tracker-ops, portfolio/multi-account allocation is senior-buyer-ops. Not organic SEO."
+description: "Senior Google Ads, single-account layer: plan, launch, audit, diagnose, scale one account. Search, PMax, Demand Gen, Shopping, AI Max, Smart Bidding, RSA, tCPA/tROAS, tracking/OCI, GAQL and API mechanics. Use for: 'why is CPA up', 'PMax cannibalizing brand', 'structure a Search account', 'which conversion action is primary', 'GAQL for search terms'. Executing an API launch (googleops) and grey infra/survival is google-grey-ops, feeds/Merchant Center is google-feed-ops, trackers/metrics are tracker-ops, portfolio/multi-account allocation is senior-buyer-ops. Not organic SEO."
 ---
 
 # Google Ads
@@ -51,12 +51,18 @@ Read only what the task needs.
 Always read `00` before making a numerical claim or citing a benchmark. Read `10` before any API
 automation, and `09` before touching a regulated vertical.
 
+## Playbooks
+
+Vertical worked examples: `playbooks/b2b-saas.md`, `playbooks/local-leadgen.md`,
+`playbooks/us-ecommerce.md`.
+
 ## Boundaries
 
 - **Buy well** → here.
 - **Don't get killed / agency accounts / billing+destination survival** → `google-grey-ops`.
-- **API mutate graph / `validate_only` mass-launch** → here (`10`). Grey overlay (whose MCC, whose
-  developer token, unique destination) → `google-grey-ops`.
+- **API mechanics** (GAQL, mutate graph, quotas, OCI) → here (`10`). **Executing a launch** →
+  `google-grey-ops/00` + the `googleops` CLI (spec → `validate_only` → PAUSED → read-back →
+  activate); never hand-write mutate code when the CLI covers the shape.
 - **Feed, Merchant Center, product eligibility** → `google-feed-ops`. Shopping/PMax *campaigns* stay
   here (`01`, `07`).
 - **Count money, tracker sync, gclid postbacks** → `tracker-ops`.

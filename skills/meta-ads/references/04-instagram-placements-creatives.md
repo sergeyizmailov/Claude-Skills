@@ -1,265 +1,152 @@
-# Instagram Placements & Ad Creatives (2025–2026)
+# Instagram Placements & Ad Creatives
 
-Knowledge base for Meta Ads Manager, mid-2026. Covers every Instagram placement, Advantage+ vs manual placement strategy, exact creative specs, Advantage+ creative enhancements, copy rules, Reels hooks, UGC performance data, and creative volume best practices.
+Reviewed 2026-07-22.
 
-**Naming notes (2025–2026):**
-- "Automatic placements" → renamed **Advantage+ placements** (ad-set level setting).
-- "Automatic advanced matching / dynamic creative enhancements" → **Advantage+ creative** (ad level).
-- "Advantage+ shopping campaigns (ASC)" → renamed **Advantage+ sales campaigns** in early 2025.
-- ODAX objectives are the only campaign objectives now: **Awareness, Traffic, Engagement, Leads, App promotion, Sales**. Older sources referencing "Conversions", "Reach", "Video views", "Catalog sales" objectives describe the pre-ODAX UI.
-- Placement UI groups: **Feeds / Stories and Reels / In-stream ads for videos and Reels / Search results / Messages / Apps and sites** (Jon Loomer, current UI).
+**Naming**: "Automatic placements"→**Advantage+ placements** (ad-set level). "Automatic advanced matching/dynamic creative enhancements"→**Advantage+ creative** (ad level). "ASC"→**Advantage+ sales** (early 2025). ODAX is the only objective set now (Awareness/Traffic/Engagement/Leads/App promotion/Sales) — sources naming "Conversions"/"Reach"/"Video views"/"Catalog sales" describe pre-ODAX UI. Placement UI groups: Feeds / Stories and Reels / In-stream ads for videos and Reels / Search results / Messages / Apps and sites.
 
 ---
 
 ## 1. Where placements are selected
 
-Click-path: **Ads Manager → Campaigns → + Create → Ad set level → "Placements" section**.
+Ad set → Placements. Default **Advantage+ placements**; **Manual** exposes platform/placement checkboxes + device targeting. Meta recommends **6+ placements** when going manual so delivery isn't starved [Meta guidance via Topkee 2025]. Results per placement: Breakdown → Delivery → Placement.
 
-- Default: **Advantage+ placements** (recommended). **Manual placements** lets you pick platforms (Facebook, Instagram, Audience Network, Messenger) and individual placements via checkboxes, plus device targeting (All/Mobile/Desktop, specific OS).
-- Meta recommends **6+ placements** when going manual so delivery isn't starved (Meta guidance, echoed by Topkee 2025).
-- View results per placement: **Ads Manager → Breakdown → Delivery → Placement**.
-
-**Instagram placements available in Manual placements (2026):**
+Instagram placements in Manual mode:
 
 | UI group | Instagram placements |
 |---|---|
-| Feeds | Instagram feed, Instagram profile feed, Instagram Explore, Instagram Explore home |
-| Stories and Reels | Instagram Stories, Instagram Reels |
-| In-stream ads for videos and Reels | Ads on Instagram Reels (overlay format) |
+| Feeds | Instagram feed, profile feed, Explore, Explore home |
+| Stories and Reels | Stories, Reels |
+| In-stream ads for videos/Reels | Ads on Instagram Reels (overlay format) |
 | Search results | Instagram search results |
-
----
 
 ## 2. Instagram placements in detail
 
-### Instagram Feed
-- Classic in-feed placement between organic posts; most attention-dense surface on Instagram, also most competitive. Supports image, video, carousel, collection (ratios: §4).
-- Per Tinuiti data cited by Shopify (2026): Feed dropped to ~26% of Instagram ad impressions, behind Reels (~33%) and Stories — no longer the default volume placement.
+- **Feed**: classic in-feed, most attention-dense and most competitive; supports image/video/carousel/collection. Dropped to **~26%** of IG ad impressions, behind Reels (~33%) and Stories [Tinuiti via Shopify 2026] — no longer the default volume placement.
+- **Stories**: full-screen 9:16, ephemeral, land in the first second. Image auto-displays ~5–7s; video >60s auto-segments; native carousel = 3 cards max/unit; collection supported. More impressions than Feed. Only placement family (with Reels) where sound is a realistic expectation — design for sound-on AND captions for sound-off.
+- **Reels**: full-screen 9:16, fastest-growing at **~33%** of IG ad impressions, all-time high. Native look (trending audio, fast cuts, UGC) outperforms polished TV-style. Boosted-Reels-as-ads restrictions [Strike Social]: no Reels published before 2021-10-15; no licensed music (original audio or Meta Sound Collection only); no face/camera effects; no GIFs; no product tags. Max duration 15 min (spec); real-world 5–30s.
+- **"Ads on Instagram Reels"** (in-stream/overlay) ≠ "Instagram Reels" — appears as a banner/post-loop overlay on top of an existing organic Reel, not a standalone Reel; smaller, interruptive, different creative rules.
+- **Explore**: appears after a tap into the Explore grid content chain — high-intent discovery. Image/video/carousel.
+- **Explore home**: ad appears directly in the Explore grid before any tap (launched Oct 2022, opened via Marketing API Nov 2022) — distinct checkbox from "Explore," both needed for full coverage. Square 1:1, must read at thumbnail size.
+- **Profile feed**: ads inserted into a public profile's feed for non-followers (launched Oct 2022). Lower-intent, cheaper impressions, wider ratio range than Feed.
+- **Search results**: appears in results list after a search-post tap (announced 2023); small/growing; image+carousel; no headline field in some configs [uncertain: spec coverage thin].
 
-### Instagram Stories
-- Full-screen 9:16 between organic Stories; ephemeral, fast consumption — creative must land in the first second.
-- Image auto-displays ~5–7s; video >60s auto-segments into multiple Story cards; native carousel = 3 cards max per unit before expanding; collection supported.
-- Generates more impressions than Feed (Shopify/Tinuiti, 2026).
-- Only placement family (with Reels) where sound is a realistic expectation — design for sound-on AND captions for sound-off.
+Each placement has its own format/dimension/truncation rules and cost dynamics; Audience Network/rewarded-video are the placements prone to accidental clicks/bots/forced views — Instagram placements themselves are comparatively clean.
 
-### Instagram Reels
-- Full-screen 9:16 between organic Reels; fastest-growing placement at ~33% of all Instagram ad impressions, an all-time high (Tinuiti via Shopify, 2026).
-- Creative should feel native — trending-style audio, fast cuts, UGC look; polished TV-style spots underperform.
-- Boosted-Reels-as-ads restrictions (Strike Social spec sheet): no Reels published before Oct 15, 2021; no licensed music (original audio or Meta Sound Collection only); no face/camera effects; no GIFs; no product tags.
-- Max duration 15 minutes (spec); performance reality is 5–30s ads.
+## 3. Advantage+ placements vs manual
 
-### "Ads on Instagram Reels" (in-stream/overlay group)
-- Distinct from "Instagram Reels". These appear **on top of an existing organic Reel** (banner/post-loop overlay), not as a standalone Reel in the feed (Jon Loomer). Smaller, interruptive format; different creative rules.
+**Default (Advantage+)**: Meta distributes budget to eligible placements by historical data. Rule of thumb: for purchase/conversion goals leave it ON — the algorithm adjusts away from placements whose clicks don't convert, so weak-placement clicks don't matter [Jon Loomer]. Removing "low-performing" placements usually raises costs — cheap placements (e.g. right column) assist conversions without direct clicks. Meta's illustrative math [Meta Help Center via AdNabu]: with $27 and 11 impression opportunities at different costs/result ($3 FB/$5 IG/$1 AN), using all placements beats cherry-picking the "best."
 
-### Instagram Explore
-- Appears after a user taps a tile in the Explore grid and scrolls the content chain — high-intent discovery context. Supports image, video, carousel.
+**Override to Manual when**: (1) Traffic/link-click/LPV optimization — inspect Audience Network separately for click quality, exclude only on account-data evidence or brand-safety need, never infer fraud from placement alone; (2) ThruPlay/video-view optimization — consider removing AN rewarded video (forced views inflate metrics); (3) Reach with frequency caps — algorithm chases cheapest placements, force Feeds if action matters (costs rise, accept it); (4) creative-format constraints — 9:16-only assets should limit to Stories/Reels rather than auto-crop from landscape; prefer per-placement asset customization over restricting placements; (5) placement-level testing (e.g. Reels-only ad sets for clean creative data); (6) brand-safety/compliance in regulated verticals. **Do NOT remove placements just because they show few results** — remove only placements producing low-quality versions of the exact optimized event.
 
-### Instagram Explore home
-- Ad appears **directly in the Explore grid** (before the tap). Launched Oct 2022, opened via Marketing API Nov 2022 (Digiday 2022; Search Engine Journal 2022). Distinct checkbox from "Instagram Explore" — both must be selected for full Explore coverage.
-- Square 1:1 grid context — creative renders as a tile among organic tiles, must read at thumbnail size.
-
-### Instagram profile feed
-- Ads inserted into a **public profile's** feed as a non-follower scrolls. Launched October 2022 (Digiday; SEJ). Lower-intent, passive context; cheaper impressions. Wider ratio range than Feed (§4).
-
-### Instagram search results
-- Appear in the results list when a user taps a search result post and scrolls. Announced 2023; small, growing surface. Image and carousel supported; no headline field in some configs [uncertain — Meta spec coverage thin here].
-
-**Behavioral differences to remember (Jon Loomer):** each placement has its own display rules for format, dimensions, and character truncation; costs vary with competition; some placements (esp. Audience Network, rewarded video) are prone to accidental clicks/bots/forced views. Instagram placements themselves are comparatively clean.
-
----
-
-## 3. Advantage+ placements vs manual placements
-
-### The default: Advantage+ placements
-- Meta distributes budget to any eligible placement using historical data/audience behavior, optimizing total results within budget. **Rule of thumb (Jon Loomer):** for purchase/conversion goals, leave Advantage+ placements ON — low-quality clicks from weak placements don't matter because the algorithm adjusts away from placements whose clicks don't convert.
-- Removing "low-performing" placements usually just raises costs — cheap placements (e.g., right column) assist conversions even without direct clicks.
-- Meta's illustrative math (Meta Help Center example via AdNabu): with $27 and 11 impression opportunities at different costs per result ($3 FB, $5 IG, $1 AN), using all placements yields more total results than cherry-picking the "best" ones.
-
-### When to override to Manual placements
-1. **Traffic/link-click or landing-page-view optimization** → inspect Audience Network separately for click quality and downstream behavior. Exclude it only when account data shows low-quality delivery or when brand-safety requirements demand it; do not infer fraud from placement alone.
-2. **ThruPlay/video-view optimization** → consider removing **Audience Network rewarded video** (forced/incentivized 15s views inflate metrics).
-3. **Reach campaigns with frequency caps** → the algorithm chases cheapest placements; if you need action, force Feeds (costs rise, accept it).
-4. **Creative-format constraints** → if you only produced 9:16, limit to Stories/Reels — a landscape video auto-cropped into Stories wastes the impression. Prefer placement-specific asset uploads ("asset customization") over restricting placements.
-5. **Placement-level testing** → isolating e.g. Reels-only ad sets gives clean placement data for creative decisions.
-6. **Brand-safety/compliance** → regulated verticals sometimes must exclude surfaces like profile feed or search results.
-- **Do NOT remove placements just because they show few results** — only remove placements that produce low-quality versions of the exact event you optimize for.
-
-### Gotchas
-- Not all objectives support all placements (e.g., Messages placement only appears for sponsored-message campaigns).
-- Advantage+ sales campaigns historically locked placement control; 2025 updates restored some, but expect fewer manual options inside Advantage+ campaign types.
-- Placement selection lives at the **ad set** — you can't vary placements per ad, only per ad set.
-- Duplicate-ad-set trap: duplicated ad sets carry old placement choices — verify after duplicating.
-
----
+Gotchas: not all objectives support all placements (Messages only for sponsored-message campaigns); Advantage+ sales historically locked placement control, 2025 restored some — expect fewer manual options inside Advantage+ campaign types; placement selection lives at **ad set** level only (can't vary per ad); duplicated ad sets carry old placement choices — verify after duplicating.
 
 ## 4. Creative specs per placement
 
-Primary references: Meta's official ad spec sheet as mirrored by Strike Social (May 2026) and Sprout Social (Aug 2025). Minor discrepancies between the two are noted.
+Primary refs: Strike Social (2026-05) and Sprout Social (2025-08) mirrors of Meta's spec sheet; discrepancies flagged.
 
-### Aspect-ratio cheat sheet
-- **1:1 (square)** — Feed safe default, Explore home grid, carousel cards.
-- **4:5 (portrait 1080×1350)** — recommended for Instagram Feed; max vertical space without leaving Feed context.
-- **9:16 (full vertical 1080×1920)** — Stories, Reels.
-- **1.91:1 (landscape)** — supported in Feed/profile feed but weak; avoid for Instagram-first campaigns.
-- Pro strategy: design **4:5 + 9:16** versions of every concept; use per-placement asset customization in Ads Manager instead of relying on auto-crop.
+Ratio cheat sheet: **1:1** — Feed safe default, Explore home grid, carousel cards. **4:5 (1080×1350)** — recommended for Feed. **9:16 (1080×1920)** — Stories/Reels. **1.91:1** — supported in Feed/profile feed but weak, avoid IG-first. Design **4:5 + 9:16** per concept; use per-placement asset customization rather than auto-crop.
 
 ### Image ads
 
 | Placement | Ratio | Min. resolution | Max file | Primary text | Headline |
 |---|---|---|---|---|---|
-| Instagram Feed | 1:1 (4:5–1.91:1 supported) | 1080×1080 (Sprout: 1440×1440 recommended) | 30 MB | 125 ch | 40 ch |
-| Instagram profile feed | 1:1 (1.91:1–4:5) | 1080×1080 | 30 MB | 125 ch | 40 ch |
-| Instagram Stories | 9:16 | 1080×1920 (Sprout: 1440×2560) | 30 MB | 125 ch | — |
-| Instagram Reels | 9:16 | 1440×2560 rec. | 30 MB | **72 ch** | — |
-| Instagram Explore | 9:16 (Strike) / 1:1 (Sprout) [uncertain — sources conflict] | 1080×1080 | 30 MB | 125 ch | — |
-| Instagram Explore home | 1:1 | 1080×1080 | 30 MB | 125 ch | 40 ch |
-| Instagram search results | matches Explore-style specs [uncertain] | 1080×1080 | 30 MB | 125 ch | — |
+| Feed | 1:1 (4:5–1.91:1 ok) | 1080×1080 (Sprout: 1440×1440 rec.) | 30 MB | 125 ch | 40 ch |
+| Profile feed | 1:1 (1.91:1–4:5) | 1080×1080 | 30 MB | 125 ch | 40 ch |
+| Stories | 9:16 | 1080×1920 (Sprout: 1440×2560) | 30 MB | 125 ch | — |
+| Reels | 9:16 | 1440×2560 rec. | 30 MB | **72 ch** | — |
+| Explore | 9:16 (Strike) / 1:1 (Sprout) [uncertain] | 1080×1080 | 30 MB | 125 ch | — |
+| Explore home | 1:1 | 1080×1080 | 30 MB | 125 ch | 40 ch |
+| Search results | Explore-style [uncertain] | 1080×1080 | 30 MB | 125 ch | — |
 
-- File types: JPG, PNG. Min width 500 px. Aspect-ratio tolerance ~1–3%. Max hashtags: 30.
+File types JPG/PNG, min width 500px, ratio tolerance ~1–3%, max 30 hashtags.
 
 ### Video ads
 
 | Placement | Ratio | Min. resolution | Duration | Max file |
 |---|---|---|---|---|
-| Instagram Feed | 4:5 | 1080×1080 (Sprout: 1440×1880) | 1s–60 min | 4 GB |
-| Instagram profile feed | 4:5 (1.91:1–9:16) | 1080×1080 | 1s–60 min | 4 GB |
-| Instagram Stories | 9:16 | 1080×1080 min | 1s–60 min (15s+ gets segmented) | 4 GB |
-| Instagram Reels | 9:16 | 500×888 min | up to 15 min (spec) — target 5–30s | 4 GB |
-| Instagram Explore | 4:5 | 1080×1080 | 1s–60 min | 4 GB |
+| Feed | 4:5 | 1080×1080 (Sprout: 1440×1880) | 1s–60min | 4 GB |
+| Profile feed | 4:5 (1.91:1–9:16) | 1080×1080 | 1s–60min | 4 GB |
+| Stories | 9:16 | 1080×1080 min | 1s–60min (15s+ segments) | 4 GB |
+| Reels | 9:16 | 500×888 min | up to 15min (spec) — target 5–30s | 4 GB |
+| Explore | 4:5 | 1080×1080 | 1s–60min | 4 GB |
 
-- File types: MP4, MOV (GIF accepted in Feed/Stories). Codec stack: H.264, square pixels, fixed frame rate, progressive scan, AAC stereo 128 kbps+.
-- Captions and sound are optional but commonly useful on Stories/Reels. Design the message to remain understandable without sound, and test whether audio materially improves the selected outcome.
+MP4/MOV (GIF ok in Feed/Stories); codec H.264, square pixels, fixed frame rate, progressive scan, AAC stereo 128kbps+. Design for sound-off comprehension; test whether audio materially helps the outcome.
 
-### Safe zones (critical for Stories & Reels)
-- **Stories: keep text/logos/CTA out of the top 14% (~250 px) and bottom 20% (~340 px)** of the 1080×1920 canvas — profile icon, swipe-up CTA, and "Send message" bar render there (Meta guidance via Sprout/Strike).
-- **Reels: top ~14% (250 px), bottom up to 35% (~340–670 px depending on UI version), ~6% each side** — username, caption (up to 4 lines), like/comment/share/save buttons, audio attribution all overlay the bottom and right edge (Strike Social; screensnap.pro). Bottom 350 px is the practical floor; captions burned into the bottom third get covered.
-- Feed image ads: keep ~13% right / 10% bottom clear (disclaimers, promos) per Strike Social.
-- Ads Manager shows a yellow **safe-zone guard overlay** in the ad preview for Stories/Reels — check every placement preview before publishing.
+**Safe zones**: Stories — clear top 14% (~250px) and bottom 20% (~340px) of 1080×1920 (profile icon/swipe-up/message bar render there). Reels — top ~14% (250px), bottom up to 35% (~340–670px, UI-version dependent), ~6% each side (username/caption up to 4 lines/like-comment-share-save/audio attribution overlay bottom+right); 350px is the practical floor, burned-in captions below it get covered. Feed image ads: keep ~13% right/10% bottom clear. Ads Manager's yellow safe-zone overlay in preview — check every placement before publishing.
 
----
+## 5. Formats
 
-## 5. Formats: image vs video vs carousel vs collection
+Single image — fastest, strong for retargeting/offers, works everywhere. Single video — best for Reels/Stories/prospecting, needs hook discipline (§7). Carousel — 2–10 cards, 1:1 (4:5 in Feed per Sprout), 30MB image/4GB video per card, Stories carousel video ≤15s/card; each card own headline (40ch)+link; best for multi-product/feature breakdowns. Collection — cover image/video + catalog grid opening an Instant Experience (required); cover 1.91:1–1:1 (Feed/Stories), 9:16 cover with 1:1 product images for Reels; commerce/catalog accounts only. **Flexible ads** (replaced most of Dynamic Creative 2024–25) — up to 10 images/videos in one ad, Meta assembles per-user variations; use for variation testing without DCO overhead.
 
-- **Single image** — fastest to produce; strong for retargeting and offers. Works everywhere.
-- **Single video** — best for Reels/Stories and prospecting; hook discipline required (§7).
-- **Carousel** — 2–10 cards, 1:1 (4:5 in Feed per Sprout), image 30 MB / video 4 GB per card; Stories carousel video limited to 15s per card (Strike). Each card gets its own headline (40 ch) and link. Best for multi-product, feature breakdowns, sequenced storytelling.
-- **Collection** — cover image/video + product catalog grid opening into an Instant Experience (required). Cover ratio 1.91:1–1:1 (Feed/Stories), 9:16 cover with 1:1 product images for Reels. Commerce/catalog accounts only.
-- **Flexible ads** (replaced much of Dynamic Creative in 2024–2025): upload up to 10 images/videos in one ad; Meta assembles variations per user. Use for variation testing without DCO overhead.
+## 6. Advantage+ creative enhancements
 
----
+Ad level → "Advantage+ creative" → Edit. Defaults/account-level controls vary by feature/rollout — inspect every ad, preview every placement; don't assume a universal on/off switch.
 
-## 6. Advantage+ creative enhancements — the toggles
+**AI-labeled (generative, highest brand risk)**: Text improvements/generation (rewrites primary text/headline/description per placement — disable when exact wording/disclosures/isolated testing matter). Expand image (generative fill for 9:16 — test, warps edges/logos, or upload true 9:16). Generate background (catalog — test per product, avoid for premium brands). Image/3D animation (Ken Burns/parallax — disable on composed product photography, crops edges as it zooms). Enhance CTA (test). Add overlays (auto text overlay from headline — usually ugly, "looks pretty awful" per Loomer, test rarely).
 
-Location: **Ad level → "Advantage+ creative" → Edit** or an "Optimize media" panel. Defaults and account-level controls vary by feature/rollout — inspect every ad, preview every eligible placement; don't assume a universal account-wide switch or that every enhancement is enabled.
+**Standard (rule-based)**: Visual touch-ups (low risk, disable only under strict color governance). Music (adds Meta library track to silent Stories/Reels — preview every placement, disable for regulated/governed creative or supply approved audio). Relevant comments (social proof — enable, monitor quality). Adapt to placement/Dynamic media/description (catalog — enable). Site links (up to 4 extra links under CTA — use when useful, disable when they fragment a single conversion path, validate with a controlled test). Dynamic overlays/Info labels (catalog price badges — enable only with accurate pricing data).
 
-### AI-labeled (generative — highest brand risk)
-| Toggle | What it does | Verdict for brand control |
-|---|---|---|
-| **Text improvements / text generation** | Rewrites/reorders primary text, headline, description; swaps positions per placement | Disable when exact wording, disclosures, or isolated creative testing matter; otherwise test against a fixed control |
-| **Expand image** | Generative fill extends image edges to fit 9:16 etc. | Test; warps hands/logos/edges — preview every variant. Alternative: upload true 9:16 assets |
-| **Generate background** (catalog) | AI lifestyle backgrounds behind product shots | Test per product; avoid for premium brands |
-| **Image animation / 3D animation** | Ken Burns zoom / parallax on static images | Disable on composed product photography (edge crop as zoom progresses) |
-| **Enhance CTA** | Highlights phrases from copy onto CTA | Test |
-| **Add overlays** | Auto text overlays from headline onto image | Usually ugly (Jon Loomer: "looks pretty awful") — test rarely |
+Bulk edit exposes only some toggles. API: Marketing API v22.0 (Jan 2025) deprecated the single `enable_standard_enhancements` field — per-feature flags now required (`text_optimization_enable`, `enhance_cta_enable`, etc.) via `creative_features_spec`. Meta claims ~4% lower cost per result on average from enhancements [Meta-reported, directional]. Failure case (2025): True Classic ran unintended AI enhancements — Meta generated images of a grandma holding a product the brand doesn't sell [Ads Uploader]. Enhancements modify creative mid-flight — can't isolate variant performance while on; standardize enhancement state across test/control.
 
-### Standard (rule-based)
-| Toggle | What it does | Verdict |
-|---|---|---|
-| **Visual touch-ups / adjust brightness & contrast** | Subtle color/contrast lift | Low risk; disable only with strict color governance |
-| **Music** | Adds Meta library track to Stories/Reels videos lacking audio | Preview every placement; disable for regulated or tightly governed creative, or provide approved audio |
-| **Relevant comments** | Shows top comment under ad as social proof | Enable; monitor comment quality |
-| **Adapt to placement / Dynamic media / Dynamic description** (catalog) | Fit, pick best asset, pull catalog copy | Enable for catalogs |
-| **Site links** | Adds up to 4 extra links under CTA | Use when additional destinations support the journey; disable when they distract from a single conversion path. Validate with a controlled test |
-| **Dynamic overlays / Info labels** (catalog) | Price/discount badges | Enable only when pricing data is accurate |
-
-- Bulk editing: multi-select ads → Edit → Advantage+ creative (not every toggle exposed in bulk).
-- API: Marketing API v22.0 (Jan 2025) **deprecated the single `enable_standard_enhancements` field** — per-feature flags now required (`text_optimization_enable`, `enhance_cta_enable`, etc.) via `creative_features_spec`.
-- Meta claims ~4% lower cost per result on average from enhancements [Meta-reported; treat as directional].
-- Failure case (2025): True Classic ran unintended AI enhancements; Meta generated images of a grandma holding a product the brand doesn't sell (Ads Uploader).
-- **Testing hygiene:** enhancements modify creative mid-flight — you can't isolate variant performance while they're on; standardize enhancement state across test/control.
-
----
-
-## 7. Copy: primary text, headline, description
+## 7. Copy limits
 
 | Field | Recommended visible | Hard limit |
 |---|---|---|
-| Primary text | 50–125 characters | ~2,200 (truncated behind "… more" after ~125 on most placements; **72 ch on Reels**) |
-| Headline | 27–40 characters | 40 (UI practical) / 255 technical [sources conflict; plan for 40] |
-| Description | 20–30 characters | 30 practical / 125 technical [sources conflict; plan for 30] |
+| Primary text | 50–125 ch | ~2,200 stored (truncated behind "…more" after ~125 most placements; **72 ch on Reels**) |
+| Headline | 27–40 ch | 40 UI practical / 255 technical [sources conflict; plan for 40] |
+| Description | 20–30 ch | 30 practical / 125 technical [sources conflict; plan for 30] |
 | Hashtags | — | 30 max |
-| Carousel card headline | — | 40 ch per card |
+| Carousel card headline | — | 40 ch/card |
 
-Best practices:
-- Front-load value in the first ~125 characters — the rest sits behind "See more" (Reels: write short copy, only ~72 ch display).
-- Don't repeat the headline in the description; description only shows on some placements, so never put critical info there.
-- Text-improvements enhancement can reorder your copy (§6) — disable if message order matters.
-- The old 20%-text-on-image rule is dead; low text still correlates with cheaper delivery.
-- Q4 note (WordStream 2025): explicit problem-solution copy structure beat product-description copy by 28% CTR in December campaigns [seasonal benchmark].
+Front-load value in the first ~125 characters. Don't repeat headline in description; description doesn't show on all placements — never put critical info there. Text-improvements enhancement can reorder copy (§6) — disable if order matters. The old 20%-text-on-image rule is dead; low text still correlates with cheaper delivery. Seasonal: explicit problem-solution copy beat product-description copy by 28% CTR in December campaigns [WordStream 2025].
 
----
+## 8. Reels hooks & UGC — evidence status
 
-## 8. Reels hooks & UGC-style creative performance — evidence status
+Hook-archetype and UGC-lift figures are Meta-blog/vendor marketing quotes — priors, not benchmarks. Durable facts only: Reels truncates primary text at 72 chars (§7); audio-on lifts are Meta-reported, not independent.
 
-Hook-archetype and UGC-lift figures above are Meta-blog/vendor marketing quotes — priors, not benchmarks. Durable facts only: Reels truncates primary text at 72 chars (§7 spec table); audio-on lifts are Meta-reported, not independent.
+## 9. Creatives per ad set
 
----
+Treat `≤6` active and the `3–5` practitioner range as starting heuristics, not hard limits — Meta recommends limiting active ads/ad set so delivery can allocate enough impressions, but newer automated formats support more combinations. Learning status is evaluated at **ad-set level**, not per ad — don't multiply the legacy `50 events` heuristic by ad count, and the former `ads ≤ weekly budget ÷ (CPA×50) × 7` formula is dimensionally incorrect. Select creative count from budget, audience size, concept diversity, and the question being tested; reduce variants that get too little delivery to evaluate. Testing frameworks: 3-2-2 method (3 audiences × 2 creatives × 2 copy = 12 variants) only with budget to match; Meta's built-in Creative testing/A-B tool forces even budget splits for clean reads. **Diversification > volume**: near-duplicate assets add little info — vary angle/persona/offer/format, not just captions; no documented algorithmic penalty for volume. Advantage+ sales/Flexible ads tolerate higher variation counts — system assembles combinations internally without the same per-ad learning penalty. Refresh on account-relative fatigue evidence (declining attention/efficiency at comparable delivery, rising frequency, control-vs-challenger comparison) — calendar cadence and frequency thresholds are heuristics, not universal limits.
 
-## 10. How many creatives per ad set
+## 10. Common mistakes
 
-- Meta has recommended limiting active ads per ad set so delivery can allocate enough impressions to each; newer automated formats support more combinations. Treat `≤6` and the practitioner `3–5` range as starting heuristics, not hard limits.
-- Learning status is evaluated at the **ad-set level**, not per ad — don't multiply the legacy `50 events` heuristic by ad count, or use the former `ads ≤ weekly budget ÷ (CPA × 50) × 7` formula (dimensionally incorrect).
-- Select creative count from budget, audience size, concept diversity, and the question the test must answer. Reduce variants when most receive too little delivery to evaluate.
-- Testing frameworks: 3-2-2 method (3 audiences × 2 creatives × 2 copy = 12 variations) only with budget to match; Meta's built-in **Creative testing / A/B test** tool forces even budget splits for clean reads.
-- **Creative diversification > superficial volume:** near-duplicate assets add little new information or audience relevance — vary angle, persona, offer, and format, not just captions. Don't claim a specific algorithmic penalty; Meta documents none.
-- In Advantage+ sales campaigns and Flexible ads, higher variation counts are fine — the system assembles combinations internally without the same per-ad learning penalty.
-- Refresh when account-relative evidence shows fatigue: declining attention or conversion efficiency at comparable delivery, rising frequency, and a control-vs-challenger comparison. Calendar cadence and frequency thresholds are practitioner heuristics, not universal limits.
-
----
-
-## 11. Common mistakes checklist
-
-1. Running one 1:1 asset across all placements and letting Meta auto-crop/letterbox into Reels — white bars flag repurposed creative instantly; upload native 9:16.
-2. Burned-in captions in the bottom 350 px of Reels — hidden behind UI chrome.
-3. Leaving **Music** enhancement on — random library tracks on brand creative.
-4. Leaving **Text improvements** on during creative tests — invalidates attribution of what worked.
-5. Removing placements because "they don't convert" while optimizing for traffic — you likely meant to remove Audience Network only, for traffic objectives only.
-6. Restricting placements without a format, policy, quality, or experimental reason — this just reduces auction opportunities.
-7. Treating "Instagram Explore" and "Instagram Explore home" as one placement — they're separate checkboxes covering different surfaces.
-8. Ignoring per-placement previews — the yellow safe-zone overlay in Ads Manager preview exists precisely to catch §2/§4 problems.
+1. One 1:1 asset auto-cropped/letterboxed into Reels — white bars flag repurposed creative; upload native 9:16.
+2. Burned-in captions in bottom 350px of Reels — hidden behind UI chrome.
+3. Leaving Music enhancement on — random library tracks on brand creative.
+4. Leaving Text improvements on during creative tests — invalidates attribution of what worked.
+5. Removing placements because "they don't convert" while optimizing for traffic — usually should remove Audience Network only, and only for traffic objectives.
+6. Restricting placements without a format/policy/quality/experimental reason — just reduces auction opportunities.
+7. Treating Explore and Explore home as one placement — separate checkboxes, different surfaces.
+8. Ignoring per-placement previews — the yellow safe-zone overlay exists precisely to catch §2/§4 problems.
 9. Assuming Ads Manager > Preview shows what users saw — preview shows the unenhanced original; use Inspect per placement for enhancement-applied previews.
-10. Counting on >125 characters of primary text being read — write for the truncation.
+10. Counting on >125 characters of primary text being read — write for truncation.
 
 ---
 
 ## Sources
 
-1. https://www.jonloomer.com/a-guide-to-meta-ads-placements/ — placement inventory, Advantage+ vs manual decision rules (practitioner). Accessed 2026-07-22.
-2. https://sproutsocial.com/insights/instagram-ad-sizes/ — per-placement specs, safe zones, character limits, updated Aug 22 2025 (practitioner). Accessed 2026-07-22.
-3. https://strikesocial.com/blog/instagram-ad-specs/ — full spec sheet incl. Explore home, profile feed, Reels restrictions, safe zones, updated May 2026 (practitioner). Accessed 2026-07-22.
-4. https://www.socialmediatoday.com/news/meta-shares-tips-on-reels-hooks-creative-diversification-in-ads-and-threa/808182/ — Meta's Reels hook types, +13% incremental conversions from audio, Andromeda/creative diversification stats (practitioner, reports official Meta marketing blog). Accessed 2026-07-22.
-5. https://adsuploader.com/blog/advantage-plus-creative-enhancements — full Advantage+ creative enhancement matrix, AI vs standard tiers, API v22.0 deprecation, True Classic case, site-links CVR issue, June 2026 (practitioner). Accessed 2026-07-22.
-6. https://www.hyperfx.ai/blog/meta-advantage-creative-enhancements-issues — per-toggle disable paths, account/ad-set/ad override levels, May 2026 (practitioner). Accessed 2026-07-22.
-7. https://withblip.com/blog/how-many-ads-to-run-meta-campaign/ — Meta's ≤6 ads per ad set rule, learning-phase budget math, budget tiers, April 2026 (practitioner). Accessed 2026-07-22.
-8. https://blog.adnabu.com/facebook/meta-advantage-placements/ — Meta's budget-efficiency example for Advantage+ placements, July 2025 (practitioner, cites Meta Help Center). Accessed 2026-07-22.
-9. https://www.shopify.com/blog/instagram-ads — placement impression shares (Reels 33%, Feed 26%) via Tinuiti, Stories > Feed; Story ad segmentation, July 2026 (benchmark). Accessed 2026-07-22.
-10. https://digiday.com/marketing/the-rundown-meta-to-put-new-ads-all-over-facebook-and-instagram-including-on-user-profiles/ — Explore home + profile feed ad launch, Oct 2022 (practitioner/news). Accessed 2026-07-22.
-11. https://www.searchenginejournal.com/meta-announces-instagram-explore-home-ads-placement-via-marketing-api/471006/ — Explore home via Marketing API, Nov 2022 (practitioner/news). Accessed 2026-07-22.
-12. https://billo.app/blog/what-is-a-good-ctr/ — creator Reels 38% CTR (Zebracat 2025), UGC 2× CTR, Lebesgue 63% first-3s stat, 2026 (benchmark). Accessed 2026-07-22.
-13. https://billo.app/blog/meta-ads-best-practices/ — AppsFlyer 70–80% creative-share-of-performance, 2026 (benchmark). Accessed 2026-07-22.
-14. https://paceads.com/research/meta-ads-statistics-2026 — WordStream/LocaliQ 2025 medians: 1.71% CTR / $0.70 CPC traffic, 2.59% CTR / $1.92 CPC / 7.72% CVR / $27.66 CPL leads; $14.19 ecommerce CPM (benchmark aggregator). Accessed 2026-07-22.
-15. https://digitalmarketinginstitute.com/blog/how-to-use-user-generated-content-ugc-with-4-great-examples — UGC 4× CTR aggregate stat, Dec 2025 (practitioner). Accessed 2026-07-22.
-16. https://ugcera.com/wp-content/uploads/2025/08/ugcera_whitepaper.pdf — 84-campaign UGC study: +21% CVR, −17% CPA, Aug 2025 (benchmark, vendor self-published). Accessed 2026-07-22.
-17. https://getkoro.app/blog/how-to-use-ugc-for-facebook-ads — Performance UGC methodology, hook iteration, Partnership Ads naming, Feb 2026 (practitioner). Accessed 2026-07-22.
-18. https://www.screensnap.pro/blog/instagram-reels-size-guide — Reels safe zone detail (top 250 px, bottom 350 px), April 2026 (practitioner). Accessed 2026-07-22.
-19. https://metalla.digital/facebook-ad-creative-testing-2025/ — creative testing phases, CTR 0.90–1.60% healthy range, July 2025 (practitioner). Accessed 2026-07-22.
-20. https://admakeai.com/blog/what-is-facebook-ads-manager — Advantage+ naming confusion, ASC→Advantage+ sales rename Q1 2025 (practitioner). Accessed 2026-07-22.
+1. jonloomer.com/a-guide-to-meta-ads-placements — placement inventory, Advantage+ vs manual rules (practitioner, 2026-07-22).
+2. sproutsocial.com/insights/instagram-ad-sizes — per-placement specs/safe zones/char limits (practitioner, 2025-08-22).
+3. strikesocial.com/blog/instagram-ad-specs — full spec sheet incl. Explore home/profile feed/Reels restrictions/safe zones (practitioner, 2026-05).
+4. socialmediatoday.com — Meta's Reels hook types, +13% incremental conversions from audio, Andromeda stats (practitioner reporting official Meta blog, 2026-07-22).
+5. adsuploader.com/blog/advantage-plus-creative-enhancements — enhancement matrix, API v22.0 deprecation, True Classic case (practitioner, 2026-06).
+6. hyperfx.ai — per-toggle disable paths/override levels (practitioner, 2026-05).
+7. withblip.com — ≤6 ads/ad set rule, learning-phase budget math (practitioner, 2026-04).
+8. blog.adnabu.com — Advantage+ placement budget-efficiency example, cites Meta Help Center (practitioner, 2025-07).
+9. shopify.com/blog/instagram-ads — placement impression shares (Reels 33%/Feed 26%) via Tinuiti (benchmark, 2026-07).
+10–11. digiday.com, searchenginejournal.com — Explore home + profile feed launch, Oct/Nov 2022 (practitioner/news).
+12–13. billo.app — creator Reels 38% CTR (Zebracat 2025), UGC 2× CTR, AppsFlyer 70–80% creative-share-of-performance (benchmark, 2026).
+14. paceads.com — WordStream/LocaliQ 2025 medians (benchmark aggregator, 2026-07-22).
+15–17. digitalmarketinginstitute.com, ugcera.com, getkoro.app — UGC CTR/CVR/CPA stats, methodology practitioner/vendor (2025-08 to 2026-02).
+18. screensnap.pro — Reels safe zone detail (practitioner, 2026-04).
+19. metalla.digital — creative testing phases, CTR healthy range (practitioner, 2025-07).
+20. admakeai.com — Advantage+ naming, ASC rename Q1 2025 (practitioner).
 
 ## Gaps
 
-- **Meta's official Ads Guide (facebook.com/business/ads-guide) could not be fetched** (HTTP 400/JS-gated). All specs above come from Strike Social and Sprout Social, which mirror the official spec sheets; minor conflicts between them are flagged inline ([uncertain] tags, e.g. Explore image ratio 9:16 vs 1:1).
-- **Instagram search results placement specs** are thin in all secondary sources; ratio/field support marked [uncertain]. The official Meta help article on ads in Instagram search results (March 2023 announcement) was not directly retrieved.
-- The "89% higher engagement from first-3-second hooks" figure is a secondary citation of Meta's 2025 Creative Best Practices report (adlibrary.com); the primary Meta report was not retrieved.
-- Whether a global account-level off-switch for Advantage+ creative enhancements exists: sources conflict (HyperFX says Business Settings > Advertising settings sets defaults; mbadv.agency says no campaign/account-level disable, per-ad only). Verify in a live account.
-- Safe-zone pixel values (250/340 vs 250/350) vary slightly by source and UI version; Meta publishes percentages, not hard pixels.
-- UGC performance statistics (4× CTR, 50% lower CPC) trace to pre-2024 aggregate studies recirculated by vendors; no rigorous 2025–2026 Meta-published UGC benchmark was found.
+- Meta's official Ads Guide not fetchable (HTTP 400/JS-gated) — specs sourced via Strike/Sprout mirrors; conflicts flagged inline.
+- Instagram search results specs thin across all secondary sources — ratio/field support [uncertain].
+- "89% higher engagement from first-3-second hooks" is a secondary citation of Meta's 2025 Creative Best Practices report — primary not retrieved.
+- Global account-level off-switch for Advantage+ creative enhancements: sources conflict (HyperFX says Business Settings sets defaults; mbadv.agency says per-ad only) — verify live.
+- Safe-zone pixel values vary slightly by source/UI version; Meta publishes percentages, not hard pixels.
+- UGC performance stats (4× CTR, 50% lower CPC) trace to pre-2024 aggregate studies recirculated by vendors — no rigorous 2025–2026 Meta-published benchmark found.

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://googleops.local/schemas/workspace.v1.json",
+  "title": "googleops workspace",
+  "type": "object",
+  "required": ["schema", "name", "api_version", "profiles", "defaults"],
+  "properties": {
+    "schema": {"const": "googleops.workspace/v1"},
+    "name": {"type": "string", "minLength": 1},
+    "api_version": {"type": "string", "pattern": "^v[0-9]+$"},
+    "blocked_customers": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]{10}$"}, "uniqueItems": true},
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$"},
+      "additionalProperties": {"$ref": "#/$defs/profile"}
+    },
+    "defaults": {
+      "type": "object",
+      "required": ["profile"],
+      "properties": {
+        "profile": {"type": "string", "minLength": 1},
+        "auth": {"enum": ["oauth", "service_account"]},
+        "state_dir": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": ["login_customer_id", "customer_id", "currency", "timezone", "budget_cap_major"],
+      "properties": {
+        "login_customer_id": {"type": "string", "pattern": "^[0-9]{10}$"},
+        "customer_id": {"type": "string", "pattern": "^[0-9]{10}$"},
+        "merchant_id": {"type": "string", "pattern": "^[0-9]{6,12}$"},
+        "conversion_actions": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9]+$"}},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "timezone": {"type": "string", "minLength": 1},
+        "budget_cap_major": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}

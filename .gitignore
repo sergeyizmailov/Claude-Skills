@@ -1,1 +1,10 @@
 .DS_Store
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+*.egg-info/
+build/
+.metaops/
+.googleops/
+.meta-launch/

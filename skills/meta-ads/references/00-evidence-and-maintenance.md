@@ -2,150 +2,128 @@
 
 Last reviewed: 2026-07-24
 
-This file defines how the Meta Ads references should be interpreted, cited, and maintained. Meta changes product names, UI paths, defaults, eligibility, and regional availability continuously. A dated screenshot or practitioner workflow is evidence of one account state, not a universal product contract.
+Meta changes product names, UI paths, defaults, eligibility, and regional availability continuously. A dated screenshot or workflow is evidence of one account state, not a universal contract.
 
 ## 1. Evidence labels
 
-Use one of these labels when a claim can materially change a recommendation:
-
-| Label | Meaning | Appropriate use |
+| Label | Meaning | Use |
 |---|---|---|
-| **Official behavior** | Current Meta policy, Help Center, developer documentation, or in-product state | Product rules, availability, policy, required setup |
-| **Meta-reported** | Result or benchmark published by Meta, often from selected studies | Directional context with the study scope stated |
-| **Independent benchmark** | Aggregated data with disclosed sample, period, geography, objective, and methodology | Planning ranges for a comparable account |
-| **Practitioner heuristic** | Operational rule derived from experience or a vendor article | A starting hypothesis to validate against account data |
-| **Unverified** | Single-source, stale, inaccessible, conflicting, or rollout-dependent claim | Explicit uncertainty only; never present as a requirement |
+| **Official behavior** | Meta policy, Help Center, dev docs, in-product state | Product rules, availability, policy, required setup |
+| **Meta-reported** | Result/benchmark published by Meta, often selected studies | Directional context with study scope stated |
+| **Independent benchmark** | Aggregated data, disclosed sample/period/geo/objective/methodology | Planning ranges for a comparable account |
+| **Practitioner heuristic** | Derived from experience or a vendor article | Starting hypothesis to validate against account data |
+| **Unverified** | Single-source, stale, inaccessible, conflicting, rollout-dependent | Explicit uncertainty only; never present as requirement |
 
-For case studies, add a proof grade separately from source ownership: causal design reported, structured comparison, or attributed/pre-post case. Meta, an agency, or a measurement vendor can describe a real experiment while still being an interested-party publisher. Never turn a positive case-study lift into an expected result for another account.
+Case studies also need a proof grade, separate from source ownership: causal design reported / structured comparison / attributed or pre-post. Meta, an agency, or a vendor can report a real experiment while still being an interested-party publisher. Never turn a positive case-study lift into an expected result for another account.
 
-Do not convert vendor language such as “best practice,” “optimal,” “must,” or “Meta recommends” into official guidance unless the primary Meta source supports it.
+Do not convert "best practice," "optimal," "must," or "Meta recommends" into official guidance unless the primary Meta source supports it.
 
 ## 2. Source priority
 
-1. Live in-product state for the exact account, country, objective, placement, and data source.
-2. Current Meta Advertising Standards, Help Center, Business Help Center, and developer documentation.
-3. Meta newsroom or product announcement with publication date and rollout scope.
+1. Live in-product state for the exact account/country/objective/placement/data source.
+2. Current Meta Advertising Standards, Help Center, Business Help Center, dev docs.
+3. Meta newsroom/product announcement with date and rollout scope.
 4. Independent benchmark with visible methodology.
-5. Practitioner or vendor source with date and account context.
-6. Undated summaries, search snippets, and copied screenshots only as discovery leads.
+5. Practitioner/vendor source with date and account context.
+6. Undated summaries, search snippets, screenshots — discovery leads only.
 
-When sources conflict, state the conflict, prefer the higher-priority and newer evidence, and advise checking the live account. Never infer universal availability from one UI screenshot.
+Conflicts: state the conflict, prefer higher-priority/newer evidence, advise checking the live account. Never infer universal availability from one screenshot.
 
-An agent/support reply is **official account-specific evidence**, not a public
-platform contract. Preserve the case text and affected asset IDs. If it
-conflicts with the live UI or public documentation, operate conservatively for
-that account and request human/manual escalation.
+An agent/support reply is **official account-specific evidence**, not a public platform contract. Preserve case text and affected asset IDs. If it conflicts with live UI/public docs, operate conservatively for that account and escalate to human/manual review.
 
 ## 3. Verification protocol
 
-Before asserting a changing fact:
+1. Identify claim type: policy, product behavior, UI path, benchmark, heuristic.
+2. Record market, objective, optimization event, placement, account type.
+3. Check an official source + its publication/update date.
+4. Check the live account when access exists — account state overrides generic navigation instructions.
+5. Use independent sources only when official docs are unavailable/ambiguous.
+6. Label confidence; give a concrete verification step for unresolved rollout variance.
 
-1. Identify the claim type: policy, product behavior, UI path, benchmark, or heuristic.
-2. Record the relevant market, objective, optimization event, placement, and account type.
-3. Check an official source and its publication/update date.
-4. Check the live account when access exists; account state overrides generic navigation instructions.
-5. Use an independent source only when official documentation is unavailable or ambiguous.
-6. Label the confidence and give the user a concrete verification step for unresolved rollout variance.
-
-For high-impact recommendations, include the evidence label inline. Exact prices, thresholds, reporting delays, learning requirements, and feature defaults are presumed volatile unless verified.
+Include the evidence label inline for high-impact recommendations. Prices, thresholds, reporting delays, learning requirements, feature defaults: presumed volatile unless verified.
 
 ## 4. Confirmed corrections and retired concepts
 
 | Topic | Current interpretation | Evidence |
 |---|---|---|
-| Location presence selector | Meta removed the old “living in or recently in” choice for new ad sets in 2023. Current location behavior and exceptions must be checked in-product. | Independent product reporting: https://searchengineland.com/new-update-to-meta-ads-location-targeting-404124 |
-| Special Ad Audiences | Meta stopped making Special Ad Audiences available for housing, employment, and credit in 2022. Do not recommend them as a current substitute for lookalikes. | Official: https://about.fb.com/news/2022/06/expanding-our-work-on-ads-fairness/ |
-| Pixel and dataset | Meta Pixel remains a browser-side web data source; a dataset can group events from multiple sources. The terms are related but not interchangeable. | Official: https://www.facebook.com/help/messenger-app/952192354843755 |
-| Closed ad account | A closed ad account can be reactivated; closure is not inherently irreversible. Restrictions and disabled accounts are separate states. | Official: https://www.facebook.com/help/messenger-app/331993756945799/ |
-| Two-factor authentication | Meta may require 2FA for certain portfolios and workflows. Recommending it for every privileged user is a security practice, not proof that every portfolio has the same product requirement. | Meta help should be checked in-product; secondary setup context: https://support.chatarchitect.com/books/meta-business-portfolio-setup/page/turn-on-the-two-factor-authentication-requirement-in-your-business-portfolio |
-| Offline event ingestion | References to the separate Offline Conversions API can be stale. Current offline/CRM event ingestion should be designed around supported Conversions API routes and verified against current developer documentation. | Official CAPI overview: https://www.facebook.com/business/help/AboutConversionsAPI |
-| Meta-enabled CAPI | Meta announced a no-code Meta-enabled Conversions API option in April 2026. Availability and supported data sources remain account-dependent. | Official: https://about.fb.com/ltam/news/2026/04/eliminar-barreras-tecnicas-para-ayudar-a-empresas-de-todos-los-tamanos-a-aprovechar-mas-sus-anuncios/amp/ |
-| Detailed targeting exclusions | Availability has changed and can depend on campaign state and account rollout. Do not build a strategy that assumes the legacy control exists. | Official: https://www.facebook.com/help/messenger-app/717368264947302/ |
-| EU political, electoral, and social-issue ads | Meta announced that these ads would no longer be delivered in the EU from October 2025. Confirm scope and current policy before planning. | Official: https://about.fb.com/news/2025/07/ending-political-electoral-and-social-issue-advertising-in-the-eu/ |
+| Location presence selector | "Living in or recently in" removed for new ad sets (2023). Check current behavior/exceptions in-product. | [Reporting](https://searchengineland.com/new-update-to-meta-ads-location-targeting-404124) |
+| Special Ad Audiences | Unavailable for housing/employment/credit since 2022. Not a current lookalike substitute. | [Official](https://about.fb.com/news/2022/06/expanding-our-work-on-ads-fairness/) |
+| Pixel vs dataset | Pixel = browser-side web data source; a dataset can group events from multiple sources. Related, not interchangeable. | [Official](https://www.facebook.com/help/messenger-app/952192354843755) |
+| Closed ad account | Reactivable; not inherently irreversible. Distinct from restricted/disabled. | [Official](https://www.facebook.com/help/messenger-app/331993756945799/) |
+| 2FA | May be required for certain portfolios/workflows; not a uniform product requirement. | Check in-product; [context](https://support.chatarchitect.com/books/meta-business-portfolio-setup/page/turn-on-the-two-factor-authentication-requirement-in-your-business-portfolio) |
+| Offline event ingestion | Separate Offline Conversions API references can be stale; design around current CAPI routes. | [CAPI overview](https://www.facebook.com/business/help/AboutConversionsAPI) |
+| Meta-enabled CAPI | No-code option announced April 2026; availability account-dependent. | [Official](https://about.fb.com/ltam/news/2026/04/eliminar-barreras-tecnicas-para-ayudar-a-empresas-de-todos-los-tamanos-a-aprovechar-mas-sus-anuncios/amp/) |
+| Detailed targeting exclusions | Availability depends on campaign state/rollout; don't assume the legacy control exists. | [Official](https://www.facebook.com/help/messenger-app/717368264947302/) |
+| EU political/electoral/social-issue ads | No longer delivered in EU from Oct 2025; confirm current scope. | [Official](https://about.fb.com/news/2025/07/ending-political-electoral-and-social-issue-advertising-in-the-eu/) |
 
 ## 4.1 Marketing API version anchor (2026-08)
 
-Graph API majors ship ~2×/year and a version number goes stale within months — check the changelog
-(§7 map) before asserting "current". Version-bound behavior observed in this corpus:
+Graph API majors ship ~2×/year; a version number goes stale within months — check changelog (§7) before asserting "current".
 
-**A Marketing API version is available for ~12 months TOTAL** — v24.0 ran 2025-10-08 →
-2026-10-06 — far shorter than Graph API's 2-year core guarantee; do not conflate the two. The
-"90 days" quoted on the versions page is the **minimum overlap guaranteed after a new version
-ships** ("at least 90 days"), not an extra grace period tacked onto the 12 months and not the
-lifetime. Marketing API also **rejects unversioned calls outright**. Pin the version in every
-script. Per-version dates exist only in the Graph API changelog's Marketing API table — the
-`marketing-api/versions` page carries none. [verified 2026-08-31]
+A Marketing API version is available **~12 months TOTAL** (v24.0 ran 2025-10-08 → 2026-10-06) — shorter than Graph API's 2-year core guarantee; don't conflate the two. The "90 days" on the versions page is the **minimum overlap after a new version ships**, not extra grace time and not the lifetime. Marketing API rejects unversioned calls outright. Pin the version in every script. Per-version dates exist only in the Graph API changelog's Marketing API table — the `marketing-api/versions` page carries none. [verified 2026-08-31]
 
-| Version | Released | Marketing API status (2026-08-31) | What changed / lives |
+| Version | Released | Status (2026-08-31) | Notes |
 |---|---|---|---|
-| v22.0 | 2025-01-21 | expired | `instagram_actor_id` → `instagram_user_id`; `enable_standard_enhancements` → per-feature `creative_features_spec`. `13` §5, `04`, `14` |
+| v22.0 | 2025-01-21 | expired | `instagram_actor_id`→`instagram_user_id`; `enable_standard_enhancements`→`creative_features_spec`. See `13` §5, `04`, `14` |
 | v23.0 | 2025-05-29 | expired | — |
-| v24.0 | 2025-10-08 | **available until 2026-10-06** (Graph API changelog → Marketing API table). The `marketing-api/versions` page still names v25.0 current and gives no per-version dates — it lags; use the changelog | anything still on v24 breaks within weeks. Do not quote the Graph API 2-year date here |
+| v24.0 | 2025-10-08 | available until 2026-10-06 | `marketing-api/versions` page lags (still names v25 current, no dates) — use changelog |
 | v25.0 | 2026-02-18 | supported, TBD | — |
-| **v26.0** | **2026-07-29** | **current, no expiry announced** | Reference version for `14` and `02` §9. Removed `delivery_estimate.daily_outcomes_curve` / `budget_guardrail` / `estimate_dau`; HEC-F campaigns now require explicit `targeting_automation.advantage_audience`; Instagram Explore placement discontinued; Messenger `story` position removed; poll ads unsupported |
+| **v26.0** | **2026-07-29** | **current, no expiry** | Reference for `14`/`02`§9. Removed `delivery_estimate.daily_outcomes_curve`/`budget_guardrail`/`estimate_dau`; HEC-F campaigns require explicit `targeting_automation.advantage_audience`; IG Explore placement gone; Messenger `story` position removed; poll ads unsupported |
 
-If any reference names a version, treat the claim as version-bound and re-verify against the current
-major before automating.
+Any version named in a reference is version-bound — re-verify against current major before automating.
 
 ## 4.2 Hard limits (cross-file)
 
-Numbers agents hit during setup/automation, consolidated so they drift in one place. A live account
-overrides any row here.
+Live account overrides any row here.
 
 | Limit | Value | Note | Source |
 |---|---|---|---|
-| Automated rules per ad account | 250 | Includes inactive rules | `02` §9 |
-| Ads per ad set | 50 max; Meta discourages >~6 active | Legacy ASC 150-ad cap gone; total-campaign cap [uncertain] | `03` §2.1 |
-| Primary text | ~2,200 stored; ~125 shown ("… more"); 72 on Reels | Write for truncation | `04` §7 |
-| Headline | 40 UI practical / 255 technical | Sources conflict; plan for 40 | `04` §7 |
-| Description | 30 practical / 125 technical | | `04` §7 |
-| Lookalike range | 1–10% similarity | A suggestion, not a control, under conversions optimization | `05` |
-| Learning-phase volume | "~50 events / 7 days per ad set" | Heuristic, never an official threshold | SKILL, `06` §4 |
-| Stories safe zone | top ~14% (~250 px), bottom ~20% (~340 px) | 1080×1920 canvas | `04` §4 |
-| Reels safe zone | top ~14%, bottom ~350 px practical | UI-version dependent | `04` §4 |
+| Automated rules/ad account | 250 | Includes inactive rules | `02`§9 |
+| Ads per ad set | 50 max; Meta discourages >~6 active | Legacy ASC 150-ad cap gone; total-campaign cap [uncertain] | `03`§2.1 |
+| Primary text | ~2,200 stored; ~125 shown; 72 on Reels | Write for truncation | `04`§7 |
+| Headline | 40 UI practical / 255 technical | Sources conflict; plan for 40 | `04`§7 |
+| Description | 30 practical / 125 technical | | `04`§7 |
+| Lookalike range | 1–10% similarity | Suggestion, not a hard control, under conversions optimization | `05` |
+| Learning-phase volume | "~50 events/7 days per ad set" | Heuristic, never official | SKILL, `06`§4 |
+| Stories safe zone | top ~14% (~250px), bottom ~20% (~340px) | 1080×1920 canvas | `04`§4 |
+| Reels safe zone | top ~14%, bottom ~350px practical | UI-version dependent | `04`§4 |
 
 ## 5. Claims that always need context
 
-- Cost benchmarks: currency, country, period, objective, optimization event, attribution setting, placement mix, and sample size.
-- Learning: current Delivery status, result volume, conversion delay, event quality, and fragmentation; avoid a universal event-count formula.
-- Budget changes: marginal economics and observed delivery response; percentage limits are heuristics.
-- Frequency and fatigue: objective, evaluation window, audience size, reach, creative distribution, and outcome trend.
-- Event Match Quality: diagnostic signal, not a universal launch or optimization gate.
-- Attribution gaps: identity, consent, click/view windows, time zones, reporting timestamps, deduplication, refunds, and backend definitions.
-- Feature paths and defaults: account rollout, objective, country, placement, and interface version.
+Cost benchmarks (currency/country/period/objective/event/attribution/placement/sample) · learning status (Delivery status/result volume/delay/event quality/fragmentation — no universal event-count formula) · budget changes (marginal economics/delivery response; % limits are heuristics) · frequency/fatigue (objective/window/audience size/reach/creative distribution/outcome trend) · EMQ (diagnostic signal, not a launch/optimization gate) · attribution gaps (identity/consent/click-view windows/timezones/timestamps/dedup/refunds/backend defs) · feature paths/defaults (rollout/objective/country/placement/interface version).
 
 ## 6. Maintenance checklist
 
-Review at least quarterly and immediately after a major Meta announcement:
+Review quarterly and after any major Meta announcement:
 
-1. Recheck official policy and product links.
-2. Search for removed product names, retired APIs, legacy objectives, and hard-coded years.
-3. Reclassify every new benchmark and record its scope and methodology.
-4. Replace dead sources; do not silently preserve a claim whose evidence disappeared.
-5. Re-run contradiction searches for universal language: `must`, `always`, `never`, exact learning counts, fixed edit percentages, fixed reporting delays, and fixed frequency limits.
-6. Update the review date only after the facts, links, and known gaps have actually been checked.
+| # | Action |
+|---|---|
+| 1 | Recheck official policy/product links |
+| 2 | Search for removed product names, retired APIs, legacy objectives, hard-coded years |
+| 3 | Reclassify every new benchmark; record scope/methodology |
+| 4 | Replace dead sources; never silently preserve a claim whose evidence disappeared |
+| 5 | Re-run contradiction searches: `must`, `always`, `never`, exact learning counts, fixed edit %, fixed reporting delays, fixed frequency limits |
+| 6 | Update review date only after facts/links/gaps actually checked |
 
 ## 7. Official knowledge map
 
-Do not copy Meta's whole help corpus into this skill. Route the question to the
-current primary surface:
+Route the question to the current primary surface — do not copy Meta's help corpus here.
 
 | Question | Check first |
 |---|---|
 | Exact account/asset restriction | Live error, [Account Status](https://www.facebook.com/help/1392616391875085/), [Business Support Home](https://business.facebook.com/business-support-home/), Support Inbox |
-| Ad rejection or prohibited content | [Advertising Standards](https://transparency.meta.com/policies/ad-standards/), [ad-review guide](https://www.facebook.com/business/ads/review-policy-guidelines) |
-| Profile/Page conduct | [Community Standards](https://transparency.meta.com/policies/community-standards/) and Account Status |
-| Portfolio, Page, Instagram, billing UI | [Business Help Center](https://www.facebook.com/business/help), live Business Settings/Billing |
-| Campaign operation and official training | [Meta Blueprint](https://www.facebookblueprint.com/student/catalog/list), [Ads Manager learning](https://www.facebookblueprint.com/student/collection/507792-meta-ads-manager-learning) |
+| Ad rejection / prohibited content | [Advertising Standards](https://transparency.meta.com/policies/ad-standards/), [ad-review guide](https://www.facebook.com/business/ads/review-policy-guidelines) |
+| Profile/Page conduct | [Community Standards](https://transparency.meta.com/policies/community-standards/), Account Status |
+| Portfolio/Page/Instagram/billing UI | [Business Help Center](https://www.facebook.com/business/help), live Business Settings/Billing |
+| Campaign ops / official training | [Meta Blueprint](https://www.facebookblueprint.com/student/catalog/list), [Ads Manager learning](https://www.facebookblueprint.com/student/collection/507792-meta-ads-manager-learning) |
 | Creative format/placement availability | [Ads Guide](https://www.facebook.com/business/ads-guide), live placement preview |
 | Competitor/market creative discovery | [Meta Ad Library](https://www.facebook.com/ads/library/) |
-| Marketing API objects and permissions | [Marketing API docs](https://developers.facebook.com/docs/marketing-apis/), [official Postman collection](https://www.postman.com/meta/facebook-marketing-api/collection/0zr4mes/facebook-marketing-api-mapi) |
+| Marketing API objects/permissions | [Marketing API docs](https://developers.facebook.com/docs/marketing-apis/), [Postman collection](https://www.postman.com/meta/facebook-marketing-api/collection/0zr4mes/facebook-marketing-api-mapi) |
 | Breaking API changes | [Graph API versioning](https://developers.facebook.com/docs/graph-api/guides/versioning/), [changelog](https://developers.facebook.com/docs/graph-api/changelog/) |
-| SDK implementation | [official Business SDK repositories](https://github.com/facebook/facebook-python-business-sdk) |
+| SDK implementation | [Business SDK repos](https://github.com/facebook/facebook-python-business-sdk) |
 | Pixel/CAPI/data duties | [CAPI overview](https://www.facebook.com/business/help/AboutConversionsAPI), [Business Tools Terms](https://www.facebook.com/legal/terms/businesstools) |
-| Contract, billing, delivery obligations | [Commercial Terms](https://www.facebook.com/legal/commercial_terms), [Self-Serve Ad Terms](https://www.facebook.com/legal/self_service_ads_terms) |
-| Suspected platform outage | [Meta Status](https://metastatus.com/) before rebuilding or changing campaigns |
-| Announced rollout | [Meta newsroom](https://about.fb.com/news/); verify availability in the exact account |
+| Contract/billing/delivery obligations | [Commercial Terms](https://www.facebook.com/legal/commercial_terms), [Self-Serve Ad Terms](https://www.facebook.com/legal/self_service_ads_terms) |
+| Suspected platform outage | [Meta Status](https://metastatus.com/) before rebuilding/changing campaigns |
+| Announced rollout | [Meta newsroom](https://about.fb.com/news/); verify in the exact account |
 
-Search snippets are discovery aids only. Logged-in Help Center pages, live UI,
-country eligibility, and current API version can differ from indexed copies.
+Search snippets are discovery aids only — logged-in Help Center pages, live UI, country eligibility, and API version can differ from indexed copies.

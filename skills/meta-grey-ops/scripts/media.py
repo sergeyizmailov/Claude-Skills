@@ -33,6 +33,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 
 import graph
@@ -169,8 +170,10 @@ def thumbnail_hash(account: str, video_id: str) -> dict:
         return {}
     chosen = next((t for t in thumbs if t.get("is_preferred")), thumbs[0])
 
-    tmp = f".meta-launch/thumb-{video_id}.jpg"
-    os.makedirs(os.path.dirname(tmp), exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(prefix=f"metaops-thumb-{video_id}-", suffix=".jpg",
+                                         delete=False)
+    tmp = handle.name
+    handle.close()
     resp = graph.session().get(chosen["uri"], timeout=120)
     resp.raise_for_status()
     with open(tmp, "wb") as fh:
@@ -193,7 +196,7 @@ def main() -> int:
     ap.add_argument("--manifest", default="media.json")
     args = ap.parse_args()
 
-    account = args.account if args.account.startswith("act_") else f"act_{args.account}"
+    account = graph.normalize_account(args.account)
     manifest: dict = {"account_id": account, "images": [], "videos": []}
 
     for path in args.image:

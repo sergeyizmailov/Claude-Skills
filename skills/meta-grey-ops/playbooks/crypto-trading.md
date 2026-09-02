@@ -1,81 +1,30 @@
 # Playbook — Crypto / trading / finance
 
-Status (reviewed 2026-08-28): directional vendor benchmarks (dated below) + verified Meta policy.
-NOT this team's live data — replace with your own. Heavily overlaps news-tg when
-the pre-lander is a fake news article.
+Reviewed 2026-08-28. Vendor benchmarks below are directional priors, not live data — replace with your own. Heavy overlap with `news-tg.md` when the pre-lander is a fake news article.
 
-**Gate before anything here:** written permission via A&V + a recognized regulator licence **per
-targeted country** (~25 have a named path; unlisted = treat as unsupported). **ICOs are prohibited
-outright.** Affiliate/solicitation sites need the same permission — no affiliate exemption. Exemption
-boundary (NFTs, storage-only wallets, mining hardware, education) and the licence list →
-`references/10-no-path-and-permissions.md`. 🔺 Forex specifically is **unresolved** in Meta's own text.
+**Gate:** written permission via A&V + recognized regulator licence **per targeted country** (~25 have a named path; unlisted = treat unsupported). ICOs prohibited outright. Affiliate/solicitation sites need the same permission — no exemption. Exemption boundary (NFTs, storage-only wallets, mining hardware, education) + licence list → `10`. 🔺 Forex specifically **unresolved** in Meta's own text.
 
-Funnel: FB/IG ad → pre-lander (news / review / quiz) → broker/exchange
-registration → deposit. Lead = registration; paying gate = FTD (first deposit),
-often a qualified/validated deposit.
+**Objective/event:** click → LP → registration/lead → **FTD** → qualified deposit → RevShare/CRG. Primary KPI = CPA per FTD (or cost-per-deposit). Brokers validate deposits and reject low-quality — cohort by click date, reconcile to advertiser's validated count, not raw regs (click→FTD tail <0.1% for weak traffic).
 
-## Event ladder & KPI
+**Creative constraints:** news/review/quiz angles; "opportunity" framing — NOT get-rich-quick (instant reject/ban). Personal Attributes: copy can't imply reader's finances ("Drowning in debt?", "Turn $250 into $5,000") — reframe to product benefit. News-styled crypto pre-landers can trip Social Issues if they debate regulation vs promote a product.
 
-click → LP → **registration/lead** → **FTD** → qualified deposit → RevShare/CRG.
-Primary KPI = CPA per FTD (or CRG cost-per-deposit). Quality delay + heavy scrub:
-brokers validate deposits and reject low-quality — cohort by click date, reconcile
-to the advertiser's validated count (tracker-ops 01).
+**Review traps / what kills the account:**
+- Prohibited instrument (binary options, ICO) → no permission path exists at all, don't attempt.
+- Get-rich-quick/guaranteed-returns copy → instant reject/burn.
+- Legit finance/trading runs under FINANCIAL_PRODUCTS_SERVICES SAC — strips detailed targeting, forces 18+, limits some custom audiences.
+- Broker scrubs hard on quality — optimizing to cheap regs looks fine on CPA, bleeds on P&L.
 
-## Economics
-
-Vendor-band numbers are directional priors — replace with your live data (SKILL.md).
-Keep payout, conversion, and your media cost separate:
-
-Affiliate PAYOUT per FTD (what you EARN):
-| offer | payout |
+**Economics (vendor bands — replace with live data):**
+| Metric | Band |
 |---|---|
-| crypto | $300-800 |
-| forex | $150-400 |
-| models | CPA / CPL / CRG (cost-per-deposit) |
+| Payout/FTD crypto | $300–800 |
+| Payout/FTD forex | $150–400 |
+| Model | CPA / CPL / CRG (cost-per-deposit) |
+| lead→FTD | UAE 16–22%, India 12–18%, Nigeria 10–15%, Brazil 9–14%, Vietnam 8–13% |
+| click→FTD | 0.5–1% avg; top partners 3–5%; tail <0.1% |
 
-Conversion rates:
-| rate | band |
-|---|---|
-| lead → FTD | UAE 16-22%, India 12-18%, Nigeria 10-15%, Brazil 9-14%, Vietnam 8-13% |
-| click → FTD | 0.5-1% avg; top partners 3-5%; tail <0.1% |
+Meta CPM: finance = steepest CPMs on FB, no clean grey number. Example break-even: $400 payout, 18% lead→FTD → break-even lead CPL ≈ $72.
 
-Meta CPM: finance = steepest CPMs on FB (no clean grey number). Your media CPA
-per FTD (spend ÷ FTDs) is what you PAY — a separate number from the payout above;
-e.g. at a $400 payout and 18% lead→FTD, break-even lead CPL ≈ $72.
+**First tests:** 1-3-1 on pre-lander angle (directional screening, not causal — `04`); optimize to lead while FTD volume thin, switch down once it builds. Spy: AdSpy/AdHeart.
 
-## Creative concepts & first tests
-
-News/review/quiz angles; "opportunity" framing (NOT get-rich-quick — policy).
-First test 1-3-1 (directional screening, not a causal test — see 04) on
-pre-lander angle; optimise to lead where FTD volume thin,
-switch down once it builds. Spy: AdSpy / AdHeart.
-
-## Common failure modes
-
-- Broker scrubs hard on quality → optimise to the validated event, not cheap
-  regs (click→FTD tail is <0.1% — most regs never deposit).
-- Get-rich-quick / guaranteed-returns copy → instant reject/ban (policy).
-- Prohibited instrument (binary options / ICO) → no permission path at all.
-
-## Policy (docs-level, verified Aug 2026)
-
-- Crypto = hard gate: exchanges, trading platforms, lending, buy/sell/swap/stake
-  wallets, mining need PRIOR WRITTEN PERMISSION + a recognized regulatory
-  license via Authorizations & Verifications (Meta Business Suite),
-  jurisdiction-gated. Unauthorized crypto isn't runnable clean → rejection/burn.
-- Flat-banned finance (no permission path): binary options, ICOs,
-  penny/bidding-fee auctions, ≤90-day loans, bail bonds, get-rich-quick,
-  recruitment-based returns (MLM). The fastest account-killers.
-- Legit finance/trading: identity + regulatory-authorization verification;
-  runs under FINANCIAL_PRODUCTS_SERVICES SAC (strips detailed targeting, 18+,
-  limits some custom audiences).
-- Personal Attributes: copy can't imply the reader's finances ("Drowning in
-  debt?", "Turn $250 into $5,000") → product benefit.
-- News-styled crypto pre-landers can also trip Social Issues if they debate
-  regulation vs promote a product.
-
-## Metrics discipline
-
-- Pin which tracker event = payout (reg? FTD? qualified FTD?) before any CPA
-  math (tracker-ops metric rule). Broker traffic is scrubbed on quality —
-  optimize to the advertiser's validated event, not cheap regs.
+**Metrics discipline:** pin which tracker event = payout before any CPA math; optimize to the advertiser's validated event, not cheap regs.

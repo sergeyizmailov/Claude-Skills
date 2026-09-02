@@ -1,304 +1,138 @@
 # Tracking, Measurement & Optimization for Instagram/Meta Ads (2025–2026)
 
-Scope: Meta Pixel/dataset, Conversions API, event configuration, domain verification/AEM, UTM hygiene, iOS14+ reporting reality, A/B testing, creative testing frameworks, kill/scale rules, frequency/fatigue, and operational checklists. All UI labels reflect the 2025–2026 interface (Business Portfolio + new Events Manager); older naming is flagged inline.
+Reviewed 2026-07-22. UI reflects 2025–2026 interface (Business Portfolio + reworked Events Manager); older naming flagged inline.
 
 ---
 
 ## 1. Meta Pixel and datasets
 
-### Current naming (important)
-
-- The **Meta Pixel remains the browser-side web data source**. Events from the Pixel are shared to a **dataset**, which can group website, app, offline, and other event sources. IDs can match when an existing Pixel is converted/represented as a dataset, but the concepts aren't interchangeable. (Official: https://www.facebook.com/help/messenger-app/952192354843755)
-- Events Manager UI was reworked 2025–2026; pre-2025 guide screenshots ("Data Sources" tab, green pixel icon) will look different.
-
-### Setup paths
-
-1. **Events Manager** (business.facebook.com → ☰ All tools → **Events Manager**, or direct: business.facebook.com/events_manager) → **Connect data** (older UI: "Connect Data Sources") → **Web** → name dataset → **Create**.
-2. Installation options after creation:
-   - **Manually add pixel code to website** — base code in the `<head>` of every page.
-   - **Partner integration** — Shopify, WooCommerce, WordPress, Wix, Squarespace, GTM, etc. Recommended for non-developers; most partner integrations now also enable CAPI (see §2).
-   - **Conversions API Gateway** — Meta's self-hosted server-side option (see §2).
-3. **Event Setup Tool** — codeless, point-and-click way to add standard events to buttons/URLs after base code install. Final step of pixel creation, and later under the dataset's **Settings** tab. (Jon Loomer, 2024-09: https://www.jonloomer.com/conversions-for-meta-advertising-checklist/)
-
-### Base code vs Events Manager (common confusion)
-
-- **Base code** = the JS snippet on the site; fires only `PageView` by itself.
-- **Events Manager** = reporting/configuration surface. Events appear only after firing at least once on the live site (or via **Test events**).
-- Gotcha: an event that has never fired shows inactive/red in Events Manager — expected until real traffic triggers it. Use **Test events** with your own browser session to verify.
-
-### Advanced Matching
-
-- Sends hashed customer data (email, phone, names, external ID) captured on-site with pixel events; improves attribution, lowers CPAs. Enable **Automatic Advanced Matching** in dataset **Settings**. Best practices: normalize email/phone formats, combine automatic + manual matching, monitor match quality regularly. (AGrowth, 2025-12: https://agrowth.stck.me/chapter/1516626/)
+- **Pixel remains the browser-side web data source.** Its events feed a **dataset**, which can group website/app/offline/other sources. IDs can match when an existing Pixel is represented as a dataset, but the concepts aren't interchangeable. [official]
+- Events Manager UI reworked 2025–2026 — pre-2025 screenshots ("Data Sources" tab, green pixel icon) look different.
+- Setup: Events Manager → Connect data → Web → name dataset → Create. Then: manually add base code to `<head>`; or partner integration (Shopify/WooCommerce/WordPress/Wix/Squarespace/GTM — most now also enable CAPI, §2); or CAPI Gateway (§2). **Event Setup Tool** = codeless point-and-click standard-event tagging, final step of creation and later under dataset Settings.
+- Base code fires only `PageView` by itself; Events Manager is reporting/config only — events appear after firing once live or via **Test events**. An event that never fired shows inactive/red — expected, not broken.
+- **Advanced Matching**: hashed customer data (email/phone/names/external ID) captured on-site improves attribution/lowers CPA. Enable in dataset Settings; normalize email/phone formats, combine automatic+manual matching, monitor match quality.
 
 ---
 
 ## 2. Conversions API (CAPI)
 
-### What it is and why it matters post-ATT
+- Server/platform/CRM/app → Meta. Less affected by load failures/connectivity/ad blockers than browser-only, but doesn't bypass consent or guarantee complete attribution.
+- **Not a Pixel replacement** for most websites — Meta recommends combining both, deduplicated via matching `event_name` + `event_id`.
+- Vendor claim: CAPI recovers 20–40% of conversions — **no account-independent loss rate established**; measure event coverage/dedup/matched events/backend reconciliation for the real number. [W: do not quote 20-40% as a guaranteed recovery rate]
+- iOS 26 (2025-09-15) added Advanced Fingerprinting Protection to Safari + expanded Link Tracking Protection — further degrades browser-only tracking.
 
-- CAPI sends events from a server, platform, CRM, app, or other business system to Meta. Less affected than browser-only collection by loading failures, connectivity issues, and ad blockers, but doesn't bypass consent requirements or guarantee complete attribution.
-- CAPI is **not a Pixel replacement** for most website setups. Meta recommends combining them and deduplicating matching browser/server events via matching `event_name` and `event_id`. (Official: https://www.facebook.com/business/help/AboutConversionsAPI)
-- Vendor articles commonly claim CAPI recovers `20–40%` of conversions. No account-independent loss rate is established; measure event coverage, deduplication, matched events, and backend reconciliation for the actual implementation.
-- iOS 26 (released 2025-09-15) added **Advanced Fingerprinting Protection** to Safari and expanded Link Tracking Protection — further degrades browser-only tracking. (LeadsBridge, 2026-07)
+**Three setup routes (2026):**
+1. **Meta-enabled CAPI ("one-click")** — announced 2026-04: free, no-code web setup in minutes; availability can exclude some data-source categories, verify in Events Manager. [official]
+2. **Partner integration** — dataset → Settings → Conversions API → pick partner (Shopify, WooCommerce, WordPress, LeadsBridge, Zapier, Segment, sGTM/Stape). No code. Shopify's native channel defaults CAPI to "Maximum" sharing.
+3. **Manual/developer** — Dataset ID + access token: Settings → Conversions API → "Generate access token" (developer-privilege only) → "Manage Integrations" auto-creates API app + system user (no App Review needed); or Business Settings → assign dataset to system user → Generate Token. Direct integration = you own retries/validation/monitoring/consent/version upgrades — check the live Meta for Developers version schedule, don't assume a fixed cadence.
+4. **CAPI Gateway / Signals Gateway** — Meta's self-hosted server-side container (e.g. AWS). Middle ground, Meta-focused; enterprise teams often prefer sGTM instead for multi-platform flexibility.
 
-### Three setup routes (as of 2026)
+**Testing/dedup**: Test events tab → grab test event code → include in CAPI payload → fire real actions → verify payload before going live. Dedup requires shared `event_name`+`event_id` between browser/server events, matched within Meta's window. Duplicate events and missing `value`/`currency` are the two most common Diagnostics warnings.
 
-1. **Meta-enabled Conversions API ("one-click")** — announced April 2026: free, no-code, no-maintenance web setup completed in minutes. Availability can exclude certain data-source categories; verify feature coverage in Events Manager. (Official: https://about.fb.com/ltam/news/2026/04/eliminar-barreras-tecnicas-para-ayudar-a-empresas-de-todos-los-tamanos-a-aprovechar-mas-sus-anuncios/amp/)
-2. **Partner integration** — Events Manager → dataset → **Settings** → **Conversions API** section → choose a partner (Shopify, WooCommerce, WordPress, LeadsBridge, Zapier, Segment, GTM server-side/Stape, etc.). No code required. Shopify's native Facebook & Instagram channel sets CAPI to "Maximum" sharing — the common recommendation.
-3. **Manual / developer setup** — needs Dataset ID + access token:
-   - Events Manager → dataset → **Settings** → **Conversions API** → **"Generate access token"** (developer-privilege users only).
-   - Then **"Manage Integrations"** to auto-create an API app + system user (no App Review needed).
-   - Or via Business Settings → assign dataset to a system user → **Generate Token**.
-   - A direct integration needs ownership of retries, validation, monitoring, consent handling, and supported API-version upgrades. Check the current Meta for Developers version schedule rather than assuming a fixed release/deprecation cadence.
-4. **CAPI Gateway / Signals Gateway** — Meta's self-hosted server-side container (cloud deploy, e.g., AWS). Middle ground between partner and fully manual; Meta-focused. Enterprise teams often choose sGTM (server-side Google Tag Manager) instead, for multi-platform flexibility. (DataCops, 2026-05: https://www.joindatacops.com/resources/enterprise-meta-capi-implementation; Datahash docs: https://www.datahash.com/docs/meta-conversions-api-gateway/)
+**Offline Conversions API is gone** — shut down **May 2025**; all offline events (in-store, phone, CRM stages) now go through standard CAPI. Unmigrated offline tracking silently stopped working.
 
-### Testing and deduplication
-
-- **Test events tab** in Events Manager: grab the test event code, include it in the CAPI payload, fire real actions, verify payload contents before going live.
-- Deduplication: browser + server events must share `event_name` and `event_id`; Meta dedupes within its matching window. Duplicate events (double-counted purchases) and missing `value`/`currency` are the two most common Events Manager diagnostics warnings. (AGrowth, 2025-12)
-- **Offline Conversions API is gone**: Meta shut down the separate Offline Conversions API in **May 2025** — all offline events (in-store, phone sales, CRM stages) now go through standard CAPI. Unmigrated offline tracking silently stopped working. (LeadsBridge, 2026-07)
-
-### Privacy gotcha
-
-- CAPI is not automatically privacy-compliant. Apply jurisdiction-specific laws and consent rules, minimize data, use Meta's required hashing/normalization, honor opt-outs, document processors. The cited 2026 German-court interpretation is single-sourced here — don't generalize into legal advice without checking the judgment and jurisdiction.
+**Privacy**: CAPI isn't automatically compliant — apply jurisdiction law/consent, minimize data, use required hashing/normalization, honor opt-outs, document processors. [A 2026 German-court CAPI-consent interpretation is single-sourced — don't generalize into legal advice without checking the judgment/jurisdiction.]
 
 ---
 
 ## 3. Standard events & Event Match Quality (EMQ)
 
-### Core standard events
-
-(BestEver, 2025-09: https://www.bestever.ai/post/meta-events-manager; Jon Loomer on standard vs custom events vs custom conversions: https://www.jonloomer.com/standard-events-custom-events-and-custom-conversions/)
-
-Gotcha: Purchase events without `value`/`currency` break value optimization and ROAS reporting — top Events Manager diagnostics warning. Don't fire Purchase on checkout page load; fire on the thank-you/confirmation page (or server-side on payment success).
-
-### Event Match Quality (EMQ)
-
-- 0–10 score per event, in Events Manager → dataset **Overview** → event → **Event Matching** view. Reflects completeness of hashed customer-info parameters; based on last ~48h of activity. (PixelFlow, 2026-07: https://pixelflow.so/blog/how-facebook-generates-event-match-quality-scores)
-- Score bands and event-specific ranges published by vendors are descriptive heuristics, not Meta eligibility thresholds.
-- Reported impact: raising EMQ 8.6 → 9.3 correlated with 18% lower CPA, +24% match rate, +22% ROAS (AdLeaks 2025 case data, cited by DataCops/Trackbee 2026). [vendor-cited case data]
-- Biggest single lift: **hashed email** collected at the conversion point in the CAPI payload; email + phone + external ID + fbp/fbc cookies contribute most. (MB Adv Agency, 2026-06: https://www.mbadv.agency/meta-ads/meta-pixel-and-conversion-tracking)
-- Improve EMQ via accurate permitted identifiers, but don't optimize the score at the expense of consent, correctness, deduplication, or backend event fidelity. No universal EMQ launch gate.
-
-### Choosing the optimization event & value-optimization eligibility
-
-- Delivery can optimize for a custom conversion or custom event, not only standard events; the specific event appears in the ad set Optimization & Delivery dropdown. [practitioner; verify in Ads Manager] A brand-new event has no history and optimizes poorly until it accrues volume — the learning-phase target (~50 optimization events per ad set per 7 days) is the practical floor, so a deep, rare event (e.g. qualified sale) can leave an ad set permanently learning-limited. Optimize for the deepest event that still clears that volume; otherwise use a reliable upstream proxy that correlates with the paid outcome and monitor that correlation. (Tracker/CRM → CAPI event tiering detailed in `tracker-ops`.)
-- Value optimization (VBO) requires `value` + `currency` (ISO 4217) on the event. Custom conversions can use VBO, but Meta reportedly raised the bar for custom/non-purchase events to roughly **100 attributed conversions** + **≥5 distinct values in the past 14 days** (higher than Purchase). [practitioner-reported change; verify current thresholds in Events Manager] Thin funnels that can't meet this should optimize on conversion count and control quality via which event they send, not VBO.
-- **Conversion Leads** performance goal (Lead Ads / Instant Forms): send down-funnel CRM stage events back via CAPI and optimize for a chosen lead stage. Official eligibility: ≥200 leads/month, upload data ≥ once daily, target stage occurs within 28 days of lead creation, and target-stage conversion rate between 1%–40%. [official — developers.facebook.com/documentation/ads-commerce/conversions-api/conversion-leads-integration]
+- Gotcha: Purchase without `value`/`currency` breaks value optimization + ROAS reporting — top Diagnostics warning. Fire Purchase on thank-you/confirmation page or server-side on payment success, **not** checkout page load.
+- **EMQ**: 0–10 score per event, Events Manager → dataset Overview → event → Event Matching view; reflects hashed-parameter completeness, based on ~last 48h activity. Vendor score bands/event-specific ranges are descriptive heuristics, **not Meta eligibility thresholds** — no universal EMQ launch gate.
+- [vendor-cited case data] Raising EMQ 8.6→9.3 correlated with 18% lower CPA, +24% match rate, +22% ROAS (AdLeaks 2025 case, relayed by DataCops/Trackbee).
+- Biggest single lift: hashed email at the conversion point in the CAPI payload; email+phone+external ID+fbp/fbc cookies contribute most.
+- **Optimization event choice**: delivery can optimize for custom conversion/custom event, not only standard events (ad set Optimization & Delivery dropdown). A brand-new event has no history — learning-phase target (~50 optimization events/ad set/7 days) is the practical floor, so a deep rare event (e.g. qualified sale) can leave an ad set permanently learning-limited. Optimize for the deepest event that still clears that volume, else use a reliable upstream proxy correlated with the paid outcome (tiering detail: `tracker-ops`).
+- **Value optimization (VBO)** requires `value`+`currency` (ISO 4217). Custom conversions can use VBO, but Meta reportedly raised the bar for custom/non-purchase events to **~100 attributed conversions + ≥5 distinct values in the past 14 days** (higher than Purchase). [practitioner-reported, verify live] Thin funnels failing this should optimize on conversion count, not force VBO.
+- **Conversion Leads** goal (Lead Ads/Instant Forms): send down-funnel CRM stage events via CAPI, optimize for a chosen stage. Official eligibility: **≥200 leads/month, upload ≥1×/day, target stage within 28 days of lead creation, target-stage conversion rate 1%–40%.** [official]
 
 ---
 
 ## 4. Domain verification & Aggregated Event Measurement (AEM)
 
-### Domain verification
-
-- Path: **Business Settings → Brand safety and suitability → Domains → Add** → verify via DNS TXT record, meta tag in `<head>`, or HTML file upload.
-- Since the AEM changes (below), verification is **no longer required for event configuration**, but still recommended for link ownership/editing control and still a prerequisite for some features. (Jon Loomer, 2023-05: https://www.jonloomer.com/meta-announces-big-changes-to-website-conversion-campaigns/)
-
-### AEM history — critical 2023→2025 change
-
-- **Original model (2021–2023):** verify domain, configure and rank **8 conversion events per domain** in Events Manager → **Aggregated Event Measurement** tab → **Web Event Configuration**. Only the highest-priority event per user session was reported for ATT opt-outs. Value Optimization consumed 4 of 8 slots via "value sets". Ad sets optimizing for non-prioritized events couldn't reach iOS opt-outs. Reordering events triggered a ~72-hour cool-down that paused affected ad sets. (Search Engine Journal 2021; Segwise 2026 for cool-down mechanics)
-- **May 2023:** Meta announced removal of most AEM requirements: no more 8-event prioritization, no value sets, AEM tab removed from Events Manager, domain verification no longer required for event config, no conversion-domain selection at ad set level. Rolled out gradually. (Jon Loomer, 2023-05)
-- **By mid-2025:** removal broadly complete — multiple sources confirm the manual 8-event ranking step is gone for web events; Meta aggregates all eligible web events automatically. Some accounts not yet migrated; **iOS app campaigns** still use the prioritized-event model. (Segwise 2026-07; Conversios "Update – June 2025": https://www.conversios.io/blog/meta-aggregated-event-measurement/; DEPT: https://www.deptagency.com/en-dk/insight/metas-removal-of-aggregated-event-measurement-aem-and-its-implications-for-advertisers/)
-- **Practical rule for 2025–2026:** if an AEM tab appears in Events Manager, the legacy model still applies to that account; if not, nothing to configure — keep the event list clean anyway, since AEM still feeds Advantage+ optimization signals. [account variance not officially documented]
-
-### AEM for app campaigns (still current)
-
-- AEM runs by default alongside SKAdNetwork for iOS app promotion; choosing **"SKAdNetwork only"** at ad set level disables AEM postbacks. **Advanced data sharing** toggle controls whether AEM shares events only from ATT-consenting users (off) or all users with masked signals (on). Check privacy policy before enabling. (Segwise, 2026-07)
+- Domain verification: Business Settings → Brand safety and suitability → Domains → Add → DNS TXT / meta tag / HTML file. **No longer required for event configuration** post-AEM-change, but still useful for link ownership/editing control and some feature prerequisites.
+- **AEM history (critical)**: 2021–2023 model — verify domain, rank **8 conversion events/domain** in AEM → Web Event Configuration; only highest-priority event per session reported for ATT opt-outs; VBO consumed 4 of 8 slots ("value sets"); non-prioritized-event ad sets couldn't reach iOS opt-outs; reordering triggered a **~72h cool-down** pausing affected ad sets.
+- **2023-05**: Meta announced removal — no more 8-event prioritization/value sets, AEM tab removed, domain verification no longer required for event config, no conversion-domain selection at ad set level. Rolled out gradually.
+- **By mid-2025**: removal broadly complete for web events — Meta aggregates all eligible web events automatically. Some accounts not yet migrated. **iOS app campaigns still use the prioritized-event model.**
+- Practical rule: if an AEM tab still appears for an account, legacy model applies there; if not, nothing to configure (still keep event list clean — feeds Advantage+ signals). [account variance undocumented]
+- **App campaigns**: AEM runs by default alongside SKAdNetwork for iOS; "SKAdNetwork only" at ad set level disables AEM postbacks. **Advanced data sharing** toggle: off = ATT-consenting users only, on = all users with masked signals — check privacy policy before enabling.
 
 ---
 
-## 5. UTM parameters — best practice
+## 5. UTM parameters
 
-### Setup
-
-- Ad level → **Destination** section → **URL Parameters** field (or **"Build a URL Parameter"**). Put the query string here, **not** the Website URL field; no leading `?` — Meta appends it. (Metricfixer, 2026-07: https://metricfixer.com/publications/online-advertising/meta-ads-dynamic-url-parameters-utm-tracking)
-- Minimum viable set: `utm_source` + `utm_medium` + `utm_campaign`; add `utm_content` for ad-level reporting. (Wevion, 2026-06: https://wevion.ai/en/blog/utm-parameter-guide-meta-ads-attribution/)
-
-### Dynamic URL parameters (8 tokens)
-
-`{{campaign.id}}`, `{{campaign.name}}`, `{{adset.id}}`, `{{adset.name}}`, `{{ad.id}}`, `{{ad.name}}`, `{{placement}}`, `{{site_source_name}}` (fb / ig / msg / an). Resolved at click time. (AdManage, 2025-10: https://admanage.ai/blog/utm-parameters-for-facebook-ads)
-
-Recommended template:
-
-```
-utm_source={{site_source_name}}&utm_medium=paid_social&utm_campaign={{campaign.id}}&utm_term={{adset.id}}&utm_content={{ad.id}}&placement={{placement}}
-```
-
-Use IDs as stable join keys. If analysts also need readable names, add separate name parameters and preserve the IDs.
-
-### Rules that prevent data fragmentation
-
-1. Keep static taxonomy values consistently cased. Dynamic name tokens retain the names configured in Meta and can fragment reporting if teams rename or vary capitalization.
-2. Align `utm_medium` with the analytics property's channel-group rules. `paid_social` is a common GA4-compatible convention; verify custom channel groups before standardizing it.
-3. **Name tokens can preserve their original published value** when entities are renamed; IDs stay stable. Use IDs for joins, names for readability.
-4. Tag every ad including boosted posts; don't edit UTMs mid-campaign (splits data into before/after buckets).
-5. Never put PII in UTMs (violates GA ToS).
-6. `fbclid` is appended automatically but does NOT populate GA campaign reports — UTMs still needed.
-7. Test before big launches: click a live ad, confirm values land in GA4 realtime.
-8. Meta, analytics, and backend totals will differ — identity, attribution windows, time zones, consent coverage, and conversion-time logic all differ across them. A stable understood gap is normal; a sudden change needs investigation.
+- Ad level → Destination → **URL Parameters** field (not Website URL field), no leading `?`. Minimum viable: `utm_source`+`utm_medium`+`utm_campaign`; add `utm_content` for ad-level reporting.
+- 8 dynamic tokens: `{{campaign.id}}`, `{{campaign.name}}`, `{{adset.id}}`, `{{adset.name}}`, `{{ad.id}}`, `{{ad.name}}`, `{{placement}}`, `{{site_source_name}}` (fb/ig/msg/an) — resolved at click time.
+- Recommended template: `utm_source={{site_source_name}}&utm_medium=paid_social&utm_campaign={{campaign.id}}&utm_term={{adset.id}}&utm_content={{ad.id}}&placement={{placement}}`. Use IDs as stable join keys; add separate name params if analysts need readability, but preserve IDs.
+- Rules: static taxonomy values consistently cased (name tokens fragment reporting if renamed/re-cased); align `utm_medium` to the analytics property's channel-group rules (`paid_social` is common GA4 convention, verify custom groups); tag every ad incl. boosted posts; never edit UTMs mid-campaign (splits before/after buckets); never PII in UTMs (GA ToS); `fbclid` auto-appends but does NOT populate GA campaign reports — UTMs still needed; test on a live ad before big launches. Meta/analytics/backend totals will differ — identity, attribution windows, time zones, consent, conversion-time logic all diverge; a stable gap is normal, a sudden change needs investigation.
 
 ---
 
-## 6. iOS14+ impact on reporting (the 2025–2026 reality)
+## 6. iOS14+ reporting reality
 
-- **Delays:** conversion reporting isn't always immediate, especially for modeled or privacy-preserving app attribution. Use the account's observed conversion-delay distribution, not a universal 72-hour wait. (Practitioner context: https://www.adsmurai.com/en/articles/meta-ads-in-the-post-ios14-era-how-to-consolidate-data-and-not-get-lost-in-attribution)
-- **Modeled conversions:** Meta fills opt-out gaps with statistical modeling — Ads Manager totals exceed what analytics tools see. Attribution counted at time of conversion; SKAN postbacks arrive on Apple's timer, not real time. (Adscook; Impression Digital, 2021 — mechanics unchanged)
-- **Under-reporting persists:** ATT opt-out means a real share of iOS conversions never reaches Meta; practitioners report meaningful CPA/ROAS distortion vs backend truth. Triangulate with UTM/GA4 + backend revenue.
-- **SKAdNetwork:** Apple's privacy-safe app attribution; postbacks delayed 24–72h+, conversion values limited. Meta supports SKAN for app campaigns; AEM runs alongside it (see §4). Per LeadsBridge (2026-07), Apple replaced SKAN with **AdAttributionKit (AAK)** as primary framework with iOS 26 (Sept 2025), adding custom attribution rules and regional postback data. [single source — verify against Apple docs if app tracking matters]
-- **Practical mitigations:** Pixel + CAPI redundancy where appropriate; stable UTM joins; backend outcome reporting; evaluation windows long enough to capture the account's conversion lag and weekly pattern.
+- Conversion reporting isn't always immediate, esp. for modeled/privacy-preserving app attribution — use the account's observed delay distribution, not a universal 72h wait.
+- Modeled conversions fill opt-out gaps statistically — Ads Manager totals exceed analytics tools' counts; attribution counted at conversion time; SKAN postbacks arrive on Apple's timer.
+- ATT opt-out means a real share of iOS conversions never reaches Meta — meaningful CPA/ROAS distortion vs. backend truth reported; triangulate with UTM/GA4 + backend revenue.
+- SKAdNetwork: Apple's privacy-safe app attribution, postbacks delayed 24–72h+, limited conversion values; AEM runs alongside it (§4). [single source] Apple reportedly replaced SKAN with **AdAttributionKit (AAK)** as primary framework at iOS 26 (Sept 2025) — custom attribution rules, regional postback data; verify against Apple docs if app tracking matters.
+- Mitigations: Pixel+CAPI redundancy, stable UTM joins, backend outcome reporting, evaluation windows long enough for the account's lag/weekly pattern.
 
 ---
 
 ## 7. A/B testing: Experiments tool vs manual splits
 
-### Meta's native A/B test (Experiments)
-
-- Path: Ads Manager → ☰ **All tools** → **Experiments** (Analyze and report section) → **A/B Test** → pick two existing campaigns/ad sets/ads or create a duplicate as the variable.
-- Ensures **no audience overlap** between cells — people who see variant A never see variant B. Core advantage over manual splits.
-- Reports a "% confidence this will be a winner." The commonly repeated "90% default" is likely the **Lift-study** threshold; Meta's A/B framework appears to flag a winner at a lower bar (~65%+ cited) — so an A/B "winner" is directional, not lift-grade. Official help page was geo-blocked at last check — verify the live figure in the results view. "End test early if a winner is found" exists — leave off, run the full window unless Meta's sequential decision rule is verified (methodology unpublished; treat early stops as peeking risk). Key metric selection is limited mostly to "Cost per …" metrics; conversion rate isn't native (workaround: custom metric = Purchases/Link clicks). (Convert/Daphne Tideman, 2025-12: https://www.convert.com/blog/growth-marketing/meta-ads-ab-testing-guide/)
-- Best use: validating big bets — offers, landing pages/journeys, funnels — where overlap-free delivery matters. Clunky for high-volume creative iteration (one test at a time per setup).
-
-### Manual split tests
-
-- **ABO structure** can hold budgets equal, but doesn't create a randomized or overlap-free experiment. Use Meta Experiments when causal confidence matters; use parallel ABO cells for directional operational tests, checking audience overlap, delivery, and spend balance. (Convert, 2025-12)
-- **Advantage+ creative screening:** multiple variants in one ad set can help delivery discover promising combinations, but allocation is unequal and the result isn't a clean angle test. Size variant count to available delivery; use materially distinct concepts when the goal is concept discovery.
-- **Flexible/ad-creative combinations and legacy Dynamic Creative options** vary by objective and account. Can discover combinations but don't isolate component effects. Use a controlled A/B test when the learning must be causal. (AdStellar, 2026-03: https://www.adstellar.ai/blog/facebook-ad-creative-testing-methods)
-- Set required confidence before launch. Directional creative screening can use lower evidence standards than a landing-page, pricing, or budget-allocation decision — don't present an early platform prediction as a statistically validated result.
+- **Meta Experiments**: Ads Manager → All tools → Experiments → A/B Test → pick two existing campaigns/ad sets/ads or duplicate as the variable. Ensures **no audience overlap between cells** — core advantage over manual splits.
+- Reports "% confidence this will be a winner." The commonly repeated "90% default" is likely the **Lift-study** threshold; Meta's A/B framework appears to flag a winner at a lower bar (**~65%+ cited**) — an A/B "winner" is directional, not lift-grade. [official help page geo-blocked at last check — verify live figure in the results view] "End test early if a winner is found" exists — leave off; sequential-decision methodology unpublished, early stops carry peeking risk. Key-metric selection is mostly "Cost per …" — conversion rate isn't native (workaround: custom metric = Purchases/Link clicks).
+- Best for validating big bets (offers, landing pages, funnels) where overlap-free delivery matters; clunky for high-volume creative iteration (one test at a time per setup).
+- **Manual splits**: ABO can hold budgets equal but isn't randomized/overlap-free — use Experiments when causal confidence matters, ABO cells for directional operational tests (check overlap/delivery/spend balance manually).
+- **Advantage+ creative screening**: multiple variants in one ad set can surface promising combos but allocation is unequal — not a clean angle test.
+- Flexible/ad-creative combinations and legacy Dynamic Creative discover combinations but don't isolate component effects — use a controlled A/B test when the learning must be causal.
+- Set required confidence before launch; directional creative screening can use a lower bar than a landing-page/pricing/budget decision — don't present an early platform prediction as statistically validated.
 
 ---
 
-## 8. Creative testing frameworks used by pros
+## 8. Creative testing frameworks
 
-- **Structure by angle in CBO:** one campaign, ad sets per angle (same targeting across sets for fairness), 2–3 creatives per set consistent with that angle. (PublicityPort, 2025-04: https://publicityport.com/awc/3964/)
-- **Volume framework (ecom, 2026):** Week 1 define 3–4 angles → generate 5–10 variations per angle (vary format, hook, visual style: lifestyle/product/UGC) → 20–40 variations → test 2 weeks, iterate. (InsightIQ, 2026-02: https://www.insight-iq.ai/blog/ai-ad-creative-testing-ecommerce)
-- **Challenger cadence:** maintain enough creative candidates to replace declining concepts without fragmenting delivery. Appropriate count/evaluation threshold depend on spend, volume, and the test question. (Atria, 2026-07: https://www.tryatria.com/blog/meta-creative-fatigue-diagnose-and-fix-2026)
-- Variable priority order: creative concept → format → copy → audience → placement. (GoStellar)
-- Vendor reports describe faster fatigue in some high-spend accounts, but no universal 2–3-week lifespan or YoY CPM uplift applies. Maintain iteration capacity; refresh when account-relative distribution and outcome signals deteriorate. (Practitioner source: https://segwise.ai/blog/creative-experimentation-platforms-ads-2026)
+- Structure by angle in CBO: one campaign, ad sets per angle (same targeting across sets for fairness), 2–3 creatives/set per angle.
+- Volume framework (ecom): Week 1 define 3–4 angles → 5–10 variations/angle (vary format/hook/visual style) → 20–40 variations → test 2 weeks → iterate.
+- Challenger cadence: enough creative candidates to replace declining concepts without fragmenting delivery — count/threshold depend on spend, volume, test question.
+- Variable priority order: creative concept → format → copy → audience → placement.
+- Vendor reports describe faster fatigue in some high-spend accounts — no universal 2–3-week lifespan or YoY CPM uplift applies; refresh when account-relative distribution/outcomes deteriorate, not on a calendar.
 
 ---
 
 ## 9. Kill & scale decisions
 
-### When to kill an ad
+**Kill**: no universal seven-day hold — define minimum data requirement from conversion delay, expected CVR, spend risk, test purpose; stop immediately for policy/tracking/brand-safety/severe funnel failures. "3× target CPA with zero conversions" is a pre-registered risk limit, not proof of significance — also compare CTR/LPV rate/CVR/lead quality/backend outcomes vs. the account's own baseline. No universal current requirement of exactly 50 events/7 days for every setup — use live Delivery status; don't downgrade to a low-quality proxy event just to satisfy the legacy heuristic.
 
-- Avoid reacting to normal early variance, but don't impose a universal seven-day hold. Define a minimum data requirement from conversion delay, expected conversion rate, spend risk, and test purpose. Stop immediately for policy, tracking, brand-safety, or severe funnel failures.
-- Practitioner multiples like "3× target CPA with zero conversions" are pre-registered risk limits, not proof of statistical significance. Also compare CTR, landing-page-view rate, CVR, lead quality, and backend outcomes against the account's own baseline.
-- Meta documents learning and learning-limited delivery but doesn't publish a universal current requirement of exactly 50 events in seven days for every optimization setup. Use the live Delivery status and observed stability; don't switch to a low-quality proxy event merely to satisfy a legacy heuristic. (Practitioner history: https://www.jonloomer.com/qvt/how-to-set-your-facebook-ads-budget/)
-
-### When and how to scale
-
-- **Vertical:** change budget in measured steps, monitor marginal CPA/ROAS, delivery status, and conversion lag. Percent rules such as 10–20% or 1% nightly are practitioner heuristics, not guaranteed learning-safe thresholds. (Jon Loomer, 2025-03: https://www.jonloomer.com/qvt/how-to-increase-facebook-ads-budget/; slow-burn strategy: https://www.jonloomer.com/slow-burn-a-strategy-for-scaling-facebook-ads/)
-- **Horizontal:** new audiences, broader lookalikes (1% → 3–5%), new placements, new geos.
-- **Duplicate-and-scale caution:** duplicating a winning campaign/ad set with identical ads + audiences causes **Auction Overlap** — the higher-total-value ad wins the auction, the other starves. Prefer scaling in place or genuinely differentiating the duplicate. (Jon Loomer, 2023-09: https://www.jonloomer.com/qvt/auction-overlap-and-ad-performance/)
-- **Budget split heuristic:** 60% proven winners / 30% testing / 10% refreshing past winners; 60–80% of budget on prospecting for growth accounts. (AdAmigo 2026-07; Growwithba 2026-04)
-- With Advantage Campaign Budget (CBO), avoid ad set spend minimums/maximums except rarely (e.g., forcing delivery in a new state) — they defeat the algorithm's allocation. (Jon Loomer, 2023-09: https://www.jonloomer.com/qvt/ad-set-spend-limits-and-cbo/)
+**Scale**: Vertical — measured budget steps, monitor marginal CPA/ROAS/delivery/lag; 10–20% or 1%-nightly are practitioner heuristics, not guaranteed learning-safe thresholds. Horizontal — new audiences, broader lookalikes (1%→3–5%), new placements/geos. **Duplicate-and-scale caution**: duplicating a winner with identical ads+audience causes **Auction Overlap** — higher-total-value ad wins, the other starves; prefer scaling in place or genuinely differentiating the duplicate. Budget-split heuristic: 60% proven winners/30% testing/10% refreshing past winners; 60–80% on prospecting for growth accounts. With Advantage Campaign Budget (CBO), avoid ad-set spend min/max except rarely (e.g. forcing delivery in a new state) — they defeat the algorithm's allocation.
 
 ---
 
 ## 10. Frequency management & ad fatigue
 
-### Practitioner benchmarks (context only)
-
-- Fatigue onset ~4 exposures; conversion likelihood −45% after 4 repeats; CTR −40–55% at 5–8 exposures; costs +50–80% at 5+. (AdAmigo, 2026-07: https://www.adamigo.ai/blog/meta-ads-frequency-benchmarks-when-ads-start-fatiguing)
-- Vendor-reported ranges such as prospecting below 2.5–3.0 or retargeting around 4–6 are starting points only. Interpret frequency with objective, window, audience size, purchase cycle, reach, creative mix, and the account's performance trend. (AdAmigo; Revel Marketing, 2025-10: https://www.revelmarketingpartners.com/blogposts/2025/10/8/ad-fatigue-on-meta-how-to-detect-it-early-fix-it-fast)
-- Context: median account frequency ~2.4–2.5. ~80% of an ad's impact happens in the first 2 impressions. (AdAmigo)
-
-### Fatigue signals
-
-- Compare CTR, hook/hold metrics, CPA/ROAS, frequency, reach, CPM, and creative-level spend against the account's own comparable baseline. Deterioration across several signals is stronger evidence than any fixed threshold.
-- Separate creative fatigue from auction seasonality, audience saturation, spend reallocation, offer changes, landing-page changes, and normal conversion lag.
-- Meta may expose delivery diagnostics such as **Creative limited** or **Creative fatigue**. Treat the live explanation as a diagnostic input; validate against outcome trends before pausing or replacing creative.
-- Vendor-reported lifespans, percentage declines, and rest periods are descriptive samples, not automatic cutoffs. Pre-register a risk limit; choose response size from marginal economics.
-
-### Controls & fixes
-
-- **Frequency caps** only on Awareness/Reach objective campaigns; **Target frequency** available on Sales/Awareness/Engagement with lifetime budgets. For conversion campaigns, frequency is managed indirectly: budget, audience size, creative rotation.
-- **Automated rules:** prefer notification rules tied to frequency plus a performance deterioration signal; don't auto-pause solely because a generic frequency number was crossed.
-- Possible responses: new hook/thumbnail, different format, new concept, broader eligible delivery, or budget change. Diagnose whether decline is creative-specific or audience-wide before acting. Pausing an ad set stops its delivery; whether a later change returns it to learning depends on Meta's significant-edit handling and live status. Apply engager exclusions only when they match the campaign's message and objective.
-- Distinguish creative fatigue (one ad declining) from **audience saturation** (reach declining at stable budget, new creatives fail immediately) — fix is audience expansion, not more creative. (Atria, 2026-07)
+- Benchmarks (context only): fatigue onset ~4 exposures; conversion likelihood −45% after 4 repeats; CTR −40–55% at 5–8 exposures; costs +50–80% at 5+. Prospecting <2.5–3.0, retargeting ~4–6 are starting points only — interpret with objective/window/audience size/purchase cycle/reach/creative mix/trend. Median account frequency ~2.4–2.5; ~80% of an ad's impact happens in the first 2 impressions.
+- Fatigue signals: compare CTR/hook-hold/CPA-ROAS/frequency/reach/CPM/creative spend vs. the account's own baseline — deterioration across several signals beats any single fixed threshold. Separate creative fatigue from auction seasonality/audience saturation/spend reallocation/offer or LP changes/conversion lag. "Creative limited"/"Creative fatigue" diagnostics are inputs to validate against outcome trends, not auto-triggers.
+- Controls: **Frequency caps** only on Awareness/Reach objective; **Target frequency** on Sales/Awareness/Engagement with lifetime budgets. Conversion campaigns manage frequency indirectly (budget, audience size, creative rotation). Automated rules: prefer notification rules tied to frequency + a performance-deterioration signal, don't auto-pause on frequency alone.
+- Responses: new hook/thumbnail, different format, new concept, broader delivery, or budget change — diagnose creative-specific vs. audience-wide first. Pausing an ad set stops delivery; whether it returns to learning on restart depends on Meta's significant-edit handling and live status. Distinguish creative fatigue (one ad declining) from **audience saturation** (reach declining at stable budget, new creatives fail immediately) — fix is audience expansion, not more creative.
 
 ---
 
-## 11. Launch-day & weekly optimization checklists
+## 11. Launch-day & weekly checklists
 
-### Launch day
+**Launch**: verify events in Test events (value/currency, dedup) — EMQ is diagnostic, not a launch gate; verify domain only if the feature requires it, check legacy AEM only if it exists for the account; UTM template on every ad, click-test GA4 realtime; naming conventions finalized (name tokens lock at publish); budget sized to the decision being made; objective/performance goal matches the tracked event; purchaser/customer exclusions only if matching objective/retention strategy; test landing page on representative mobile/connections; **no AEM/event-config changes within 72h of launch** if on legacy AEM (cool-down pauses delivery); record launch time + expected conversion delay, keep explicit emergency-stop conditions.
 
-1. Verify applicable browser/server events in **Test events**, incl. conversion value/currency and deduplication. Review EMQ as a diagnostic, not a launch gate.
-2. Verify the domain when required by the selected feature/ownership workflow; check legacy AEM configuration only if it exists for the account/use case.
-3. UTM template in **URL Parameters** on every ad; click one live ad, confirm GA4 realtime attribution.
-4. Naming conventions finalized (name tokens lock at publish).
-5. Budget sanity: expected result volume adequate for the decision being made; consolidate when fragmentation prevents useful delivery.
-6. Objective/performance goal matches the event actually tracked (e.g., Sales → Purchase, not traffic).
-7. Apply purchaser/customer exclusions only when they match campaign objective, retention strategy, and current targeting controls.
-8. Test the landing page on representative mobile devices/connections; investigate click-to-landing-page-view loss and Core Web Vitals rather than relying on a universal conversion-loss multiplier.
-9. No AEM/event-config changes within 72h of launch if on legacy AEM (cool-down pauses delivery).
-10. Record launch time and expected conversion delay; avoid premature edits, while retaining explicit emergency stop conditions for tracking, policy, spend, or funnel failures.
-
-### Weekly
-
-1. Review spend vs results per ad, not just per campaign — aggregation hides fatigued ads.
-2. Check Delivery column for **Creative limited / Creative fatigue**; check learning-phase status per ad set.
-3. Review frequency together with reach, audience size, creative distribution, and outcome trend against the account baseline.
-4. Review CTR, click-to-LPV, CVR, CPA/ROAS, and qualified/backend outcomes over windows appropriate to volume and conversion lag.
-5. Apply pre-registered stop/scale rules and log changes; pace edits by volume and risk, not a fixed weekly quota.
-6. Maintain a creative pipeline sized to spend and fatigue evidence; refresh when distribution or outcomes deteriorate, not merely because days elapsed.
-7. Events Manager **Diagnostics** tab: clear warnings (missing value/currency, dedup issues, EMQ drops); re-test after any site/funnel change.
-8. Search terms/placements review (placements for Meta); audience overlap check before scaling duplicates.
-9. Reconcile Meta-reported conversions with analytics and backend outcomes. Either side can be higher depending on identity, attribution, consent, event loss, duplicates, refunds, and reporting time; investigate unexplained or suddenly changing deltas.
-10. Scale in measured increments while monitoring marginal economics and delivery; practitioner percentage rules are optional starting points.
+**Weekly**: review spend/results per ad not just per campaign (aggregation hides fatigued ads); check Delivery column for Creative limited/fatigue + learning-phase status; review frequency with reach/audience size/creative distribution/trend vs. baseline; review CTR/click-to-LPV/CVR/CPA-ROAS/backend outcomes over windows matched to volume and lag; apply pre-registered stop/scale rules, log changes; maintain a creative pipeline sized to spend/fatigue evidence; clear Diagnostics warnings (value/currency, dedup, EMQ drops), re-test after site/funnel changes; review placements, check audience overlap before scaling duplicates; **reconcile Meta-reported conversions with analytics/backend — either side can be higher** depending on identity, attribution, consent, event loss, duplicates, refunds, reporting time; investigate unexplained/sudden deltas; scale in measured increments, percentage rules are optional starting points.
 
 ---
 
 ## Sources
 
-1. https://leadsbridge.com/blog/facebook-conversions-api/ — CAPI guide, dataset rename, Offline API shutdown, one-click CAPI, iOS 26 changes (practitioner), accessed 2026-07-22
-2. https://segwise.ai/blog/facebook-aggregated-event-measurement — AEM 2026 state, 8-event removal, app AEM settings (practitioner), accessed 2026-07-22
-3. https://www.jonloomer.com/meta-announces-big-changes-to-website-conversion-campaigns/ — May 2023 AEM change announcement (practitioner), accessed 2026-07-22
-4. https://www.conversios.io/blog/meta-aggregated-event-measurement/ — June 2025 AEM 8-event removal confirmation (practitioner), accessed 2026-07-22
-5. https://www.deptagency.com/en-dk/insight/metas-removal-of-aggregated-event-measurement-aem-and-its-implications-for-advertisers/ — AEM removal implications (practitioner/agency), accessed 2026-07-22
-6. https://admanage.ai/blog/utm-parameters-for-facebook-ads — UTM setup, dynamic parameters, naming rules (practitioner), accessed 2026-07-22
-7. https://metricfixer.com/publications/online-advertising/meta-ads-dynamic-url-parameters-utm-tracking — URL Parameters field mechanics (practitioner), accessed 2026-07-22
-8. https://wevion.ai/en/blog/utm-parameter-guide-meta-ads-attribution/ — minimum UTM set, Meta-vs-GA4 gap (practitioner), accessed 2026-07-22
-9. https://www.joindatacops.com/resources/enterprise-meta-capi-implementation — CAPI gateway options, EMQ ranges/benchmarks (practitioner/benchmark), accessed 2026-07-22
-10. https://www.joindatacops.com/resources/clerk-fraud-detection/ — signal-loss 20–40%, Apple LTP expansion (practitioner), accessed 2026-07-22
-11. https://pixelflow.so/blog/how-facebook-generates-event-match-quality-scores — EMQ score bands (practitioner), accessed 2026-07-22
-12. https://www.mbadv.agency/meta-ads/meta-pixel-and-conversion-tracking — EMQ per-event ranges, hashed-email lift (practitioner), accessed 2026-07-22
-13. https://www.bestever.ai/post/meta-events-manager — Events Manager setup, standard events (practitioner), accessed 2026-07-22
-14. https://www.jonloomer.com/conversions-for-meta-advertising-checklist/ — Event Setup Tool (practitioner), accessed 2026-07-22
-15. https://www.jonloomer.com/standard-events-custom-events-and-custom-conversions/ — event taxonomy (practitioner), accessed 2026-07-22
-16. https://agrowth.stck.me/chapter/1516626/Meta-Events-Manager-Guide-2025-Tracking-CAPI-and-Optimization — advanced matching, diagnostics (practitioner), accessed 2026-07-22
-17. https://www.adsmurai.com/en/articles/meta-ads-in-the-post-ios14-era-how-to-consolidate-data-and-not-get-lost-in-attribution — 72h reporting delays, post-iOS14 attribution (practitioner), accessed 2026-07-22
-18. https://www.convert.com/blog/growth-marketing/meta-ads-ab-testing-guide/ — Experiments A/B test mechanics, ABO vs Advantage+, test structures (practitioner), accessed 2026-07-22
-19. https://www.gostellar.app/blog/ab-testing-facebook-ads-7-proven-criteria-for-results — variable priority, angle-test speed (practitioner), accessed 2026-07-22
-20. https://www.adstellar.ai/blog/facebook-ad-creative-testing-methods — DCO vs manual A/B (practitioner), accessed 2026-07-22
-21. https://admanage.ai/blog/facebook-ad-creative-testing-framework — 3–5 variation concept testing (practitioner), accessed 2026-07-22
-22. https://www.insight-iq.ai/blog/ai-ad-creative-testing-ecommerce — angle/variation volume framework (practitioner), accessed 2026-07-22
-23. https://segwise.ai/blog/creative-experimentation-platforms-ads-2026 — vendor fatigue/cost claims retained only as contextual evidence, not universal cadence or forecast, accessed 2026-07-22
-24. https://publicityport.com/awc/3964/guys-test-campaign-from-different-angles-creatives-offers — CBO structure-by-angle (practitioner), accessed 2026-07-22
-25. https://growwithba.com/blog/facebook-ads-kill-criteria — kill criteria, 3x CPA rule, weekly checklist (practitioner), accessed 2026-07-22
-26. https://growwithba.com/blog/meta-ads-testing-budget-rules — testing budget rules (practitioner), accessed 2026-07-22
-27. https://www.jonloomer.com/qvt/how-to-increase-facebook-ads-budget/ — 1%-nightly budget scaling rule (practitioner), accessed 2026-07-22
-28. https://www.jonloomer.com/slow-burn-a-strategy-for-scaling-facebook-ads/ — slow-burn scaling (practitioner), accessed 2026-07-22
-29. https://www.jonloomer.com/qvt/auction-overlap-and-ad-performance/ — auction overlap on duplication (practitioner), accessed 2026-07-22
-30. https://www.jonloomer.com/qvt/how-to-set-your-facebook-ads-budget/ — 50 × CPA weekly budget rule (practitioner), accessed 2026-07-22
-31. https://www.jonloomer.com/qvt/ad-set-spend-limits-and-cbo/ — CBO spend limits (practitioner), accessed 2026-07-22
-32. https://www.adamigo.ai/blog/meta-ads-frequency-benchmarks-when-ads-start-fatiguing — frequency benchmarks, fatigue thresholds, refresh cadence (practitioner/benchmark), accessed 2026-07-22
-33. https://www.tryatria.com/blog/meta-creative-fatigue-diagnose-and-fix-2026 — Creative limited/fatigue statuses, diagnosis framework (practitioner), accessed 2026-07-22
-34. https://www.revelmarketingpartners.com/blogposts/2025/10/8/ad-fatigue-on-meta-how-to-detect-it-early-fix-it-fast — Meta frequency 3–4 engagement-decline note (practitioner), accessed 2026-07-22
-35. https://www.datahash.com/docs/meta-conversions-api-gateway/ — CAPI Gateway overview (practitioner/docs), accessed 2026-07-22
-36. https://adsmaa.com/blog/meta-conversions-api-setup-guide — CAPI maintenance burden, API versioning (practitioner), accessed 2026-07-22
-37. https://www.searchenginejournal.com/facebook-aggregated-event-measurement/399484/ — original AEM 8-event model (practitioner/news), accessed 2026-07-22
-38. https://www.facebook.com/help/messenger-app/952192354843755 — official Pixel and dataset relationship, reviewed 2026-07-22
-39. https://www.facebook.com/business/help/AboutConversionsAPI — official Conversions API overview, reviewed 2026-07-22
-40. https://about.fb.com/ltam/news/2026/04/eliminar-barreras-tecnicas-para-ayudar-a-empresas-de-todos-los-tamanos-a-aprovechar-mas-sus-anuncios/amp/ — official announcement of Meta-enabled Conversions API, reviewed 2026-07-22
+Official: facebook.com/help (Pixel/dataset relationship), facebook.com/business/help/AboutConversionsAPI, about.fb.com (Meta-enabled CAPI announcement, 2026-04) — reviewed 2026-07-22. Practitioner: LeadsBridge (CAPI/dataset rename/Offline API shutdown/iOS 26), Segwise (AEM 2026 state, app AEM settings), Jon Loomer (AEM 2023 announcement, event taxonomy, scaling/auction-overlap/CBO-limits QVT series), Conversios/DEPT (AEM removal confirmation), admanage.ai/metricfixer/wevion (UTM setup+mechanics), DataCops/PixelFlow/MB Adv Agency (EMQ scoring, CAPI gateway options), BestEver/AGrowth (Events Manager, advanced matching), adsmurai (iOS14+ delays), Convert/GoStellar/AdStellar/InsightIQ (A/B and creative-testing frameworks), AdAmigo/Atria/Revel Marketing (frequency/fatigue benchmarks), growwithba (kill-criteria, testing budget), datahash/adsmaa (CAPI gateway docs, versioning), Search Engine Journal (original AEM model). All accessed 2026-07-22; full URLs in prior version if needed.
 
 ## Gaps
 
-- **Official coverage is partial:** Pixel/dataset, CAPI, and the April 2026 Meta-enabled CAPI announcement were checked against official Meta pages. Exact Events Manager labels and AEM/Experiments paths still rely partly on practitioner sources and can vary by rollout.
-- **AdAttributionKit replacing SKAdNetwork** for Meta app ads is single-sourced (LeadsBridge); Apple's framework docs were not checked, and Meta's current SKAN-vs-AAK support state is unverified.
-- **Exact completion date of the AEM 8-event-limit removal** is fuzzy: announced May 2023, confirmed removed by June–July 2025 in practitioner sources; some accounts reportedly still see the legacy AEM tab. No official Meta changelog found.
-- **EMQ → CPA/ROAS impact numbers** (18% CPA, 24% match rate, 22% ROAS) trace to AdLeaks 2025 case data cited by vendors — directional, not Meta-published.
-- **Fatigue/frequency benchmarks** (CTR −45% at 4 exposures, etc.) are vendor aggregates without disclosed methodology; treat as planning heuristics, not Meta-published thresholds.
-- **Instagram-specific (vs general Meta) tracking differences** — none found; all tracking infrastructure is account-level and shared across placements. Instagram-only nuances (e.g., in-app browser behavior) were not separately documented in sources reviewed.
-- **German court CAPI-consent ruling (2026)** cited only by LeadsBridge; case details unverified.
+- AdAttributionKit replacing SKAdNetwork for Meta app ads is single-sourced (LeadsBridge); Apple's own docs not checked, current SKAN-vs-AAK support state unverified.
+- Exact completion date of AEM 8-event-limit removal is fuzzy (announced 2023-05, confirmed removed by mid-2025 in practitioner sources); some accounts reportedly still see the legacy tab; no official Meta changelog found.
+- EMQ→CPA/ROAS impact numbers (18%/24%/22%) trace to one AdLeaks 2025 case relayed by vendors — directional, not Meta-published.
+- Fatigue/frequency benchmarks are vendor aggregates without disclosed methodology — planning heuristics, not Meta-published thresholds.
+- No Instagram-specific (vs. general Meta) tracking differences found — infrastructure is account-level, shared across placements.
+- German-court CAPI-consent ruling (2026) cited only by LeadsBridge — case details unverified.

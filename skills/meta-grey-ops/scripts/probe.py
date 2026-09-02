@@ -2,7 +2,7 @@
 """Pre-flight gate. Proves the token can actually WRITE before anything is built.
 
     export META_TOKEN=...  META_PROXY=socks5h://user:pass@host:port
-    python3 probe.py --account act_123 --page 456 [--dataset 789] [--json report.json]
+    python3 probe.py --account act_123 --page 456 [--dataset 789 [--attach-pixel --business 111]] [--json report.json]
 
 Every check is a separate gate (meta-ads/13 §4): a successful GET proves nothing about
 write access, and an asset visible to a human is not an asset assigned to the token.
@@ -41,6 +41,14 @@ ACCOUNT_STATUS = {
 }
 
 REQUIRED_SCOPES = ["ads_management", "ads_read"]
+# The full-access set a launch persona should hold (meta-grey-ops/02). Missing ones are a
+# WARN, not a FAIL: catalog work fails later without catalog_management, Page-avatar edits
+# fail #283 without pages_manage_metadata, IG identity reads need instagram_basic.
+RECOMMENDED_SCOPES = [
+    "business_management", "read_insights", "pages_manage_ads", "pages_read_engagement",
+    "pages_show_list", "pages_manage_metadata", "pages_manage_posts", "instagram_basic",
+    "catalog_management",
+]
 
 
 class Report:
@@ -65,6 +73,21 @@ def gate_identity(r: Report) -> None:
         r.add("token identity", FAIL, str(e), e.as_dict())
 
 
+def gate_token_debug(r: Report) -> None:
+    """/debug_token accepts the System User token as its own app token (live 2026-09-02):
+    returns type, app, expires_at (0 = never), data_access_expires_at, scopes."""
+    try:
+        d = graph.get("debug_token", params={"input_token": graph.token()}, context="debug_token")["data"]
+    except graph.GraphError as e:
+        r.add("token debug", WARN, f"debug_token unavailable for this token: {e}")
+        return
+    exp = d.get("expires_at")
+    life = "never" if exp == 0 else str(exp)
+    r.add("token debug", PASS if d.get("is_valid") else FAIL,
+          f"type={d.get('type')} app={d.get('app_id')} ({d.get('application')}) expires={life} "
+          f"data_access_expires={d.get('data_access_expires_at')}", d)
+
+
 def gate_scopes(r: Report) -> None:
     try:
         perms = graph.get("me/permissions", context="scopes")["data"]
@@ -77,6 +100,112 @@ def gate_scopes(r: Report) -> None:
         r.add("granted scopes", FAIL, f"missing {missing}; granted={sorted(granted)}", sorted(granted))
     else:
         r.add("granted scopes", PASS, ", ".join(sorted(granted)), sorted(granted))
+    soft = [s for s in RECOMMENDED_SCOPES if s not in granted]
+    if soft:
+        r.add("recommended scopes", WARN, f"not granted: {soft} — catalog/page/IG steps will fail "
+              "later if the job needs them (02)")
+
+
+def gate_visible_accounts(r: Report, account: str | None) -> None:
+    """The token must SEE the account through its own assignment, not just read it by id.
+    An account absent from /me/adaccounts is one the System User was not assigned to —
+    reads may still work through a Page role while every write fails."""
+    try:
+        rows = graph.get("me/adaccounts", params={"fields": "id,name", "limit": 500},
+                         context="visible ad accounts").get("data", [])
+    except graph.GraphError as e:
+        r.add("visible ad accounts", WARN, f"could not list: {e}")
+        return
+    ids = {x["id"] for x in rows}
+    if account is None:
+        names = ", ".join(f"{x['id']} {x.get('name', '')[:20]}" for x in rows[:12])
+        r.add("visible ad accounts", PASS if rows else WARN,
+              f"{len(ids)} visible: {names}{' …' if len(rows) > 12 else ''}" if rows else
+              "none — this token is assigned to no ad account", rows)
+        return
+    if account in ids:
+        r.add("visible ad accounts", PASS, f"{account} is assigned to this token ({len(ids)} visible)")
+    else:
+        r.add("visible ad accounts", FAIL,
+              f"{account} is NOT in /me/adaccounts ({len(ids)} visible). Assign the ad account "
+              "to the System User (Business Settings → System users → Assign assets).")
+
+
+def whoami_verdict(r: Report) -> None:
+    """Turn the intake gates into the decision a fresh agent needs: which pipe, proxy or not,
+    how long the token lives, what it cannot do (02 §1, §4)."""
+    dbg = next((x["data"] for x in r.rows if x["gate"] == "token debug" and x["data"]), {}) or {}
+    ttype, exp = dbg.get("type"), dbg.get("expires_at")
+    scopes = set(dbg.get("scopes") or [])
+    lines = []
+    if ttype == "SYSTEM_USER":
+        lines.append("SYSTEM_USER token: session-independent, no persona proxy needed "
+                     "(META_ALLOW_NO_PROXY=1 is acceptable); direct API via scripts/ is the pipe.")
+    elif ttype == "USER":
+        lines.append("USER token: it IS a persona session. Route every call through that persona's proxy "
+                     "(META_PROXY=socks5h://…); it dies on logout/password change/checkpoint (190/460-467) "
+                     "and cannot be revived — re-mint. No appsecret_proof for EAAB tokens from Ads Manager.")
+        if exp:
+            lines.append(f"expires_at={exp} — plan the re-mint; exchange to long-lived only if it came from "
+                         "your own app (02 §4).")
+    elif ttype == "PAGE":
+        lines.append("PAGE token: comments/page edits only — no ad account writes.")
+    else:
+        lines.append(f"token type {ttype!r}: unknown to this probe; read 02 §4 before writing.")
+    missing = {"ads_management", "business_management", "pages_read_engagement"} - scopes
+    if missing:
+        lines.append(f"missing for launches: {sorted(missing)}")
+    if "ads_mcp_management" not in scopes:
+        lines.append("no ads_mcp_management → the official Meta Ads MCP will answer 401; API-only.")
+    if "catalog_management" not in scopes:
+        lines.append("no catalog_management → no DLO/catalog creatives or product-set edits.")
+    for ln in lines:
+        r.add("verdict", WARN if ("missing" in ln or "unknown" in ln) else PASS, ln)
+
+
+def gate_pixel_attached(r: Report, account: str, dataset_id: str, business: str | None,
+                        attach: bool) -> None:
+    """A pixel shared to the BM is NOT on the ad account. Ad set create fails 1815045 until
+    it is attached (Data sources → Connected assets, or POST /{pixel}/shared_accounts).
+    Field-hit 2026-09-01. --attach-pixel does the POST; it needs the owning business id and
+    is idempotent (re-sharing an already-shared account is a no-op)."""
+    def listed() -> list[str]:
+        rows = graph.get(f"{account}/adspixels", params={"fields": "id,name", "limit": 200},
+                         context="account pixels").get("data", [])
+        return [x["id"] for x in rows]
+
+    try:
+        ids = listed()
+    except graph.GraphError as e:
+        r.add("pixel attached to account", FAIL, str(e), e.as_dict())
+        return
+    if str(dataset_id) in ids:
+        r.add("pixel attached to account", PASS, f"{dataset_id} listed on {account}")
+        return
+    if attach:
+        if not business:
+            r.add("pixel attached to account", FAIL,
+                  "--attach-pixel needs --business <BM id that owns the pixel>")
+            return
+        try:
+            graph.post(f"{dataset_id}/shared_accounts",
+                       {"account_id": account.replace("act_", ""), "business": business},
+                       context="attach pixel", idempotent=True)
+            ids = listed()
+        except graph.GraphError as e:
+            r.add("pixel attached to account", FAIL, f"attach failed: {e}", e.as_dict())
+            return
+        if str(dataset_id) in ids:
+            r.add("pixel attached to account", PASS, f"{dataset_id} attached to {account} just now")
+            return
+        r.add("pixel attached to account", FAIL,
+              f"POST /shared_accounts succeeded but {dataset_id} still not listed — propagation "
+              "lag or wrong business id; re-run in a minute")
+        return
+    r.add("pixel attached to account", FAIL,
+          f"{dataset_id} is not on {account} (has {ids}). Re-run with --attach-pixel --business "
+          "<BM id>, or Business Settings → Data sources → Datasets → Add assets → this ad "
+          "account. Ad set create will fail 1815045 until then.")
 
 
 def gate_account(r: Report, account: str) -> dict | None:
@@ -210,23 +339,44 @@ def gate_write(r: Report, account: str) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--account", required=True, help="act_<id>")
+    ap.add_argument("--account", help="act_<id>; omit for --whoami")
+    ap.add_argument("--whoami", action="store_true",
+                    help="token intake only: type, app, expiry, scopes, visible accounts, verdict on pipe/proxy")
     ap.add_argument("--page", help="Page id used as the ad identity")
     ap.add_argument("--dataset", help="Pixel/dataset id for the CAPI write probe")
     ap.add_argument("--create-pbia", action="store_true", help="Create the PBIA if absent")
+    ap.add_argument("--attach-pixel", action="store_true",
+                    help="Share the dataset to this ad account if it is not attached (needs --business)")
+    ap.add_argument("--business", help="Business (BM) id that owns the pixel — for --attach-pixel")
     ap.add_argument("--json", help="Write the full report here")
     args = ap.parse_args()
 
-    account = args.account if args.account.startswith("act_") else f"act_{args.account}"
+    if not args.account and not args.whoami:
+        ap.error("--account is required unless --whoami")
+    r = Report()
+    if args.whoami:
+        print(f"Graph {graph.API_VERSION} · token intake")
+        gate_identity(r)
+        gate_token_debug(r)
+        gate_scopes(r)
+        gate_visible_accounts(r, None)
+        whoami_verdict(r)
+        if args.json:
+            with open(args.json, "w", encoding="utf-8") as fh:
+                fh.write(graph.redact(json.dumps(r.rows, indent=2, default=str)))
+        return 0
+    account = graph.normalize_account(args.account)
 
     print(f"Graph {graph.API_VERSION} · {account}")
-    r = Report()
     gate_identity(r)
+    gate_token_debug(r)
     gate_scopes(r)
+    gate_visible_accounts(r, account)
     gate_account(r, account)
     if args.page:
         gate_page_and_pbia(r, args.page, args.create_pbia)
     if args.dataset:
+        gate_pixel_attached(r, account, args.dataset, args.business, args.attach_pixel)
         gate_dataset(r, args.dataset)
     gate_write(r, account)
 
