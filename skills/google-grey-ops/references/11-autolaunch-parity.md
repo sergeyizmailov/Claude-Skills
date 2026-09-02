@@ -8,7 +8,7 @@ vendor claim.
 ## The market shape (why the Meta playbook does not port)
 
 - **No Dolphin Cloud / FBTool-class Google launcher exists.** Nothing found that takes N accounts
-  + a template and mass-creates campaigns through the Ads API. Closest: **Noogle** (automation on
+  plus a template and mass-creates campaigns through the Ads API. Closest: **Noogle** (automation on
   top of Octo Browser: registration, farming, ban-recovery) — browser RPA, not API, blog-sourced
   only.
 - Google Ads Scripts can't create campaigns/accounts from nothing (official); Google Ads Editor
