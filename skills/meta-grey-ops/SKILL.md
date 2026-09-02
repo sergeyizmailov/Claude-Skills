@@ -39,7 +39,7 @@ New shape → extend `metaops`/the implementation and its tests.
 | Special ad categories | must be declared explicitly (`[]` or the real one) | spec rejected if absent | — |
 
 Not in the scripts and therefore on you: account-level "test new optimizations" enrollment
-(Advertising Settings, UI only), Business Suite MCP rules, billing warm-up, kill rules.
+(Advertising Settings, UI only), billing/card binding, appeals, BM and Page creation.
 
 ## Non-negotiables (always apply)
 
@@ -90,22 +90,23 @@ any edit.
 
 | Script | Does | Spends? |
 |---|---|---|
-| `metaops.py` | agent interface: workspace/assets/doctor/media/feed, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate | only explicit activate commands |
+| `metaops.py` | agent interface: workspace/assets/doctor/media/feed/catalog/business, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate, then edit/clone/rules/review/monitor/comments/page/insights | activate, `edit … --confirm SPEND` |
 | `probe.py` | internal doctor implementation: identity/scopes/account/PBIA/dataset/write gates | no spend |
 | `media.py` | internal `metaops media` implementation | no spend |
 | `launch.py` | spec → `validate_only` → create PAUSED; resume-safe state | no |
 | `bulk.py` | internal bulk-plan/apply implementation | no |
 | `verify.py` | read-back diff of every spec field; exit 0 writes `<state>.verified.json` | no |
 | `activate.py` | internal single/bulk activation implementation; receipt required | **yes** |
-| `edit.py` · `clone.py` · `rules.py` | implementation backlog; not agent-exposed until wrapped by workspace-bound `metaops` commands | mutating |
+| `cmd_edit.py` · `cmd_catalog.py` · `cmd_business.py` · `cmd_operate.py` | `metaops` command groups: edit/clone/rules · catalog/feed/set/products · BM accounts/pixel/CAPI/users/partners · review/monitor/comments/page/insights (`16`) | edit ACTIVE/budget only with `--confirm SPEND` |
+| `edit.py` · `clone.py` · `rules.py` | internal implementations behind `metaops edit/clone/rules` | mutating |
 | `monitor.py` | N-account status/spend sweep → verdicts incl. `STALL` (ad set ≥40 impr, 0 clicks), JSONL | no |
 | `insights.py` | spend/delivery, explicit attribution window, CSV for tracker | no |
-| `comments.py` | comment reads remain usable; hide/delete is not agent-exposed | no spend |
+| `comments.py` | internal `metaops comments list/hide/delete` (Page token) | no spend |
 | `mcp.py` | official Meta Ads MCP: tools, rollout diagnostics, allowlisted reads only; mutating tools are rejected in code | no |
 | `mutate_set.py` | internal `metaops assets set-products` implementation | no spend |
 | `sheetfeed.py` | edit/validate the Google-Sheet catalog via service account (`17`); Meta pulls it as a scheduled feed | no spend |
-| `uniquify.py` · `page.py` | local creative variants (`--no-crop` keeps exact pixels for text/border banners) · Page writes (not agent-exposed) | no spend |
+| `uniquify.py` · `page.py` | local creative variants (`--no-crop` keeps exact pixels for text/border banners) · internal `metaops page` | no spend |
 | `feed_upload.py` | internal `metaops feed sync/swap`: `POST /{feed_id}/uploads` + poll | no spend |
 
-Env: `META_TOKEN` (required), `GSHEETS_JSON_KEY_FILE` (sheetfeed only), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
+Env: `META_TOKEN` (required), `GSHEETS_JSON_KEY_FILE` (sheetfeed only), `TG_BOT_TOKEN`+`TG_CHAT_ID` (`monitor --telegram`), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
 (adds `appsecret_proof`), `META_API_VERSION` (pinned `v26.0`). Never pass a token on argv.

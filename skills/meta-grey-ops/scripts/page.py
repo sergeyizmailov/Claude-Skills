@@ -23,6 +23,8 @@ import sys
 
 import graph
 
+SUMMARY_SCHEMA = "page.result/v1"
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -40,6 +42,8 @@ def main() -> int:
                          context="pages").get("data", [])
         for p in rows:
             print(f"  {p['id']}  {(p.get('name') or '?')[:40]:<40} {p.get('category')}  tasks={p.get('tasks')}")
+        print(json.dumps({"schema": SUMMARY_SCHEMA, "action": "list-pages", "pages": rows},
+                         ensure_ascii=False))
         return 0
     if not args.page_id:
         sys.exit("page_id required")
@@ -50,6 +54,8 @@ def main() -> int:
                                              "picture{url},cover{source},is_published,verification_status"},
                       context="page")
         print(json.dumps(p, indent=2, ensure_ascii=False))
+        print(json.dumps({"schema": SUMMARY_SCHEMA, "action": "show", "page_id": pid, "page": p},
+                         ensure_ascii=False))
         return 0
 
     ptoken = graph.page_token(pid)
@@ -72,6 +78,12 @@ def main() -> int:
         print(f"  ✓ {', '.join(fields)}")
     back = graph.get(pid, params={"fields": "name,about,website,picture{url}"}, context="readback")
     print(json.dumps(back, indent=2, ensure_ascii=False))
+    print(json.dumps({
+        "schema": SUMMARY_SCHEMA, "action": "set", "page_id": pid,
+        "fields_set": sorted(list(fields) + (["avatar"] if args.avatar else [])
+                             + (["cover"] if args.cover else [])),
+        "page": back,
+    }, ensure_ascii=False))
     return 0
 
 

@@ -98,6 +98,61 @@ lists ads whose status flipped into review after the fetch. Result `data.upload`
 `num_persisted_items`, `num_invalid_items`, `error_count`, `errors[]`. `finished=false` = still
 running after `--wait` (default 120 s); re-check `GET /{upload_id}`.
 
+## Edit / clone / rules (wrap `edit.py`, `clone.py`, `rules.py`)
+
+```bash
+metaops … edit status  (--ids a,b | --state run.json --level adset | --all --level campaign) --status PAUSED|ACTIVE [--confirm SPEND]
+metaops … edit budget  --ids … (--budget-minor N | --budget-pct ±N) [--force-step] [--confirm SPEND]   # ±20%/late-day guard from edit.py
+metaops … edit rename  --ids … --prefix P [--suffix S]
+metaops … edit ramp    --ids … --steps 20,20,20 --confirm RAMP                       # one guarded step per rung
+metaops … clone campaign|adset|ad <id> [--times N] [--prefix/--suffix] [--start ISO] [--into-campaign/--into-adset] [--dry-run]   # /copies, level by level, PAUSED
+metaops … rules ladder --target-minor N --event E --level ADSET|AD [--rungs 0-6] [--mode notify|pause] [--ids] [--prefix] [--confirm RULES]
+metaops … rules list | history [--since] | execute --rule-id ID | delete --prefix P --confirm DELETE
+```
+
+ACTIVE / budget raise → `--confirm SPEND`; `--mode pause` → `--confirm RULES`. Children print a
+final `*.result/v1` JSON line that lands in `data`.
+
+## Catalog lifecycle (`17`)
+
+```bash
+metaops … catalog create --name N [--vertical commerce] --confirm CREATE          # POST /{business}/owned_product_catalogs → put id in workspace.json
+metaops … catalog list | access                                                   # owned catalogs; SU assigned_product_catalogs + business match
+metaops … catalog feed create --name N --url <csv/sheet export> --schedule hourly|daily|weekly [--hour H] [--update-only] --confirm CREATE
+metaops … catalog feed list | uploads [--feed-id]
+metaops … catalog set create --name N (--filter f.json | --retailer-ids a,b) --confirm CREATE   # filter sent as dict, encoded once
+metaops … catalog set list · products list [--set-id] [--limit]
+metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s]      # items_batch item_type=PRODUCT_ITEM → check_batch_request_status
+```
+
+`schedule` is a JSON string (`interval HOURLY|DAILY|WEEKLY|MONTHLY, hour, minute, day_of_week,
+timezone, url`). items_batch takes feed-format `price` "9.99 USD"; `/products` takes integer
+minor units — the command passes the file through verbatim. Unverified: `status` strings of
+`check_batch_request_status` (polled case-insensitively).
+
+## Business Manager setup (no billing surface exists)
+
+```bash
+metaops … business assets                                                          # owned/client accounts, pages, pixels, catalogs, system users
+metaops … business adaccount create --name N --currency USD --timezone-id 1 [--end-advertiser B] --confirm CREATE   # new-BM cap = 1 (`03`)
+metaops … business pixel create --name N [--is-crm] --confirm CREATE · pixel share --account act_X --confirm SHARE · pixel shared
+metaops … business capi test --event Lead --test-code TESTxxxx [--url …]           # /{dataset}/events, hashed dummy user_data → Events Manager "Test events"
+metaops … business user invite --email E --role EMPLOYEE|ADMIN --confirm SHARE
+metaops … business user assign --user-id U --asset adaccount|page|pixel --tasks MANAGE,ADVERTISE --confirm SHARE   # /assigned_users {user,tasks}
+metaops … business partner share --partner-business B --asset adaccount|page|pixel --tasks … --confirm SHARE       # /agencies {business,permitted_tasks}
+```
+
+## Operate
+
+```bash
+metaops … review [--state run.json | --ids a,b | --all] [--previews --format DESKTOP_FEED_STANDARD,MOBILE_FEED_STANDARD]   # ad_review_feedback, issues_info; exit 1 on DISAPPROVED/WITH_ISSUES
+metaops … monitor --accounts accounts.json [--stall-impressions 40] [--telegram] [--log] [--json]   # TG_BOT_TOKEN + TG_CHAT_ID env only
+metaops … comments list|hide|delete [--ads a,b | --all] [--matching REGEX] [--all-comments] --confirm HIDE|DELETE   # Page token
+metaops … page show | set --avatar f --cover f --about "…" --website URL --confirm PAGE | list-pages
+metaops … insights pull --level ad (--date-preset yesterday | --since --until) [--csv]
+metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # join on ad_name across accounts
+```
+
 ## Bulk lifecycle
 
 ```bash

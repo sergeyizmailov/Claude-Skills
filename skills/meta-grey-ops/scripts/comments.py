@@ -28,6 +28,8 @@ import sys
 
 import graph
 
+SUMMARY_SCHEMA = "comments.result/v1"
+
 
 def ad_ids(account: str | None, ads: str | None) -> list[str]:
     if ads:
@@ -87,6 +89,7 @@ def main() -> int:
 
     seen_posts: set[str] = set()
     acted = 0
+    rows_out: list[dict] = []
     for aid in ad_ids(args.account, args.ads):
         try:
             post = story_id(aid)
@@ -108,6 +111,11 @@ def main() -> int:
             flag = "[hidden] " if c.get("is_hidden") else ""
             if args.list:
                 print(f"    {flag}{c['created_time'][:16]}  {who[:20]:<20} {text[:100]}")
+                rows_out.append({
+                    "id": c["id"], "post": post, "ad": aid, "from": who,
+                    "text": text, "is_hidden": bool(c.get("is_hidden")),
+                    "created_time": c.get("created_time"), "like_count": c.get("like_count"),
+                })
                 continue
             hit = args.hide_all or (pattern and pattern.search(text or ""))
             if not hit or (c.get("is_hidden") and not args.delete_matching):
@@ -128,6 +136,14 @@ def main() -> int:
                 print(f"      ! {e}", file=sys.stderr)
     if not args.list:
         print(f"\n{acted} comment(s) {'would be ' if args.dry_run else ''}acted on across {len(seen_posts)} post(s).")
+    mode = "list" if args.list else ("delete" if args.delete_matching else "hide")
+    summary = {
+        "schema": SUMMARY_SCHEMA, "mode": mode, "posts_checked": len(seen_posts),
+        "acted": acted, "dry_run": args.dry_run,
+    }
+    if args.list:
+        summary["rows"] = rows_out
+    print(json.dumps(summary, ensure_ascii=False))
     return 0
 
 

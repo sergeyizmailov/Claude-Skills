@@ -29,6 +29,8 @@ import time
 
 import graph
 
+SUMMARY_SCHEMA = "insights.result/v1"
+
 FIELDS = [
     "date_start", "date_stop", "account_currency",
     "campaign_id", "campaign_name", "adset_id", "adset_name", "ad_id", "ad_name",
@@ -111,6 +113,11 @@ def main() -> int:
     if not rows:
         print("No rows. On freshly created objects insights stay empty for 15-40 min — "
               "that is propagation, not a delivery failure.")
+        print(json.dumps({
+            "schema": SUMMARY_SCHEMA, "account": account, "level": args.level, "rows": 0,
+            "total_spend": 0.0, "currency": acct.get("currency"), "timezone": acct.get("timezone_name"),
+            "csv": args.csv, "json": args.json,
+        }, ensure_ascii=False))
         return 0
 
     flat = [flatten_actions(r) for r in rows]
@@ -141,6 +148,11 @@ def main() -> int:
 
     print("\nNext: push these as cost into the tracker (tracker-ops/01 update_costs). "
           "No cost push = report cost is 0 = no CPL.")
+    print(json.dumps({
+        "schema": SUMMARY_SCHEMA, "account": account, "level": args.level, "rows": len(rows),
+        "total_spend": round(total, 2), "currency": acct.get("currency"),
+        "timezone": acct.get("timezone_name"), "csv": args.csv, "json": args.json,
+    }, ensure_ascii=False))
     return 0
 
 

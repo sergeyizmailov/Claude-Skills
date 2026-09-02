@@ -104,8 +104,34 @@ def list_rules(account: str) -> list[dict]:
 
 def needs_ladder(args) -> bool:
     """A ladder is built only for --ladder-only or a create run. --list / --execute /
-    --delete-prefix never need --target-minor, with or without --dry-run."""
-    return bool(args.ladder_only or not (args.list or args.execute or args.delete_prefix))
+    --delete-prefix / --history never need --target-minor, with or without --dry-run."""
+    return bool(args.ladder_only or not (
+        args.list or args.execute or args.delete_prefix or getattr(args, "history", False)
+    ))
+
+
+def history_rows(account: str, since: str | None, rule_id: str | None = None) -> list[dict]:
+    rows = graph.get(f"{account}/adrules_history",
+                     params={"fields": "rule_id,evaluation_type,exception_code,results,timestamp",
+                             "limit": 250},
+                     context="rules history").get("data", [])
+    if rule_id:
+        rows = [h for h in rows if str(h.get("rule_id")) == str(rule_id)]
+    if since:
+        cutoff = dt_parse_since(since)
+        rows = [h for h in rows if h.get("timestamp") and float(h["timestamp"]) >= cutoff]
+    return rows
+
+
+def dt_parse_since(value: str) -> float:
+    """--since as a Unix timestamp, or an ISO-8601 datetime (naive = UTC)."""
+    if value.isdigit():
+        return float(value)
+    import datetime as _dt
+    parsed = _dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_dt.timezone.utc)
+    return parsed.timestamp()
 
 
 def main() -> int:
@@ -127,6 +153,8 @@ def main() -> int:
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--execute", help="rule id: fire now and read adrules_history")
     ap.add_argument("--delete-prefix", help="delete every rule whose name starts with this")
+    ap.add_argument("--history", action="store_true", help="read adrules_history for the account")
+    ap.add_argument("--since", help="--history filter: Unix timestamp or ISO-8601 datetime")
     ap.add_argument("--ladder-only", action="store_true", help="print thresholds, touch nothing")
     ap.add_argument("--dry-run", action="store_true", help="print payloads, create nothing")
     args = ap.parse_args()
@@ -140,6 +168,8 @@ def main() -> int:
             x = f"{r['actual_cost_x_target']}× target" if r["actual_cost_x_target"] else "—"
             print(f"  k={r['k']:<3} spent > {r['spend_minor']:>8}  ({r['multiplier']}×, actual cost at trigger {x})")
         if args.ladder_only:
+            print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "ladder_only",
+                              "ladder": rows}, ensure_ascii=False))
             return 0
 
     if not args.account:
@@ -147,13 +177,17 @@ def main() -> int:
     account = graph.normalize_account(args.account)
 
     if args.list:
-        for r in list_rules(account):
+        rules = list_rules(account)
+        for r in rules:
             ex = (r.get("execution_spec") or {}).get("execution_type")
             print(f"  {r['id']}  {r.get('status'):<8} {ex:<12} {r.get('name')}")
+        print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "list",
+                          "rules": rules}, ensure_ascii=False))
         return 0
 
     if args.delete_prefix:
         n = 0
+        deleted = []
         for r in list_rules(account):
             if (r.get("name") or "").startswith(args.delete_prefix):
                 if args.dry_run:
@@ -161,20 +195,30 @@ def main() -> int:
                 else:
                     graph.call("DELETE", r["id"], context="delete rule", idempotent=True)
                     print(f"  deleted {r['id']} {r['name']}")
+                deleted.append(r["id"])
                 n += 1
         print(f"{n} rule(s)")
+        print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "delete",
+                          "dry_run": args.dry_run, "deleted": deleted}, ensure_ascii=False))
+        return 0
+
+    if args.history:
+        hist = history_rows(account, args.since)
+        for h in hist:
+            print(json.dumps(h, indent=2))
+        print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "history",
+                          "since": args.since, "history": hist}, ensure_ascii=False))
         return 0
 
     if args.execute:
         graph.post(f"{args.execute}/execute", {}, context="execute rule", idempotent=True)
         print("  fired; reading history (lags 1-2 min) …")
         time.sleep(20)
-        hist = graph.get(f"{account}/adrules_history",
-                         params={"fields": "rule_id,evaluation_type,exception_code,results,timestamp", "limit": 25},
-                         context="rules history").get("data", [])
+        hist = history_rows(account, None, args.execute)
         for h in hist:
-            if str(h.get("rule_id")) == str(args.execute):
-                print(json.dumps(h, indent=2))
+            print(json.dumps(h, indent=2))
+        print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "execute",
+                          "rule_id": args.execute, "history": hist}, ensure_ascii=False))
         return 0
 
     existing = len(list_rules(account))
@@ -199,6 +243,9 @@ def main() -> int:
                   "Delete the notify set with --delete-prefix when the pause set is armed.")
         print("LIFETIME sticks on relaunch: a paused ad set keeps its lifetime counts. Duplicate the ad "
               "set (clone.py) or use --time-preset LAST_7D.")
+    print(json.dumps({"schema": "rules.result/v1", "ok": True, "action": "create",
+                      "dry_run": args.dry_run, "mode": args.mode, "created": created},
+                     ensure_ascii=False))
     return 0
 
 

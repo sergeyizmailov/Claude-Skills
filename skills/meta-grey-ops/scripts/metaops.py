@@ -56,8 +56,12 @@ DOCTOR_MAX_AGE = int(os.environ.get("METAOPS_DOCTOR_MAX_AGE_SECONDS", "86400"))
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$")
 WORKSPACE_LIFECYCLE_COMMANDS = {
     "media", "plan", "apply", "verify", "status", "activate", "bulk-plan", "bulk-apply",
-    "bulk-activate", "feed",
+    "bulk-activate", "feed", "edit", "clone", "rules", "catalog", "business", "review",
+    "monitor", "comments", "page", "insights",
 }
+
+# Command groups implemented in cmd_*.py modules; each exposes register(sub, ctx).
+COMMAND_MODULES = ("cmd_edit", "cmd_catalog", "cmd_business", "cmd_operate")
 
 
 class MetaOpsError(Exception):
@@ -1706,6 +1710,14 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--confirm-ui", required=True, help="must be REVIEWED after UI-only checks")
     p.add_argument("--refresh-start")
     p.set_defaults(handler=command_bulk_activate)
+
+    import importlib
+    for module_name in COMMAND_MODULES:
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            continue
+        module.register(sub, sys.modules[__name__])
 
     add_json_help(ap)
     return ap

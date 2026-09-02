@@ -227,13 +227,17 @@ different spec), UI multi-advertiser check done.
 ## 9.1 — Operate
 
 ```bash
-python3 monitor.py --accounts accounts.json                    # status + spend sweep, STALL (≥40 impr, 0 clicks), survival log
-python3 insights.py --account act_123 --level ad --date-preset yesterday --csv day.csv
+metaops … review --state .metaops/run.json            # ad_review_feedback / issues_info; exit 1 on rejects
+metaops … monitor --accounts accounts.json --telegram   # status + spend sweep, STALL (≥40 impr, 0 clicks), survival log, TG alerts
+metaops … rules ladder --target-minor 1200 --event … --level ADSET --mode pause --confirm RULES
+metaops … edit budget --ids … --budget-pct +20 --confirm SPEND · clone campaign <id> --times 2
+metaops … comments hide --all --matching "scam|fake" --confirm HIDE
+metaops … insights pull --level ad --date-preset yesterday --csv day.csv · insights leaderboard --accounts accounts.json
 ```
 
-Read-only monitoring remains directly callable. V1 does not expose comments, rules, edit, or
-clone mutations to agents; use Ads Manager for those until workspace-bound `metaops` commands
-exist. Do not bypass the transport guard. Ladder math/traps → `senior-buyer-ops/04`.
+All operate mutations are workspace-bound `metaops` commands (`16`); do not bypass the
+transport guard. Still UI-only: appeals, billing, BM/Page creation. Ladder math/traps →
+`senior-buyer-ops/04`.
 
 ## 9.5 — Daily sync
 

@@ -109,6 +109,7 @@ def main() -> int:
                  "for a fresh launch, which also refreshes start_time).")
 
     bad = 0
+    results: list[dict] = []
     for oid in ids:
         obj = graph.get(oid, params={"fields": "name,status,daily_budget,lifetime_budget,account_id,effective_status"},
                         context=f"read {oid}")
@@ -123,6 +124,7 @@ def main() -> int:
                 print(f"  x {oid} {obj.get('name')}: no daily_budget on this level (CBO child or lifetime "
                       f"budget) — edit the level that owns it", file=sys.stderr)
                 bad += 1
+                results.append({"id": oid, "ok": False, "error": "no daily_budget on this level"})
                 continue
             if args.budget_pct:
                 new = round(cur * (1 + float(args.budget_pct.replace('+', '')) / 100))
@@ -134,26 +136,36 @@ def main() -> int:
                       f"re-enters learning and on fresh accounts has frozen delivery. Step in ≤20% "
                       f"moves 48-72 h apart, or --force-step.", file=sys.stderr)
                 bad += 1
+                results.append({"id": oid, "ok": False, "error": f"budget step {step:+.0%} exceeds ±20%"})
                 continue
             hour = account_hour(obj)
             if step > 0 and hour is not None and hour >= 22 and not args.force_step:
                 print(f"  x {oid} {obj.get('name')}: raising at {hour:02d}:00 account time leaves "
                       f"<2 h to spend it. Raise in the morning, or --force-step.", file=sys.stderr)
                 bad += 1
+                results.append({"id": oid, "ok": False, "error": "budget raise in last 2h of account day"})
                 continue
             payload["daily_budget"] = int(new)
         if args.dry_run:
             print(f"  would POST /{oid} {json.dumps(payload)}  (now: status={obj.get('status')} "
                   f"budget={obj.get('daily_budget')})")
+            results.append({"id": oid, "ok": True, "dry_run": True, "payload": payload})
             continue
         try:
             graph.post(oid, payload, context=f"edit {oid}", idempotent=True)
             back = graph.get(oid, params={"fields": "name,status,daily_budget,effective_status"}, context="readback")
             print(f"  ✓ {oid} {back.get('name')}: status={back.get('status')} "
                   f"effective={back.get('effective_status')} daily_budget={back.get('daily_budget')}")
+            results.append({
+                "id": oid, "ok": True, "name": back.get("name"), "status": back.get("status"),
+                "effective_status": back.get("effective_status"), "daily_budget": back.get("daily_budget"),
+            })
         except graph.GraphError as e:
             print(f"  x {oid}: {e}", file=sys.stderr)
             bad += 1
+            results.append({"id": oid, "ok": False, "error": str(e)})
+    print(json.dumps({"schema": "edit.result/v1", "dry_run": args.dry_run, "ok": bad == 0,
+                      "count": len(ids), "failed": bad, "results": results}, ensure_ascii=False))
     return 1 if bad else 0
 
 

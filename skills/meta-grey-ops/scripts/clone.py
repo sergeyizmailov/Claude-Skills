@@ -113,6 +113,7 @@ def main() -> int:
               "they would begin immediately on activation. Pass --start.", file=sys.stderr)
 
     results = []
+    failed = False
     for n in range(1, args.times + 1):
         out: dict = {}
         try:
@@ -145,6 +146,7 @@ def main() -> int:
                 print("    code 1 / sub 99 here has meant: source still IN_PROCESS (just created) — "
                       "wait a minute and retry", file=sys.stderr)
             results.append(out)
+            failed = True
             break
         results.append(out)
     if args.json:
@@ -154,7 +156,10 @@ def main() -> int:
         print("\nAll copies PAUSED. Copies have no spec, so activate.py (which needs a spec'd verify "
               "receipt) does not apply: check them in Ads Manager, then edit.py --ids <ids> --status "
               "ACTIVE --confirm ACTIVATE.")
-    return 0
+    print(json.dumps({"schema": "clone.result/v1", "ok": not failed, "dry_run": args.dry_run,
+                      "kind": args.kind, "source_id": args.id, "times": args.times,
+                      "completed": len(results), "results": results}, ensure_ascii=False))
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
