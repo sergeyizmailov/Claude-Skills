@@ -24,8 +24,8 @@ Check every item before the account exists:
   supplier images identical to dozens of other stores.
 - Domain never previously tied to a suspended MC/Ads account or a different business.
 
-Sequencing itself does not suspend — uploading products before gates only yields disapprovals.
-Suspension comes from the site/identity signals above.
+Sequencing itself does not suspend — uploading products before gates only yields disapprovals;
+suspension comes from the site/identity signals above.
 
 ## 1 — Account + Terms of Service
 

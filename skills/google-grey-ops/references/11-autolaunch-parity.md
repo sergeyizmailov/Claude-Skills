@@ -7,21 +7,21 @@ vendor claim.
 
 ## The market shape (why the Meta playbook does not port)
 
-- **No Dolphin Cloud / FBTool-class Google launcher exists.** Nothing found that takes N accounts +
-  a template and mass-creates campaigns through the Ads API. The closest thing is **Noogle**
-  (automation on top of Octo Browser: registration, farming, ban-recovery) — browser RPA, not API,
-  blog-sourced only.
-- Google Ads Scripts cannot create campaigns or accounts from nothing (official); Google Ads Editor
-  is not agent-drivable. So every "автозалив Google" product is antidetect-browser automation of
-  the UI, not a Graph-style token pipe. The Meta mechanism (scraped session token → API loop) has no
-  Google analogue because the Ads API needs a **developer token issued to an MCC** — the account
-  supply problem moves from "session" to "MCC + developer token + billing identity" (`01`, `02`).
-- What is farmed instead: **accounts**, sold with the browser profile. Ads-account farming guide
+- **No Dolphin Cloud / FBTool-class Google launcher exists.** Nothing found that takes N accounts
+  + a template and mass-creates campaigns through the Ads API. Closest: **Noogle** (automation on
+  top of Octo Browser: registration, farming, ban-recovery) — browser RPA, not API, blog-sourced
+  only.
+- Google Ads Scripts can't create campaigns/accounts from nothing (official); Google Ads Editor
+  isn't agent-drivable. So every "автозалив Google" product is antidetect-browser automation of
+  the UI, not a Graph-style token pipe. The Meta mechanism (scraped session token → API loop) has
+  no Google analogue — the Ads API needs a **developer token issued to an MCC**, so the supply
+  problem moves from "session" to "MCC + developer token + billing identity" (`01`, `02`).
+- What's farmed instead: **accounts**, sold with the browser profile. Ads-account farming guide
   (afftimes, RU): antidetect **AdsPower / AntBrowser** recommended, Dolphin{anty} discouraged for
   Google ("Google sees hardware better") — contradicted by traffnews' Dolphin review; residential
   IPv4, never mobile proxies ("Google is very triggered by IP changes"); ~14 days of warm-up
-  (100–150 sites of cookies, YouTube, Drive, third-party logins) before the first spend; first
-  billing ≈ $15/account vs $40+ for a bought aged account. None of it touches Merchant Center.
+  (100–150 sites of cookies, YouTube, Drive, third-party logins) before first spend; first billing
+  ≈ $15/account vs $40+ for a bought aged account. None of it touches Merchant Center.
 
 ## Feature map: SaaS feature → this skill
 
@@ -48,11 +48,11 @@ vendor claim.
 | okayfy | $349–599 | "instant ad-ready" |
 
 Delivery-in-antidetect-browser is the tell: these are farmed with the tooling above, not aged
-organically. Reviews are mixed including scam accusations. Buying one inherits an unknown MCC/payment
-history — `04` cascade applies from day one.
+organically. Reviews are mixed, including scam accusations. Buying one inherits an unknown
+MCC/payment history — `04` cascade applies from day one.
 
 ## Where autolaunch value actually is on Google
 
-The lift is not launch speed (a Search campaign is a dozen operations); it is **not dying at the
-payment event and the destination review**. Spend the engineering on `doctor` gates, tracking
-before spend, review-layer discipline (`05`), and per-account kill rules — not on a UI bot.
+The lift isn't launch speed (a Search campaign is a dozen operations) — it's **not dying at the
+payment event and the destination review**. Spend engineering on `doctor` gates, tracking before
+spend, review-layer discipline (`05`), per-account kill rules — not a UI bot.

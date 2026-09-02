@@ -13,8 +13,8 @@ schedule; the agent edits rows through a service account with permanent access.*
    If key creation is blocked (`iam.disableServiceAccountKeyCreation`, default for orgs created
    after 2024-05-03) → use a personal Cloud project or Workload Identity/ADC.
 3. Create the sheet, tab `products`. Share → add the SA email (`client_email` in the key; also
-   printed by `sheetfeed info`) as **Editor**. SA keys do not expire; access survives password
-   changes and sessions — this is why SA beats OAuth here.
+   printed by `sheetfeed info`) as **Editor**. SA beats OAuth here: keys don't expire, access
+   survives password changes and sessions.
 4. Sheets API caps: 60 reads + 60 writes/min/user, 300/min/project. `sheetfeed` batches writes.
 
 ## Connect the platforms (UI only)

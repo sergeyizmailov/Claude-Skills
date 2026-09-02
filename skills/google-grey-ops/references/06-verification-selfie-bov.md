@@ -1,16 +1,16 @@
 # 06 — Advertiser verification, video selfie, BOV
 
-Reviewed 2026-08-27. Policy taxonomy → `google-ads/09`. Account supply → `01`.
-Payments → `02`. Cloak / replacement → `05`. This file is the grey overlay: how
-the identity gates actually fire, and which “pass” paths are live vs CS.
+Reviewed 2026-08-27. Policy taxonomy → `google-ads/09`. Account supply → `01`. Payments → `02`.
+Cloak/replacement → `05`. Grey overlay: how identity gates actually fire, which "pass" paths are
+live vs CS.
 
-**Load-bearing official split:** honest fail = pause / retry. **False information =
-Circumventing systems** (egregious, cascade). 3 failed identity attempts on the
-**appeal** path → no further appeal. Photoshop / redacted gov ID = CS (Nov 2025
-examples). There is no version where fabrication is the lower-risk path.
+**Load-bearing official split:** honest fail = pause/retry. **False information = Circumventing
+systems** (egregious, cascade). 3 failed identity attempts on the **appeal** path → no further
+appeal. Photoshop/redacted gov ID = CS (Nov 2025 examples). No version where fabrication is the
+lower-risk path.
 
-Vendor selfie/liveness claims are **not** Google Ads docs. Google does **not**
-name the Ads selfie vendor (Jumio / Onfido / Persona / in-house = **unknown**).
+Vendor selfie/liveness claims are **not** Google Ads docs. Google does **not** name the Ads selfie
+vendor (Jumio/Onfido/Persona/in-house = **unknown**).
 
 ## Do not conflate products
 
@@ -56,21 +56,19 @@ Payments-profile **country or ownership** change: **support only**.
 
 ## Video selfie — what is actually known
 
-Official: submit gov ID + video selfie; match after 5 attempts or contact us.
-**No** vendor name, **no** blink/turn/smile script, **no** glasses/VPN/virtual-camera
-list. Privacy line “won’t be shared with any third party” does **not** prove
-in-house processing.
+Official: submit gov ID + video selfie; match after 5 attempts or contact us. **No** vendor name,
+**no** blink/turn/smile script, **no** glasses/VPN/virtual-camera list. Privacy line "won't be
+shared with any third party" does **not** prove in-house processing.
 
-**Confirmed 2025–26 Google Ads selfie pass via deepfake or camera injection:
-none found.** Cybernews (2026-08-26) found an Android injection toolkit and **no
-evidence any IDV provider accepted it.**
+**Confirmed 2025–26 Google Ads selfie pass via deepfake or camera injection: none found.**
+Cybernews (2026-08-26) found an Android injection toolkit and **no evidence any IDV provider
+accepted it.**
 
-Industry (not Ads): presentation attacks (print, screen, 2D mask) are **mostly
-dead** against iBeta L2/L3. **Injection** (virtual camera / native Android camera
-hook) is the live class (iProov +741% 2025; iOS +1,151% H2 2025). MITRE ATLAS
-2025-12: iProov red team evaded a **financial-app** liveness with OBS + non-rooted
-Android Virtual Camera + faceswap. **Not transferable to Ads until someone names
-the Ads vendor.**
+Industry (not Ads): presentation attacks (print, screen, 2D mask) **mostly dead** against iBeta
+L2/L3. **Injection** (virtual camera/native Android camera hook) is the live class (iProov +741%
+2025; iOS +1,151% H2 2025). MITRE ATLAS 2025-12: iProov red team evaded a **financial-app**
+liveness with OBS + non-rooted Android Virtual Camera + faceswap. **Not transferable to Ads until
+someone names the Ads vendor.**
 
 ## BOV — live form (UAV_Harmonized_BOV_Form, 2026-08-27)
 

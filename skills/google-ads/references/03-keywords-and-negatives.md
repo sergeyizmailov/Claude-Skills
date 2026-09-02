@@ -22,9 +22,9 @@ synonyms (`[bathing suits]` → "swimming suits") · same intent, different word
 
 Documented non-identical exact match: `[digital marketing services]` serves on "google ads agency".
 
-**Exact match is not literal.** Treat it as tightly-scoped *intent* match. There is no setting in UI
-or API to disable close-variant expansion on positive keywords. The only lever is negatives — which
-do not get close variants.
+**Exact match is not literal.** Treat as tightly-scoped *intent* match. No setting in UI or API disables
+close-variant expansion on positive keywords. The only lever is negatives — which do not get close
+variants.
 
 **2021 BMM merger aftermath:** BMM (`+word +word`) retired Feb–Jul 2021, its behavior folded into
 phrase. Phrase is now slightly more expansive than pre-2021 phrase, slightly less than BMM was. The
@@ -89,10 +89,10 @@ queries are bucketed into Search terms insights subthemes. **Redaction is identi
 | Seer Interactive | Sep 2020 (the baseline event) | Multi-client | Cost visibility 98.7% → 71.0%, clicks 98.3% → 77.9% in one day. ~$27K of unseen search-term data per $100K spend. |
 | Taikun Digital (Collin Slattery) | Jul 2025 | 933 campaigns, ~14M clicks, >$20M spend | ~51% of clicks from hidden terms. Hidden queries cost **52% more CPC** and deliver **44% lower CTR**. |
 
-Do not average these — different methodologies and dates. The practical reading: **a quarter to half
-of click/cost volume has no visible search term**, worse for small and long-tail accounts, and hidden
-queries skew worse. **The report you can see is systematically more flattering than reality.** Say
-this out loud whenever presenting search-term analysis as evidence.
+Do not average these — different methodologies and dates. Practical reading: **a quarter to half of
+click/cost volume has no visible search term**, worse for small and long-tail accounts, hidden queries
+skew worse. **The report you can see is systematically more flattering than reality.** Say this
+whenever presenting search-term analysis as evidence.
 
 The widely quoted "85 cents of value wasted per ad dollar" is a worst-case keyword-level figure from
 the Taikun study, not an account average.
@@ -146,8 +146,8 @@ change. **Never build automation assuming >5,000 works.** Split lists by theme, 
 
 ### Negatives always win — audit before you push
 
-A negative at **any** level suppresses the ad before the auction, silently. This is the most common
-root cause of "why did my exact-match keyword stop getting impressions."
+A negative at **any** level suppresses the ad before the auction, silently — the most common root
+cause of "why did my exact-match keyword stop getting impressions."
 
 Invisible without dedicated auditing: Adalysis "Keyword conflicts", Nils Rooijmans' conflict script,
 or the GAQL pull-both-sides-and-diff audit in `10` (query 7). **Run the

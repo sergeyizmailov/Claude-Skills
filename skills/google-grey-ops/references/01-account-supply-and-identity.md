@@ -5,30 +5,29 @@ here is a counterparty to evaluate, not an endorsement.
 
 ## What the terms mean on Google
 
-Unlike Facebook, Google's grey-market infrastructure is built almost entirely on **Google's own
-manager-account and invoicing primitives** rather than on forged business verification.
+Unlike Facebook, Google's grey-market infra runs almost entirely on **Google's own manager-account
+and invoicing primitives**, not forged business verification.
 
 | Term | What it actually is |
 |---|---|
-| **Agency account** | A client account created *inside* a Google Ads **Manager Account (MCC)** belonging to a Partner or a reseller adjacent to one. It inherits the MCC's billing relationship, often invoiced. **The MCC hierarchy is a first-party Google feature being rented out** — not an emulation of one, which is the structural difference from Facebook |
-| **Invoiced / credit-line account** | Monthly invoicing instead of threshold billing. Google extends credit; no card is charged in real time |
-| **MCC** | Google's official multi-account layer. The grey use is renting a seat inside someone else's rather than building your own trust history |
-| **Self-farm** | Building your own accounts from scratch. Higher control, higher time cost, **no shared-MCC blast radius** |
-| **"Threshold account"** | Not a product. Standard automatic-payments billing where the threshold has already ramped through several clean cycles, sold or rented for the higher ceiling |
+| **Agency account** | Client account inside a Google Ads **Manager Account (MCC)** owned by a Partner/reseller. Inherits MCC billing, often invoiced. **First-party MCC feature rented out** — not an emulation, the structural difference vs Facebook |
+| **Invoiced / credit-line account** | Monthly invoicing instead of threshold billing; Google extends credit, no real-time card charge |
+| **MCC** | Google's official multi-account layer. Grey use = renting a seat in someone else's vs building own trust history |
+| **Self-farm** | Building own accounts from scratch. Higher control, higher time cost, **no shared-MCC blast radius** |
+| **"Threshold account"** | Not a product — standard auto-payments billing whose threshold already ramped through clean cycles, sold/rented for the higher ceiling |
 
 ## Account types
 
 | Type | Moderation tolerance | Notes |
 |---|---|---|
-| **Brand-new self-registered** | Lowest — thinnest trust graph, first campaigns get the most scrutiny | Best for self-farm where you control every variable; worst for immediate aggressive scaling |
-| **Aged with billing history** | Higher — the threshold ramps with clean payment cycles | **History *is* the credential.** This is the legitimate trust-building mechanic the grey market resells |
-| **Partner / Premier Partner MCC** | Highest structural tolerance claimed | The product the agency-account market rents. Partner status requires spend and certification thresholds **on the agency's side** — the client riding inside does not personally qualify |
-| **Invoiced / credit-line** | High — no real-time decline risk | Chargebacks are structurally impossible (no per-transaction card charge), but **non-payment on an invoice hits the whole relationship**, far more severely than one declined card |
+| **Brand-new self-registered** | Lowest — thinnest trust graph, first campaigns get most scrutiny | Best for self-farm, full control; worst for immediate aggressive scaling |
+| **Aged with billing history** | Higher — threshold ramps with clean payment cycles | **History *is* the credential** — the legitimate trust mechanic the grey market resells |
+| **Partner / Premier Partner MCC** | Highest structural tolerance claimed | Product the agency-account market rents. Partner status needs spend/certification thresholds **on the agency's side** — client riding inside doesn't personally qualify |
+| **Invoiced / credit-line** | High — no real-time decline risk | Chargebacks structurally impossible (no per-transaction charge), but **non-payment on an invoice hits the whole relationship**, worse than one declined card |
 
-**Geo:** US/UK/EU/CA/AU/SG have the most mature identity verification and highest scrutiny. OFAC vs
-serve-pause vs payment friction are **three different lists** (`07`). Iran is OFAC; Russia is a
-serve-to pause; Nigeria/Pakistan/Belarus are **not** on 6163740. 🔺 No official ranked “easiest AIV
-geo” list.
+**Geo:** US/UK/EU/CA/AU/SG = most mature identity verification, highest scrutiny. OFAC vs serve-pause
+vs payment friction are **three different lists** (`07`). Iran is OFAC; Russia is a serve-to pause;
+Nigeria/Pakistan/Belarus are **not** on 6163740. 🔺 No official ranked "easiest AIV geo" list.
 
 ## Reseller economics 🔺
 
@@ -44,103 +43,98 @@ All vendor-reported list prices, not market clearing prices.
 | Onboarding | 24–72 hours signup to live |
 | Fee to recover balance from a banned account | ~30% (one vendor) |
 
-Context for why the market exists: Google's own 2024 Ads Safety Report figures — **12.7 million
-advertiser accounts suspended, 5.5 billion ads removed**. Verify against Google's report directly.
+Google's 2024 Ads Safety Report: **12.7 million advertiser accounts suspended, 5.5 billion ads
+removed** — verify against the report directly.
 
 ### Reading a reseller
 
 Red flags, converged across sources:
 
-- **"Unbannable accounts"** — definitionally false. Every source calls this a red flag.
-- **Crypto-only, anonymous, or Telegram-only contact** with no other channel — no recourse if they
-  vanish.
-- **Vagueness about who owns the MCC.** If they cannot answer this cleanly, you have no idea whose
-  compliance history you are inheriting — and MCC-level enforcement cascades (see `04`).
-- **No written replacement policy** — a documented timeline and whether unspent balance migrates,
-  versus a verbal "we'll take care of you".
+- **"Unbannable accounts"** — definitionally false; every source flags this.
+- **Crypto-only, anonymous, or Telegram-only contact**, no other channel — no recourse if they vanish.
+- **Vagueness about who owns the MCC** — you inherit unknown compliance history; MCC-level
+  enforcement cascades (`04`).
+- **No written replacement policy** — no documented timeline / balance-migration terms, only a
+  verbal "we'll take care of you".
 
-**The tell worth reading closely:** one major vendor's explicit product promise is **fund continuity on
-ban** — "recover unused balance, transfer funds to another account" — *not* ban prevention. That is the
-vendor's own admission of the base rate.
+**Tell worth reading:** one major vendor's explicit promise is **fund continuity on ban** —
+"recover unused balance, transfer to another account" — *not* ban prevention. Vendor's own admission
+of the base rate.
 
-Roundup and comparison articles on this topic are themselves frequently affiliate-monetized, so the
-ranking is not independent judgment.
+Roundup/comparison articles on this topic are frequently affiliate-monetized — ranking isn't
+independent judgment.
 
 ## Signals Google associates accounts by
 
-Converged from official policy language (which names some explicitly) and practitioner consensus
-(which fills in the rest). **Google does not publish the full set, by design.** No single factor
-triggers linking; the threshold is undisclosed.
+Converged from official policy language (names some explicitly) + practitioner consensus (fills in
+the rest). **Google does not publish the full set, by design.** No single factor triggers linking;
+threshold undisclosed.
 
-- **Payment profile** — card BIN, cardholder name, billing address, bank details. The explicit anchor
-  of the suspicious-payment and chargeback enforcement path.
+- **Payment profile** — card BIN, cardholder name, billing address, bank details. Explicit anchor of
+  the suspicious-payment/chargeback enforcement path.
 - **Phone number** — creation and verification challenges.
-- **Recovery email and the underlying Google account.** The circumventing-systems policy explicitly
-  targets "creating new accounts to re-enter the system", which only functions as a deterrent if Google
-  ties the *person*, not just the account.
+- **Recovery email + underlying Google account.** Circumventing-systems policy targets "creating new
+  accounts to re-enter the system" — only deters if Google ties the *person*, not just the account.
 - **Browser/device fingerprint** — canvas, WebGL, fonts, timezone/locale consistency.
 - **IP/ASN** — exit IP type and consistency across sessions for one identity.
-- **GTM container / Google Tag / Analytics property IDs** — shared tagging infrastructure across
-  "different" accounts is a strong cross-link. Frequently overlooked.
+- **GTM container / Google Tag / Analytics property IDs** — shared tagging across "different"
+  accounts is a strong cross-link. Frequently overlooked.
 - **Merchant Center** — business name, address, domain tie into MC's own verification.
 - **Domain WHOIS registrant** reused across otherwise-unrelated properties.
-- **Search Console property ownership** — verifying multiple domains under one identity ties them.
-- **Business name and address** reused across Merchant Center, invoicing, WHOIS, and the landing page's
-  own About-us content.
+- **Search Console property ownership** — multiple domains verified under one identity ties them.
+- **Business name and address** reused across Merchant Center, invoicing, WHOIS, landing page's
+  About-us content.
 
-**Consistency is required *within* one persona; separation is required *between* personas.** Both
-halves matter.
+**Consistency required *within* one persona; separation required *between* personas.** Both halves
+matter.
 
 ### Where Google differs from Facebook
 
-The full comparison table and the practical translation — protect the **billing identity and the
-destination**, not the session — are canonical in `04`. The one operating consequence for this file:
-a payment event, not a login, is the highest-risk identity-mismatch moment, so sequence a persona's
-activity around its payment events (see `02`).
+Full comparison table + practical translation — protect the **billing identity and destination**,
+not the session — canonical in `04`. Operating consequence here: a payment event, not a login, is the
+highest-risk identity-mismatch moment — sequence a persona's activity around its payment events (`02`).
 
 ## Antidetect and proxies 🔺
 
 **No rigorous, methodology-backed comparison of antidetect vendors' Google-specific detection
-resistance exists in reachable public material.** This is a genuine gap, not an omission. What was
-found is vendor marketing and competitor-authored reviews, which are structurally unreliable.
+resistance exists in reachable public material** — a genuine gap. Found: vendor marketing and
+competitor-authored reviews, structurally unreliable.
 
-- **Dolphin{anty}** — heavily positioned for Facebook/TikTok; Google support present but described by
-  users as technically demanding. Free plan cut from 10 to **5 profiles in Sept 2025**. Flagged as
-  *detected* in one third-party fingerprint check — **but that review was competitor-authored**, so
-  treat it as marketing.
+- **Dolphin{anty}** — positioned for Facebook/TikTok; Google support present but technically
+  demanding per users. Free plan cut from 10 to **5 profiles in Sept 2025**. Flagged *detected* in
+  one third-party fingerprint check — **competitor-authored review**, treat as marketing.
 - **GoLogin, AdsPower, Octo Browser, Multilogin, Undetectable** — all market Google multi-accounting.
-  None of their own Google-specific configuration docs were retrievable this pass.
-- **Linken Sphere** — one review cites affiliates running **15–20 Google Ads accounts**. The only
-  concrete N-accounts figure surfaced for Google specifically.
+  No Google-specific config docs retrievable this pass.
+- **Linken Sphere** — one review cites affiliates running **15–20 Google Ads accounts**. Only
+  concrete N-accounts figure found for Google specifically.
 
 **Proxies:**
 
-- **Static residential is the reported norm** for an account-holding persona — an exit IP that behaves
-  like a real home connection, held stable for the persona's life.
-- **Datacenter** is cheap and fast but flagged by IP-reputation systems as non-residential, raising
-  baseline suspicion before any behavioral signal is evaluated.
-- **Mobile** offers carrier-grade reputation at higher cost, but shared/rotating CGNAT ranges can cause
-  **cross-persona collisions** if reused without control.
-- **Rotating residential is the wrong choice for the account-holding persona** — it breaks IP
-  consistency and resets the model on every rotation. Appropriate only for scraping tasks unrelated to
-  the persona's own session.
+- **Static residential = reported norm** for an account-holding persona — exit IP behaves like a real
+  home connection, stable for the persona's life.
+- **Datacenter** — cheap/fast but flagged non-residential by IP-reputation systems, raises baseline
+  suspicion before any behavioral signal.
+- **Mobile** — carrier-grade reputation, higher cost; shared/rotating CGNAT ranges can cause
+  **cross-persona collisions** if reused uncontrolled.
+- **Rotating residential is wrong for the account-holding persona** — breaks IP consistency, resets
+  the model each rotation. Fine only for scraping unrelated to the persona's own session.
 
-Vendor product docs for Bright Data, IPRoyal, Proxy-Seller, and 922proxy could not be retrieved for
-Google-specific guidance.
+Vendor docs for Bright Data, IPRoyal, Proxy-Seller, 922proxy not retrievable for Google-specific
+guidance.
 
 ## The compliant path for each grey practice
 
 | Grey practice | Compliant alternative reaching a similar goal |
 |---|---|
-| Renting a seat in an unknown reseller's MCC for spend headroom | Apply for **Google Partner** status directly, or qualify for **direct monthly invoicing** — same billing flexibility, no shared-fate MCC risk |
-| Buying aged "threshold accounts" to skip the trust ramp | Run a real account through Google's own threshold progression with compliant spend. Slower, but the trust is **yours and not revocable by a third party** |
-| Cloaking | Build one page that is simultaneously compliant and converting — solve the actual policy friction (missing product or company info, absent disclosures) rather than hiding it from the crawler |
-| Domain-hopping to dodge a disapproval | Fix the specific policy trigger named in the notice and use the real appeal path. Domain cycling to evade detection is named in policy as **Evasive ad content** |
-| Payment-identity fragmentation | Consolidate onto one verified invoiced business relationship where scrutiny is expected and accounted for |
-| Antidetect session separation to hide multi-account operation | Use the **MCC hierarchy** — a first-party feature designed for exactly this, with none of the fingerprint-evasion risk |
-| Buying stolen or synthetic-identity accounts | Register a real entity and complete Advertiser Identity Verification **proactively** — this removes the entire "account collapses when verification catches up" failure class |
+| Renting a seat in an unknown reseller's MCC for spend headroom | Apply for **Google Partner** status directly, or qualify for **direct monthly invoicing** — same flexibility, no shared-fate MCC risk |
+| Buying aged "threshold accounts" to skip the trust ramp | Run a real account through Google's own threshold progression, compliant spend. Slower, but trust is **yours, not revocable by a third party** |
+| Cloaking | Build one page simultaneously compliant and converting — fix the actual policy friction (missing product/company info, absent disclosures) instead of hiding it from the crawler |
+| Domain-hopping to dodge a disapproval | Fix the specific policy trigger named in the notice, use the real appeal path. Domain cycling to evade detection = policy's **Evasive ad content** |
+| Payment-identity fragmentation | Consolidate onto one verified invoiced business relationship where scrutiny is expected |
+| Antidetect session separation to hide multi-account operation | Use the **MCC hierarchy** — first-party feature for exactly this, no fingerprint-evasion risk |
+| Buying stolen or synthetic-identity accounts | Register a real entity, complete Advertiser Identity Verification **proactively** — removes the "account collapses when verification catches up" failure class |
 
-**Google does not ban multiple accounts per business.** Agencies and multi-brand companies run many
-under one MCC routinely. What crosses into Circumventing systems is creating an account **to re-enter
-after a suspension**, or spreading the same violating content across accounts to evade detection.
-**The violation is the evasion pattern, not the account count.**
+**Google does not ban multiple accounts per business.** Agencies/multi-brand companies run many
+under one MCC routinely. Circumventing systems = creating an account **to re-enter after a
+suspension**, or spreading violating content across accounts to evade detection. **Violation is the
+evasion pattern, not the account count.**

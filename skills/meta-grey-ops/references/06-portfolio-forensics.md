@@ -3,9 +3,9 @@
 Reviewed 2026-08-28. **Method, not measurement.** Standard survival analysis; no
 figure here is Meta-sourced or benchmarked, none is meant to be quoted as one.
 
-`senior-buyer-ops/01` says "diagnose which cause" for a ban-rate spike. This is the
-HOW: turn dead accounts into an attributed hazard so you fix the real driver
-instead of superstitiously changing everything at once.
+`senior-buyer-ops/01` says "diagnose which cause" for a ban-rate spike. HOW: turn
+dead accounts into an attributed hazard, fix the real driver instead of changing
+everything at once.
 
 ## Log the survival dimensions (or nothing is attributable)
 
@@ -33,14 +33,13 @@ opposite fixes.
 
 ## Confounding is the trap → balanced designs
 
-New domain + new creative + new batch launched together → a ban wave can't be
-pinned on any one. Vary ONE infra axis at a time across an otherwise-balanced set:
-same proven creative across accounts differing only in the tested axis (domain A
-vs B; proxy cluster A vs B; supplier batch A vs B), balanced counts — divergent
-death/CPM/delivery isolates that axis. This is the infra-fixed inversion of a
-creative test (the third testing mode, `measurement-experimentation-ops`). Never
-move two axes at once when something is dying. When you must change several
-things (new vertical launch), at least stagger them to separate the effects.
+New domain + new creative + new batch launched together → ban wave can't be pinned
+on any one. Vary ONE infra axis at a time across an otherwise-balanced set: same
+proven creative across accounts differing only in the tested axis (domain A vs B;
+proxy cluster A vs B; supplier batch A vs B), balanced counts — divergent
+death/CPM/delivery isolates that axis. Infra-fixed inversion of a creative test
+(third testing mode, `measurement-experimentation-ops`). Never move two axes at
+once when something is dying; a multi-change launch should at least stagger them.
 
 ## Cross-account anomaly detection
 
@@ -65,6 +64,6 @@ single-domain collapse to ~0 LP CTR (domain/SSL/cloak fault, not a ban —
 
 ## Boundary
 
-This is diagnosis/attribution METHOD. Reactions (freeze, rotate domain, replace
-batch, kill creative) live in `01`/`05`/`tracker-ops`; the portfolio-level decision
-(shift budget after a wave) is `senior-buyer-ops/01`.
+Diagnosis/attribution METHOD only. Reactions (freeze, rotate domain, replace
+batch, kill creative) → `01`/`05`/`tracker-ops`; portfolio-level decision (shift
+budget after a wave) → `senior-buyer-ops/01`.

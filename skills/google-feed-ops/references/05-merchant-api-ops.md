@@ -1,9 +1,9 @@
 # 05 — Merchant API v1: operating facts and `gmcops`
 
-Reviewed 2026-09-02, primary reference pages (raw HTML) unless marked. Content API for Shopping is
-gone (2026-08-18, errors escalate from 2026-09-01); v1beta gone 2026-02-28. Base
-`https://merchantapi.googleapis.com/{sub-api}/v1/…`. CLI: `google-grey-ops/scripts/gmcops.py`
-(usage table in `google-grey-ops/10`).
+Reviewed 2026-09-02, primary reference pages (raw HTML) unless marked. Content API for Shopping gone
+(2026-08-18, errors escalate from 2026-09-01); v1beta gone 2026-02-28. Base
+`https://merchantapi.googleapis.com/{sub-api}/v1/…`. CLI: `google-grey-ops/scripts/gmcops.py` (usage
+table in `google-grey-ops/10`).
 
 ## Facts that change what you build
 

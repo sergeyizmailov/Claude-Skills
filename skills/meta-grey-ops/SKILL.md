@@ -83,10 +83,10 @@ Declared gaps: no dating or loans playbook; `APP_PROMOTION` only directional in 
 
 ## Scripts
 
-`metaops` is the agent write boundary. It rejects workspaces inside the configured skills directory;
-generated files belong in the current project workspace. Low-level scripts may be used directly only for
-read-only inspection; their POST/DELETE transport is enabled only inside a validated
-workspace-bound `metaops` process. Run the isolated checks in `16` after any edit.
+`metaops` is the agent write boundary: rejects workspaces inside the skills directory; generated
+files belong in the project workspace. Low-level scripts: read-only inspection only — POST/DELETE
+enabled only inside a validated workspace-bound `metaops` process. Run `16`'s isolated checks after
+any edit.
 
 | Script | Does | Spends? |
 |---|---|---|

@@ -11,8 +11,8 @@ is in `google-feed-ops/01` — do not invent a second one: label 0 = margin tier
 2 = bestseller rank · 3 = seasonality · 4 = stock lifecycle.
 
 **Build separate PMax campaigns per margin tier.** A single blended tROAS either underbids your most
-profitable SKUs or keeps overspending on SKUs that were never profitable at that rate. This is the
-single highest-leverage structural decision in the vertical.
+profitable SKUs or keeps overspending on SKUs never profitable at that rate — the single
+highest-leverage structural decision in the vertical.
 
 ## Target derivation
 
@@ -24,9 +24,9 @@ Target ROAS     = break-even + profit buffer, then layered per margin tier
 Low-margin SKUs get a **higher** tROAS floor; high-margin SKUs are allowed to spend more aggressively
 at a **lower** tROAS.
 
-> **The frequent silent error:** most agency guidance treats "margin" loosely. Verify the input
-> includes **landed COGS + shipping + payment processing**, not wholesale cost. Everything downstream
-> inherits this mistake.
+> **Frequent silent error:** most agency guidance treats "margin" loosely. Verify the input includes
+> **landed COGS + shipping + payment processing**, not wholesale cost. Everything downstream inherits
+> this mistake.
 
 ## New-customer acquisition
 
@@ -37,20 +37,20 @@ Google's default detection scans **540 days** of account conversion history — 
 in that window counts as new.
 
 > **Assign an explicit incremental value to new-customer conversions, not just the flag.** The toggle
-> alone does nothing. This is the single most common misconfiguration of the feature.
+> alone does nothing — the single most common misconfiguration of the feature.
 
 ## Refunds and returns
 
 Use the **Conversion Adjustments API** — `RETRACTION` for a cancelled order, `RESTATEMENT` for a
 partial return.
 
-Restatements are accepted up to **54 days** post-conversion [official: answer/7686280]. Google documents
-a **7-day "autobidding readability"** window generally — 🔺 but the explicit statement that later
+Restatements accepted up to **54 days** post-conversion [official: answer/7686280]. Google documents a
+**7-day "autobidding readability"** window generally — 🔺 but the explicit statement that later
 adjustments are **ignored by autobidding** appears **only in the Hotel Ads note** (answer/7686447).
-Generalizing it to Search/Shopping/PMax is practitioner inference, not documented. Restate inside 7 days
-where you can; do not assume a day-8 restatement is worthless for bidding.
+Generalizing to Search/Shopping/PMax is practitioner inference, not documented. Restate inside 7 days
+where possible; don't assume a day-8 restatement is worthless for bidding.
 
-**Unadjusted refunds silently inflate reported revenue and corrupt tROAS bidding.** This is a top-tier
+**Unadjusted refunds silently inflate reported revenue and corrupt tROAS bidding** — a top-tier
 scale-capping failure that never surfaces in-platform.
 
 ## Seasonality and Q4
@@ -61,9 +61,9 @@ year's actual CVR delta for the same window, not a guess.
 > **Applying a seasonality adjustment across the whole of Q4 instead of just the BFCM days is a known
 > misuse that distorts Smart Bidding calibration for the rest of the quarter.**
 
-Lock the total Q4 budget first, then explicitly reserve incremental spend for Cyber Five and the final
-pre-Christmas week rather than letting daily budgets auto-cap mid-surge. Monitor pacing hourly on BFCM,
-accounting for conversion lag when reading same-day numbers.
+Lock total Q4 budget first, then explicitly reserve incremental spend for Cyber Five and the final
+pre-Christmas week rather than letting daily budgets auto-cap mid-surge. Monitor pacing hourly on
+BFCM, accounting for conversion lag when reading same-day numbers.
 
 ## Benchmarks — priors only
 
@@ -94,9 +94,9 @@ apply category CVR direction qualitatively rather than inventing per-category nu
 ## What breaks first
 
 **PMax's cross-channel black box misattributes existing brand-search demand as incremental wins while
-simultaneously corrupting tROAS via unadjusted refund data.** The account looks like it is scaling
-profitably in-platform while blended true margin quietly erodes — and by the time it reaches the P&L,
-the structure has already been scaled on the false signal.
+simultaneously corrupting tROAS via unadjusted refund data.** The account looks like it's scaling
+profitably in-platform while blended true margin quietly erodes — by the time it reaches the P&L, the
+structure has already been scaled on the false signal.
 
 Both halves are fixable and both are usually missing together: brand exclusions plus an exact-match
 brand campaign (`../references/07`), and conversion adjustments within the 7-day bidding window.

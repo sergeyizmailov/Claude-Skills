@@ -51,8 +51,8 @@ testing algorithm, never evenly rotated.
 
 ## Ad testing without ETAs
 
-ETAs stopped serving in 2022. Every Search test since runs against a combinatorial black box where
-Google's ML chooses which combination shows, to whom, and when.
+ETAs stopped serving 2022; every Search test since runs against a combinatorial black box — Google's
+ML chooses which combination shows, to whom, when.
 
 **Brad Geddes / Adalysis method:**
 
@@ -72,9 +72,9 @@ Google's ML chooses which combination shows, to whom, and when.
 **Low / Good / Best**. These are a **relative rank within the ad group**, not an absolute grade,
 computed from the subset of combinations Google actually served.
 
-The trap: pausing "Low" assets that would perform fine in another context. On a young or low-volume
-ad group a "Low" label is often noise. Wait **4–6 weeks**, then **replace 1–2 assets at a time**,
-never a full refresh — a simultaneous swap resets the baseline across every slot at once.
+Trap: pausing "Low" assets that would perform fine elsewhere — on a young/low-volume ad group "Low" is
+often noise. Wait **4–6 weeks**, then **replace 1–2 assets at a time**, never a full refresh (a
+simultaneous swap resets the baseline across every slot).
 
 **Ad variations** (Campaigns → Ads → Ad variations) bulk-swaps text across many campaigns but is
 **not** a controlled A/B — no split, no holdout. **Experiments** (Drafts & Experiments) is the
@@ -101,11 +101,10 @@ components and mismatch is the most commonly cited fixable driver.
 Standard doctrine with no large-N isolated study found: search term/intent in Headline 1;
 price/qualifier headlines ("From $49/mo", "Same-Day Shipping") to pre-qualify clicks.
 
-**Competitor ads:** you **cannot** put a competitor trademark in ad copy, headline, or display URL
-except under four narrow exceptions (reseller · components/compatible-with · informational comparison
-· purely descriptive use). **Bidding on competitor trademarked keywords is fully allowed** — Google
-does not restrict it. **Feb 2025:** Google removed the proactive trademark-protection submission form;
-enforcement is now reactive and complaint-driven per ad.
+**Competitor ads:** competitor trademark in ad copy/headline/display URL **not allowed** except four
+exceptions (reseller · components/compatible-with · informational comparison · purely descriptive).
+**Bidding on competitor trademarked keywords fully allowed.** Feb 2025: proactive trademark-protection
+submission form removed; enforcement now reactive/complaint-driven per ad.
 
 ## Assets
 
@@ -128,10 +127,9 @@ Destinations, Featured hotels, Insurance coverage, Models, Neighbourhoods, Servi
 Styles, Types. No custom headers.
 
 **Incremental impact** [WordStream aggregate, methodology unverified, directional]: sitelinks alone
-+10–20% CTR, +20–50% on branded queries — most of the lift attributed to **filling the sitelink
-description lines**, which most advertisers leave blank. Sitelinks + callouts + snippets together
->20%. The reliable mechanism is official: Ad Rank includes expected impact of assets, so assets lift
-Ad Rank at no incremental CPC.
++10–20% CTR, +20–50% on branded queries — most lift from **filling the sitelink description lines**
+(most advertisers leave blank). Sitelinks + callouts + snippets together >20%. Official mechanism: Ad
+Rank includes expected impact of assets, so assets lift Ad Rank at no incremental CPC.
 
 ## PMax asset group specs
 
@@ -159,10 +157,9 @@ data for retail. Officially acknowledged failure mode: auto-generated video **"m
 visit your landing page a different product than the one featured in your video"** — the SKU in the
 video does not match the Final URL.
 
-Google's suggested mitigation is narrowing the asset group via product filters so fewer, more
-consistent products feed generation. **The actual fix is uploading real video in all three
-orientations** — which is also the condition for Excellent PMax Ad Strength and suppresses the AI
-fallback entirely.
+Google's mitigation: narrow the asset group via product filters so fewer, more consistent products
+feed generation. **Actual fix:** upload real video in all three orientations — also the condition for
+Excellent PMax Ad Strength, and it suppresses the AI fallback entirely.
 
 🔺 **Gemini Omni video creation landed in-platform 2026-08-25** — native AI video asset generation,
 not a bolt-on tool. Shipped days before this review: no performance comparison exists, so treat it
@@ -216,9 +213,9 @@ each column an attribute; requires `target_campaign`, `target_ad_group`, or `tar
 **Auto-apply recommendations**: ~17 types across Bidding & budgets, Keywords & targeting, Ads &
 assets. Path: **Recommendations → gear icon → toggle per category.**
 
-Never auto-apply **Bidding & budgets** — these silently raise CPA targets and budgets on Google's own
-logic when a strategy under-delivers. Review Ads & assets manually before enabling; Google-authored
-headlines drift from brand voice and compliance.
+Never auto-apply **Bidding & budgets** — silently raises CPA targets/budgets on Google's own logic when
+a strategy under-delivers. Review Ads & assets manually before enabling — Google-authored headlines
+drift from brand voice and compliance.
 
 **Account-level automated assets** — eight types Google generates without your copy: dynamic sitelinks
 · dynamic structured snippets · automated locations · seller ratings · dynamic callouts · dynamic
@@ -228,10 +225,8 @@ Opt-out path: **Campaigns → Assets → Associations tab → ⋮ → "Account l
 "Advanced settings" → uncheck each "Allow Google Ads to automatically create…" → give a reason →
 Save.**
 
-Two things that matter operationally:
-
-- Auto-generated copy surfaces **stale promos, wrong pricing, and irrelevant page fragments** scraped
-  from the landing page — the most common complaint.
+- Auto-generated copy surfaces **stale promos, wrong pricing, irrelevant page fragments** scraped from
+  the landing page — most common complaint.
 - **Practitioners report Google silently re-enabling these after opt-out.** Re-audit the Advanced
   settings screen on a schedule; never treat an opt-out as permanent.
 - Account-level automated assets, campaign/ad-group manual assets, and PMax's own automatically

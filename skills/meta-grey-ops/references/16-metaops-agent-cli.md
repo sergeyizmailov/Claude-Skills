@@ -25,8 +25,11 @@ its BM, app, System User, Page/PBIA, dataset, catalog, product-set aliases, curr
 timezone. `blocked_accounts` can never be selected. Credentials stay in the environment.
 The CLI discovers the nearest `workspace.json` from the current directory upward; explicit
 `--workspace` wins, followed by `METAOPS_WORKSPACE`.
-Every lifecycle command requires a workspace. Workspace-free legacy plans are not executable.
-The skill is account-agnostic. `workspace.json` lives in a per-launch project directory outside the skills directory (one directory per BM/agency setup, holding `workspace.json`, `.metaops/`, and `.notes/` with the token env file). The CLI rejects skill-store workspaces and state directories that escape the project. Start from `scripts/specs/example-workspace.json`.
+Every lifecycle command requires a workspace; workspace-free legacy plans are not executable.
+Account-agnostic: `workspace.json` lives in a per-launch project directory outside the skills
+directory (one per BM/agency setup — holds `workspace.json`, `.metaops/`, `.notes/` with the
+token env file). CLI rejects skill-store workspaces and state directories escaping the project.
+Start from `scripts/specs/example-workspace.json`.
 
 ```bash
 metaops --workspace . --profile <profile> --json workspace validate
@@ -35,11 +38,11 @@ metaops --workspace . --profile <profile> --json assets verify --scope core
 metaops --workspace . --profile <profile> --json doctor
 ```
 
-`--scope core` checks BM/app/System User/account/Page/PBIA/dataset. `--scope all` additionally
-checks the catalog and every declared product set. A successful check writes a workspace-hash,
-profile, scope, API-version, and timestamp-bound receipt; catalog specs require `all`, other
-specs accept `core` or `all`. `plan` and every later lifecycle command refuse stale or changed
-receipts. Verification makes no changes. Generated state lives under workspace `.metaops/`.
+`--scope core` checks BM/app/System User/account/Page/PBIA/dataset; `--scope all` adds catalog +
+every declared product set. A successful check writes a workspace-hash, profile, scope,
+API-version, and timestamp-bound receipt; catalog specs require `all`, other specs accept `core`
+or `all`. `plan` and every later lifecycle command refuse stale or changed receipts. Verification
+makes no changes; generated state lives under workspace `.metaops/`.
 
 If a product set is empty, inspect valid catalog IDs without leaving the interface:
 
@@ -74,10 +77,9 @@ Media upload and product-set repair also require that fresh receipt. Product-set
 a live System User/catalog/set ownership check that permits an empty set, then invalidates any
 old `all` asset receipt; rerun `assets verify --scope all` after repair.
 `plan` snapshots the normalized spec, then runs the existing API `validate_only` path before
-writing the artifact. Later source-file edits do not alter the saved plan; run `plan` again to
-adopt them. As with
-`launch.py --dry-run`, campaign and creative payloads reach Meta; ad-set and ad payloads are
-local-only until their parent IDs exist during `apply`.
+writing the artifact. Later source-file edits don't alter the saved plan; run `plan` again to
+adopt them. As with `launch.py --dry-run`: campaign and creative payloads reach Meta; ad-set and
+ad payloads are local-only until their parent IDs exist during `apply`.
 
 Before `activate`, complete every UI-only check in `00` §6–8. The command requires
 `--confirm-ui REVIEWED`, the spec-bound verification receipt, and literal `--confirm SPEND`.

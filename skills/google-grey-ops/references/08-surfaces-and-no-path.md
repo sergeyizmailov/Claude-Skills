@@ -7,10 +7,10 @@ Cert taxonomy → `google-ads/09`. Only facts with a live official page.
 
 Official hybrid-apps playbook + ACe deep-link help [16413616]:
 
-- **ACi destination is the Play / App Store listing.** You do not pick a web Final URL. PHP white/money is irrelevant.
-- **ACe: “Third-party trackers aren’t supported.”** [16428019]. Change campaign type or remove the tracker. ACi: a 3P tracker must still land on the **correct store**.
+- **ACi destination is the Play / App Store listing.** No web Final URL choice. PHP white/money irrelevant.
+- **ACe: "Third-party trackers aren't supported."** [16428019]. Change campaign type or remove the tracker. ACi: a 3P tracker must still land on the **correct store**.
 - **ACe Final URL must be a non-redirecting App Link / Universal Link.** App Attribution Partner links (Branch, AppsFlyer OneLink) that **redirect** are **not supported** as Final URL [16413616].
-- Tracking templates: “most campaign types, **excluding App campaigns**” [7382504].
+- Tracking templates: "most campaign types, **excluding App campaigns**" [7382504].
 - **PMax cannot run an app-install goal.** App campaigns remain mandatory for installs (`dating-loans-apps`).
 
 Do not port `05` onto UAC.
@@ -62,7 +62,7 @@ Official Demand Gen help [13695777], fetched 2026-08-27:
 - Personalized ads [143465]: promoting sensitive → **cannot** use Customer Match, lookalikes, **Custom Segments**, or audience expansion. Custom Intent was **renamed Custom Segments** [9805516] — still live on Display/Gmail/DG/Video; **not** PMax hard targeting.
 - Customer Match is **first-party only** [6299717]. Affiliate/bought PII lists are a policy fail. Sensitive products cannot run CM campaigns.
 
-Those two bullets conflict. Operational: do not expect Gmail/GDN for grey/sensitive. Discover is **not** a given. Channel controls are **ad-group** level (`google-ads/12`). Display Ads → Demand Gen migration (Jun 2026) **opts GDN in by default** and you cannot unselect it during migration [17051545] — a grey Display leftover becomes GDN inventory you did not pin.
+Those two bullets conflict. Operational: don't expect Gmail/GDN for grey/sensitive. Discover is **not** a given. Channel controls are **ad-group** level (`google-ads/12`). Display Ads → Demand Gen migration (Jun 2026) **opts GDN in by default**, cannot unselect during migration [17051545] — a grey Display leftover becomes GDN inventory you didn't pin.
 
 Alcohol: **no product feeds** on Demand Gen.
 

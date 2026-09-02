@@ -8,10 +8,10 @@ Local Services Ads become a **Performance Max subtype with pay-per-lead goals**.
 2026** for US home/storefront verticals (plumbing, HVAC, electrical, appliance repair, house cleaning,
 lawn care, roofing, pest control, moving); broader US late 2026; non-US and remaining verticals 2027.
 
-**Manual bidding and per-vertical Target CPA caps consolidate into one campaign-level Target CPA.** The
-standalone LSA dashboard disappears. BBB callouts are dropped.
+**Manual bidding and per-vertical Target CPA caps consolidate into one campaign-level Target CPA.**
+Standalone LSA dashboard disappears; BBB callouts dropped.
 
-Any budget or bid model built today should anticipate that consolidation.
+Any budget or bid model built today should anticipate this consolidation.
 
 ## Eligibility and verification
 
@@ -19,18 +19,18 @@ Screening varies by category and location: **background checks** (business, owne
 plus any field agent performing in-home services) · business registration · insurance · license
 verification · minimum review requirements.
 
-**Badge change:** Google retired the separate **Google Guaranteed** and **Google Screened** badges in
-**October 2025**, replacing both with a unified **"Google Verified"** checkmark. Update any client
-material still using the old names. The legacy Guaranteed backing still offers up to **$2,000** in
-dissatisfied-customer compensation.
+**Badge change:** Google retired the separate **Google Guaranteed** and **Google Screened** badges
+**October 2025**, replacing both with a unified **"Google Verified"** checkmark. Update client material
+still using old names. Legacy Guaranteed backing still offers up to **$2,000** in dissatisfied-customer
+compensation.
 
 ## The dispute lever is gone
 
 LSA is **pay-per-lead**, not pay-per-click.
 
-**Google removed manual lead disputing in August 2024**, replacing it with an **automated credit
-system**: every lead is reviewed within **72 hours** and auto-credited if identified as spam, a wrong
-number, or an obvious misdial — no advertiser action required.
+**Google removed manual lead disputing August 2024**, replacing it with an **automated credit system**:
+every lead reviewed within **72 hours**, auto-credited if identified as spam, wrong number, or obvious
+misdial — no advertiser action required.
 
 For leads that do not auto-credit, the only remaining lever is the **Lead Feedback Survey** (mark
 "Dissatisfied" within 30 days). **That is feedback, not a guaranteed credit.**
@@ -41,8 +41,8 @@ only.
 
 ## Call tracking
 
-Google's **forwarding number** dynamically swaps the displayed number for ad-driven traffic and reports
-call length, answer status, and rough caller location. A call counts as a conversion once it clears an
+Google's **forwarding number** dynamically swaps the displayed number for ad-driven traffic, reports
+call length, answer status, rough caller location. A call counts as a conversion once it clears an
 advertiser-set minimum duration (commonly 30s+).
 
 Two types: **Calls from Ads** (call-only ads and call assets, no site changes) and **Calls to a website
@@ -96,6 +96,6 @@ inert — only the schedule itself is a hard control.
 ## What breaks first
 
 **Losing the manual-dispute lever combined with running Smart Bidding without an offline-conversion
-feedback loop.** Bad leads that do not auto-qualify for credit get paid for at full price, and with no
+feedback loop.** Bad leads that don't auto-qualify for credit get paid at full price, and with no
 CRM-stage data flowing back, Smart Bidding has no way to learn which sources were garbage — so it buys
 more of the same, efficiently.

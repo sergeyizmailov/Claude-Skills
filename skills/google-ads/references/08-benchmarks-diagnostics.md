@@ -3,9 +3,8 @@
 Reviewed 2026-08-27.
 
 **Read first:** every benchmark here is a **prior for sizing a test or sanity-checking an outlier** —
-never a target, never a KPI to report against. The account's own trailing 90-day baseline is always
-the correct comparison. Industry medians only tell you whether a fresh account's numbers are
-plausible.
+never a target, never a KPI to report against. Account's own trailing 90-day baseline is always the
+correct comparison. Industry medians only tell you whether a fresh account's numbers are plausible.
 
 ## Refuted — do not cite
 
@@ -16,11 +15,11 @@ aggregate data. **None of the three publishes it.** WordStream's real 2026 repor
 pricing (the Transparency Center discloses ad content and advertiser identity, not CPC); no matching
 SEJ report exists.
 
-The figure propagates across a cluster of SEO content-farm sites (digitalapplied, solutionbyz,
-get-ryze, silverbackmarketing) all citing each other. Treat it as fabricated or AI-hallucinated.
+Propagates across SEO content-farm sites (digitalapplied, solutionbyz, get-ryze, silverbackmarketing)
+citing each other. Treat as fabricated/AI-hallucinated.
 
-**Generalize the lesson:** a precise-sounding statistic with a vague source list is the 2026 failure
-mode. Trace before citing.
+**Lesson:** a precise-sounding statistic with a vague source list is the 2026 failure mode. Trace
+before citing.
 
 ## The best-sourced longitudinal data
 
@@ -35,9 +34,9 @@ geo/vertical mix undisclosed:
 | CVR blended | — | 6.20% | softening from a 6.79% Q3 2025 peak |
 | ROAS blended | — | ~428–464% | Q4 seasonally strongest |
 
-**Read this as an auction-supply story, not an execution story.** The same targeting and creative
-producing fewer impressions is a market-inventory signal. Do not let an agent diagnose a platform-wide
-contraction as a campaign problem — this is the single most common false positive in 2026 audits.
+**Read as an auction-supply story, not an execution story.** Same targeting/creative producing fewer
+impressions is a market-inventory signal. Never diagnose a platform-wide contraction as a campaign
+problem — the single most common false positive in 2026 audits.
 
 Q2 2026 report (n=20,000+ accounts / 250,000+ campaigns) is gated, but visible teasers: one of 20
 tracked verticals posted a **44% YoY ROAS swing** (vertical unnamed), a metric reversed after three
@@ -117,15 +116,14 @@ CPC              ≈ CPM / (1000 × CTR)
 Worked: 40% margin → break-even ROAS 2.5. Want to keep 15% of revenue after ads → target ROAS
 1/(0.40−0.15) = **4.0**.
 
-**Gross margin must be after COGS, shipping, payment processing, discounts, and returns.** Feeding a
-markup number instead is the most common error and overstates headroom.
+**Gross margin must be after COGS, shipping, payment processing, discounts, returns.** Feeding a markup
+number instead is the most common error, overstates headroom.
 
-**LTV:CAC ≥3:1** is a sanity floor, not a target. **Always pair it with payback period** — a 3:1 ratio
-at 24-month payback can starve a business worse than 2.5:1 at 4 months.
+**LTV:CAC ≥3:1** is a sanity floor, not a target. **Always pair with payback period** — 3:1 at
+24-month payback can starve a business worse than 2.5:1 at 4 months.
 
-**Lag rule:** never judge a lead-gen cohort's CPA until the account's average sales cycle has elapsed
-for that cohort. At a 45-day cycle, the last 45 days of leads are structurally incomplete data, not
-poor performance.
+**Lag rule:** never judge a lead-gen cohort's CPA until the account's average sales cycle has elapsed.
+At a 45-day cycle, the last 45 days of leads are structurally incomplete data, not poor performance.
 
 ### Funnel decomposition — which lever, and what not to touch
 
@@ -155,24 +153,23 @@ extra spend       ≈ extra clicks × current avg CPC
 ```
 
 **Closing Lost IS (rank)** — a competitiveness constraint. **The multiplication does NOT hold.** Those
-impressions are in auctions you were losing, often on quality signals that correlate with CTR, so your
-current CTR/CVR will not transfer. Fix bids and quality components, not budget.
+impressions are auctions you were losing, often on quality signals correlated with CTR — current
+CTR/CVR will not transfer. Fix bids and quality components, not budget.
 
-Throwing budget at a rank problem wastes spend because you still will not win. Raising bids while
-budget-constrained does nothing because you already win what you can afford.
+Budget against a rank problem wastes spend (you still will not win); bids while budget-constrained do
+nothing (you already win what you can afford).
 
 ### Marginal vs average ROAS — the scaling rule most people get backwards
 
-As budget rises, campaigns bid into progressively lower-intent inventory; the revenue curve is
-concave. **Average ROAS** is backward-looking and blended. **Marginal ROAS** = ΔRevenue / ΔSpend for
-the next increment, and is always ≤ average once diminishing returns start.
+As budget rises, campaigns bid into progressively lower-intent inventory; revenue curve is concave.
+**Average ROAS** is backward-looking, blended. **Marginal ROAS** = ΔRevenue / ΔSpend for the next
+increment, always ≤ average once diminishing returns start.
 
-**Profit-maximizing rule: keep raising budget while marginal ROAS ≥ break-even ROAS. Stop where they
-are equal.**
+**Profit-maximizing rule: keep raising budget while marginal ROAS ≥ break-even ROAS. Stop where equal.**
 
 That spend level is **higher** than "maximize average ROAS" logic suggests — average ROAS is typically
-highest at the smallest spend, which is exactly why optimizing toward it systematically under-scales
-profitable accounts.
+highest at smallest spend, which is why optimizing toward it systematically under-scales profitable
+accounts.
 
 Google reports no marginal ROAS. Estimate it: raise budget by a known increment, hold everything else,
 measure ΔConversion value / ΔSpend over a stable 2–4 week window long enough to clear learning
@@ -180,9 +177,9 @@ volatility. Budget experiments or a clean pre/post on a stable campaign are the 
 
 ### Blended vs platform-reported
 
-Platform conversions use Google's own model, generous windows, and cross-device modeling, and
-deduplicate against nothing. **Blended CAC = total marketing spend across all channels / backend-
-verified deduplicated new customers.** That is ground truth.
+Platform conversions use Google's own model, generous windows, cross-device modeling, dedup against
+nothing. **Blended CAC = total marketing spend across all channels / backend-verified deduplicated new
+customers.** Ground truth.
 
 Reconcile by matching backend orders to channel via UTM/order-source/promo code, then compute
 `attribution inflation = platform-reported / backend-verified`. Ratios of ~1.3–1.5× are commonly
@@ -271,9 +268,9 @@ structurally cannot convert.
 
 ### Optimization score — the nuance that reconciles two studies
 
-Official: "an estimate of how well your Google Ads account is set to perform", 0–100%. Google uses
-conditional language and **makes no claim that a higher score causes better performance.** Ginny
-Marvin, verbatim: **"OptiScore has no influence on the auction."**
+Official: "an estimate of how well your Google Ads account is set to perform", 0–100%. Google **makes
+no claim that a higher score causes better performance.** Ginny Marvin: **"OptiScore has no influence
+on the auction."**
 
 Two studies, apparently contradictory, actually measuring different things:
 
@@ -284,9 +281,9 @@ Two studies, apparently contradictory, actually measuring different things:
 - **Within one account** — TheDoctorAds, n=6,071 campaigns across 29 accounts, $85.3M spend, 2026:
   median rank correlation of score vs CTR = **0.05**, vs CVR = **−0.05**. Effectively zero.
 
-**Reconciled: a chronically low account-level score is a weak general red flag; campaign-level score
-differences predict nothing.** Do not rank or prioritize campaigns by optimization score — rank by
-share of zero-conversion spend and cost-per-conversion vs account median.
+**Reconciled: chronically low account-level score is a weak general red flag; campaign-level score
+differences predict nothing.** Never rank/prioritize campaigns by optimization score — rank by share
+of zero-conversion spend and cost-per-conversion vs account median.
 
 ## Budget and pacing
 
@@ -308,9 +305,9 @@ proportionally longer to resolve.
 
 ## Seasonality
 
-**Seasonality adjustments** are for short, sharp, known-in-advance conversion-rate events the
-algorithm has no history for — **not** slow-building seasonal ramps, which Smart Bidding learns from
-the account's own history.
+**Seasonality adjustments** are for short, sharp, known-in-advance conversion-rate events the algorithm
+has no history for — **not** slow-building seasonal ramps, which Smart Bidding learns from the
+account's own history.
 
 **Resolved: there is no enforced hard cap on percentage or duration.** Google's page frames **1–7 days
 as ideal** and warns effectiveness degrades **beyond 14 days**; a secondary source cites a −90% to

@@ -6,8 +6,8 @@ description: "Senior Meta (FB/IG) ads: plan, launch, audit, diagnose, optimize. 
 # Meta Ads
 
 Operate as a senior Meta Ads practitioner. Treat UI, eligibility, policy, API
-behavior, prices, and benchmarks as volatile. Research reviewed **2026-07-28**.
-Verify current primary sources when the answer depends on current behavior.
+behavior, prices, benchmarks as volatile — verify current primary sources when
+the answer depends on current behavior. Research reviewed **2026-07-28**.
 
 ## Route references
 
@@ -39,8 +39,8 @@ restrictions, or activation.
 
 Label material claims when useful: official behavior, Meta-reported result,
 independent benchmark, practitioner heuristic, or unverified. Preserve source
-population, geography, objective, date, and methodology. Never convert a
-benchmark or case lift into a platform rule or forecast.
+population, geography, objective, date, methodology. Never convert a benchmark
+or case lift into a platform rule or forecast.
 
 ## Minimum context
 

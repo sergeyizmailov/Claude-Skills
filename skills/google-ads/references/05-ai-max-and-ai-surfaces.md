@@ -10,10 +10,10 @@ Reviewed 2026-08-27. **The most time-critical file in this skill.** Everything h
 | Legacy Automatically Created Assets (ACA) | AI Max asset optimization | Same window | None |
 | Dynamic Search Ads | AI Max | **Delayed to Feb 2027** | Yes — 8-month extension announced 2026-06-11 by Ginny Marvin, attributed to advertiser feedback about Q4 planning risk |
 
-Since **2026-08-03** Google blocks *creating* new campaign-level Broad Match or legacy ACA
-configurations across UI, Editor, and API. You can keep an existing one until it is swept; you cannot
-opt back in. Migration mechanics published on the Ads Developer Blog 2026-08-12; affected advertisers
-emailed 2026-08-05. Existing brand inclusions/exclusions carry over automatically.
+Since **2026-08-03** Google blocks *creating* new campaign-level Broad Match or legacy ACA configs
+across UI, Editor, API. Existing config survives until swept; no opt-back-in. Mechanics published Ads
+Developer Blog 2026-08-12; advertisers emailed 2026-08-05. Brand inclusions/exclusions carry over
+automatically.
 
 **The only real opt-out: disable campaign-level Broad Match / ACA *before* September 1.** Google will
 not auto-migrate a campaign that no longer uses the legacy feature, which leaves you free to enable
@@ -59,25 +59,24 @@ The campaign-level AI Max switch is not the lever. These are:
 | **Lunio** | 414M retail ad clicks | Invalid traffic on AI Max-enabled retail search rose **2.46% (Q4 2025) → 5.28% (Q2 2026)**. Modeled cost at a $10M/yr retail advertiser: ~$500K/yr wasted, ~$1.25M lost revenue opportunity. Separately, in one AI Max campaign a **single competitor's brand terms took 69% of total impressions**; all competitor terms combined exceeded 80%. |
 | **Adriaan Dekker** | LinkedIn poll, self-selected PPC professionals | Only **16%** reported good AI Max performance. Self-selection caveat applies. |
 
-**Reading:** the independent evidence is consistent in direction and contradicts Google's marketing.
-Do not present Google's uplift numbers without this counter-evidence.
+**Reading:** independent evidence is consistent in direction, contradicts Google's marketing. Never
+present Google's uplift numbers without this counter-evidence.
 
 ## Where it helps and where it destroys accounts
 
-**Relatively helps:** e-commerce with clear intent and a fast conversion cycle — obvious purchase
-intent and short feedback loops give the algorithm a clean signal. Still shows ROAS drag per smec,
-just less catastrophically.
+**Relatively helps:** e-commerce, clear intent, fast conversion cycle — clean signal for the algorithm.
+Still shows ROAS drag per smec, just less catastrophically.
 
 **Hurts:**
 
 - **Local / home-services lead gen** — the sharpest documented failure (HBT Digital above).
-- **B2B lead gen** — long cycles, CRM-disconnected form-fill optimization. It will efficiently scale
-  low-intent content downloads while pipeline quality craters. It does not know your ICP.
+- **B2B lead gen** — long cycles, CRM-disconnected form-fill optimization; scales low-intent content
+  downloads while pipeline quality craters. Does not know your ICP.
 - Regulated verticals needing strict message control.
-- **Budget-constrained accounts** — AI Max is meant to expand into *additional* budget-funded reach.
-  If impression share is already lost to budget, it diverts spend from working keywords instead of
+- **Budget-constrained accounts** — AI Max expands into *additional* budget-funded reach; if
+  impression share is already lost to budget, it diverts spend from working keywords instead of
   adding incremental volume.
-- Sites with thin or disorganized content — URL expansion has nothing good to match against.
+- Thin/disorganized content sites — URL expansion has nothing good to match against.
 
 ## Pre-migration checklist
 
@@ -110,9 +109,9 @@ the deadline.
 
 ## AI Overviews and AI Mode
 
-**Ads in AI Overviews are existing Search/Shopping/PMax ads made eligible for a new placement.**
-There is no AI Overview campaign type. Google decides placement using **both the query and the content
-of the generated Overview** — a dual relevance bar beyond ordinary matching.
+**Ads in AI Overviews are existing Search/Shopping/PMax ads made eligible for a new placement** — no
+AI Overview campaign type exists. Placement decided by **both the query and the content of the
+generated Overview** — a dual relevance bar beyond ordinary matching.
 
 **Advertisers cannot target or opt out of AI Overview placements** (confirmed early 2026). Eligibility
 is automatic once existing ads clear the relevance threshold.
@@ -130,9 +129,9 @@ Ads appear in an estimated **25.5% of AI Mode results in 2026**.
 - Jan 2025 – Feb 2026: paid CTR on AIO-present queries **rose 14.64% → 16.21%**, while CTR on
   *non*-AIO queries **fell 25.98% → 21.85%**.
 
-Read together: the early AIO shock crushed paid CTR, Google then re-optimized ad placement inside
-Overviews enough to partially recover it, and ordinary SERPs are now the ones losing CTR — plausibly
-because AI Mode siphons easier low-funnel queries out of the traditional pool.
+Read together: early AIO shock crushed paid CTR; Google re-optimized ad placement inside Overviews
+enough to partially recover it; ordinary SERPs now lose CTR instead — plausibly AI Mode siphoning
+easier low-funnel queries out of the traditional pool.
 
 **Never quote a single AIO CTR number without naming which dataset and window it came from.** They
 tell opposite stories.

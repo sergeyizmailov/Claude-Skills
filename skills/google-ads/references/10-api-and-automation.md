@@ -51,9 +51,9 @@ client.login_customer_id = "1234567890"   # MCC id, no dashes
 **Getting this wrong is the most common cause of `USER_PERMISSION_DENIED` and `CUSTOMER_NOT_ENABLED`
 on otherwise-valid requests.**
 
-A developer token issued under MCC-A cannot query an account not linked into MCC-A's hierarchy, even
-if the OAuth user personally has UI access to it elsewhere. **The API path and the human login path
-are separate access checks.**
+A developer token issued under MCC-A cannot query an account not linked into MCC-A's hierarchy, even if
+the OAuth user personally has UI access elsewhere. **The API path and the human login path are separate
+access checks.**
 
 ## Versions
 
@@ -77,7 +77,7 @@ dependency-upgrade problem, not a runtime query.
 - **v23** — removed aggregate asset performance-label metrics for Search/Display (v22 had already
   removed them for PMax).
 
-> **The silent migration trap:** minor versions are additive, major versions remove fields. A script
+> **Silent migration trap:** minor versions are additive, major versions remove fields. A script
 > hardcoded to a minor version's field set can start returning **200 OK with silently missing data**
 > after a forced major bump rather than throwing. **Add field-presence assertions to report parsing,
 > not just error handling.**

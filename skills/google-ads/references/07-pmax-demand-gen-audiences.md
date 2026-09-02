@@ -51,15 +51,14 @@ mutate request.** See `10-api-and-automation.md`.
 ## Controls — what each actually does
 
 **Brand exclusions** block Search *and* Shopping inside PMax for your brand, common misspellings, and
-related subsidiary brands automatically. **You can allow Shopping to keep serving on excluded brand
-terms while blocking Search** — a granular toggle most operators miss. Google calls this "the most
-precise and comprehensive tool" for brand-term control, more complete than negatives.
+related subsidiary brands automatically. **Shopping can keep serving on excluded brand terms while
+Search is blocked** — a granular toggle most operators miss. Google: "the most precise and
+comprehensive tool" for brand-term control, more complete than negatives.
 
-**Negative keywords.** Google explicitly frames them as *"a highly restrictive control that can harm
-performance by preventing the AI from finding valuable traffic."* Use for brand-safety essentials and
-clearly irrelevant terms only; prefer brand exclusions for your own brand. Avoid heavy application in
-the first weeks post-launch — Optmyzr measured over-application during the learning window as a
-performance drag.
+**Negative keywords.** Google: *"a highly restrictive control that can harm performance by preventing
+the AI from finding valuable traffic."* Use for brand-safety essentials and clearly irrelevant terms
+only; prefer brand exclusions for own brand. Avoid heavy application in first weeks post-launch —
+Optmyzr measured over-application during the learning window as a performance drag.
 
 **Search themes are not keywords.** Google states they "provide a broader signal" and ads still serve
 "based on several factors" — Google serves beyond your themes and this is by design. Use broad terms
@@ -80,19 +79,18 @@ and generates matching assets. Three tiers of control, in order of preference:
 A 2024 in-campaign A/B reported **+9% conversions at similar CPA/ROAS** with expansion on.
 
 **Audience signals are seed, not targeting.** Official: *"Performance Max may show ads to relevant
-audiences outside of your signals."* Google draws the contrast explicitly against "audience segments",
-which are hard targeting criteria elsewhere. **Signals cannot restrict PMax delivery.** Confusing the
-two is a common and expensive error.
+audiences outside of your signals."* Contrast with "audience segments" (hard targeting criteria
+elsewhere). **Signals cannot restrict PMax delivery.** Confusing the two is a common, expensive error.
 
 **Customer lifecycle goals** — five modes: New Customer Value (bid higher, still serves existing;
 needs a purchase goal; works with tROAS/Max Conv Value) · High Value New Customer (PMax+Search only) ·
 **New Customer Only** (excludes existing entirely; works with any bid strategy; right for lead gen and
 strict acquisition budgets) · Re-engagement and High Value Re-engagement (PMax only).
 
-"New customer" is identified **only** via past online purchase conversions and/or an uploaded Customer
-Match list explicitly labeled in the Conversions Summary Acquisition panel. There is no other ground
-truth. Store Goals PMax supports **only** New Customer Only. Google's own testing claims New Customer
-Value gives +9% ROAS and +5% new-customer ratio.
+"New customer" identified **only** via past online purchase conversions and/or an uploaded Customer
+Match list labeled in the Conversions Summary Acquisition panel — no other ground truth. Store Goals
+PMax supports **only** New Customer Only. Google's own testing: New Customer Value gives +9% ROAS,
++5% new-customer ratio.
 
 **Gender targeting is still beta** as of the 2025 year-end recap; device and age are fully available.
 
@@ -105,19 +103,19 @@ third-party brand-safety verification wired into PMax.
 ## Reporting — what is exposed and what is hidden
 
 **Channel performance report** breaks out Google Search, GDN, YouTube, Discover, Maps, Gmail, Search
-partners with a status column (Eligible / Eligible (Limited) / Not eligible / Missing required assets)
-and issue-level diagnostics. **Hard limits: no per-channel budget control, no per-store-location
-conversion breakdown, and no data before 2025-06-06.**
+partners with a status column (Eligible / Eligible (Limited) / Not eligible / Missing required assets),
+issue-level diagnostics. **Hard limits:** no per-channel budget control, no per-store-location
+conversion breakdown, no data before 2025-06-06.
 
 **`campaign_search_term_insight`** — real, API-queryable through v25, now surfaced in the UI for all
 PMax campaigns. Caveats from Frederick Vallaeys: **no cost data** (clicks/impressions/category only,
 so no CPA per category — relevance triage only) · data only back to ~Mar 2023 · **high-volume terms
 are sampled**, so long-tail and small-account data is unreliable.
 
-**Asset-level metrics are attributed per instance served** and Google's own docs warn they "may not
+**Asset-level metrics are attributed per instance served** — Google's own docs warn they "may not
 directly match the corresponding metrics at the asset group level". Ratio metrics (CTR, CPC, ROAS) at
-individual-asset level are officially **"directional indicators only"**. Evaluate at asset-group or
-campaign level. The **Combinations report** shows the top 6 text/image/video combinations per category.
+individual-asset level officially **"directional indicators only"**. Evaluate at asset-group/campaign
+level. **Combinations report** shows top 6 text/image/video combinations per category.
 
 Google's FAQ: PMax campaigns with **at least one video saw an average 12% conversion uplift**.
 
@@ -145,10 +143,10 @@ Google's FAQ: PMax campaigns with **at least one video saw an average 12% conver
 4. Ad Rank breaks ties.
 5. **Shopping is exempt** and can serve alongside Search even when an exact-match keyword exists.
 
-**The practical consequence: only an exact-match keyword for that exact term guarantees Search keeps
-the query.** Phrase and broad get no guaranteed priority over PMax. This is the entire mechanism behind
-"PMax steals my brand traffic even though I have a Search campaign" — the Search campaign was running
-phrase/broad, not tight exact.
+**Practical consequence: only an exact-match keyword for that exact term guarantees Search keeps the
+query.** Phrase and broad get no guaranteed priority over PMax — the entire mechanism behind "PMax
+steals my brand traffic even though I have a Search campaign": that campaign was running phrase/broad,
+not tight exact.
 
 Evidence: in Optmyzr's 24,702-campaign study, 51% of advertisers put >50% of budget into PMax; those
 accounts showed a 652% ROAS headline with "mixed" CVR/CPA underneath — consistent with PMax harvesting
@@ -194,8 +192,8 @@ not Optmyzr, Adalysis, Rhodes, Ani or smec, none of whom publish a per-asset-gro
 rule of thumb, not settled guidance. The **30–50/month** figure is campaign-level Smart Bidding, not
 per-group (`01`).
 
-**Feed-only ("assetless") PMax** — build with zero uploaded text/image/video so the campaign leans on
-the Merchant Center feed, biasing delivery toward Shopping surfaces over YouTube/Discover.
+**Feed-only ("assetless") PMax** — zero uploaded text/image/video so the campaign leans on the
+Merchant Center feed, biasing delivery toward Shopping surfaces over YouTube/Discover.
 
 > **2026 caveat: feed-only does NOT guarantee zero Display/YouTube spend.** Since late 2023 Google
 > auto-generates video and display creative directly from feed images and text even with no manual
@@ -238,7 +236,7 @@ Maps (beta, needs a non-affiliated location extension).
 choose". **YouTube Engagement campaigns run YouTube-only regardless of selection.**
 
 **Learning phase:** ~50 conversion events or 3 conversion cycles, targeted within 2 weeks. Enabling
-**view-through conversion optimization** is cited as speeding ramp and reducing fluctuation.
+**view-through conversion optimization** speeds ramp, reduces fluctuation (cited).
 
 **Lookalike segments:** historical tiers were narrow/balanced/broad ≈ **2.5% / 5% / 10%**. 🔺 **2026
 change:** lookalike becomes a *suggestion* — the seed list is a signal to the model rather than a
@@ -271,10 +269,10 @@ Upload via UI, Google Ads Editor, or the API's `OfflineUserDataJobService`. 🔺
 restrictions (health, financial hardship) exist but were not re-verified against a current 2026 policy
 page — check before using Customer Match in a regulated vertical.
 
-**Data Manager** — the unified first-party ingestion layer: connect a source once, activate across
+**Data Manager** — unified first-party ingestion layer: connect a source once, activate across
 destinations. Objects: **data source** (BigQuery, HubSpot, file) → **connection** → **destination**
-(Customer Match, Enhanced Conversions for Leads, offline conversion import). Has its own **Data Manager
-API**. This is where Google is steering OCI (see `06-tracking-attribution.md`).
+(Customer Match, Enhanced Conversions for Leads, offline conversion import). Own **Data Manager API**.
+Where Google is steering OCI → `06`.
 
 **Custom segments** (Display/Gmail/Demand Gen/Video — **not directly usable in PMax**, only via
 audience signals): keyword/phrase interest · **URL-based** ("people who browse websites *similar to*

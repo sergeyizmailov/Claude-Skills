@@ -14,9 +14,8 @@ Before Google will even review a data source, all of these must be true:
 4. **Business address verified.**
 5. **US only: tax settings configured.**
 
-Missing any one blocks review completely. **This is the actual root cause of a large share of "why are
-my products not showing" tickets that are not policy violations at all.** Check these before
-diagnosing anything else.
+Missing any one blocks review completely. **Actual root cause of most "why are my products not
+showing" tickets that aren't policy violations.** Check these before diagnosing anything else.
 
 ## Issue mechanics
 
@@ -39,8 +38,8 @@ both sides. **US merchants have no equivalent — the only path is Google suppor
 
 ## Misrepresentation — the one that matters
 
-Definition: offers that either induce a purchase without complete information or explicit consent, or
-represent the product as anything other than "accurate, realistic, and truthful."
+Definition: offers inducing purchase without complete information/explicit consent, or representing
+the product as anything other than "accurate, realistic, and truthful."
 
 **Triggers:**
 

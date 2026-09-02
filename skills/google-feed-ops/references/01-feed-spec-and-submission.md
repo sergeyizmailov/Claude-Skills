@@ -18,8 +18,8 @@ account with no opt-in toggle remaining.
 
 ## Universal Commerce Protocol 🔺
 
-New open standard letting AI agents and Google surfaces complete checkout **inside Google**, expanded
-to main Search Shopping results May 2026.
+Open standard for AI agents/Google surfaces to complete checkout **inside Google**; expanded to main
+Search Shopping results May 2026.
 
 - **`native_commerce(checkout_eligibility)`** is the confirmed gating attribute. Official wording:
   *"Only product listings using the native_commerce(checkout_eligibility) product attribute will
@@ -32,9 +32,9 @@ to main Search Shopping results May 2026.
 - Exclude ineligible categories (subscriptions, pre-orders, age-restricted, digital goods, final-sale)
   via restriction rules, then verify no new Errors after refresh.
 
-> **Correction to a common claim: UCP did not replace Buy on Google.** Buy on Google for Search and
-> Shopping **shut down 2023-09-26** (announced 2023-06-29); the YouTube variant was preserved. There is
-> a three-year gap between the two. They are separate initiatives, not sequential versions.
+> **Correction: UCP did not replace Buy on Google.** Buy on Google for Search/Shopping **shut down
+> 2023-09-26** (announced 2023-06-29); YouTube variant preserved. Three-year gap — separate
+> initiatives, not sequential versions.
 
 ## Required attributes
 
@@ -63,9 +63,9 @@ to main Search Shopping results May 2026.
 **Never put an internal SKU into `gtin` or `mpn` as a fake identifier.** Leave blank and set
 `identifier_exists=no`.
 
-Google's copy softens GTIN to "recommended" but warns: *"Products with an assigned GTIN, but submitted
+Google softens GTIN to "recommended" but warns: *"Products with an assigned GTIN, but submitted
 without one, may have limited visibility."* **Omitting a real GTIN is a self-inflicted ranking
-penalty**, and it also disables price-benchmark data (below).
+penalty** and disables price-benchmark data (below).
 
 ### Load-bearing optional attributes
 
@@ -135,14 +135,14 @@ undocumented. Treat it as an exception process, not a grace period.
 | Merchant API push | Real-time | Full, programmatic | High-velocity catalogs, custom feed layers |
 | Platform connector | Platform-dependent | **Often lossy for custom labels** | Shopify-native stores wanting zero maintenance |
 
-**Why crawl-only degrades at scale:** crawl-derived price and availability drift from a structured
-feed's precision; **custom attributes cannot be crawled because they do not exist on-page**; refresh
-cadence is opaque. The professional pattern is **structured primary feed + supplemental/rules layer for
-enrichment**, with crawl reserved for gap-filling.
+**Why crawl-only degrades at scale:** crawl-derived price/availability drift from a structured feed's
+precision; **custom attributes cannot be crawled — they don't exist on-page**; refresh cadence
+opaque. Pattern: **structured primary feed + supplemental/rules layer for enrichment**, crawl for
+gap-filling only.
 
-> **The failure mode to watch: mixing methods on one data source causes silent "last write wins"
-> conflicts** — a scheduled fetch overwrites a manual UI correction on the next cycle. Pick one primary
-> method per source and use supplemental feeds or rules for overlays.
+> **Mixing methods on one data source causes silent "last write wins" conflicts** — a scheduled
+> fetch overwrites a manual UI correction next cycle. One primary method per source; supplemental
+> feeds/rules for overlays.
 
 **Feed rules and supplemental feeds** both live under Products & store → rules for your product data
 sources. Attribute rules have a **test/preview mode — use it**, it prevents catalog-wide breakage.
@@ -154,37 +154,28 @@ generally understood to be unchangeable (it is the join key) but this was not re
 
 ## Titles
 
-**Visible cutoff is ~70 characters** on most surfaces even though the field allows 150. Google:
-*"Google will show as much of your product title as possible, but probably no longer than 70
-characters."* **Put decision-driving attributes before character 70.**
+**Visible cutoff ~70 characters**, field allows 150. Google: *"Google will show as much of your
+product title as possible, but probably no longer than 70 characters."* **Put decision-driving
+attributes before character 70** — per-category templates (Brand + attribute order per vertical,
+e.g. Apparel: Brand + Gender + Type + Color) are secondary to this cliff.
 
-**The 70-character cliff is empirically real** — DataFeedWatch, 20,000-SKU, 30-day paid + organic
-Shopping A/B: performance drops materially once the load-bearing keyword falls past ~char 70.
+- **Cliff is empirically real** — DataFeedWatch, 20,000-SKU, 30-day paid+organic Shopping A/B:
+  performance drops materially once the load-bearing keyword falls past ~char 70.
+- **"Specs over descriptions"** — leading with hard data (pack qty, spec, model number) beats
+  generic marketing adjectives on both CTR and CVR.
+- Second cohort (7,000 SKUs, 60 days, organic-weighted): AI-rewritten titles → **fewer but
+  higher-quality clicks** (better post-click conversion, not more raw clicks). Judge title tests on
+  conversion, not click volume.
 
-**"Specs over descriptions"** — titles leading with hard data (pack quantity, technical spec, exact
-model number) beat titles leading with generic marketing adjectives on both CTR and CVR.
+**Never in a title:** price · sale price · sale dates/time-limited language · shipping/delivery-date
+claims · store name · ALL CAPS · promo text ("SALE", "% OFF", "FREE SHIPPING", "BEST PRICE") ·
+non-universal foreign terms. **Promotional text in title or description is a policy violation
+trigger, not a soft ranking issue** — evaluated on the same surface as landing-page violations.
 
-A second cohort (7,000 SKUs, 60 days, organic-weighted): AI-rewritten titles produced **fewer but
-higher-quality clicks** — better post-click conversion, not more raw clicks. Judge title tests on
-conversion, not click volume.
-
-Per-category title templates (Brand + attribute ordering per vertical — Apparel Brand + Gender +
-Type + Color… etc.) are secondary to the load-bearing fact: the **~70-character cliff** (DataFeedWatch
-finding above).
-
-**Never in a title:** price · sale price · sale dates or time-limited language · shipping or
-delivery-date claims · your store name · ALL CAPS · promotional text ("SALE", "% OFF", "FREE
-SHIPPING", "BEST PRICE") · non-universally-understood foreign terms.
-
-**Promotional text in title or description is a policy violation trigger, not a soft ranking issue** —
-evaluated on the same surface as landing-page violations.
-
-**Testing at scale, two phases:** (1) 50/50 split-test AI-generated vs control titles across a large
-SKU sample; (2) once winning **patterns** — not individual titles — emerge, codify them into
-**repeatable templates with attribute substitution and fallback chains**.
-
-> Leaving LLM generation live and unbounded across a whole catalog "risks ruining feed quality." **AI
-> as testing sandbox; rule-codified templates as the production system.**
+**Testing at scale:** (1) 50/50 split-test AI-generated vs control titles on a large SKU sample; (2)
+once winning **patterns** (not individual titles) emerge, codify into **repeatable templates with
+attribute substitution and fallback chains**. Unbounded live LLM generation across a whole catalog
+"risks ruining feed quality" — **AI as testing sandbox; rule-codified templates as production.**
 
 ## `custom_label_0-4`
 

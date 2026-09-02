@@ -130,9 +130,9 @@ googleops --workspace . --profile <p> --json activate --plan .googleops/plans/<p
 ```
 
 Ads → ad groups / asset groups → campaign last; stops on first failure. Before `SPEND`, confirm
-with the operator: budget in **major units and currency**, destination, tracker receipt,
-`verify` exit 0 on this exact state, approval status not DISAPPROVED. Bulk: `bulk-activate
---customer <id>` per reviewed account; there is deliberately no activate-all.
+with operator: budget in **major units and currency**, destination, tracker receipt, `verify` exit 0
+on this exact state, approval status not DISAPPROVED. Bulk: `bulk-activate --customer <id>` per
+reviewed account — no activate-all, deliberately.
 
 ## 9 — First hour
 

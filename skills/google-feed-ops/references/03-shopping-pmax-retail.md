@@ -6,8 +6,8 @@ an impression** → `google-ads/01` (Ad Rank since 2024-10-17). Do not treat thi
 
 ## Standard Shopping still exists
 
-Google has not deprecated it despite years of speculation. But its **role has changed** — see the
-PMax-dominant section below.
+Not deprecated despite years of speculation, but its **role has changed** — see PMax-dominant section
+below.
 
 ### The priority ladder
 
@@ -34,19 +34,18 @@ and negatives:
 Ad groups split by `google_product_category`, `product_type`, `brand`, or `custom_label_0-4` rather
 than by keywords. This is where the label schema in `01` becomes actionable.
 
-**There is no "bid to position" in Shopping.** No ad-rank-to-position table is exposed the way it is
-for text ads. Ranking is auction-based on bid × quality with no merchant-visible position lever — which
-is exactly why the priority ladder and Smart Bidding are the only two real levers.
+**No "bid to position" in Shopping** — no ad-rank-to-position table as for text ads. Ranking is
+auction-based on bid × quality with no merchant-visible position lever, so the priority ladder and
+Smart Bidding are the only two real levers.
 
 Reporting exposes benchmark CTR and benchmark max CPC (peer comparison) plus the standard Lost IS
 (budget) / Lost IS (rank) split. 🔺 Exact current column names not re-verified.
 
 ### The role of standard Shopping in a PMax-dominant account
 
-Running standard Shopping as a **full-catalog parallel with no priority or negative differentiation
-is the most common structural mistake** — it duplicates PMax's eligibility without adding a control
-that PMax lacks. Who wins an overlapping impression is Ad Rank, not an old "PMax uber-priority"
-(`google-ads/01`).
+**Most common structural mistake:** full-catalog standard Shopping parallel with no priority/negative
+differentiation — duplicates PMax's eligibility without adding a control PMax lacks. Overlapping
+impressions go to Ad Rank, not an old "PMax uber-priority" (`google-ads/01`).
 
 Two roles that do work:
 
@@ -61,13 +60,12 @@ Two roles that do work:
 ### Feed-only first
 
 Practitioner recommendation, verbatim: *"I recommend most stores start with feed-only. It forces your
-budget into Shopping, which is almost always your highest-converting channel."*
+budget into Shopping, which is almost always your highest-converting channel."* Full creative asset
+groups open budget eligibility to Display, YouTube, and Discover — the leakage feed-only avoids
+during early optimization. Add assets once the feed-only baseline exists and cross-network reach is
+wanted deliberately.
 
-Full creative asset groups open budget eligibility to Display, YouTube, and Discover — exactly the
-leakage feed-only avoids during early optimization. Add assets once the feed-only baseline exists and
-you deliberately want cross-network reach.
-
-**Caveat carried from `google-ads/07`:** feed-only does not guarantee zero Display/YouTube spend.
+**Caveat (`google-ads/07`):** feed-only does not guarantee zero Display/YouTube spend.
 
 ### Asset group structure
 
@@ -79,9 +77,8 @@ How many asset groups, and feed-only vs assets, is a **buy** decision — canoni
 > signals. This is a strategy that no longer works in 2026."* Audience-signal-based asset-group
 > splitting was widely taught in 2023–24 and is now obsolete.
 
-Each asset group's **listing group filter** scopes it to a product subset — the PMax-native equivalent
-of Shopping's product-group subdivision, and the mechanism that makes the `custom_label` schema
-actionable.
+Each asset group's **listing group filter** scopes it to a product subset — PMax-native equivalent of
+Shopping's product-group subdivision, and the mechanism that makes `custom_label` actionable.
 
 ### PMax vs standard Shopping — do not invent a priority dial
 
@@ -98,11 +95,11 @@ beats Shopping."
 > *"Check where PMax conversions come from before declaring victory: brand cannibalization flatters
 > PMax numbers."*
 
-PMax auto-bids into brand-term auctions you would win organically or via a cheap dedicated brand
-campaign, so **its reported ROAS is systematically inflated by conversions it did not cause.**
+PMax auto-bids into brand-term auctions winnable organically or via a cheap dedicated brand campaign,
+so **its reported ROAS is systematically inflated by conversions it did not cause.**
 
-Mitigation: a dedicated **exact-match** Search brand campaign to keep brand traffic segregated and
-measurable, and/or **brand exclusion lists inside PMax** forcing it to compete on non-brand discovery.
+Mitigation: dedicated **exact-match** Search brand campaign to keep brand traffic segregated/
+measurable, and/or **brand exclusion lists inside PMax** forcing it onto non-brand discovery.
 
 **Measurement trap to state when recommending this:** excluding brand makes PMax's own ROAS look
 worse, so the correct change gets reverted for the wrong reason (canonical statement →
@@ -117,8 +114,8 @@ Two API resources, joined:
 - **`shopping_performance_view`** — a resource **with metrics**. Product-level impressions, clicks,
   cost, conversions, segmentable by product attributes, across both standard Shopping and PMax.
 
-**Join them to reconstruct true per-product, per-asset-group performance.** This is the standard
-workaround for PMax's UI reporting opacity and the same join commercial tooling performs internally.
+**Join them to reconstruct true per-product, per-asset-group performance** — the standard workaround
+for PMax's UI reporting opacity; the same join commercial tooling performs internally.
 
 Mike Rhodes' PMax script does this natively, including a **6-bucket product matrix** (zombies,
 zero-conversion, meh, flukes, costly, profitable) spanning both PMax and standard Shopping — see
@@ -145,37 +142,36 @@ Availability: AU, BR, CA, FR, DE, IN, IT, JP, KR, ES, NL, UK, US.
 
 ### Price competitiveness
 
-**Analytics → Pricing.** Shows products with price-comparison data and how many sit above or below the
+**Analytics → Pricing.** Shows products with price-comparison data and how many sit above/below the
 **benchmark price**, computed across all retailers selling the same GTIN — **GTIN required for this
 feature.**
 
-A separate **AI sale-price suggestion** engine runs 7-day simulations across price points factoring
-elasticity and comparable-business performance, predicting click and conversion uplift per price. It
-**requires conversion tracking but does not require a GTIN.**
+Separate **AI sale-price suggestion** engine: 7-day simulations across price points factoring
+elasticity and comparable-business performance, predicting click/conversion uplift per price.
+**Requires conversion tracking, not GTIN.**
 
-Legal restriction: this data is internal-use only — *"can't be resold, publicly displayed, advertised,
-or aggregated across businesses."*
+Legal restriction: internal-use only — *"can't be resold, publicly displayed, advertised, or
+aggregated across businesses."*
 
 ### Local inventory ads
 
-Available in **80+ regions**. Google-reported lift for retailers combining LIA with standard Shopping:
-**+21% store visits, +9% online conversions** for products also available in-store. Undated standing
-Google claim, not a fresh study.
+Available in **80+ regions**. Google-reported lift for retailers combining LIA with standard
+Shopping: **+21% store visits, +9% online conversions** for products also available in-store.
+Undated standing Google claim, not a fresh study.
 
 Setup paths: "Pickup today" · "Pickup later" · "Automated inventory" (auto-sync from online stock).
 
 ### CSS — real, but EU-only
 
-**Confirmed real, and it is not a platform discount — it is a margin-removal mechanic.**
+**Confirmed real — a margin-removal mechanic, not a platform discount.**
 
-Origin: the **EU's 2017 Google Shopping antitrust decision** forced Google to open Shopping inventory
-to competing Comparison Shopping Services on equal terms with Google's own. Google's default CSS bakes
-a margin on top of the base CPC; third-party and self-service CSS providers do not add that layer.
-That differential is the "~20%".
+Origin: **EU's 2017 Google Shopping antitrust decision** forced Google to open Shopping inventory to
+competing Comparison Shopping Services on equal terms with Google's own. Google's default CSS bakes a
+margin on top of base CPC; third-party/self-service CSS providers don't add that layer — that
+differential is the "~20%".
 
-**It is not a visible line-item discount or a rebate credited to the account.** It manifests as more
-competitive effective bidding headroom. Marketed as "up to 20%" — a ceiling, not a flat rate, varying
-by provider and vertical.
+**Not a visible line-item discount or account rebate** — manifests as more competitive effective
+bidding headroom. Marketed as "up to 20%": a ceiling, not a flat rate, varying by provider/vertical.
 
 **Mandatory CSS markets:** Austria, Belgium, Czech Republic, Denmark, Finland, France, Germany, Greece,
 Hungary, Ireland, Italy, Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Spain, Sweden,

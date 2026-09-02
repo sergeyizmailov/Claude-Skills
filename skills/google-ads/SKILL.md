@@ -14,11 +14,10 @@ to Google.** Google is explicit-search-intent driven — Menachem Ani: "every se
 telling you something, not a demographic."
 
 **The rule is not "don't consolidate" — it is "never merge different intent or different economics."**
-Consolidation is how you clear Smart Bidding's volume floor (`01`), and Hagakure-style consolidated
+Consolidation is how you clear Smart Bidding's volume floor (`01`); Hagakure-style consolidated
 structures are standard on Google. What fails is Meta-style consolidation *across* price tiers,
-margins, and funnel stages, because Google can read the intent Meta cannot. Ani prescribes segmentation
-by **economic/price tier**, isolated retargeting, and product-theme grouping — not fewer campaigns.
-See `05`.
+margins, funnel stages, because Google can read the intent Meta cannot. Ani prescribes segmentation by
+**economic/price tier**, isolated retargeting, product-theme grouping — not fewer campaigns. See `05`.
 
 ## Check these two things first on any 2026 account
 
@@ -78,7 +77,7 @@ MCC -> account -> billing/verification/conversion actions/account-level negative
       Ad / Asset -> creative/copy/final URL/tracking
 ```
 
-Diagnose at the level owning the setting. Campaign, ad group, and ad statuses are separate — check all
+Diagnose at the level owning the setting. Campaign, ad group, ad statuses are separate — check all
 three.
 
 ## Workflow
@@ -131,8 +130,8 @@ eligibility/policy/billing -> delivery -> auction -> click quality -> landing co
 - Benchmarks size a test. They are never targets.
 - **Google's defaults are set in Google's interest**, not the advertiser's — Search Partners, Display
   expansion, presence-or-interest, auto-apply, auto-generated assets. Audit each deliberately.
-- Never accept a budget recommendation without computing the cost per additional conversion. Google
-  does not lower a budget it raised.
+- Never accept a budget recommendation without computing cost per additional conversion. Google does
+  not lower a budget it raised.
 - Do not chase optimization score at campaign level — within one account it predicts nothing.
 - System User and OAuth credentials are bearer secrets. Never expose them in chat, URLs, screenshots,
   repos, or logs.

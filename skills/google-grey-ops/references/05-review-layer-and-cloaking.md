@@ -5,34 +5,32 @@ Reviewed 2026-08-27. Official destination/tracker mechanics → `03`. Policy tax
 the grey overlay: how the review layer is actually filtered, classifier tricks at the
 ad/asset layer, and what happens after a burn.
 
-Vendor recipes below are **vendor-reported**. They are not Google docs. Numbers and
-“bulletproof” claims have no published methodology. The policy facts are official.
+Vendor recipes below are **vendor-reported**, not Google docs. Numbers/"bulletproof" claims have no
+published methodology. Policy facts are official.
 
 ## What Google named (do not argue with this)
 
 From Circumventing systems [official, answer 15938075]:
 
-- **Cloaking** = “showing different content on your website to different people or to Google
-  to try to hide things that might break Google Ads' rules.” Egregious: **no warning,
+- **Cloaking** = "showing different content on your website to different people or to Google
+  to try to hide things that might break Google Ads' rules." Egregious: **no warning,
   permanent, cascades**.
-- Explicitly **allowed**: language variants, geo-specific offers, slower-connection variants
-  — **the promoted product or service must be the same for everyone**.
-- Explicitly **allowed**: “Using appropriate click trackers and redirecting users … as long
-  as you’re not doing these things to try to hide” a policy violation. Redirects are not
-  the crime.
-- Named violations: clothing-to-Google / guns-to-users · interstitial that blocks Google
-  from the destination · bait-and-switch topic · sending users to a **different violating
-  site even on the same domain** · using a click tracker to reach prohibited content ·
-  **dynamic DNS to switch page or ad content** after review.
+- Explicitly **allowed**: language variants, geo-specific offers, slower-connection variants —
+  **the promoted product or service must be the same for everyone**.
+- Explicitly **allowed**: "Using appropriate click trackers and redirecting users … as long as
+  you're not doing these things to try to hide" a policy violation. Redirects are not the crime.
+- Named violations: clothing-to-Google / guns-to-users · interstitial blocking Google from the
+  destination · bait-and-switch topic · sending users to a **different violating site even on
+  the same domain** · click tracker to prohibited content · **dynamic DNS to switch page/ad
+  content** after review.
 - **After a suspension, creating new accounts to re-enter** is its own named offense.
 - **Spreading violating ads across 2+ accounts**, **variations of previously disapproved
-  ads / domains / content**, **false verification**, **running uncertified restricted
-  products across several accounts** — all named.
+  ads/domains/content**, **false verification**, **running uncertified restricted products
+  across several accounts** — all named.
 
-**Evasive ad content** (15938074) is a **separate** policy: manipulate text/image/video/
-domain/subdomain to bypass detection. **Not egregious — 7-day warning.** Same creative
-variation can be charged as CS if Google files it as interference with review. You do not
-pick the track.
+**Evasive ad content** (15938074) is a **separate** policy: manipulate text/image/video/domain/
+subdomain to bypass detection. **Not egregious — 7-day warning.** Same creative variation can
+be charged as CS if Google files it as interference with review. You don't pick the track.
 
 Certified click trackers: `support.google.com/google-ads/answer/13707634` (fetched
 2026-08-27). Certification is a **Tracking Template** rule (9481382), not a Final-URL
@@ -75,29 +73,27 @@ trackers).
 | `<10` redirects | DSA troubleshooting 9229701. Click trackers can also exhaust crawl capacity |
 | `<meta name="AdsBot-Google" content="noindex">` | Named as a Destination-not-crawlable cause. Do not set it on the white |
 
-Desktop AdsBot’s UA is a short non-browser string. Mobile AdsBot **is** Chrome-shaped.
-**UA-only filters catch the desktop crawler and miss a lot else.** Human policy
-specialists on residential IPs — vendor claim, no Google confirmation. Treat UA-only
-as a first sieve, never the stack.
+Desktop AdsBot's UA is a short non-browser string. Mobile AdsBot **is** Chrome-shaped.
+**UA-only filters catch the desktop crawler and miss a lot else.** Human policy specialists on
+residential IPs — vendor claim, no Google confirmation. Treat UA-only as a first sieve, never
+the stack.
 
-**GGC is not AdsBot.** Google Global Cache is an **ISP-hosted inbound CDN** (mostly
-YouTube). Official: `redirector.googlevideo.com/report_mapping`, rDNS
-`rN---sn-….googlevideo.com`, ASN **AS36040** (ARIN: YOUTUBE / “Google (Global
-Cache)”), WHOIS `GOOGLE-GLOBAL-CACHE` on **the ISP’s prefixes** — not AS15169.
-No official GGC IP JSON (`goog.json` is Google-operated space, not ISP-hosted
-cache). Cloaker pitch “whitelist GGC = whitelist reviewers” is a **category
-error**: GGC IPs are users fetching YouTube inside an ISP, not crawler egress.
-Using a GGC list as “Google reviewer” misclassifies real YouTube/Display viewers
-on those ISPs. AdsBot remains `special-crawlers.json` + US egress.
+**GGC is not AdsBot.** Google Global Cache is an **ISP-hosted inbound CDN** (mostly YouTube).
+Official: `redirector.googlevideo.com/report_mapping`, rDNS `rN---sn-….googlevideo.com`, ASN
+**AS36040** (ARIN: YOUTUBE / "Google (Global Cache)"), WHOIS `GOOGLE-GLOBAL-CACHE` on **the ISP's
+prefixes** — not AS15169. No official GGC IP JSON (`goog.json` is Google-operated space, not
+ISP-hosted cache). Cloaker pitch "whitelist GGC = whitelist reviewers" is a **category error**:
+GGC IPs are users fetching YouTube inside an ISP, not crawler egress — misclassifies real
+YouTube/Display viewers on those ISPs. AdsBot remains `special-crawlers.json` + US egress.
 
-JS rendering: Google Search’s WRS executes JS (evergreen Chromium; non-200 may skip
-render). AdsBot’s own JS-execution is **not** documented on the AdsBot page. Vendors
-and SEO shops 2025–26 treat Chrome-class review as live (hence JS challenges + IP/ASN,
-not JS-hide-the-DOM). Do not bet an account on “AdsBot cannot run JavaScript” in 2026.
+JS rendering: Google Search's WRS executes JS (evergreen Chromium; non-200 may skip render).
+AdsBot's own JS-execution is **not** documented on the AdsBot page. Vendors/SEO shops 2025–26
+treat Chrome-class review as live (hence JS challenges + IP/ASN, not JS-hide-the-DOM). Don't bet
+an account on "AdsBot cannot run JavaScript" in 2026.
 
-**Do not 403/429 AdsBot and do not `Disallow` it in robots.txt.** Crawler infra says
-special-case crawlers *may ignore* robots.txt; Ads policy still disapproves the block.
-Operational: blocking AdsBot is a destination fail even if the crawler still hits you.
+**Do not 403/429 AdsBot and do not `Disallow` it in robots.txt.** Crawler infra says special-case
+crawlers *may ignore* robots.txt; Ads policy still disapproves the block — blocking AdsBot is a
+destination fail even if the crawler still hits you.
 
 ## How review is actually layered
 
@@ -119,24 +115,24 @@ Not one crawler, not one pass:
 6. **Editor policy colors** (red/yellow/green) “don’t flag all editorial violations.”
    Policy Manager is an **appeal tracker**, not a crawler.
 
-App campaigns: destination is the **store listing**. `AdsBot-Google-Mobile-Apps` is
-retired; store-policy violations are a Destination-requirements subtype — fix Play /
-Chrome Web Store first. ACe: third-party trackers not supported.
+App campaigns: destination is the **store listing**. `AdsBot-Google-Mobile-Apps` is retired;
+store-policy violations are a Destination-requirements subtype — fix Play/Chrome Web Store
+first. ACe: third-party trackers not supported.
 
-PMax / Demand Gen / YouTube share destination policy. PMax **Final URL expansion**
-crawls **other pages on the same domain** and auto-generates assets. YouTube LAS is a
-**serving throttle**, not a different crawler. **Do not cloak PMax.** Search with a
-pinned Final URL is the only surface where the review fetch is the URL you declared.
+PMax/Demand Gen/YouTube share destination policy. PMax **Final URL expansion** crawls **other
+pages on the same domain**, auto-generates assets. YouTube LAS is a **serving throttle**, not a
+different crawler. **Do not cloak PMax.** Search with a pinned Final URL is the only surface
+where the review fetch is the URL you declared.
 
-Display / GDN / app-webview clicks often have **no `google.com` referrer**. A Search-only
-referrer-whitelist (`google\\.com`) will white a lot of real Display users. Split
-recipes by campaign type.
+Display/GDN/app-webview clicks often have **no `google.com` referrer**. A Search-only
+referrer-whitelist (`google\\.com`) whites a lot of real Display users. Split recipes by
+campaign type.
 
 ## Filter stack for Google (layers, in order)
 
-Facebook’s cheap trick (empty `{{ad.name}}` until macros fire) does not port. Google
-always has a click-id on a **real paid click** (`gclid` / `wbraid` / `gbraid`). Build
-**AND** across layers. One layer failing is a leak.
+Facebook's cheap trick (empty `{{ad.name}}` until macros fire) does not port. Google always has
+a click-id on a **real paid click** (`gclid` / `wbraid` / `gbraid`). Build **AND** across layers
+— one layer failing is a leak.
 
 Architecture first. Filters are worthless on a cross-domain 302.
 
@@ -210,20 +206,17 @@ Money: local lander / same-domain path, offer behind a button
 ```
 
 - Update **Maintenance → Geo-DBs / Bots** on a cadence. Stale bot DB is a silent leak.
-- **Settings → Enable tracking cookies = No.** Unique-by-cookie is a moderation tell
-  (`03`).
+- **Settings → Enable tracking cookies = No.** Unique-by-cookie is a moderation tell (`03`).
 - CURL/Show HTML keeps the response on **your** host — no extra hop for AdsBot.
-- Money page via 302 to an **external** offer is the leak Google named. Prefer: white
-  and prelander on the **same registered domain** (path or subdomain), offer behind a
-  button **after** the first 200. That button-click is a user action AdsBot does not
-  have to take.
-- Test: UA switcher (what Keitaro documents) **and** a datacenter VPS **and** a
-  residential IP in-geo with a real `gclid=` query. If both see the same page, the
-  stack is not filtering. A self-click of the live ad is the human-reviewer analogue
-  (gclid present).
+- Money page via 302 to an **external** offer is the leak Google named. Prefer: white +
+  prelander on the **same registered domain** (path or subdomain), offer behind a button
+  **after** the first 200 — that button-click is a user action AdsBot doesn't have to take.
+- Test: UA switcher (Keitaro's own doc) **and** datacenter VPS **and** residential IP in-geo
+  with a real `gclid=` query. Same page on both = stack not filtering. Self-click of the live
+  ad = human-reviewer analogue (gclid present).
 
-Keitaro Google integration is **cost + conversion sync**, not a cloak. MCC
-unsupported. Conversions only if `gclid` present.
+Keitaro Google integration is **cost + conversion sync**, not a cloak. MCC unsupported.
+Conversions only if `gclid` present.
 
 ## Dedicated cloaker (Adspect class) — Google recipes
 
@@ -256,17 +249,16 @@ Two official vendor paths [docs.adspect.ai, fetched 2026-08-27]:
 
 Vendor hard rules that match Google’s destination text:
 
-- PHP integration on Google: **safe page without redirect**. 302-the-white is the
-  FB-portable mistake.
-- **Iframe = considered a redirect** by many networks. Do not iframe the money page.
-- Never reuse domain / creative / white in the same traffic source unmodified.
+- PHP integration on Google: **safe page without redirect**. 302-the-white is the FB-portable
+  mistake.
+- **Iframe = considered a redirect** by many networks. Don't iframe the money page.
+- Never reuse domain/creative/white in the same traffic source unmodified.
 - Filters (country, OS, browser, language) **match campaign targeting**.
-- White must look like a real site: unique, mobile, terms/privacy/cookies,
-  `robots.txt` + `sitemap.xml`, no Wix/Tilda/Shopify constructors (vendor: networks
-  now pre-ban those).
-- Do not change a live white (extra `<script>` can re-trigger review).
-- One stream per campaign (vendor will not inspect mixed traffic after a ban).
-- `.com` / `.net` / `.org`; no stop-words in the domain (`diet`, `date`, `xxx`, …).
+- White must look like a real site: unique, mobile, terms/privacy/cookies, `robots.txt` +
+  `sitemap.xml`, no Wix/Tilda/Shopify constructors (vendor: networks now pre-ban those).
+- Don't change a live white (extra `<script>` can re-trigger review).
+- One stream per campaign (vendor won't inspect mixed traffic after a ban).
+- `.com`/`.net`/`.org`; no stop-words in the domain (`diet`, `date`, `xxx`, …).
 
 Domain pre-flight, per NEW domain before any seat touches it (log the result with the seat — an
 unlogged pre-flight cannot explain a wave later): Safe Browsing status
@@ -297,35 +289,34 @@ first 24h, not how they scale.
 
 ## White page that actually passes destination review
 
-AdsBot is checking a **destination**, not a screenshot of an ad. Minimum that maps
-onto official destination + misrepresentation language:
+AdsBot is checking a **destination**, not a screenshot of an ad. Minimum mapping onto official
+destination + misrepresentation language:
 
-- 200 OK on AdsBot desktop **and** mobile, **including from US IPs** even if you
-  buy EU/ASIA. Do not geo-block US.
+- 200 OK on AdsBot desktop **and** mobile, **including from US IPs** even if you buy EU/ASIA. Do
+  not geo-block US.
 - `robots.txt` **Allow** `AdsBot-Google` and `AdsBot-Google-Mobile`. They ignore `*`.
 - Same registrable domain as Display URL / Final URL.
-- Company name, physical address, contact — prominent. A fake NAP that contradicts
-  verification docs is a **verification** landmine, not a destination checkbox.
-- Working nav, original text, no “page solely designed to send users elsewhere.”
-- Pricing / offer on the white **matches the ad**. Clothing-ad / gun-site is the
-  example Google wrote down.
-- No interstitial in front of the content. Works **without user interaction**
-  (Googlebot WRS does not click/scroll).
+- Company name, physical address, contact — prominent. A fake NAP contradicting verification
+  docs is a **verification** landmine, not a destination checkbox.
+- Working nav, original text, no "page solely designed to send users elsewhere."
+- Pricing/offer on the white **matches the ad**. Clothing-ad / gun-site is the example Google
+  wrote down.
+- No interstitial in front of the content. Works **without user interaction** (Googlebot WRS
+  doesn't click/scroll).
 - HTTPS, no AdsBot-specific error, no `AdsBot-Google` noindex meta.
 - `<10` hops on the review path.
 
-Vendor extras **not** in Destination Requirements but operators treat as
-load-bearing: privacy/ToS/cookies (also EU cookie law), sitemap.xml, no
-Shopify/Wix/Tilda (vendor High), Core Web Vitals (QS folklore — unverified as
-cloak-survival).
+Vendor extras **not** in Destination Requirements but treated as load-bearing: privacy/ToS/
+cookies (also EU cookie law), sitemap.xml, no Shopify/Wix/Tilda (vendor High), Core Web Vitals
+(QS folklore — unverified as cloak-survival).
 
-The white is a **real site**, not an empty HTML file. Empty whites pass a UA check
-and fail a human re-review. **Insufficient original content** (doorways, scraped,
-templates) kills a white even if the cloak “works.”
+The white is a **real site**, not an empty HTML file. Empty whites pass a UA check, fail a human
+re-review. **Insufficient original content** (doorways, scraped, templates) kills a white even if
+the cloak "works."
 
-Do not optimize Quality Score via the cloak. QS is landing-page experience of
-**what users and crawlers see**. If they diverge, QS on white is real until the
-cloak is pierced; then the account is dead.
+Do not optimize Quality Score via the cloak. QS is landing-page experience of **what users and
+crawlers see** — if they diverge, QS on white is real until the cloak is pierced, then the
+account is dead.
 
 ## Same-domain constraint
 
@@ -378,20 +369,18 @@ the crawler’s documented fetch. Content review is Final URL.
 
 ## Replacement after a burn
 
-Official: creating a new account **to re-enter after a suspension** is Circumventing
-systems. Linked payment **and** email accounts, plus Merchant Center, are named
-cascade surfaces. Billing FAQ is more absolute than the policy-overview “may”:
-related accounts using **same email or payment method, or linked to the same MCC,
-will be suspended; any new accounts will be suspended**.
+Official: creating a new account **to re-enter after a suspension** is Circumventing systems.
+Linked payment **and** email accounts, plus Merchant Center, are named cascade surfaces. Billing
+FAQ is more absolute than the policy-overview "may": related accounts using **same email or
+payment method, or linked to the same MCC, will be suspended; any new accounts will be
+suspended**.
 
-Identity-document graph is official: if this CID was suspended because **other
-accounts verified with the same docs** were suspended, reinstating those others
-auto-reinstates this one. Reverse: do not verify a grey seat with docs already on
-a burned CID.
+Identity-document graph is official: if this CID was suspended because **other accounts verified
+with the same docs** were suspended, reinstating those others auto-reinstates this one. Reverse:
+don't verify a grey seat with docs already on a burned CID.
 
-Google does **not** publish GAIA / GTM / fingerprint / IP / phone as Ads CS
-detectors. Practitioner consensus still unique those. Naming them as *official*
-Ads link keys is an overclaim.
+Google does **not** publish GAIA/GTM/fingerprint/IP/phone as Ads CS detectors. Practitioner
+consensus still uniques those. Naming them as *official* Ads link keys is an overclaim.
 
 | Move | What it actually is |
 |---|---|
@@ -405,15 +394,14 @@ Ads link keys is an overclaim.
 | MCC in third-party violation | Child accounts **paused** while linked (2025-06-06). **Unlink** to serve again. Isolation lever, not a cloak |
 | Gambling buyer in a mixed MCC | From 2026-03-23: MCC with significant revoked gambling certs / violating cert-using children **loses new gambling-cert applications** and existing certs revoked. Shared MCC is a **cert-kill** surface. Expand 2026-09-14 |
 
-Self-farmed re-entry from a burned payments profile is how people turn one dead
-account into a dead MCC. Reseller replacement is survivable only if the **identity
-graph is actually new**. Ask: whose MCC, whose invoice, whose GTM, whose domain.
+Self-farmed re-entry from a burned payments profile is how one dead account becomes a dead MCC.
+Reseller replacement is survivable only if the **identity graph is actually new**. Ask: whose
+MCC, whose invoice, whose GTM, whose domain.
 
-“Unbannable agency accounts” is a vendor lie. Real SLA is **replacement + leftover
-handling**. Live this fetch (vendor-stated, no methodology): YeezyPay hours + **~30%**
-leftover; Uproas free ~3–24h (whitehat Google); SpeedX transfers leftover, **1 domain
-per CID**, new CID needs a new domain; Mega Digital refunds unspent 5–20d **no
-published haircut**; Threasury does **not** promise CS replacement.
+"Unbannable agency accounts" is a vendor lie. Real SLA is **replacement + leftover handling**.
+Vendor-stated, no methodology: YeezyPay hours + **~30%** leftover; Uproas free ~3–24h (whitehat
+Google); SpeedX transfers leftover, **1 domain per CID**, new CID needs a new domain; Mega Digital
+refunds unspent 5–20d **no published haircut**; Threasury does **not** promise CS replacement.
 
 **Closest operator SOP with numbers — Mega Digital TOS (2025-09-24), vendor rule
 not Google’s threshold:** unique destination URL including **undeleted history on

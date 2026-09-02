@@ -16,8 +16,8 @@ Label material claims when the label changes what the reader should do with them
 | **unverified** | Single source, or a claim that could not be traced |
 | **refuted** | Traced and found false. Say so loudly |
 
-Preserve **source, date, geography, vertical, sample size, and methodology** on every number. Never
-convert a benchmark or a case lift into a platform rule or a forecast.
+Preserve **source, date, geography, vertical, sample size, methodology** on every number. Never convert
+a benchmark or a case lift into a platform rule or a forecast.
 
 ## Known-false claims — never repeat these
 
@@ -67,7 +67,7 @@ Ranked by how fast they move:
 
 ## Minimum context before advising
 
-Infer what you can; ask only for inputs that change the decision.
+Infer what you can; ask only for inputs that change the decision:
 
 - Country, currency, vertical, and whether the vertical is **certification-gated** per geo.
 - **Conversion lag** and conversion-window/attribution setup.
@@ -90,9 +90,9 @@ be unsafe or make the work useless.
 
 When refreshing this skill:
 
-- Re-run the volatile list above first — those decay fastest and carry the most consequence.
-- Keep the refuted list current. A dead statistic that keeps recirculating is worth more to flag than
-  a new one is to add.
-- When a gap closes, move the claim out of the unverified column explicitly, and note what closed it.
+- Re-run the volatile list first — decays fastest, carries most consequence.
+- Keep the refuted list current — a dead statistic that keeps recirculating is worth more to flag than
+  a new one to add.
+- When a gap closes, move the claim out of unverified explicitly, note what closed it.
 - When Google contradicts a practitioner source, **record both and name the conflict** rather than
   silently picking. Support replies are account-specific evidence, not universal rules.

@@ -20,7 +20,8 @@ Malicious software · Prescription opioid painkillers · Unauthorized pharmacy p
 **Unacceptable business practices** · Trade sanctions violation · Sexually explicit content · CSAE.
 
 **Destination requirements are explicitly NOT egregious** — that page states "A warning will be issued
-at least 7 days prior to any suspension." Broken landing pages are recoverable; cloaking is Circumventing systems. Grey execution of the review layer → `google-grey-ops/05`.
+at least 7 days prior to any suspension." Broken landing pages recoverable; cloaking is Circumventing
+systems. Grey execution of the review layer → `google-grey-ops/05`.
 
 Minimum window to appeal from suspension date: **6 months**.
 
@@ -89,13 +90,13 @@ unapproved substances · guns/parts · explosives · other weapons · tobacco ·
 mail-order brides · clickbait · misleading ad design · bail bonds · call directories · **credit repair
 services · binary options · personal loans**.
 
-> **The counterintuitive practitioner finding** [John Horn / StubGroup]: a fully compliant ceremonial
-> sword retailer got repeated strikes; every appeal was rejected. Resolution came from
-> **acknowledging** the strike plus adding site disclaimers. *"Ultimately, we had to 'acknowledge' the
-> strike to Google so that the ads would resume serving."*
+> **Counterintuitive finding** [John Horn / StubGroup]: a fully compliant ceremonial sword retailer got
+> repeated strikes; every appeal rejected. Resolution came from **acknowledging** the strike plus site
+> disclaimers. *"Ultimately, we had to 'acknowledge' the strike to Google so that the ads would resume
+> serving."*
 >
-> **Acknowledge when the fastest path to serving matters. Appeal only when you have a real factual
-> disagreement.** Being right is not the same as serving.
+> **Acknowledge when the fastest path to serving matters. Appeal only with a real factual
+> disagreement.** Being right ≠ serving.
 
 ## Verification
 
@@ -119,8 +120,8 @@ complete → risk of **suspension**. Ads can be restricted mid-verification befo
 Document bar: **all four corners visible, legible, in color** — not black-and-white.
 
 **Failing verification honestly is recoverable (pause). Lying during it is Circumventing systems
-(permanent).** That asymmetry should drive every decision here. Grey operational paths (org
-selfie-skip, BOV as affiliate vs abandon, nominee vs fabrication) → `google-grey-ops/06`.
+(permanent).** That asymmetry drives every decision here. Grey operational paths (org selfie-skip, BOV
+as affiliate vs abandon, nominee vs fabrication) → `google-grey-ops/06`.
 
 Google can force **re-verification** after material account changes.
 
@@ -193,14 +194,14 @@ numbers for regulated verticals.
 ## How enforcement actually behaves
 
 - **Fast approval, later sweep.** Initial review is largely automated pattern-matching. Ads approved
-  for weeks get disapproved in a later re-review pass with no change on the advertiser's side. Google's
-  own framing is "a combination of Google AI and human evaluation" with escalation to "specially-trained
-  experts" for complex cases — the deep review happens *after* the money starts moving.
-- **Linked-account propagation is real and multi-signal.** Google's own language: "Accounts related to
-  the suspended account may be suspended" and "any new accounts that the advertiser tries to create may
-  also be suspended." Practitioner-consensus signals (not an official list — Google does not publish it):
-  shared payment profile · phone · IP · domain · **GTM container ID** · business name · verification
-  documents. No single factor alone triggers it; the threshold is undisclosed.
+  for weeks get disapproved in a later re-review pass with no advertiser-side change. Google: "a
+  combination of Google AI and human evaluation" with escalation to "specially-trained experts" for
+  complex cases — deep review happens *after* the money starts moving.
+- **Linked-account propagation is real, multi-signal.** Google: "Accounts related to the suspended
+  account may be suspended" and "any new accounts that the advertiser tries to create may also be
+  suspended." Practitioner-consensus signals (no official list): shared payment profile · phone · IP ·
+  domain · **GTM container ID** · business name · verification documents. No single factor alone
+  triggers it; threshold undisclosed.
 - **Ban evasion is charged as its own offense** on top of whatever caused the original suspension.
 
 ## Appeals
@@ -213,12 +214,11 @@ numbers for regulated verticals.
 **What works** [StubGroup and forum consensus]:
 
 - **Identify the exact root cause before appealing.** Generic "please review my account" appeals and
-  repeated near-identical submissions are reported to *worsen* outcomes — reviewers read them as
-  evasive.
+  repeated near-identical submissions reported to *worsen* outcomes — reviewers read them as evasive.
 - **Evidence, not argument** — contracts, licenses, credentials, proof of operations.
-- For circumventing systems: run a **full self-audit** of account, site, and campaigns for redirects,
-  mismatched destinations, injected code, and cloaking artifacts *before* writing, then address the
-  findings explicitly.
+- Circumventing systems: run a **full self-audit** of account, site, campaigns for redirects,
+  mismatched destinations, injected code, cloaking artifacts *before* writing, then address findings
+  explicitly.
 
 **Why appeals auto-reject:** the appeal restates general compliance instead of addressing the specific
 sub-policy · **the underlying issue is still live at re-review time** (re-review evaluates current

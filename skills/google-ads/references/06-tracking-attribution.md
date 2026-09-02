@@ -11,9 +11,9 @@ offline-conversion or enhanced-conversions-for-leads request.** Confirmed agains
 `developers.google.com/google-ads/api/docs/conversions/upload-clicks`. Google is steering click
 conversion upload to the **Data Manager API**.
 
-Practical consequence: **existing** integrations keep working; a **fresh developer token cannot
-onboard classic gclid-based OCI**. Verify live status before committing engineering effort, and plan
-new pipelines around enhanced conversions for leads or Data Manager instead.
+Consequence: **existing** integrations keep working; a **fresh developer token cannot onboard classic
+gclid-based OCI**. Verify live status before committing engineering effort; plan new pipelines around
+enhanced conversions for leads or Data Manager instead.
 Implementation of the Data Manager hop (SA JWT, `{gclid}` cloak-forward trap) → `tracker-ops/04`.
 
 ## Conversion action anatomy
@@ -27,8 +27,8 @@ goals combine any mix of actions across categories into one bidding target.
 reports only in **"All conversions"** and is excluded from bidding — **except** when added to a custom
 goal, where it becomes biddable regardless of the flag.
 
-> Over-marking actions as primary dilutes the bidding signal: the algorithm averages dissimilar-value
-> events (newsletter signup + purchase both primary) and shifts budget toward the cheaper action.
+> Over-marking actions as primary dilutes the bidding signal — algorithm averages dissimilar-value
+> events (newsletter signup + purchase both primary), shifts budget toward the cheaper action.
 
 **Count Every vs One.** Every = each conversion per interaction (sales/revenue). One = max one per
 click (lead gen, blocks refresh/resubmit inflation). Per conversion action, **prospective only**. This
@@ -71,14 +71,13 @@ page; store all, submit whichever is populated.
 🔺 Unverified single-source claim (wickedreports.com): since Oct 2025 `gclid` and `gbraid` can be set
 simultaneously on one upload row. Check API release notes before coding against it.
 
-**ATT:** on restricted iOS traffic `gclid` is often not appended at all — reported conversions drop
-and Google substitutes **modeled conversions**. Search/Shopping are less exposed than Meta; Display,
-Video, and App-promotion campaigns targeting web goals see real volatility.
+**ATT:** on restricted iOS traffic `gclid` often not appended — reported conversions drop, Google
+substitutes **modeled conversions**. Search/Shopping less exposed than Meta; Display, Video,
+App-promotion campaigns targeting web goals see real volatility.
 
-**Auto-tagging vs manual UTMs.** With auto-tagging on, hardcoding UTMs into the **Final URL** field
-collides with the appended `gclid`, and **gclid wins attribution** even when a different UTM was
-intended. Fix: never hardcode UTMs in Final URL; use ValueTrack parameters via the **tracking template**
-(or Final URL suffix), which composes cleanly.
+**Auto-tagging vs manual UTMs.** With auto-tagging on, hardcoding UTMs into **Final URL** collides
+with the appended `gclid` — **gclid wins attribution** regardless of intended UTM. Fix: never hardcode
+UTMs in Final URL; use ValueTrack parameters via **tracking template** (or Final URL suffix).
 
 **gclid stripping.** Any redirect hop that does not forward the query string silently strips `gclid`
 and UTMs. Survival:
@@ -92,9 +91,9 @@ and UTMs. Survival:
 
 ## Enhanced Conversions
 
-**Web**: augments the click-based conversion with hashed first-party data matched against signed-in
-Google accounts. **For Leads**: matches hashed lead-form data captured at submission against later
-offline imports, closing the loop from form fill to downstream sale.
+**Web**: augments click-based conversion with hashed first-party data matched against signed-in Google
+accounts. **For Leads**: matches hashed lead-form data captured at submission against later offline
+imports, closing form-fill-to-sale loop.
 
 **Hashing/normalization — exact:**
 
@@ -158,8 +157,8 @@ accepted vs rejected against the CRM export nightly.
 
 ### The highest-leverage move in lead gen and affiliate
 
-Front-end leads are frequently 30–70% junk. Bidding on them teaches Smart Bidding to find **more
-junk**, not more revenue. The fix:
+Front-end leads frequently 30–70% junk. Bidding on them teaches Smart Bidding to find **more junk**,
+not more revenue. Fix:
 
 1. Set the front-end form-fill action to **secondary**, or uncheck include-in-conversions.
 2. Create a **primary** action of category **Import** representing the backend-qualified event
@@ -180,9 +179,9 @@ Google build an **advertiser-specific** model.
 Signals: `ad_storage`, `analytics_storage` (v1) · **`ad_user_data`** (gates Enhanced Conversions and
 PII matching), **`ad_personalization`** (v2).
 
-**Modeling threshold**: ~**700 ad clicks over a rolling 7 days**, at domain-by-country granularity,
-before advertiser-specific modeling activates. Below it Google uses general modeling — so a *correct*
-implementation can still show no lift purely from low volume.
+**Modeling threshold**: ~**700 ad clicks/rolling 7 days**, domain-by-country granularity, before
+advertiser-specific modeling activates. Below it, general modeling — a *correct* implementation can
+still show no lift purely from low volume.
 
 Timeline: 2024-03-06 hard requirement for EU/EEA/UK targeting. 2025-07-21 active enforcement began —
 non-compliant accounts had personalized advertising, remarketing, and conversion tracking restricted
@@ -194,10 +193,10 @@ consent/modeling mix, not performance.
 
 ## Server-side GTM
 
-**The mechanism that matters:** JS-set first-party cookies are capped at **7 days** under Safari ITP.
-A server-side Conversion Linker writing the cookie via a real `Set-Cookie` header from a properly
-first-party domain is not subject to that cap — extending attribution cookie lifetime to **up to 90
-days**, matching the max click window.
+**Mechanism:** JS-set first-party cookies capped at **7 days** under Safari ITP. A server-side
+Conversion Linker writing the cookie via a real `Set-Cookie` header from a true first-party domain is
+not subject to that cap — extends attribution cookie lifetime to **up to 90 days**, matching the max
+click window.
 
 Requires **two chained server tags**: Conversion Linker (writes on first hit) → Google Ads Conversion
 Tracking (reads on conversion hit).
@@ -241,11 +240,11 @@ of web conversions used the removed models.
 
 **A 20–30% variance is expected, not evidence of broken tracking.**
 
-**Which source feeds bidding:** the **native Google Ads tag**, not GA4-imported conversions.
-GA4 imports carry a reported **24–48h delay** that measurably degrades Smart Bidding responsiveness,
-and GA4's event-date semantics mismatch the bidding loop's click-date expectation. Use GA4 key events
-for cross-channel analytics and audiences. **Never mark both a native action and its GA4-imported twin
-as include-in-conversions** — that is the classic double-count.
+**Which source feeds bidding:** the **native Google Ads tag**, not GA4-imported conversions. GA4
+imports carry a reported **24–48h delay** that degrades Smart Bidding responsiveness; GA4's event-date
+semantics mismatch the bidding loop's click-date expectation. Use GA4 key events for cross-channel
+analytics/audiences. **Never mark both a native action and its GA4-imported twin as
+include-in-conversions** — classic double-count.
 
 **Conversion lag.** Default reporting is by **interaction/click date**, so a given day's numbers keep
 rising for days as delayed conversions land. Use **"Conversions (by conv. time)"** / "Conversion value
@@ -280,8 +279,8 @@ Tadelis, 2015): pausing branded SEM by DMA produced **ROAS ≈ −63%** — near
 recaptured organically. **But Coviello et al. (2017) replicated the design on Edmunds.com, a smaller,
 less organically dominant brand, and found materially different, less-negative results.**
 
-Brand incrementality is **brand-position dependent**. Never apply "brand search isn't incremental" to
-a client without a brand-specific test. Quoting eBay at a non-dominant brand is a serious error.
+Brand incrementality is **brand-position dependent** — never apply "brand search isn't incremental" to
+a client without a brand-specific test; quoting eBay at a non-dominant brand is a serious error.
 
 **Conversion Lift**: needs a Google account team to request; more readily available for
 Video/Demand Gen. Minimum 7 days, max 56 recommended; under 14 days risks up to a **17% drop in

@@ -8,17 +8,17 @@ Google now enforces closer adherence to the **stated** target for **budget-limit
 campaigns. Official example: *"If your campaign's Target CPA is $10, but your recent actual CPA
 performance is $5, your campaign will deliver more closely to a $10 actual CPA."*
 
-Previously a budget-limited campaign could overperform its target indefinitely — the algorithm
-optimized inside the budget constraint rather than driving toward the literal number.
+Previously a budget-limited campaign could overperform its target indefinitely — algorithm optimized
+inside the budget constraint rather than driving toward the literal number.
 
 - **Affected:** Search, Shopping, PMax, Demand Gen, Travel (Google Ads, SA360, DV360).
 - **Exempt:** App, Video Reach, Video View. Display and Hotel already worked this way.
 - **Only campaigns flagged "Limited by budget."** Unconstrained campaigns are unchanged.
 
-Practitioner reaction: Joey Bidner reports accounts that *intentionally* ran artificially low tROAS /
-high tCPA targets to farm the old overperformance — those are now exposed. Nils Rooijmans warns of
-efficiency loss wherever stale targets sit untouched. Xavier Mantica raises the open question of
-whether the enforced CPA gets hit by inflating CPCs, with knock-on auction effects.
+Practitioner reaction: Joey Bidner — accounts that *intentionally* ran artificially low tROAS/high tCPA
+to farm old overperformance are now exposed. Nils Rooijmans — efficiency loss wherever stale targets
+sit untouched. Xavier Mantica — open question whether the enforced CPA gets hit via inflated CPCs, with
+knock-on auction effects.
 
 Google shipped a **Bid Target Adjustment Tool** (2026-07-06) that one-click applies recent actual
 performance as the new target.
@@ -40,8 +40,8 @@ performance as the new target.
 assets and formats)`
 
 Auction-time quality is a **real-time recomputation** of expected CTR / ad relevance / landing page
-experience — not the cached 1–10 QS in the UI. This is the most misunderstood point in the platform:
-the visible QS is a diagnostic snapshot; the thing Google actually bids on is richer and more current.
+experience — not the cached 1–10 QS in the UI. Most misunderstood point in the platform: visible QS is
+a diagnostic snapshot; what Google actually bids on is richer and more current.
 
 Assets feed Ad Rank **independent of bid** — that is the official mechanism behind asset coverage
 lowering effective CPC.
@@ -75,9 +75,9 @@ as quality falls.
 **90 days**: expected CTR (normalized for position), ad relevance, landing page experience.
 
 Official, verbatim: **"Quality Score is not an input in the ad auction"** and **"should not be
-optimized or aggregated with the rest of your data."** It omits device, location, time of day, and
-asset signals — all of which *do* feed real auction quality. That is why a keyword can sit at QS 4
-and still perform profitably under Smart Bidding.
+optimized or aggregated with the rest of your data."** Omits device, location, time of day, and asset
+signals — all of which *do* feed real auction quality, which is why a keyword can sit at QS 4 and
+still perform profitably under Smart Bidding.
 
 **Component weighting** [Adalysis, reverse-engineered, not Google-confirmed]: expected CTR ≈39%,
 landing page experience ≈39%, ad relevance ≈22%. Landing-page work carries ~1.8× the leverage of

@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-07-24
 
-Meta changes product names, UI paths, defaults, eligibility, and regional availability continuously. A dated screenshot or workflow is evidence of one account state, not a universal contract.
+Meta changes product names, UI paths, defaults, eligibility, regional availability continuously — a dated screenshot/workflow is evidence of one account state, not a universal contract.
 
 ## 1. Evidence labels
 
@@ -14,7 +14,7 @@ Meta changes product names, UI paths, defaults, eligibility, and regional availa
 | **Practitioner heuristic** | Derived from experience or a vendor article | Starting hypothesis to validate against account data |
 | **Unverified** | Single-source, stale, inaccessible, conflicting, rollout-dependent | Explicit uncertainty only; never present as requirement |
 
-Case studies also need a proof grade, separate from source ownership: causal design reported / structured comparison / attributed or pre-post. Meta, an agency, or a vendor can report a real experiment while still being an interested-party publisher. Never turn a positive case-study lift into an expected result for another account.
+Case studies also need a proof grade, separate from source ownership: causal design reported / structured comparison / attributed or pre-post. Meta, an agency, or a vendor can report a real experiment while still being an interested-party publisher — never turn a positive case-study lift into an expected result for another account.
 
 Do not convert "best practice," "optimal," "must," or "Meta recommends" into official guidance unless the primary Meta source supports it.
 

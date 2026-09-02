@@ -1,7 +1,0 @@
-interface:
-  display_name: "Meta Ads"
-  short_description: "Plan, audit, and troubleshoot Meta ad campaigns"
-  default_prompt: "Use $meta-ads to plan or diagnose a Meta Ads campaign with evidence-labeled recommendations."
-
-policy:
-  allow_implicit_invocation: false

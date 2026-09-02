@@ -49,7 +49,7 @@ making `videos` and `logo_images` mandatory on `DemandGenVideoResponsiveAdInfo` 
 Type errors on `customer_metrics` are the signature of **v25** changing it from generic `Metrics` to
 specialized `CustomerMetrics`.
 
-**The dangerous case throws nothing.** Major versions remove fields, so a query hardcoded to an older
+**The dangerous case throws nothing.** Major versions remove fields — a query hardcoded to an older
 field set can return **200 OK with silently missing data**. Add field-presence assertions to report
 parsing, not only error handling.
 
@@ -66,10 +66,10 @@ parsing, not only error handling.
 | `MISSING_CONVERSION_ACTION` | Wrong action type or not found | The action must be of type **UPLOAD_CLICKS** |
 | `TOO_MANY_CONVERSIONS_IN_REQUEST` | >2,000 per request | Chunk |
 
-**Silent drops are the real hazard here.** Rows past the backdate window are dropped without an error
-in some paths. Always set `partial_failure = True`, iterate `partial_failure_error`, and reconcile
-accepted vs rejected counts against the CRM export nightly. A pipeline that never checks looks healthy
-while delivering nothing.
+**Silent drops are the real hazard.** Rows past the backdate window are dropped without an error in
+some paths. Always set `partial_failure = True`, iterate `partial_failure_error`, reconcile accepted vs
+rejected counts against the CRM export nightly. A pipeline that never checks looks healthy while
+delivering nothing.
 
 ## Policy exemption flow
 

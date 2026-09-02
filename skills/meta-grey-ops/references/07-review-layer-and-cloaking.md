@@ -214,9 +214,9 @@ scale, not CTR. Attribute with `06`'s balanced designs, one axis at a time.
 
 ## Identity / BM verification gates
 
-Full gate table (docs, thresholds, KYC specifics) → `09`. Summary relevant here:
-three+ separate gates, buying "verified" clears only one. Full details → `09`.
-Market (2026, vendor prices, volatile): verified BM ~$50-$350. What still links
+Full gate table (docs, thresholds, KYC specifics) → `09`. Summary: three+ separate
+gates, buying "verified" clears only one. Market (2026, vendor prices, volatile):
+verified BM ~$50-$350. What still links
 after purchase: user ID/cookies-tokens, phone/2FA, the verification ID, the card
 — a verified BM clears none of those. Liveness: presentation attacks (print/
 screen-replay/2D mask) mostly dead vs certified PAD; injection (virtual camera/

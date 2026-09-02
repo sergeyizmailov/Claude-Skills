@@ -88,10 +88,10 @@ sub-account — `accounts.issues.list` and MCQL refuse aggregate views from an a
 | `link status` / `link propose --ads-customer id` | `accounts.services` with `campaigns_management` → then `googleops link accept` |
 | `report --mcql "…"` | read-only Merchant Center Query Language |
 
-Not exposed on purpose: suspension appeal (`issueresolution.triggeraction` is allowlist-gated and
-its actions are opaque), business identity / phone / address verification, US tax settings (no API
-surface found 2026-09-02), shipping settings insert (full-replace semantics; do it in the UI until
-a spec exists).
+Not exposed on purpose: suspension appeal (`issueresolution.triggeraction` is allowlist-gated,
+actions opaque), business identity/phone/address verification, US tax settings (no API surface
+found 2026-09-02), shipping settings insert (full-replace semantics; do it in the UI until a
+spec exists).
 
 ## `sheetfeed` (Google Sheet as catalog)
 
@@ -111,6 +111,7 @@ uv lock --check --project "$SKILL_ROOT"
 
 Live status 2026-09-02: offline tests pass (spec normalization, graph shapes for all three kinds,
 rejections, workspace, client call shapes — added after an external review caught three
-`TypeError`/`ValueError` crashes in activate / link accept / accept-tos). **No live account run yet** — the first `plan` on a real customer is the
-test of the composite temp-id paths (`adGroupCriteria/-3~-5`, `assetGroupListingGroupFilters/-3~-7`)
-and the PMax asset ordering; record its result here.
+`TypeError`/`ValueError` crashes in activate / link accept / accept-tos). **No live account run
+yet** — first `plan` on a real customer tests the composite temp-id paths
+(`adGroupCriteria/-3~-5`, `assetGroupListingGroupFilters/-3~-7`) and PMax asset ordering; record
+its result here.

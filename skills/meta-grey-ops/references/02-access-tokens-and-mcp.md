@@ -76,8 +76,8 @@ extras — `facebook_branded_content_ads_brand`, `threads_business_basic`; reque
 | `leads_retrieval` | lead-form data; needs Full access tier | lead forms only |
 | `ads_mcp_management` | MCP server scope | MCP pipe only |
 
-Own-business assets: Limited tier + these scopes suffice. Other businesses' assets: Full tier
-- App Review with screencasts. Permission docs redirect to one consolidated
+Own-business assets: Limited tier + these scopes suffice. Other businesses' assets: Full tier —
+App Review with screencasts. Permission docs redirect to one consolidated
 `developers.facebook.com/docs/permissions` page.
 
 ## 3. Access tier (renamed 2026-05-04)
@@ -129,9 +129,9 @@ Runnable path for row 2, inside persona's antidetect profile (same exit IP as `M
    — expects `type=USER`, `expires_at` ~60d out, prints proxy/lifetime verdict.
 4. Store token + expiry; re-mint before day 55. 190/460–467 anywhere = dead, no revive.
 
-User token cannot do anything a System User can't in the Marketing API — sees whatever the
+User token can't do anything a System User can't in the Marketing API — sees whatever the
 human sees, incl. client accounts never shared to a BM. Cost: every call is persona's session
-(proxy discipline `01` applies to API too), one checkpoint kills automation mid-batch (state
+(`01` proxy discipline applies to API too); one checkpoint kills automation mid-batch (state
 files make resume safe).
 
 **Inspect:** `GET /debug_token?input_token=<token>`, caller = System User token itself (live

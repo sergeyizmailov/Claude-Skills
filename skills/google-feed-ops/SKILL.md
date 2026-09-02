@@ -8,7 +8,7 @@ description: "Google Merchant Center (GMC) launch and operation plus the retail 
 Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
 The retail data layer. Google Ads buys the traffic; **the feed decides what is eligible, what it
 costs, and what gets suspended** — and the Merchant Center account is reviewed on the *site*, not
-the feed. No Facebook analogue exists at this depth.
+the feed. No Facebook analogue at this depth.
 
 Route: buy mechanics → `google-ads` · infra/survival/agency accounts and MC↔Ads cascade →
 `google-grey-ops` (`12`) · counting → `tracker-ops` · portfolio decisions → `senior-buyer-ops`.
@@ -56,19 +56,19 @@ Merchant Center account -> verification gates -> data source(s)
         -> bid strategy per segment
 ```
 
-**The throughline: label schema → listing-group filter → divergent bid strategy per filter.** That is
-how per-segment economics happen without per-SKU bidding.
+**The throughline: label schema → listing-group filter → divergent bid strategy per filter** — how
+per-segment economics happen without per-SKU bidding.
 
 ## Workflow
 
 1. Clear the five review gates before anything else.
-2. Establish **one primary submission method per data source**. Mixing methods causes silent
+2. Establish **one primary submission method per data source** — mixing causes silent
    last-write-wins conflicts.
-3. Fix required attributes and GTIN coverage. A missing real GTIN costs visibility and disables price
-   benchmarking.
-4. Build the `custom_label` schema deliberately — margin tier, price band, bestseller rank,
-   seasonality, stock lifecycle (`01`). Do it before campaign structure, because structure depends on
-   it. This table is canonical; do not invent a second schema in a playbook.
+3. Fix required attributes and GTIN coverage — a missing real GTIN costs visibility and disables
+   price benchmarking.
+4. Build the `custom_label` schema before campaign structure, since structure depends on it:
+   margin tier, price band, bestseller rank, seasonality, stock lifecycle (canonical table in `01`,
+   don't reinvent).
 5. Optimize titles for the **~70-character cliff**, specs before adjectives, decision-driving
    attributes first.
 6. Confirm destinations and listing-group **keys** are valid. PMax/Shopping campaign structure, feed-only

@@ -48,9 +48,9 @@ creation ended Feb 2026, ads stop serving Feb 2027 — provisional, Google moved
 ## Structure doctrine
 
 **SKAGs are niche, not dead.** Reserve for top-volume, top-revenue terms where ad-copy control still
-pays. Default is **STAG** — 5–15 closely related keywords per ad group sharing intent and landing
-page. The mechanical reason SKAGs declined: close-variant and broad-match expansion mean an exact
-keyword no longer guarantees an exact query, which was the entire premise of SKAG relevance control.
+pays. Default is **STAG** — 5–15 closely related keywords per ad group sharing intent and landing page.
+Mechanical reason SKAGs declined: close-variant and broad-match expansion mean an exact keyword no
+longer guarantees an exact query — the entire premise of SKAG relevance control.
 
 "Hagakure" (radically consolidated, broad-match-led, signal-rich structure for Smart Bidding) is a
 community-coined philosophy, **not a Google framework** — no official source uses the term.
@@ -140,10 +140,9 @@ favors them. Cited estimate: unrestrained PMax absorbs **10–30%** of what shou
 Mitigation: account-level negative list for your own brand terms (protecting a dedicated exact-match
 Brand Search campaign) + campaign-level brand exclusion lists inside PMax for competitor terms.
 
-**Measurement trap — state this whenever recommending the exclusion:** pulling brand out of PMax
-makes PMax's own ROAS/CPA look worse, because it loses its cheapest converting queries. If judged on
-PMax's isolated ROAS rather than blended account performance, the correct change gets reverted for
-the wrong reason.
+**Measurement trap — state this whenever recommending the exclusion:** pulling brand out of PMax makes
+PMax's own ROAS/CPA look worse (loses its cheapest converting queries). If judged on PMax's isolated
+ROAS rather than blended account performance, the correct change gets reverted for the wrong reason.
 
 ### PMax negative keywords
 
@@ -195,10 +194,10 @@ must be **≤15 chars**.
 
 Treat asset-group count like ad-group count: too few dilutes relevance across a diverse catalog, too
 many fragments the conversion volume each needs. **The 30–50 conversions/month floor does NOT apply per
-asset group** — it is a campaign-level Smart Bidding benchmark, and every asset group in a PMax campaign
-shares one bid strategy, so there is no per-group target for it to gate. Structural caps: **100 asset
-groups/campaign**, **1,000 listing groups/asset group** [official: answer/6372658 + Google Ads API docs].
-Per-group heuristics → `07`.
+asset group** — it's a campaign-level Smart Bidding benchmark; every asset group in a PMax campaign
+shares one bid strategy, so there's no per-group target to gate. Structural caps: **100 asset
+groups/campaign**, **1,000 listing groups/asset group** [official: answer/6372658 + Google Ads API
+docs]. Per-group heuristics → `07`.
 
 ## Naming
 
