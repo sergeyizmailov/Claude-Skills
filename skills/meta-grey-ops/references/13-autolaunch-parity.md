@@ -28,7 +28,7 @@ quality/spend velocity, not the pipe.
 |---|---|---|
 | Import accounts by cookies / token | operator hands System User token + ids (`02` §1) | — |
 | Template → N accounts | `metaops bulk-plan` → `bulk-apply` (template × accounts, bound inputs, PAUSED) | `POST /act_X/campaigns\|adsets\|adcreatives\|ads` |
-| Creative "uniquification" | `uniquify.py` locally, then workspace-bound `metaops media` per account | client-side; `POST /adimages`, `/advideos` |
+| Creative "uniquification" | `uniquify.py` (`--no-crop` for text-heavy banners) locally, then workspace-bound `metaops media` per account | client-side; `POST /adimages`, `/advideos` |
 | Distribution "All→All" / "1→1" | spec shape: ads per ad set in template; per-account `media` block | — |
 | Duplicate campaign/ad set ×N | Not agent-exposed; use Ads Manager until a workspace-bound `metaops` command wraps the internal clone implementation | `POST /{id}/copies` |
 | Scheduled launch / dead-hours avoidance | spec `start_time`; `metaops activate --refresh-start`; `04` → Scheduling | `start_time` |

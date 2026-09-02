@@ -56,7 +56,7 @@ DOCTOR_MAX_AGE = int(os.environ.get("METAOPS_DOCTOR_MAX_AGE_SECONDS", "86400"))
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$")
 WORKSPACE_LIFECYCLE_COMMANDS = {
     "media", "plan", "apply", "verify", "status", "activate", "bulk-plan", "bulk-apply",
-    "bulk-activate",
+    "bulk-activate", "feed",
 }
 
 
@@ -816,6 +816,125 @@ def command_assets_set_products(args: argparse.Namespace) -> tuple[int, dict[str
     )
 
 
+REVIEW_STATUSES = {"PENDING_REVIEW", "IN_PROCESS", "PREAPPROVED"}
+
+
+def feed_binding(args: argparse.Namespace) -> tuple[str, dict[str, Any], str]:
+    if not args.workspace_obj:
+        raise MetaOpsError("feed commands require --workspace")
+    profile_name, profile = args.workspace_obj.profile(args.profile)
+    feed_id = args.feed_id or profile.get("feed_id")
+    if not feed_id:
+        raise MetaOpsError("no feed id: pass --feed-id or set profiles.<p>.feed_id in workspace.json")
+    if not str(feed_id).isdigit():
+        raise MetaOpsError("feed id must be numeric")
+    return profile_name, profile, str(feed_id)
+
+
+def feed_source_url(args: argparse.Namespace) -> str:
+    if args.url:
+        return args.url
+    if not args.sheet:
+        raise MetaOpsError("pass --url or --sheet (CSV export of the sheet tab is derived)")
+    import sheetfeed
+    gid = args.gid
+    if gid is None:
+        try:
+            gid = sheetfeed.Sheet(args.sheet, args.tab).meta()["gid"]
+        except sheetfeed.SheetError as exc:
+            raise MetaOpsError(f"cannot resolve tab gid ({exc}); pass --gid") from exc
+    return sheetfeed.csv_export_url(args.sheet, gid)
+
+
+def ad_statuses(account: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    path: str | None = f"{account}/ads"
+    params: dict[str, Any] = {"fields": "id,effective_status", "limit": 500}
+    while path:
+        resp = graph.get(path, params=params, context="ads status")
+        for ad in resp.get("data", []):
+            out[str(ad["id"])] = ad.get("effective_status", "?")
+        path = (resp.get("paging") or {}).get("next")
+        params = {}
+    return out
+
+
+def run_feed_upload(args: argparse.Namespace, feed_id: str, url: str) -> tuple[ChildResult, dict[str, Any]]:
+    child_args = ["--feed-id", feed_id, "--url", url, "--wait", str(args.wait), "--errors"]
+    if args.update_only:
+        child_args.append("--update-only")
+    child = run_child("feed_upload.py", child_args, args.timeout)
+    echo_child(child)
+    upload: dict[str, Any] = {}
+    for line in (child.stdout or "").splitlines():
+        line = line.strip()
+        if line.startswith("{"):
+            with contextlib.suppress(ValueError):
+                upload = json.loads(line)
+    return child, upload
+
+
+def command_feed_sync(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    profile_name, profile, feed_id = feed_binding(args)
+    url = feed_source_url(args)
+    child, upload = run_feed_upload(args, feed_id, url)
+    if not child.ok:
+        return child.returncode, child_failure("feed sync", "upload_failed", child)
+    return 0, result_envelope(
+        "feed sync", True, "fetched",
+        artifacts={"workspace": str(args.workspace_obj.path)},
+        data={"profile": profile_name, "feed_id": feed_id, "url": url, "upload": upload},
+        next_action="Check num_invalid_items; then metaops assets verify --scope all if product sets changed.",
+    )
+
+
+def command_feed_swap(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    """Sheet upsert → immediate fetch → prove no ad re-entered review (swap gate, 04)."""
+    import sheetfeed
+    profile_name, profile, feed_id = feed_binding(args)
+    if not args.sheet:
+        raise MetaOpsError("feed swap requires --sheet")
+    items = sheetfeed.load_items(args.file)
+    if not items:
+        raise MetaOpsError(f"{args.file}: no items")
+    account = profile["ad_account_id"]
+    before = ad_statuses(account)
+    in_review = sorted(ad for ad, st in before.items() if st in REVIEW_STATUSES)
+    if in_review and not args.force:
+        raise MetaOpsError(
+            f"swap gate: {len(in_review)} ad(s) still in review ({in_review[:5]}…); a reject on the "
+            "current creative stops the swap. Wait for approval + first delivery, or --force."
+        )
+    sheet = sheetfeed.Sheet(args.sheet, args.tab)
+    header, rows = sheet.read()
+    if not header:
+        raise MetaOpsError("sheet tab has no header row; run sheetfeed init-header first")
+    counts = sheet.upsert(items, header, rows)
+    header, rows = sheet.read()
+    problems = sheetfeed.validate_rows(header, rows, "meta")
+    if problems:
+        return 1, result_envelope(
+            "feed swap", False, "sheet_invalid",
+            data={"sheet": counts, "problems": problems},
+            error={"kind": "validation", "message": f"{len(problems)} row problem(s) after upsert"},
+            next_action="Fix the rows (sheetfeed set/upsert), then metaops feed sync.",
+        )
+    url = feed_source_url(args)
+    child, upload = run_feed_upload(args, feed_id, url)
+    if not child.ok:
+        return child.returncode, child_failure("feed swap", "upload_failed", child)
+    after = ad_statuses(account)
+    re_review = sorted(ad for ad, st in after.items() if st in REVIEW_STATUSES and before.get(ad) not in REVIEW_STATUSES)
+    return (1 if re_review else 0), result_envelope(
+        "feed swap", not re_review, "swapped" if not re_review else "re_review",
+        artifacts={"workspace": str(args.workspace_obj.path)},
+        data={"profile": profile_name, "feed_id": feed_id, "sheet": counts, "upload": upload,
+              "ads_checked": len(after), "ads_re_review": re_review},
+        next_action=(None if not re_review else
+                     "Ads re-entered review after the swap; do not touch them, watch for REJECTS (monitor.py)."),
+    )
+
+
 def command_media(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if not args.image and not args.video:
         raise MetaOpsError("media requires at least one --image or --video path")
@@ -1522,6 +1641,25 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--video", nargs="*", default=[])
     p.add_argument("--manifest", help="output path; default .metaops/media/<profile>.json")
     p.set_defaults(handler=command_media)
+
+    p = sub.add_parser("feed", help="catalog feed: immediate fetch / sheet swap")
+    feed_sub = p.add_subparsers(dest="feed_action", required=True)
+    for name, handler, help_text in (
+        ("sync", command_feed_sync, "POST /{feed_id}/uploads with the sheet CSV URL and wait"),
+        ("swap", command_feed_swap, "upsert rows into the sheet, fetch now, prove no ad re-entered review"),
+    ):
+        action = feed_sub.add_parser(name, help=help_text)
+        action.add_argument("--feed-id", help="product feed id; default profiles.<p>.feed_id")
+        action.add_argument("--sheet", help="Google Sheet URL/id (public link for Meta)")
+        action.add_argument("--tab", default="products")
+        action.add_argument("--gid", type=int, help="tab gid when GSHEETS_JSON_KEY_FILE is not set")
+        action.add_argument("--url", help="explicit feed URL instead of the sheet CSV export")
+        action.add_argument("--update-only", action="store_true")
+        action.add_argument("--wait", type=int, default=120)
+        if name == "swap":
+            action.add_argument("--file", required=True, help="CSV/JSON items keyed by id")
+            action.add_argument("--force", action="store_true", help="skip the in-review swap gate")
+        action.set_defaults(handler=handler)
 
     p = sub.add_parser("plan", help="validate one spec and write a hash-bound plan")
     p.add_argument("--spec", required=True)

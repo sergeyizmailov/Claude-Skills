@@ -84,6 +84,20 @@ ad payloads are local-only until their parent IDs exist during `apply`.
 Before `activate`, complete every UI-only check in `00` §6–8. The command requires
 `--confirm-ui REVIEWED`, the spec-bound verification receipt, and literal `--confirm SPEND`.
 
+## Feed (catalog as Google Sheet, `17`)
+
+```bash
+metaops --workspace . --profile <p> --json feed sync  --sheet <url> [--gid N] [--update-only]   # POST /{feed_id}/uploads url=<csv export> → poll end_time
+metaops --workspace . --profile <p> --json feed swap  --sheet <url> --file items.json          # upsert rows → sync → prove no ad re-entered review
+```
+
+`feed_id` from `--feed-id` or `profiles.<p>.feed_id`. Sheet CSV export needs a public link; tab
+gid resolves via `GSHEETS_JSON_KEY_FILE` or `--gid`. `swap` refuses while any ad on the account is
+`PENDING_REVIEW`/`IN_PROCESS`/`PREAPPROVED` (`--force` overrides); exit 1 + phase `re_review`
+lists ads whose status flipped into review after the fetch. Result `data.upload`:
+`num_persisted_items`, `num_invalid_items`, `error_count`, `errors[]`. `finished=false` = still
+running after `--wait` (default 120 s); re-check `GET /{upload_id}`.
+
 ## Bulk lifecycle
 
 ```bash

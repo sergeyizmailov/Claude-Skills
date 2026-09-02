@@ -227,7 +227,7 @@ different spec), UI multi-advertiser check done.
 ## 9.1 — Operate
 
 ```bash
-python3 monitor.py --accounts accounts.json                    # status + spend sweep, survival log
+python3 monitor.py --accounts accounts.json                    # status + spend sweep, STALL (≥40 impr, 0 clicks), survival log
 python3 insights.py --account act_123 --level ad --date-preset yesterday --csv day.csv
 ```
 

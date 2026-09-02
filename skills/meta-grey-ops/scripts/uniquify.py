@@ -36,18 +36,27 @@ def seed_for(path: pathlib.Path, tag: str) -> random.Random:
     return random.Random(int(h[:16], 16))
 
 
-def uniq_image(src: pathlib.Path, dst: pathlib.Path, rnd: random.Random) -> None:
+def uniq_image(src: pathlib.Path, dst: pathlib.Path, rnd: random.Random, crop: bool = True) -> None:
+    """crop=True: 1-4 px per edge + brightness jitter (default). crop=False: exact pixel
+    dimensions kept (text/border-heavy 1080x1080 banners); uniqueness from +-0.5%
+    brightness/contrast jitter, EXIF strip (convert() drops it) and JPEG quality 92-95."""
     try:
         from PIL import Image, ImageEnhance
     except ImportError:
         sys.exit("pip install pillow")
     im = Image.open(src).convert("RGB")
     w, h = im.size
-    left, top, right, bottom = (rnd.randint(1, 4) for _ in range(4))
-    im = im.crop((left, top, w - right, h - bottom))
-    im = ImageEnhance.Brightness(im).enhance(1 + rnd.uniform(-0.01, 0.01))
+    if crop:
+        left, top, right, bottom = (rnd.randint(1, 4) for _ in range(4))
+        im = im.crop((left, top, w - right, h - bottom))
+        im = ImageEnhance.Brightness(im).enhance(1 + rnd.uniform(-0.01, 0.01))
+        quality = rnd.randint(88, 95)
+    else:
+        im = ImageEnhance.Brightness(im).enhance(1 + rnd.uniform(-0.005, 0.005))
+        im = ImageEnhance.Contrast(im).enhance(1 + rnd.uniform(-0.005, 0.005))
+        quality = rnd.randint(92, 95)
     if dst.suffix.lower() in (".jpg", ".jpeg"):
-        im.save(dst, "JPEG", quality=rnd.randint(88, 95), optimize=True)
+        im.save(dst, "JPEG", quality=quality, optimize=True)
     else:
         im.save(dst)
 
@@ -71,6 +80,8 @@ def main() -> int:
     ap.add_argument("--n", type=int, help="number of variants (ignored when --tags is given)")
     ap.add_argument("--tags", help="comma-separated account tags → one variant per tag")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--no-crop", action="store_true",
+                    help="images: keep exact dimensions (no 1-4 px crop); jitter + re-encode only")
     args = ap.parse_args()
 
     tags = [t.strip() for t in args.tags.split(",")] if args.tags else [f"v{i:02d}" for i in range(1, (args.n or 1) + 1)]
@@ -89,7 +100,10 @@ def main() -> int:
                 print(f"  = {dst.name} (exists)")
                 continue
             rnd = seed_for(src, tag)
-            (uniq_image if ext in IMG else uniq_video)(src, dst, rnd)
+            if ext in IMG:
+                uniq_image(src, dst, rnd, crop=not args.no_crop)
+            else:
+                uniq_video(src, dst, rnd)
             print(f"  + {dst.name}")
             made += 1
     print(f"\n{made} variant(s) → {out}. Upload each with media.py --account <the tag's account>.")

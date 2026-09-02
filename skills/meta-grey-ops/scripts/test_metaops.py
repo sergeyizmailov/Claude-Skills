@@ -12,9 +12,11 @@ import tempfile
 import unittest
 from unittest import mock
 
+import feed_upload
 import jsonschema
 import mcp
 import metaops
+import monitor
 
 os.environ.setdefault("META_TOKEN", "TEST_TOKEN")
 
@@ -625,6 +627,77 @@ class MetaOpsContractTests(unittest.TestCase):
             self.assertIs(metaops.graph.session(), new_session)
         rebuild.assert_called_once_with()
 
+
+
+
+class FeedAndMonitorTests(unittest.TestCase):
+    def test_feed_upload_polls_until_end_time(self) -> None:
+        states = [{"id": "u1"}, {"id": "u1", "end_time": "t", "num_persisted_items": 3, "error_count": 0}]
+        with (
+            mock.patch.object(feed_upload.graph, "get", side_effect=lambda *a, **k: states.pop(0)),
+            mock.patch.object(feed_upload.time, "sleep"),
+        ):
+            u = feed_upload.poll("u1", wait_s=60)
+        self.assertTrue(feed_upload.finished(u))
+        self.assertEqual(u["num_persisted_items"], 3)
+
+    def test_feed_upload_start_posts_url(self) -> None:
+        with mock.patch.object(feed_upload.graph, "post", return_value={"id": "u9"}) as post:
+            self.assertEqual(feed_upload.start("77", "https://x/export?format=csv&gid=0", True), "u9")
+        self.assertEqual(post.call_args.args[0], "77/uploads")
+        self.assertEqual(post.call_args.args[1], {"url": "https://x/export?format=csv&gid=0", "update_only": True})
+
+    def test_monitor_stall_heuristic(self) -> None:
+        rows = [{"id": "1", "impressions": 45, "clicks": 0}, {"id": "2", "impressions": 45, "clicks": 1},
+                {"id": "3", "impressions": 10, "clicks": 0}]
+        self.assertEqual([r["id"] for r in monitor.stalled(rows)], ["1"])
+        self.assertEqual(monitor.stalled(rows, 5), [rows[0], rows[2]])
+
+    def test_feed_swap_gate_blocks_ads_in_review(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            ws = MetaOpsContractTests().workspace(root)
+            items = MetaOpsContractTests().write_json(root, "items.json", [{"id": "SKU1", "link": "https://a/"}])
+            args = type("Args", (), {"workspace_obj": ws, "profile": "test", "feed_id": "5", "sheet": "abc",
+                                     "tab": "products", "gid": 0, "url": None, "update_only": False,
+                                     "wait": 1, "timeout": 5, "file": str(items), "force": False})()
+            with mock.patch.object(metaops, "ad_statuses", return_value={"a1": "PENDING_REVIEW"}):
+                with self.assertRaisesRegex(metaops.MetaOpsError, "swap gate"):
+                    metaops.command_feed_swap(args)
+
+    def test_feed_binding_requires_feed_id(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            ws = MetaOpsContractTests().workspace(pathlib.Path(td))
+            args = type("Args", (), {"workspace_obj": ws, "profile": "test", "feed_id": None})()
+            with self.assertRaisesRegex(metaops.MetaOpsError, "no feed id"):
+                metaops.feed_binding(args)
+            args.feed_id = "42"
+            self.assertEqual(metaops.feed_binding(args)[2], "42")
+
+    def test_workspace_schema_accepts_feed_id(self) -> None:
+        schema = json.loads((SCHEMA_DIR / "workspace.v1.json").read_text(encoding="utf-8"))
+        doc = json.loads((HERE / "specs" / "example-workspace.json").read_text(encoding="utf-8"))
+        prof = doc["profiles"].pop("<profile>")
+        doc["profiles"]["p1"] = prof
+        doc["defaults"]["profile"] = "p1"
+        prof.update({"business_id": "1", "app_id": "1", "system_user_id": "1", "ad_account_id": "act_1",
+                     "page_id": "1", "dataset_id": "1", "catalog_id": "1", "feed_id": "9",
+                     "product_sets": {"main": "1"}})
+        jsonschema.validate(doc, schema)
+
+    def test_uniquify_no_crop_keeps_dimensions(self) -> None:
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest("pillow not installed")
+        import uniquify
+        with tempfile.TemporaryDirectory() as td:
+            src = pathlib.Path(td) / "a.jpg"
+            Image.new("RGB", (64, 48), (200, 30, 30)).save(src, "JPEG")
+            dst = pathlib.Path(td) / "a.v01.jpg"
+            uniquify.uniq_image(src, dst, uniquify.seed_for(src, "v01"), crop=False)
+            self.assertEqual(Image.open(dst).size, (64, 48))
+            self.assertNotEqual(src.read_bytes(), dst.read_bytes())
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

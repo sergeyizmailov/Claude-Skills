@@ -13,6 +13,7 @@
       "instagram_user_id": "auto",
       "dataset_id": "<pixel-dataset-id>",
       "catalog_id": "<catalog-id-or-omit>",
+      "feed_id": "<product-feed-id-or-omit>",
       "product_sets": {
         "main": "<product-set-id-or-omit>"
       },

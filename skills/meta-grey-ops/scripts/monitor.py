@@ -80,13 +80,36 @@ def adset_issues(account: str) -> list[dict]:
             for a in rows if a.get("issues_info")]
 
 
+STALL_MIN_IMPRESSIONS = 40
+
+
+def adset_delivery(account: str) -> list[dict]:
+    rows = graph.get(f"{account}/adsets",
+                     params={"fields": "id,name,effective_status,insights.date_preset(today){impressions,clicks}",
+                             "effective_status": json.dumps(["ACTIVE"]), "limit": 200},
+                     context="adset delivery").get("data", [])
+    out = []
+    for a in rows:
+        ins = ((a.get("insights") or {}).get("data") or [{}])[0]
+        out.append({"id": a["id"], "name": a.get("name"), "impressions": int(ins.get("impressions", 0) or 0),
+                    "clicks": int(ins.get("clicks", 0) or 0)})
+    return out
+
+
+def stalled(adsets: list[dict], min_impressions: int = STALL_MIN_IMPRESSIONS) -> list[dict]:
+    """Practitioner heuristic (2026-09): an ACTIVE ad set with >= min_impressions today and 0 clicks
+    has an eCTR the auction reads as zero; it freezes without any API-visible issue. Swap the
+    creative angle, do not raise the budget."""
+    return [a for a in adsets if a["impressions"] >= min_impressions and a["clicks"] == 0]
+
+
 def local_hour(offset_hours: float | None) -> int | None:
     if offset_hours is None:
         return None
     return (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=float(offset_hours))).hour
 
 
-def sweep(account: str) -> dict:
+def sweep(account: str, stall_min: int = STALL_MIN_IMPRESSIONS) -> dict:
     row: dict = {"account": account, "ts": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
     try:
         acct = graph.get(account, params={"fields": ACCOUNT_FIELDS}, context="account")
@@ -105,6 +128,7 @@ def sweep(account: str) -> dict:
         row["spend_today"] = spend(account, "today")
         row["ads"] = ad_status_counts(account)
         row["adset_issues"] = adset_issues(account)
+        row["stalled_adsets"] = stalled(adset_delivery(account), stall_min)
     except graph.GraphError as e:
         row["error"] = str(e)
 
@@ -124,6 +148,8 @@ def sweep(account: str) -> dict:
     active_ads = row.get("ads", {}).get("ACTIVE", 0)
     if st == 1 and active_ads and y > 0 and hour is not None and hour >= 12 and t < 0.05 * y:
         verdicts.append("SILENT_STOP")
+    if row.get("stalled_adsets"):
+        verdicts.append("STALL")
     cap = acct.get("spend_cap")
     try:
         if cap and int(cap) > 0 and int(acct.get("amount_spent", 0)) >= int(cap):
@@ -140,11 +166,13 @@ def main() -> int:
     ap.add_argument("--log", default="survival.jsonl", help="append-only JSONL survival log")
     ap.add_argument("--json", help="write this sweep's rows here")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--stall-impressions", type=int, default=STALL_MIN_IMPRESSIONS,
+                    help="ACTIVE ad set with >= N impressions today and 0 clicks → STALL")
     args = ap.parse_args()
 
     rows = []
     for acct in load_accounts(args.accounts):
-        row = sweep(acct)
+        row = sweep(acct, args.stall_impressions)
         rows.append(row)
         if not args.quiet:
             ads = row.get("ads", {})
@@ -161,7 +189,8 @@ def main() -> int:
     print(f"\n{len(rows)} account(s), {len(bad)} need attention. Log → {args.log}")
     if bad:
         print("DISABLED → document + replace (03). UNSETTLED → topup. SILENT_STOP → check ASL, "
-              "billing, review; touch nothing else. REJECTS → new ads, never re-enable.")
+              "billing, review; touch nothing else. REJECTS → new ads, never re-enable. "
+              "STALL → swap creative angle on the listed ad sets (04).")
     return 1 if bad else 0
 
 

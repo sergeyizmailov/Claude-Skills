@@ -21,6 +21,7 @@ PROFILE_KEYS = {
     "instagram_user_id",
     "dataset_id",
     "catalog_id",
+    "feed_id",
     "product_sets",
     "currency",
     "timezone",
@@ -32,6 +33,7 @@ ID_KEYS = {
     "page_id",
     "dataset_id",
     "catalog_id",
+    "feed_id",
 }
 SAFE_ALIAS = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$")
 

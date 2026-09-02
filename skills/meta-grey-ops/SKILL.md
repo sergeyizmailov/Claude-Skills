@@ -90,7 +90,7 @@ any edit.
 
 | Script | Does | Spends? |
 |---|---|---|
-| `metaops.py` | agent interface: workspace/assets/doctor/media, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate | only explicit activate commands |
+| `metaops.py` | agent interface: workspace/assets/doctor/media/feed, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate | only explicit activate commands |
 | `probe.py` | internal doctor implementation: identity/scopes/account/PBIA/dataset/write gates | no spend |
 | `media.py` | internal `metaops media` implementation | no spend |
 | `launch.py` | spec → `validate_only` → create PAUSED; resume-safe state | no |
@@ -98,13 +98,14 @@ any edit.
 | `verify.py` | read-back diff of every spec field; exit 0 writes `<state>.verified.json` | no |
 | `activate.py` | internal single/bulk activation implementation; receipt required | **yes** |
 | `edit.py` · `clone.py` · `rules.py` | implementation backlog; not agent-exposed until wrapped by workspace-bound `metaops` commands | mutating |
-| `monitor.py` | N-account status/spend sweep → verdicts, JSONL | no |
+| `monitor.py` | N-account status/spend sweep → verdicts incl. `STALL` (ad set ≥40 impr, 0 clicks), JSONL | no |
 | `insights.py` | spend/delivery, explicit attribution window, CSV for tracker | no |
 | `comments.py` | comment reads remain usable; hide/delete is not agent-exposed | no spend |
 | `mcp.py` | official Meta Ads MCP: tools, rollout diagnostics, allowlisted reads only; mutating tools are rejected in code | no |
 | `mutate_set.py` | internal `metaops assets set-products` implementation | no spend |
 | `sheetfeed.py` | edit/validate the Google-Sheet catalog via service account (`17`); Meta pulls it as a scheduled feed | no spend |
-| `uniquify.py` · `page.py` | local creative variants · Page writes (Page writes not agent-exposed) | no spend |
+| `uniquify.py` · `page.py` | local creative variants (`--no-crop` keeps exact pixels for text/border banners) · Page writes (not agent-exposed) | no spend |
+| `feed_upload.py` | internal `metaops feed sync/swap`: `POST /{feed_id}/uploads` + poll | no spend |
 
 Env: `META_TOKEN` (required), `GSHEETS_JSON_KEY_FILE` (sheetfeed only), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
 (adds `appsecret_proof`), `META_API_VERSION` (pinned `v26.0`). Never pass a token on argv.
