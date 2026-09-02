@@ -131,7 +131,7 @@ undocumented. Treat it as an exception process, not a grace period.
 | Automatic extraction / crawl | Uncontrolled, opaque | **None** — on-page data only | Very small catalogs, gap-filling |
 | Scheduled fetch | You control it | Full | **The standard professional default beyond a few hundred SKUs** |
 | Manual upload | On demand | Full | One-off corrections, testing |
-| Google Sheets | Near-real-time | Full, manual-entry-prone | Small catalogs, promotions feed |
+| Google Sheets | Fetch every 24 h default (configurable), UI-only source; MC fetches with its own identity | Full; agent-editable via service account (`google-grey-ops/scripts/sheetfeed.py`, `--target mc`) | Small catalogs, one sheet shared with a Meta catalog (availability enum differs: `in_stock` vs `in stock`) |
 | Merchant API push | Real-time | Full, programmatic | High-velocity catalogs, custom feed layers |
 | Platform connector | Platform-dependent | **Often lossy for custom labels** | Shopify-native stores wanting zero maintenance |
 

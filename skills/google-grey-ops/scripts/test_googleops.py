@@ -186,9 +186,28 @@ def test_client_call_shapes() -> None:
     assert aliased["campaign"]["bidding"] == {"strategy": "maximize_conversion_value", "target_roas": 3.0}
 
 
+def test_sheetfeed_validation() -> None:
+    import sheetfeed
+
+    header = sheetfeed.REQUIRED + ["gtin"]
+    good = [["sku1", "T", "D", "in_stock", "new", "19.99 USD", "https://x.com/p", "https://x.com/i.jpg", "B", "1234567890123"]]
+    assert sheetfeed.validate_rows(header, good, "mc") == []
+    meta_row = [["sku1", "T", "D", "in stock", "new", "19.99 USD", "https://x.com/p", "https://x.com/i.jpg", "B", ""]]
+    assert sheetfeed.validate_rows(header, meta_row, "meta") == []
+    assert any("availability" in p for p in sheetfeed.validate_rows(header, meta_row, "mc"))
+    bad = [["sku1", "T", "D", "in_stock", "new", "19.99", "http://x.com/p", "https://x.com/i.jpg", "B", ""],
+           ["sku1", "T", "D", "in_stock", "new", "19.99 USD", "https://x.com/p", "https://x.com/i.jpg", "B", ""]]
+    problems = sheetfeed.validate_rows(header, bad, "mc")
+    assert any("price" in p for p in problems) and any("duplicate id" in p for p in problems)
+    assert any("https" in p for p in problems)
+    assert sheetfeed.csv_export_url("https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=5", 5).endswith("gid=5")
+    assert "missing required" in sheetfeed.validate_rows(["id", "title"], [], "mc")[0]
+
+
 if __name__ == "__main__":
     test_specs_and_graphs()
     test_spec_rejections()
     test_workspace()
     test_client_call_shapes()
+    test_sheetfeed_validation()
     print("ok")

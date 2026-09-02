@@ -295,6 +295,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "google-ads" },
+    { name = "google-auth" },
     { name = "google-shopping-merchant-accounts" },
     { name = "google-shopping-merchant-datasources" },
     { name = "google-shopping-merchant-issueresolution" },
@@ -312,6 +313,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "google-ads", specifier = ">=31.4,<32" },
+    { name = "google-auth", specifier = ">=2.30" },
     { name = "google-shopping-merchant-accounts", specifier = ">=1.6" },
     { name = "google-shopping-merchant-datasources", specifier = ">=1.5" },
     { name = "google-shopping-merchant-issueresolution", specifier = ">=1.4" },

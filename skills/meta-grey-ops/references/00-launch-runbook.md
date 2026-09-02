@@ -96,6 +96,9 @@ spec — stops a cents-template landing on a TWD/JPY account at 100x.
 | `catalog_collection` | storefront hero + product set, **≥4 items** (2490457) | `example-catalog-collection-tr.json` |
 | `catalog_single` | one-product set → one deep-linked card, no minimum | `example-catalog-single.json` |
 
+Catalog kinds: fastest source is one Google Sheet edited via service account and pulled by Commerce
+Manager as a scheduled feed — `17` (`sheetfeed`). Swap links/images in the sheet, not via batch API.
+
 Structure is a spec choice, not a script limit:
 - **CBO** — `campaign.daily_budget_minor`, ad sets budget-less.
 - **ABO** — no campaign budget, every ad set carries `daily_budget_minor` (+ `bid_strategy`,

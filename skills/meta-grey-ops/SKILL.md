@@ -1,6 +1,6 @@
 ---
 name: meta-grey-ops
-description: "Launch and run Meta (FB/IG) ads via the Marketing API from a token — access/scopes/System User, MCP vs API, PAUSED bulk launch across ad accounts, catalog/DLO/carousel creatives, attribution 1/1/1, Advantage+ and multi-advertiser opt-out, EU DSA, plus grey-market survival: antidetect/proxy/session hygiene, agency accounts, token death, cloaking/review-layer tricks, verification gates, no-path verticals, per-vertical playbooks (casino, nutra, crypto, news-tg). Use for: 'launch FB ads through the API', 'I have a BM access token, set up campaigns', 'bulk launch on N accounts', 'connect Claude to Meta ads / MCP', 'why did the ad set create fail'. Clean marketing theory = meta-ads; tracker metrics = tracker-ops."
+description: "Launch and run Meta (FB/IG) ads via the Marketing API from a token — access/scopes/System User, MCP vs API, PAUSED bulk launch across ad accounts, catalog/DLO/carousel creatives, catalog as an agent-edited Google Sheet, attribution 1/1/1, Advantage+ and multi-advertiser opt-out, EU DSA, plus grey-market survival: antidetect/proxy/session hygiene, agency accounts, token death, cloaking/review-layer tricks, verification gates, no-path verticals, per-vertical playbooks (casino, nutra, crypto, news-tg). Use for: 'launch FB ads through the API', 'I have a BM access token, set up campaigns', 'bulk launch on N accounts', 'connect Claude to Meta ads / MCP', 'why did the ad set create fail'. Clean marketing theory = meta-ads; tracker metrics = tracker-ops."
 ---
 
 # Meta Grey Ops
@@ -76,6 +76,7 @@ Not in the scripts and therefore on you: account-level "test new optimizations" 
 | **Autolaunch parity**: what Dolphin Cloud / FBTool / cabinet.partners do, how (EAAB tokens), feature → our script or UI-only | `references/13-autolaunch-parity.md` |
 | Meta Ads MCP live tool inventory (106 tools, params) | `references/15-mcp-tools-live.md` |
 | **Agent launcher**: plan/apply/verify/activate contract, JSON output, locks | `references/16-metaops-agent-cli.md` |
+| **Catalog as one Google Sheet** — service-account setup, Commerce Manager scheduled feed, columns, `sheetfeed` | `references/17-catalog-via-google-sheets.md` |
 | Per-vertical playbooks (casino, nutra, crypto-trading, news-tg) | `playbooks/` — numbers are dated vendor/team priors, replace with live data |
 
 Declared gaps: no dating or loans playbook; `APP_PROMOTION` only directional in `playbooks/casino.md`.
@@ -102,7 +103,8 @@ workspace-bound `metaops` process. Run the isolated checks in `16` after any edi
 | `comments.py` | comment reads remain usable; hide/delete is not agent-exposed | no spend |
 | `mcp.py` | official Meta Ads MCP: tools, rollout diagnostics, allowlisted reads only; mutating tools are rejected in code | no |
 | `mutate_set.py` | internal `metaops assets set-products` implementation | no spend |
+| `sheetfeed.py` | edit/validate the Google-Sheet catalog via service account (`17`); Meta pulls it as a scheduled feed | no spend |
 | `uniquify.py` · `page.py` | local creative variants · Page writes (Page writes not agent-exposed) | no spend |
 
-Env: `META_TOKEN` (required), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
+Env: `META_TOKEN` (required), `GSHEETS_JSON_KEY_FILE` (sheetfeed only), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
 (adds `appsecret_proof`), `META_API_VERSION` (pinned `v26.0`). Never pass a token on argv.

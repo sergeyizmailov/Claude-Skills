@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "requests[socks]>=2.32",
-  "Pillow>=10"
+  "Pillow>=10",
+  "google-auth>=2.30"
 ]
 
 [dependency-groups]
@@ -21,13 +22,14 @@ dev = [
 
 [project.scripts]
 metaops = "metaops:main"
+sheetfeed = "sheetfeed:main"
 
 [tool.setuptools]
 package-dir = {"" = "scripts"}
 py-modules = [
   "activate", "asset_graph", "bulk", "clone", "comments", "edit", "graph",
   "insights", "launch", "mcp", "media", "meta_workspace", "metaops", "monitor",
-  "mutate_set", "page", "probe", "rules", "uniquify", "verify"
+  "mutate_set", "page", "probe", "rules", "sheetfeed", "uniquify", "verify"
 ]
 
 [tool.ruff]

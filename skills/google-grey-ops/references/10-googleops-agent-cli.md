@@ -93,6 +93,13 @@ its actions are opaque), business identity / phone / address verification, US ta
 surface found 2026-09-02), shipping settings insert (full-replace semantics; do it in the UI until
 a spec exists).
 
+## `sheetfeed` (Google Sheet as catalog)
+
+`sheetfeed --sheet <url|id> [--tab products] --json info|init-header|validate --target mc|meta|both|pull|upsert --file|set --id --field --value`.
+Service-account key via `GSHEETS_JSON_KEY_FILE` (falls back to `GMC_JSON_KEY_FILE`), shared on the
+sheet as Editor; MC reads the sheet as a UI-created Google Sheets source. Recipe and traps:
+`meta-grey-ops/references/17-catalog-via-google-sheets.md`.
+
 ## Offline checks
 
 ```bash

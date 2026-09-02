@@ -59,6 +59,10 @@ settings** — UI-only, no Merchant API surface found 2026-09-02. Both are revie
 - API: `gmcops datasources create-api` (label + language for a targeted source; omit both for
   any-label) → `gmcops products insert --data-source … --file …`. Products are only writable in
   API-type sources; processed copy readable after "several minutes"; `id` = `lang~label~offerId`.
+- Google Sheets source: Products → Add product source → Google Sheets → existing sheet (UI only;
+  Merchant API cannot create it). Agent edits rows with `sheetfeed --target mc` via a service
+  account shared as Editor (`GSHEETS_JSON_KEY_FILE`); MC fetches with its own identity, so a
+  Workspace admin may need to allow external sharing. Full recipe: `meta-grey-ops/17`.
 - Never mix write methods on one source (`01`). Price/availability in the feed must equal the
   landing page **and checkout total**.
 

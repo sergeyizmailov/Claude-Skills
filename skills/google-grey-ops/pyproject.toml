@@ -16,6 +16,7 @@ dependencies = [
   "google-shopping-merchant-reports>=1.5",
   "google-shopping-merchant-issueresolution>=1.4",
   "requests>=2.32",
+  "google-auth>=2.30",
 ]
 
 [dependency-groups]
@@ -24,10 +25,11 @@ dev = ["jsonschema>=4.23", "ruff>=0.12"]
 [project.scripts]
 googleops = "googleops:main"
 gmcops = "gmcops:main"
+sheetfeed = "sheetfeed:main"
 
 [tool.setuptools]
 package-dir = {"" = "scripts"}
-py-modules = ["googleops", "gads_workspace", "gads_client", "gads_spec", "gads_build", "gads_verify", "gmcops"]
+py-modules = ["googleops", "gads_workspace", "gads_client", "gads_spec", "gads_build", "gads_verify", "gmcops", "sheetfeed"]
 
 [tool.ruff]
 line-length = 100
