@@ -60,7 +60,7 @@ Include the evidence label inline for high-impact recommendations. Prices, thres
 
 Graph API majors ship ~2×/year; a version number goes stale within months — check changelog (§7) before asserting "current".
 
-A Marketing API version is available **~12 months TOTAL** (v24.0 ran 2025-10-08 → 2026-10-06) — shorter than Graph API's 2-year core guarantee; don't conflate the two. The "90 days" on the versions page is the **minimum overlap after a new version ships**, not extra grace time and not the lifetime. Marketing API rejects unversioned calls outright. Pin the version in every script. Per-version dates exist only in the Graph API changelog's Marketing API table — the `marketing-api/versions` page carries none. [verified 2026-08-31]
+A Marketing API version is available **~12 months TOTAL** (v24.0 ran 2025-10-08 → 2026-10-06) — shorter than Graph API's 2-year core guarantee (v24 stays callable on Graph core until 2028-02-18, `meta-grey-ops/02`); two independent clocks, don't conflate. The "90 days" on the versions page is the **minimum overlap after a new version ships**, not extra grace time and not the lifetime. Marketing API rejects unversioned calls outright. Pin the version in every script. Per-version dates exist only in the Graph API changelog's Marketing API table — the `marketing-api/versions` page carries none. [verified 2026-08-31]
 
 | Version | Released | Status (2026-08-31) | Notes |
 |---|---|---|---|
@@ -84,7 +84,7 @@ Live account overrides any row here.
 | Headline | 40 UI practical / 255 technical | Sources conflict; plan for 40 | `04`§7 |
 | Description | 30 practical / 125 technical | | `04`§7 |
 | Lookalike range | 1–10% similarity | Suggestion, not a hard control, under conversions optimization | `05` |
-| Learning-phase volume | "~50 events/7 days per ad set" | Heuristic, never official | SKILL, `06`§4 |
+| Learning-phase volume | "~50 events/7 days per ad set" | Meta-published guideline (Help Center "About the learning phase"), not a guarantee; exit depends on delivery status | SKILL, `06`§4 |
 | Stories safe zone | top ~14% (~250px), bottom ~20% (~340px) | 1080×1920 canvas | `04`§4 |
 | Reels safe zone | top ~14%, bottom ~350px practical | UI-version dependent | `04`§4 |
 

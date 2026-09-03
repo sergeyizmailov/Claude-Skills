@@ -39,9 +39,9 @@ Goals are averages over time, not per-result caps. All constrained strategies (c
 ## 4. Learning Phase
 
 - States: Learning → Learning limited (insufficient events) → active — check live Delivery-column status, hover for detail.
-- Official guidance does **not** publish `50 events/7 days` or a universal 20–40% CPA penalty as current rule. `50/7` is a legacy heuristic; a practitioner-observed variant of `10 events/3 days` has also surfaced — use live status per account, not either number as guaranteed.
+- Help Center "About the learning phase" publishes ~`50 events/7 days` as a guideline (verified 2026-09-03), not a guarantee; the 20–40% CPA penalty is not an official rule. `50/7` is a planning anchor; a practitioner-observed variant of `10 events/3 days` has also surfaced — use live status per account, not either number as guaranteed.
 - Significant edits (targeting, optimization, creative, bid, schedule, budget) can return delivery to learning — **no universal 20%/30% budget-change threshold is published**; check live status after any edit. [W: do not assert a fixed % as an official gate]
-- Exit faster: fund a decision-useful result count (legacy 50/7 is a scenario, not requirement); **consolidate** ad sets (core structural advice); use a higher-frequency proxy event only if still tied to business value (cheaper proxy events can reduce buyer quality — test against purchase optimization); minimize nonessential edits; observe ≥1 conversion-delay window (7 days is a common start, not universal); pool learning via Advantage+/Advantage campaign budget.
+- Exit faster: fund a decision-useful result count (50/7 is a guideline, not a requirement); **consolidate** ad sets (core structural advice); use a higher-frequency proxy event only if still tied to business value (cheaper proxy events can reduce buyer quality — test against purchase optimization); minimize nonessential edits; observe ≥1 conversion-delay window (7 days is a common start, not universal); pool learning via Advantage+/Advantage campaign budget.
 
 ## 5. Cost Benchmarks
 
@@ -94,7 +94,7 @@ Claimed global avg CPM $6.59 — don't extrapolate to unlisted markets (no relia
 
 ## 6. What Affects Costs
 
-1. **Auction**: bid × estimated action rate × ad quality ("total value") — highest bid doesn't necessarily win; no universal CPM multiplier for a weak hook.
+1. **Auction**: total value = bid × estimated action rate, weighted with ad quality (Meta publishes no exact operator; sources differ on × vs +) — highest bid doesn't necessarily win; no universal CPM multiplier for a weak hook.
 2. **Objective**: Reach/awareness cheapest CPM (US ~$10–15); traffic mid; leads/sales highest (US lead gen $25–40 CPM, sales $20–30) — smaller/higher-value pool. Wrong objective = structural cost mistake.
 3. **Seasonality**: Q4 (Oct–Dec) CPMs +40–80% (adlibrary) / +60%+ (AdAmigo); Jan resets lower (global median CPM $25.22 Nov 2025 → $15.74 Jan 2026, AdAmigo). Election years add shocks. BFCM week itself can show *cheaper* CPMs on some datasets (Gupta Media: 12–27% cheaper IG CPMs BFCM 2024) — the weeks around it are the expensive part, not BFCM itself.
 4. **Placement**: Reels often cheaper than Feed in third-party data, but gap/downstream CPA vary by account.
@@ -147,7 +147,7 @@ Practitioner: Tribe Up Academy/Jason Gan (budget mechanics), Stackmatix/TryVizUp
 ## Gaps
 
 - Exact daily-budget floor for conversions: sources conflict ($1 vs $5/day) — live field validation is authoritative.
-- Whether the 10-events/3-days learning variant (Loomer, 2024) has broadly rolled out by 2026 is unconfirmed; Meta docs reportedly still say 50/7.
+- Whether the 10-events/3-days learning variant (Loomer, 2024) has broadly rolled out by 2026 is unconfirmed; Meta docs still say 50/7 (verified 2026-09-03).
 - No credible CIS-region (Ukraine/Kazakhstan/Uzbekistan) CPM/CPC dataset; Russia excluded since March 2022.
 - AdAmigo geo table is vendor-projected, undisclosed methodology — directional only, US $23 CPM at high end of other estimates ($13–23).
 - WordStream 2025 panel is Facebook-placement; no comparably large Instagram-only industry panel found.

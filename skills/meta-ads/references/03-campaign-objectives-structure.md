@@ -113,7 +113,7 @@ One separator consistently (underscores > spaces for exports/URLs). 5–7 elemen
 ### 6.1 Consolidation wins
 
 The 2010s playbook (many narrow ad sets, ABO, manual segmentation) now mechanically hurts delivery:
-- **50 events/7 days** is a longstanding planning heuristic, not a published threshold — durable point: splitting limited result volume across redundant ad sets reduces each set's chance to stabilize.
+- **50 events/7 days** is Meta's published guideline, not a guaranteed threshold — durable point: splitting limited result volume across redundant ad sets reduces each set's chance to stabilize.
 - **Auction overlap**: overlapping ad sets de-duplicate in-auction — only the highest Total Value ad enters; the rest don't bid. Five overlapping ad sets buy one auction entry, not 5× reach.
 - CBO only optimizes the pool it's given — 2 broad healthy ad sets beat 8 thin overlapping ones.
 - Meta removed the old counter-levers: ad-set max spend is an average not a cap; ASC folded into default-on Advantage+.
