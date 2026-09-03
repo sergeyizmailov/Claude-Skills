@@ -68,7 +68,7 @@ ALLOWED_AD_FORMATS = frozenset({
 })
 
 REVIEW_BLOCKING = {"DISAPPROVED", "WITH_ISSUES"}
-AD_REVIEW_FIELDS = "id,name,effective_status,configured_status,issues_info,ad_review_feedback"
+AD_REVIEW_FIELDS = "id,account_id,name,effective_status,configured_status,issues_info,ad_review_feedback"
 
 
 # --------------------------------------------------------------------------- shared helpers
@@ -120,6 +120,21 @@ def _load_accounts(ctx, arg: str) -> list[str]:
     return [ctx.graph.normalize_account(i) for i in ids if str(i).strip()]
 
 
+def _bound_accounts(ctx, workspace, arg: str, label: str) -> list[str]:
+    """Resolve an input list and reject token-visible accounts outside this workspace."""
+    accounts = _load_accounts(ctx, arg)
+    declared = {
+        ctx.graph.normalize_account(profile["ad_account_id"])
+        for profile in workspace.data.get("profiles", {}).values()
+    }
+    outside = sorted(set(accounts) - declared)
+    if outside:
+        raise ctx.MetaOpsError(
+            f"{label} accounts are not declared by this workspace: {outside}; add/select their profiles first"
+        )
+    return accounts
+
+
 # --------------------------------------------------------------------------- review
 
 
@@ -132,25 +147,26 @@ def _review_ad_ids(ctx, args, account: str) -> list[str]:
         return [a.strip() for a in args.ids.split(",") if a.strip()]
     out: list[str] = []
     path, params = f"{account}/ads", {"fields": "id", "limit": 500}
-    while path:
+    while True:
         resp = ctx.graph.get(path, params=params, context="review ads")
         out.extend(str(a["id"]) for a in resp.get("data", []))
-        path = (resp.get("paging") or {}).get("next")
-        params = {}
+        params = ctx.graph.next_page_params(resp, params)
+        if params is None:
+            break
     return out
 
 
 def _review_all_ads(ctx, account: str) -> list[dict[str, Any]]:
     """Read review fields on the account edge to avoid one request per ad."""
     rows: list[dict[str, Any]] = []
-    path: str | None = f"{account}/ads"
+    path = f"{account}/ads"
     params: dict[str, Any] = {"fields": AD_REVIEW_FIELDS, "limit": 500}
-    while path:
+    while True:
         response = ctx.graph.get(path, params=params, context="review ads")
         rows.extend(row for row in response.get("data", []) if isinstance(row, dict))
-        path = (response.get("paging") or {}).get("next")
-        params = {}
-    return rows
+        params = ctx.graph.next_page_params(response, params)
+        if params is None:
+            return rows
 
 
 def command_review(args, ctx) -> tuple[int, dict[str, Any]]:
@@ -178,6 +194,13 @@ def command_review(args, ctx) -> tuple[int, dict[str, Any]]:
         if args.all:
             raise ctx.MetaOpsError(f"no ads found on {account}")
         raise ctx.MetaOpsError("no ad ids resolved from --state or --ids")
+
+    for ad in ads:
+        actual = ad.get("account_id")
+        if not actual or ctx.graph.normalize_account(actual) != account:
+            raise ctx.MetaOpsError(
+                f"review ad {ad.get('id') or '?'} belongs to {actual or '?'} not {account}; refusing cross-profile read"
+            )
 
     rows: list[dict[str, Any]] = []
     counts: dict[str, int] = {}
@@ -244,9 +267,8 @@ def command_monitor(args, ctx) -> tuple[int, dict[str, Any]]:
         )
 
     operate_dir = _operate_dir(workspace)
-    accounts_arg = (
-        str(ctx.resolve_input(args.accounts)) if args.accounts.endswith(".json") else args.accounts
-    )
+    accounts = _bound_accounts(ctx, workspace, args.accounts, "monitor")
+    accounts_arg = ",".join(accounts)
     log_path = ctx.resolve_input(args.log) if args.log else (workspace.state_root / "survival.jsonl").resolve()
     json_path = (
         ctx.resolve_input(args.out_json)
@@ -328,7 +350,7 @@ def command_comments(args, ctx) -> tuple[int, dict[str, Any]]:
 
     child_args = ["--page", page_id]
     if args.ads:
-        child_args += ["--ads", args.ads]
+        child_args += ["--ads", args.ads, "--expected-account", account]
     elif args.all:
         child_args += ["--account", account]
     else:
@@ -453,7 +475,7 @@ def _insights_pull(args, ctx) -> tuple[int, dict[str, Any]]:
 def _insights_leaderboard(args, ctx) -> tuple[int, dict[str, Any]]:
     workspace = _require_workspace(ctx, args, "insights leaderboard")
     operate_dir = _operate_dir(workspace)
-    accounts = _load_accounts(ctx, args.accounts)
+    accounts = _bound_accounts(ctx, workspace, args.accounts, "insights leaderboard")
     if not accounts:
         raise ctx.MetaOpsError("insights leaderboard: no accounts resolved from --accounts")
 

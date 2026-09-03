@@ -111,8 +111,14 @@ def gate_visible_accounts(r: Report, account: str | None) -> None:
     An account absent from /me/adaccounts is one the System User was not assigned to —
     reads may still work through a Page role while every write fails."""
     try:
-        rows = graph.get("me/adaccounts", params={"fields": "id,name", "limit": 500},
-                         context="visible ad accounts").get("data", [])
+        rows: list[dict] = []
+        params: dict = {"fields": "id,name", "limit": 500}
+        while True:
+            page = graph.get("me/adaccounts", params=params, context="visible ad accounts")
+            rows.extend(page.get("data", []))
+            params = graph.next_page_params(page, params)
+            if params is None:
+                break
     except graph.GraphError as e:
         r.add("visible ad accounts", WARN, f"could not list: {e}")
         return
@@ -353,6 +359,8 @@ def main() -> int:
 
     if not args.account and not args.whoami:
         ap.error("--account is required unless --whoami")
+    if args.whoami and any((args.page, args.dataset, args.business, args.create_pbia, args.attach_pixel)):
+        ap.error("--whoami is intake-only; do not combine it with account/Page/dataset mutations")
     r = Report()
     if args.whoami:
         print(f"Graph {graph.API_VERSION} · token intake")
@@ -364,7 +372,7 @@ def main() -> int:
         if args.json:
             with open(args.json, "w", encoding="utf-8") as fh:
                 fh.write(graph.redact(json.dumps(r.rows, indent=2, default=str)))
-        return 0
+        return 1 if r.failed else 0
     account = graph.normalize_account(args.account)
 
     print(f"Graph {graph.API_VERSION} · {account}")

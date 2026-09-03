@@ -12,14 +12,15 @@ here for mechanics.
 
 | Pipe | What | Use for | Not for |
 |---|---|---|---|
-| **Marketing API direct** (`scripts/`) | Graph calls, System User or long-lived user token | **every launch and write.** Only surface with confirmed control of `attribution_spec`, `degrees_of_freedom_spec`, `contextual_multi_ads`, `asset_feed_spec`, catalog/template creatives, `validate_only`, batching | — |
+| **Marketing API via `metaops`** (internal `scripts/`) | Workspace-bound Graph calls, System User or long-lived user token | **every agent launch and write.** Only surface with confirmed control of `attribution_spec`, `degrees_of_freedom_spec`, `contextual_multi_ads`, `asset_feed_spec`, catalog/template creatives, `validate_only`, batching | direct low-level script writes — internal implementation only |
 | **Meta Ads MCP** (`mcp.facebook.com/ads`) | Meta-hosted, 106 tools (live 2026-09-02), bearer System User token w/ `ads_mcp_management` or OAuth; per-account rollout flag | conversational reads: insights, anomaly/benchmarks, entity search, previews, catalog/pixel diagnostics, Ad Library; bounded edits (`ads_update_entity`) | launches: no `contextual_multi_ads` (inherits OPT_IN), defaults push 7d-click/CBO/Advantage+, no `validate_only`, no batch, one account/call, `ads_get_ad_entities` can't read `attribution_spec` back — §5 |
-| **Meta Ads CLI** (`pip install meta-ads`, `12`) | click CLI over `facebook-business` SDK, System User token via `ACCESS_TOKEN` | single-object creates w/ exact params (raw JSON flags), image/DCO upload, `dataset connect`, catalog CRUD, quick reads, insights | bulk: no `validate_only`, no multi-account, no resume state, no read-back diff, no currency guard, no proxy setting, SDK video host deprecated (#701) |
+| **Meta Ads CLI** (`pip install meta-ads`, `12`) | click CLI over `facebook-business` SDK, System User token via `ACCESS_TOKEN` | human-operator inspection and diagnosis | **all agent writes** — it has no workspace binding or spend-confirmation gates; also no `validate_only`, multi-account run, resume state, read-back diff, currency guard, or proxy setting; SDK video host deprecated (#701) |
 | Third-party Meta MCP servers (pipeboard, hashcott, brijr, ScaleForge…) | community wrappers | nothing here | shared dev apps + raw tokens + unsupervised writes = reported ban mechanism [practitioner-multiple, no Meta statement]; never hand a work token to one |
 | CSV bulk import | Ads Manager | human review of thousands of rows | agents: no validate_only; blocked on fresh accounts (3738001) |
 
-Rule: **agent writes → direct API.** CLI (`12`) sanctioned for single objects/housekeeping;
-MCP is read/analysis only, parameter coverage unproven; every skill-critical default
+Rule: **agent writes → workspace-bound `metaops` API.** The official CLI (`12`) is an
+operator reference/diagnostic tool, never an agent write path. MCP is read/analysis only,
+parameter coverage unproven; every skill-critical default
 (SKILL.md § Launch defaults) enforceable only via `launch.py`. If forced through MCP: build
 PAUSED, read every ad set/creative back through API (`verify.py --state` accepts hand-written
 state files) before activation.

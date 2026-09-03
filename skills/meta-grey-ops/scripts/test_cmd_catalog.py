@@ -96,6 +96,11 @@ class CatalogFeedTests(unittest.TestCase):
         with self.assertRaisesRegex(metaops.MetaOpsError, "no feed id"):
             cmd_catalog.command_catalog_feed_uploads(args, metaops)
 
+    def test_feed_uploads_rejects_a_different_profile_feed(self) -> None:
+        args = args_for(feed_id="999", limit=25)
+        with self.assertRaisesRegex(metaops.MetaOpsError, "does not match"):
+            cmd_catalog.command_catalog_feed_uploads(args, metaops)
+
 
 class CatalogSetTests(unittest.TestCase):
     def test_set_create_encodes_filter_once_as_dict(self) -> None:

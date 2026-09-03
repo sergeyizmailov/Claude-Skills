@@ -11,7 +11,7 @@ Reviewed 2026-09-03. Launch/operate via API on your own token (= autolaunch SaaS
 
 | You are… | Read | Then |
 |---|---|---|
-| In a directory with `workspace.json` | `references/16-metaops-agent-cli.md` | use `metaops --workspace … --json`; stop reading |
+| In a directory with `workspace.json` | `references/16-metaops-agent-cli.md` | use `metaops --workspace … --json`; before activation also read `00` §6–8 |
 | Handed a token / asked to launch anything via API | `references/00-launch-runbook.md` | create a workspace in a project dir outside the skill (`scripts/specs/example-workspace.json`), validate it, then use `metaops` |
 | Setting up access, deciding MCP vs API, minting/handing over a token | `references/02-access-tokens-and-mcp.md` | come back to `00` |
 | Hit an error, a gate, a rejection, a dead token | `00` § "When a step fails" | the one file it names |
@@ -24,7 +24,7 @@ New shape → extend `metaops`/the implementation and its tests.
 
 | Setting | Default | Enforced by | Override |
 |---|---|---|---|
-| Object status at create | `PAUSED`, all levels | internal launcher; spend only via `metaops activate --confirm SPEND` | none |
+| Object status at create | `PAUSED`, all levels | internal launcher; spend only via `metaops activate --confirm-ui REVIEWED --confirm SPEND` | none |
 | Attribution | 1d click / 1d engaged-view / 1d view on conversion goals; **1d click only** on LINK_CLICKS/REACH/etc. (Meta rejects view windows there, 1885501). Set at CREATE (immutable after, 1504040) | `launch.py` `DEFAULT_ATTRIBUTION`; `verify.py` reads it back | `attribution: {...}` or `"account_default"` |
 | Advantage+ creative enhancements | every feature `OPT_OUT` incl. `adapt_to_placement`; music via `audios: []` | `launch.py` `DEFAULT_OPT_OUT`; `verify.py` flags any `OPT_IN` | `creative.opt_out_features` |
 | Multi-advertiser ads | `contextual_multi_ads: OPT_OUT` on every creative (Meta Ads MCP cannot set it — its creatives inherit OPT_IN) | `launch.py`; readable on link/template creatives, **UI check while PAUSED** on FORMAT_AUTOMATION collections | `creative.multi_advertiser: true` |
@@ -74,6 +74,7 @@ Not in the scripts and therefore on you: account-level "test new optimizations" 
 | PWA funnel builders: join macros, postbacks, CAPI, QA gates | `references/11-pwa-funnel-builders.md` |
 | **Meta Ads CLI** (`pip install meta-ads`): what it can do, flags, traps — read before reaching for it | `references/12-meta-ads-cli.md` |
 | **Autolaunch parity**: what Dolphin Cloud / FBTool / cabinet.partners do, how (EAAB tokens), feature → our script or UI-only | `references/13-autolaunch-parity.md` |
+| Canonical Graph error codes and fixes (not a local reference 14) | `meta-ads/14` |
 | Meta Ads MCP live tool inventory (106 tools, params) | `references/15-mcp-tools-live.md` |
 | **Agent launcher**: plan/apply/verify/activate contract, JSON output, locks | `references/16-metaops-agent-cli.md` |
 | **Catalog as one Google Sheet** — service-account setup, Commerce Manager scheduled feed, columns, `sheetfeed` | `references/17-catalog-via-google-sheets.md` |

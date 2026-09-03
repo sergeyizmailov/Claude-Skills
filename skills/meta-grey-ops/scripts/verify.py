@@ -25,7 +25,9 @@ CAMPAIGN_FIELDS = (
 ADSET_FIELDS = (
     "id,name,status,effective_status,optimization_goal,billing_event,bid_strategy,"
     "bid_amount,daily_budget,start_time,end_time,promoted_object,attribution_spec,"
-    "targeting,dsa_beneficiary,dsa_payor,issues_info"
+    "targeting,dsa_beneficiary,dsa_payor,destination_type,is_dynamic_creative,"
+    "regional_regulated_categories,regional_regulation_identities,daily_min_spend_target,"
+    "daily_spend_cap,issues_info"
 )
 AD_FIELDS = (
     "id,name,status,effective_status,issues_info,conversion_domain,"
@@ -253,6 +255,11 @@ def main() -> int:
         a = graph.get(adset_id, params={"fields": ADSET_FIELDS}, context=f"verify adset {i}")
         print(f"\n  adset[{i}] {adset_id}  {a.get('name')}")
         if spec:
+            if i >= len(spec.get("adsets") or []):
+                print(f"    MISMATCH  state has adset[{i}] but the bound spec has no such ad set")
+                d.bad += 1
+                i += 1
+                continue
             s = spec["adsets"][i]
             d.check("optimization_goal", s["optimization_goal"], a.get("optimization_goal"))
             d.check("billing_event", s.get("billing_event", "IMPRESSIONS"), a.get("billing_event"))
@@ -327,6 +334,11 @@ def main() -> int:
             print(f"      ad[{i}.{j}] {ad_id}  {ad.get('name')}")
             print(f"        identity page={story.get('page_id')} ig={story.get('instagram_user_id')}")
             if spec:
+                if i >= len(spec.get("adsets") or []) or j >= len(spec["adsets"][i].get("ads") or []):
+                    print(f"        MISMATCH  state has ad[{i}.{j}] but the bound spec has no such ad")
+                    d.bad += 1
+                    j += 1
+                    continue
                 d.check("        page_id", str(spec.get("page_id")), story.get("page_id"))
                 want_ig = spec.get("instagram_user_id")
                 if want_ig and want_ig != "auto":
@@ -335,7 +347,8 @@ def main() -> int:
                 node = story.get("link_data") or story.get("video_data") or {}
                 if wc.get("kind", "link_image") in ("link_image", "link_video"):
                     d.check("        message", wc.get("message", ""), node.get("message"))
-                    d.check("        headline", wc.get("headline"), node.get("name"))
+                    headline = node.get("title") if wc.get("kind") == "link_video" else node.get("name")
+                    d.check("        headline", wc.get("headline"), headline)
                     d.check("        cta", wc.get("cta", "LEARN_MORE"), (node.get("call_to_action") or {}).get("type"))
                     if wc.get("image_hash"):
                         d.check("        image_hash", wc["image_hash"], node.get("image_hash"))

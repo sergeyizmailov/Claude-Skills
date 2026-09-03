@@ -20,6 +20,7 @@ class FakeWorkspace:
     def __init__(self, state_root: pathlib.Path, profile_data: dict):
         self._state_root = state_root
         self._profile_data = profile_data
+        self.data = {"profiles": {"test": dict(profile_data)}}
 
     @property
     def state_root(self) -> pathlib.Path:
@@ -49,9 +50,9 @@ class ReviewTests(unittest.TestCase):
 
     def test_review_summary_and_exit_code_on_disapproved(self):
         ads = {
-            "111": {"id": "111", "name": "A", "effective_status": "ACTIVE",
+            "111": {"id": "111", "account_id": "1", "name": "A", "effective_status": "ACTIVE",
                     "configured_status": "ACTIVE", "issues_info": None, "ad_review_feedback": None},
-            "222": {"id": "222", "name": "B", "effective_status": "DISAPPROVED",
+            "222": {"id": "222", "account_id": "1", "name": "B", "effective_status": "DISAPPROVED",
                     "configured_status": "ACTIVE", "issues_info": None,
                     "ad_review_feedback": {"global": "bad landing page"}},
         }
@@ -73,7 +74,7 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(payload["error"]["kind"], "ad_review")
 
     def test_review_ok_when_nothing_blocking(self):
-        ads = {"111": {"id": "111", "name": "A", "effective_status": "ACTIVE",
+        ads = {"111": {"id": "111", "account_id": "1", "name": "A", "effective_status": "ACTIVE",
                        "configured_status": "ACTIVE", "issues_info": None, "ad_review_feedback": None}}
         args = make_args(
             workspace_obj=self.workspace, state=None, ids="111", all=False,
@@ -90,8 +91,8 @@ class ReviewTests(unittest.TestCase):
             previews=False, format="DESKTOP_FEED_STANDARD",
         )
         response = {"data": [
-            {"id": "111", "name": "A", "effective_status": "ACTIVE", "configured_status": "ACTIVE"},
-            {"id": "222", "name": "B", "effective_status": "DISAPPROVED", "configured_status": "ACTIVE"},
+            {"id": "111", "account_id": "1", "name": "A", "effective_status": "ACTIVE", "configured_status": "ACTIVE"},
+            {"id": "222", "account_id": "1", "name": "B", "effective_status": "DISAPPROVED", "configured_status": "ACTIVE"},
         ]}
         with mock.patch.object(metaops.graph, "get", return_value=response) as get:
             code, payload = cmd_operate.command_review(args, metaops)
@@ -118,6 +119,16 @@ class ReviewTests(unittest.TestCase):
         )
         with self.assertRaises(metaops.MetaOpsError):
             cmd_operate.command_review(args, metaops)
+
+    def test_review_rejects_an_ad_from_another_profile_account(self):
+        args = make_args(
+            workspace_obj=self.workspace, state=None, ids="111", all=False,
+            previews=False, format="DESKTOP_FEED_STANDARD",
+        )
+        ad = {"id": "111", "account_id": "2", "effective_status": "ACTIVE"}
+        with mock.patch.object(metaops.graph, "get", return_value=ad):
+            with self.assertRaisesRegex(metaops.MetaOpsError, "cross-profile"):
+                cmd_operate.command_review(args, metaops)
 
     def test_review_requires_workspace(self):
         args = make_args(workspace_obj=None, state=None, ids="111", all=False,
@@ -153,6 +164,7 @@ class MonitorTelegramTests(unittest.TestCase):
         os.environ["TG_CHAT_ID"] = "999"
         self.addCleanup(os.environ.pop, "TG_BOT_TOKEN", None)
         self.addCleanup(os.environ.pop, "TG_CHAT_ID", None)
+        self.workspace.data["profiles"]["second"] = {"ad_account_id": "act_2"}
 
         rows = [
             {"account": "act_1", "verdict": "OK", "status_label": "ACTIVE",
@@ -267,6 +279,7 @@ class LeaderboardTests(unittest.TestCase):
         self.workspace = FakeWorkspace(self.root, {"ad_account_id": "act_1", "page_id": "2"})
 
     def test_leaderboard_aggregates_by_ad_name_across_accounts(self):
+        self.workspace.data["profiles"]["second"] = {"ad_account_id": "act_2"}
         fixtures = {
             "act_1": [
                 {"ad_name": "creative_03_v1", "spend": "10.5", "impressions": "100", "clicks": "5",
@@ -311,6 +324,7 @@ class LeaderboardTests(unittest.TestCase):
         self.assertEqual(board[1]["ad_name"], "creative_03_v2")
 
     def test_leaderboard_refuses_to_sum_different_currencies(self):
+        self.workspace.data["profiles"]["second"] = {"ad_account_id": "act_2"}
         fixtures = {
             "act_1": [{"ad_name": "creative", "spend": "10", "account_currency": "USD"}],
             "act_2": [{"ad_name": "creative", "spend": "10", "account_currency": "EUR"}],
@@ -334,6 +348,16 @@ class LeaderboardTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(payload["phase"], "currency_mismatch")
         self.assertEqual(payload["data"]["currencies"], ["EUR", "USD"])
+
+    def test_leaderboard_rejects_an_undeclared_account_before_reads(self):
+        args = make_args(
+            workspace_obj=self.workspace, accounts="act_99", date_preset="yesterday",
+            csv=None, top=20, insights_mode="leaderboard",
+        )
+        with mock.patch.object(metaops, "run_child") as child:
+            with self.assertRaisesRegex(metaops.MetaOpsError, "not declared"):
+                cmd_operate.command_insights(args, metaops)
+        child.assert_not_called()
 
 
 if __name__ == "__main__":

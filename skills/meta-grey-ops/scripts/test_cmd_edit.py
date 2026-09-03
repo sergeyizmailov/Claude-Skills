@@ -241,47 +241,43 @@ class CmdEditTests(unittest.TestCase):
     # --- edit ramp ---------------------------------------------------------
 
     def test_edit_ramp_requires_confirm_ramp(self) -> None:
-        args = self.parse(["edit", "ramp", "--ids", "1", "--steps", "20,20"])
+        args = self.parse(["edit", "ramp", "--ids", "1", "--step", "20"])
         with self.assertRaises(metaops.MetaOpsError):
             args.handler(args)
 
     def test_edit_ramp_wrong_confirm_literal_refused(self) -> None:
-        args = self.parse(["edit", "ramp", "--ids", "1", "--steps", "20", "--confirm", "YES"])
+        args = self.parse(["edit", "ramp", "--ids", "1", "--step", "20", "--confirm", "YES"])
         with self.assertRaises(metaops.MetaOpsError):
             args.handler(args)
 
     def test_edit_ramp_step_over_guard_refused(self) -> None:
-        args = self.parse(["edit", "ramp", "--ids", "1", "--steps", "25", "--confirm", "RAMP"])
+        args = self.parse(["edit", "ramp", "--ids", "1", "--step", "25", "--confirm", "RAMP"])
         with self.assertRaises(metaops.MetaOpsError):
             args.handler(args)
 
-    def test_edit_ramp_sequential_calls_match_steps(self) -> None:
-        args = self.parse(["edit", "ramp", "--ids", "1", "--steps", "20,20,20", "--confirm", "RAMP"])
+    def test_edit_ramp_makes_exactly_one_guarded_call(self) -> None:
+        args = self.parse(["edit", "ramp", "--ids", "1", "--step", "20", "--confirm", "RAMP"])
         with mock.patch.object(
             metaops, "run_child",
             return_value=fake_child('{"schema": "edit.result/v1", "ok": true}\n'),
         ) as run_child:
             code, payload = args.handler(args)
         self.assertEqual(code, 0)
-        self.assertEqual(run_child.call_count, 3)
-        for call in run_child.call_args_list:
-            _script, child_args, _timeout = call[0]
-            self.assertEqual(child_args, ["--ids", "1", "--expected-account", "act_1", "--budget-pct", "+20"])
-        self.assertEqual(len(payload["data"]["steps"]), 3)
+        run_child.assert_called_once()
+        _script, child_args, _timeout = run_child.call_args[0]
+        self.assertEqual(child_args, ["--ids", "1", "--expected-account", "act_1", "--budget-pct", "+20"])
+        self.assertEqual(payload["data"]["step_pct"], 20)
 
-    def test_edit_ramp_stops_on_first_child_failure(self) -> None:
-        args = self.parse(["edit", "ramp", "--ids", "1", "--steps", "20,20,20", "--confirm", "RAMP"])
+    def test_edit_ramp_propagates_child_failure(self) -> None:
+        args = self.parse(["edit", "ramp", "--ids", "1", "--step", "20", "--confirm", "RAMP"])
         with mock.patch.object(
             metaops, "run_child",
-            side_effect=[
-                fake_child('{"schema": "edit.result/v1", "ok": true}\n'),
-                fake_child("boom\n", returncode=1),
-            ],
+            return_value=fake_child("boom\n", returncode=1),
         ) as run_child:
             code, payload = args.handler(args)
         self.assertEqual(code, 1)
         self.assertFalse(payload["ok"])
-        self.assertEqual(run_child.call_count, 2)
+        self.assertEqual(run_child.call_count, 1)
 
     # --- clone -----------------------------------------------------------
 
@@ -332,6 +328,16 @@ class CmdEditTests(unittest.TestCase):
             {"id": "archived", "status": "ARCHIVED"},
         ]
         self.assertEqual([row["id"] for row in clone.copyable(rows, "ad")], ["active"])
+
+    def test_ad_copy_omits_deep_copy_parameter(self) -> None:
+        with mock.patch.object(clone.graph, "post", return_value={"copied_ad_id": "99"}) as post:
+            self.assertEqual(clone.copy_obj("42", {"adset_id": "7"}, False, "ad"), "99")
+        self.assertNotIn("deep_copy", post.call_args.args[1])
+
+    def test_campaign_copy_keeps_shallow_copy_parameter(self) -> None:
+        with mock.patch.object(clone.graph, "post", return_value={"copied_campaign_id": "99"}) as post:
+            self.assertEqual(clone.copy_obj("42", {}, False, "campaign"), "99")
+        self.assertEqual(post.call_args.args[1]["deep_copy"], False)
 
     def test_edit_child_rejects_opaque_id_outside_expected_account_before_post(self) -> None:
         argv = [

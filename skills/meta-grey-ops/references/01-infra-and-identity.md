@@ -11,8 +11,8 @@ security score → checkpoint / session kill / restriction / disable.
 
 Operational session hygiene, not a Meta auth requirement — API calls needn't share
 the browser's IP. A grey persona's trust rests on looking like one consistent human.
-Server-side System User token (`02`) exempt (no browser session); agency tenants
-rarely have one — default same-IP.
+Token type does not waive the assigned-egress rule; direct egress needs an explicit
+`META_ALLOW_NO_PROXY=1` decision for that BM (`02`).
 
 - Persona's entire life from ONE exit IP: browser, API, token gen. Route scripts
   through the same proxy from a secrets file — don't trust a human to VPN.

@@ -72,7 +72,7 @@ def _require_confirm(ctx: Any, args: argparse.Namespace, expected: str, label: s
 
 TASKS_BY_ASSET = {
     "adaccount": frozenset({"AA_ANALYZE", "ADVERTISE", "ANALYZE", "DRAFT", "MANAGE"}),
-    "page": frozenset({"AA_ANALYZE", "ADVERTISE", "ANALYZE", "DRAFT", "MANAGE"}),
+    "page": frozenset({"ADVERTISE", "ANALYZE", "MANAGE"}),
     "pixel": frozenset({"ADVERTISE", "ANALYZE", "EDIT", "UPLOAD"}),
 }
 
@@ -105,8 +105,9 @@ def _list_edge(ctx: Any, node_id: str, edge: str, fields: str, limit: int = 200)
     while path:
         resp = ctx.graph.get(path, params=params, context=f"business {edge}")
         out.extend(resp.get("data", []))
-        path = (resp.get("paging") or {}).get("next")
-        params = {}
+        params = ctx.graph.next_page_params(resp, params)
+        if params is None:
+            break
     return out
 
 

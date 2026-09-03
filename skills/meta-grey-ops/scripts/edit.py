@@ -50,10 +50,9 @@ def ids_from_account(account: str, level: str) -> list[str]:
     while True:
         resp = graph.get(path, params=params, context=edge)
         out.extend(o["id"] for o in resp.get("data", []))
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt:
+        params = graph.next_page_params(resp, params)
+        if params is None:
             return out
-        path, params = nxt, {}
 
 
 def account_hour(obj: dict) -> int | None:
@@ -110,6 +109,8 @@ def main() -> int:
                  "for a fresh launch, which also refreshes start_time).")
     if args.status == "PAUSED" and args.confirm != "PAUSE":
         sys.exit("--status PAUSED changes delivery: pass --confirm PAUSE.")
+    if args.status == "ARCHIVED" and args.confirm != "ARCHIVE":
+        sys.exit("--status ARCHIVED is destructive: pass --confirm ARCHIVE.")
 
     bad = 0
     results: list[dict] = []

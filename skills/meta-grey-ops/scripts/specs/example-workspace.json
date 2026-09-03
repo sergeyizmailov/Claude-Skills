@@ -24,7 +24,7 @@
   "defaults": {
     "profile": "<profile>",
     "token_env": "META_TOKEN",
-    "allow_no_proxy": true,
+    "allow_no_proxy": false,
     "state_dir": ".metaops"
   }
 }

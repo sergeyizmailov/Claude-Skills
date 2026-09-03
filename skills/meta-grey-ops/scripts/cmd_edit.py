@@ -22,7 +22,7 @@ Command surface:
     edit budget  --ids a,b (--budget-minor N | --budget-pct +-N) [--force-step]
                  [--confirm SPEND] [--dry-run]
     edit rename  --ids a,b --prefix P [--suffix S] [--dry-run]
-    edit ramp    --ids a,b --steps 20,20,20 --confirm RAMP [--dry-run]
+    edit ramp    --ids a,b --step 20 --confirm RAMP [--dry-run]
 
     clone campaign|adset|ad ID [--times N] [--prefix P] [--suffix S] [--start ISO]
           [--into-campaign ID] [--into-adset ID] [--dry-run]
@@ -43,8 +43,8 @@ is therefore refused rather than relying on its numeric shape.
 Any action that sets ACTIVE (spend can start) or can raise a budget requires the
 literal `--confirm SPEND`; PAUSED status changes require `--confirm PAUSE`.
 `edit.py` receives its own status literal (`ACTIVATE`/`PAUSE`).
-`edit ramp` requires the distinct literal `--confirm RAMP` since it composes several
-budget raises. `rules ... --mode pause` requires `--confirm RULES` since an armed
+`edit ramp` requires the distinct literal `--confirm RAMP`; it applies exactly one
+guarded budget raise per invocation. `rules ... --mode pause` requires `--confirm RULES` since an armed
 pause rule can act unattended; `rules execute` requires `--confirm EXECUTE`; and
 `rules delete` requires `--confirm DELETE`.
 
@@ -58,9 +58,8 @@ against developers.facebook.com (verified 2026-09-03, SDK 26.0.1):
   · `Ad.create_copy` param_types: adset_id (string), creative_parameters
     (AdCreative), rename_options (Object), status_option (status_option_enum).
     Endpoint POST /{id}/copies.
-  · `AdCampaign` has NO `create_copy` in this SDK build — there is no campaign-level
-    copy helper class method at all. This matches clone.py's own approach: a
-    campaign copy is a generic POST to `{campaign_id}/copies`, not an SDK method.
+  · `Campaign.create_copy` exists and accepts `deep_copy`, but clone.py still copies a
+    campaign level-by-level because Graph caps deep copies and that preserves PAUSED children.
   · `AdAccount.create_ad_rules_library` and `AdAccount.get_ad_rules_history` both
     exist (rules.py posts to `{account}/adrules_library` and reads
     `{account}/adrules_history`, matching these edges).
@@ -218,41 +217,27 @@ def handle_edit_ramp(args) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("edit ramp requires --ids")
     if args.confirm != RAMP_CONFIRM:
         raise ctx.MetaOpsError(f"edit ramp requires the literal --confirm {RAMP_CONFIRM}")
-    steps: list[int] = []
-    for raw in args.steps.split(","):
-        raw = raw.strip()
-        if not raw:
-            continue
-        try:
-            value = int(raw)
-        except ValueError as exc:
-            raise ctx.MetaOpsError(f"--steps must be comma-separated integers: {raw!r}") from exc
-        if not 0 < abs(value) <= RAMP_STEP_LIMIT:
-            raise ctx.MetaOpsError(
-                f"--steps value {value} exceeds edit.py's ±{RAMP_STEP_LIMIT}% per-edit guard"
-            )
-        steps.append(value)
-    if not steps:
-        raise ctx.MetaOpsError("--steps must contain at least one value")
-    step_results = []
-    for step in steps:
-        child_args = [
-            "--ids", args.ids, "--expected-account", account,
-            "--budget-pct", f"+{step}" if step > 0 else str(step),
-        ]
-        if args.dry_run:
-            child_args.append("--dry-run")
-        child = ctx.run_child("edit.py", child_args, args.timeout)
-        ctx.echo_child(child)
-        data = _parse_last_json_line(child.stdout)
-        step_results.append({"step_pct": step, "ok": child.ok, "data": data})
-        if not child.ok:
-            out = ctx.child_failure("edit ramp", "ramp_failed", child)
-            out["data"] = {"steps": step_results}
-            return child.returncode, out
+    step = args.step
+    if not 0 < abs(step) <= RAMP_STEP_LIMIT:
+        raise ctx.MetaOpsError(
+            f"--step {step} exceeds edit.py's ±{RAMP_STEP_LIMIT}% per-edit guard"
+        )
+    child_args = [
+        "--ids", args.ids, "--expected-account", account,
+        "--budget-pct", f"+{step}" if step > 0 else str(step),
+    ]
+    if args.dry_run:
+        child_args.append("--dry-run")
+    child = ctx.run_child("edit.py", child_args, args.timeout)
+    ctx.echo_child(child)
+    data = _parse_last_json_line(child.stdout)
+    if not child.ok:
+        out = ctx.child_failure("edit ramp", "ramp_failed", child)
+        out["data"] = {"step_pct": step, "data": data}
+        return child.returncode, out
     return 0, ctx.result_envelope(
-        "edit ramp", True, "ramped", data={"steps": step_results},
-        next_action="Wait for delivery to stabilize between rungs before the next ramp call.",
+        "edit ramp", True, "ramped", data={"step_pct": step, "data": data},
+        next_action="Wait 48–72 hours for delivery to stabilize before the next ramp invocation.",
     )
 
 
@@ -397,9 +382,9 @@ def register(sub: argparse._SubParsersAction, ctx) -> None:
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(handler=handle_edit_rename)
 
-    p = edit_sub.add_parser("ramp", help="sequential +N%% budget steps, each within the ±20%% guard")
+    p = edit_sub.add_parser("ramp", help="one guarded +N%% budget step; wait before the next rung")
     p.add_argument("--ids", required=True, help="comma-separated object ids")
-    p.add_argument("--steps", required=True, help="comma-separated percentages, e.g. 20,20,20")
+    p.add_argument("--step", required=True, type=int, help="one signed percentage, e.g. 20")
     p.add_argument("--confirm", help=f"literal {RAMP_CONFIRM}, required")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(handler=handle_edit_ramp)

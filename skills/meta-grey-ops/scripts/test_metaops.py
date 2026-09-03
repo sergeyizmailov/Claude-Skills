@@ -17,6 +17,7 @@ import jsonschema
 import mcp
 import metaops
 import monitor
+import probe
 
 os.environ.setdefault("META_TOKEN", "TEST_TOKEN")
 
@@ -389,6 +390,21 @@ class MetaOpsContractTests(unittest.TestCase):
             self.assertIn("requires a workspace", payload["error"]["message"])
             self.assertFalse((root / ".metaops").exists())
 
+    def test_invalid_timeout_environment_still_returns_one_json_envelope(self) -> None:
+        env = dict(os.environ, METAOPS_TIMEOUT_SECONDS="not-an-integer")
+        proc = subprocess.run(
+            [sys.executable, str(HERE / "metaops.py"), "--json", "doctor", "--whoami"],
+            cwd=HERE,
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+        )
+        self.assertEqual(proc.returncode, 2)
+        payload = json.loads(proc.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertIn("METAOPS_TIMEOUT_SECONDS", payload["error"]["message"])
+
     def test_low_level_graph_write_requires_metaops_authority(self) -> None:
         with (
             mock.patch.dict(os.environ, {"META_TOKEN": "TEST_TOKEN"}, clear=True),
@@ -398,6 +414,17 @@ class MetaOpsContractTests(unittest.TestCase):
             self.assertRaisesRegex(SystemExit, "direct Graph POST is disabled"),
         ):
             metaops.graph.post("act_1/campaigns", {"name": "blocked"})
+        session.assert_not_called()
+
+    def test_low_level_graph_write_rejects_an_empty_workspace_capability(self) -> None:
+        with (
+            mock.patch.dict(os.environ, {"META_TOKEN": "TEST_TOKEN"}, clear=True),
+            mock.patch.object(metaops.graph, "_WRITE_ACCOUNTS", set()),
+            mock.patch.object(metaops.graph, "_WRITE_CAPABILITY_LOADED", True),
+            mock.patch.object(metaops.graph, "session") as session,
+            self.assertRaisesRegex(SystemExit, "direct Graph POST is disabled"),
+        ):
+            metaops.graph.post("123/anything", {"name": "blocked"})
         session.assert_not_called()
 
     def test_low_level_graph_write_rejects_account_outside_workspace(self) -> None:
@@ -440,6 +467,21 @@ class MetaOpsContractTests(unittest.TestCase):
             "command": "doctor", "whoami": True, "workspace_obj": None,
         })()
         metaops.require_command_workspace(allowed)
+
+    def test_state_summary_does_not_claim_past_spec_ready_for_activation(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            spec = valid_spec()
+            spec["adsets"][0]["start_time"] = "2000-01-01T08:00:00+00:00"
+            spec_path = self.write_json(root, "spec.json", spec)
+            state_path = self.write_json(root, "state.json", {
+                "objects": {"campaign": "1", "adset[0]": "2", "ad[0.0]": "3"},
+                "in_flight": {}, "errors": [],
+            })
+            with mock.patch.object(metaops.activate, "check_receipt", return_value=None):
+                summary = metaops.state_summary(state_path, spec_path)
+            self.assertFalse(summary["activation_ready"])
+            self.assertIn("start_time is past", summary["activation_blocker"])
 
     def test_plan_cannot_move_to_another_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
@@ -531,6 +573,7 @@ class MetaOpsContractTests(unittest.TestCase):
                 "profile": "test",
                 "set": "main",
                 "retailer_ids": "sku-1",
+                "confirm": "SET",
                 "timeout": 10,
             })()
             with (
@@ -711,9 +754,23 @@ class FeedAndMonitorTests(unittest.TestCase):
             args.feed_id = "42"
             self.assertEqual(metaops.feed_binding(args)[2], "42")
 
+    def test_whoami_returns_nonzero_when_a_required_gate_fails(self) -> None:
+        def fail_gate(report):
+            report.add("token", probe.FAIL, "expired")
+
+        with (
+            mock.patch.object(probe.sys, "argv", ["probe.py", "--whoami"]),
+            mock.patch.object(probe, "gate_identity", side_effect=fail_gate),
+            mock.patch.object(probe, "gate_token_debug"),
+            mock.patch.object(probe, "gate_scopes"),
+            mock.patch.object(probe, "gate_visible_accounts"),
+            mock.patch.object(probe, "whoami_verdict"),
+        ):
+            self.assertEqual(probe.main(), 1)
+
     def test_monitor_adset_queries_follow_pagination(self) -> None:
         pages = [
-            {"data": [{"id": "a1", "issues_info": {"error_code": 1}}], "paging": {"next": "next"}},
+            {"data": [{"id": "a1", "issues_info": {"error_code": 1}}], "paging": {"cursors": {"after": "cursor"}, "next": "next"}},
             {"data": [{"id": "a2", "issues_info": {"error_code": 2}}]},
         ]
         with mock.patch.object(monitor.graph, "get", side_effect=lambda *a, **k: pages.pop(0)) as get:

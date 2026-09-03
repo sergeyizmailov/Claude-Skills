@@ -97,9 +97,7 @@ def build_rule(name: str, level: str, k: int, spend_minor: int, event: str, mode
 
 
 def list_rules(account: str) -> list[dict]:
-    return graph.get(f"{account}/adrules_library",
-                     params={"fields": "id,name,status,evaluation_spec,execution_spec,schedule_spec", "limit": 250},
-                     context="rules").get("data", [])
+    return _page(account, "adrules_library", "id,name,status,evaluation_spec,execution_spec,schedule_spec", "rules")
 
 
 def needs_ladder(args) -> bool:
@@ -111,16 +109,25 @@ def needs_ladder(args) -> bool:
 
 
 def history_rows(account: str, since: str | None, rule_id: str | None = None) -> list[dict]:
-    rows = graph.get(f"{account}/adrules_history",
-                     params={"fields": "rule_id,evaluation_type,exception_code,results,timestamp",
-                             "limit": 250},
-                     context="rules history").get("data", [])
+    rows = _page(account, "adrules_history", "rule_id,evaluation_type,exception_code,results,timestamp", "rules history")
     if rule_id:
         rows = [h for h in rows if str(h.get("rule_id")) == str(rule_id)]
     if since:
         cutoff = dt_parse_since(since)
         rows = [h for h in rows if h.get("timestamp") and float(h["timestamp"]) >= cutoff]
     return rows
+
+
+def _page(account: str, edge: str, fields: str, context: str) -> list[dict]:
+    rows: list[dict] = []
+    params: dict = {"fields": fields, "limit": 250}
+    path = f"{account}/{edge}"
+    while True:
+        response = graph.get(path, params=params, context=context)
+        rows.extend(response.get("data", []))
+        params = graph.next_page_params(response, params)
+        if params is None:
+            return rows
 
 
 def dt_parse_since(value: str) -> float:

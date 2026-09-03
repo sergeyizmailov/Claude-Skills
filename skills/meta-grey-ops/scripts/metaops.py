@@ -51,7 +51,7 @@ SINGLE_PLAN_SCHEMA = "metaops.plan/v1"
 BULK_PLAN_SCHEMA = "metaops.bulk-plan/v1"
 DOCTOR_SCHEMA = "metaops.doctor/v1"
 ASSET_RECEIPT_SCHEMA = "metaops.assets/v1"
-DEFAULT_TIMEOUT = int(os.environ.get("METAOPS_TIMEOUT_SECONDS", "900"))
+DEFAULT_TIMEOUT = 900
 DOCTOR_MAX_AGE = int(os.environ.get("METAOPS_DOCTOR_MAX_AGE_SECONDS", "86400"))
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$")
 WORKSPACE_LIFECYCLE_COMMANDS = {
@@ -304,27 +304,32 @@ def normalized_text(value: str | bytes | None) -> str:
 def run_child(script: str, args: list[str], timeout: int) -> ChildResult:
     argv = child_command(script, args)
     env = os.environ.copy()
-    read_fd, write_fd = os.pipe()
-    capability = {
-        "parent_pid": os.getpid(),
-        "allowed_accounts": sorted(graph._WRITE_ACCOUNTS or []),
-    }
-    os.write(write_fd, json.dumps(capability).encode("utf-8"))
-    os.close(write_fd)
-    env["METAOPS_AUTH_FD"] = str(read_fd)
+    read_fd: int | None = None
+    if graph._WRITE_ACCOUNTS is not None:
+        read_fd, write_fd = os.pipe()
+        capability = {
+            "parent_pid": os.getpid(),
+            "allowed_accounts": sorted(graph._WRITE_ACCOUNTS),
+        }
+        os.write(write_fd, json.dumps(capability).encode("utf-8"))
+        os.close(write_fd)
+        env["METAOPS_AUTH_FD"] = str(read_fd)
+    workspace_path = env.get("METAOPS_WORKSPACE")
+    cwd = pathlib.Path(workspace_path).expanduser().resolve().parent if workspace_path else HERE
     try:
         proc = subprocess.Popen(
             argv,
-            cwd=HERE,
+            cwd=cwd,
             env=env,
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             start_new_session=True,
-            pass_fds=(read_fd,),
+            pass_fds=(read_fd,) if read_fd is not None else (),
         )
     finally:
-        os.close(read_fd)
+        if read_fd is not None:
+            os.close(read_fd)
     try:
         stdout, stderr = proc.communicate(timeout=timeout)
     except subprocess.TimeoutExpired as exc:
@@ -556,7 +561,26 @@ def state_lock(state_path: pathlib.Path) -> Iterator[pathlib.Path]:
             pass
 
 
-def state_summary(state_path: pathlib.Path) -> dict[str, Any]:
+def _start_time_blocker(spec_path: pathlib.Path | None) -> str | None:
+    if spec_path is None:
+        return None
+    try:
+        spec = load_launch_spec(spec_path)
+        starts = [
+            dt.datetime.fromisoformat(str(adset["start_time"]).replace("Z", "+00:00"))
+            for adset in spec["adsets"]
+        ]
+    except (KeyError, TypeError, ValueError, OSError, MetaOpsError) as exc:
+        return f"cannot read bound spec start_time: {exc}"
+    if any(
+        start.tzinfo is None or start.astimezone(dt.timezone.utc) <= dt.datetime.now(dt.timezone.utc)
+        for start in starts
+    ):
+        return "an ad-set start_time is past or lacks an offset; pass a future --refresh-start"
+    return None
+
+
+def state_summary(state_path: pathlib.Path, spec_path: pathlib.Path | None = None) -> dict[str, Any]:
     if not state_path.exists():
         return {
             "exists": False,
@@ -576,6 +600,8 @@ def state_summary(state_path: pathlib.Path) -> dict[str, Any]:
         blocker = f"unresolved in-flight creates: {in_flight}"
     if not any(key.startswith("ad[") for key in objects):
         blocker = "state contains no ads"
+    if blocker is None:
+        blocker = _start_time_blocker(spec_path)
     phase = "verified" if blocker is None else "reconcile_required" if in_flight else "built_paused"
     return {
         "exists": True,
@@ -608,6 +634,8 @@ def command_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
             setattr(args, attr, expected)
     if args.whoami and args.account:
         raise MetaOpsError("use doctor --whoami or doctor --account ..., not both")
+    if args.whoami and any((args.page, args.dataset, args.business, args.create_pbia, args.attach_pixel)):
+        raise MetaOpsError("doctor --whoami is intake-only; do not combine it with Page/dataset mutations")
     child_args: list[str] = []
     if args.whoami or not args.account:
         child_args.append("--whoami")
@@ -776,6 +804,8 @@ def command_assets_products(args: argparse.Namespace) -> tuple[int, dict[str, An
 def command_assets_set_products(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     if not args.workspace_obj:
         raise MetaOpsError("assets set-products requires --workspace")
+    if args.confirm != "SET":
+        raise MetaOpsError("assets set-products requires the literal --confirm SET")
     profile_name, profile = args.workspace_obj.profile(args.profile)
     product_sets = profile.get("product_sets") or {}
     if args.set not in product_sets:
@@ -857,15 +887,15 @@ def feed_source_url(args: argparse.Namespace) -> str:
 
 def ad_statuses(account: str) -> dict[str, str]:
     out: dict[str, str] = {}
-    path: str | None = f"{account}/ads"
+    path = f"{account}/ads"
     params: dict[str, Any] = {"fields": "id,effective_status", "limit": 500}
-    while path:
+    while True:
         resp = graph.get(path, params=params, context="ads status")
         for ad in resp.get("data", []):
             out[str(ad["id"])] = ad.get("effective_status", "?")
-        path = (resp.get("paging") or {}).get("next")
-        params = {}
-    return out
+        params = graph.next_page_params(resp, params)
+        if params is None:
+            return out
 
 
 def run_feed_upload(args: argparse.Namespace, feed_id: str, url: str) -> tuple[ChildResult, dict[str, Any]]:
@@ -1003,7 +1033,7 @@ def command_apply(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         out = child_failure("apply", phase, child)
         out["artifacts"] = {"plan": str(plan_path), "state": str(state_path)}
         return child.returncode, out
-    summary = state_summary(state_path)
+    summary = state_summary(state_path, spec_path)
     return 0, result_envelope(
         "apply",
         True,
@@ -1030,7 +1060,7 @@ def command_verify(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         out = child_failure("verify", "verification_failed", child)
         out["artifacts"] = {"plan": str(plan_path), "state": str(state_path)}
         return child.returncode, out
-    summary = state_summary(state_path)
+    summary = state_summary(state_path, spec_path)
     return 0, result_envelope(
         "verify",
         True,
@@ -1088,10 +1118,10 @@ def command_activate(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
 def command_status(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     plan_path, plan = load_plan(args.plan)
     if plan["schema"] == SINGLE_PLAN_SCHEMA:
-        _, state_path = validate_single_plan(plan, args.workspace_obj, args.profile)
+        spec_path, state_path = validate_single_plan(plan, args.workspace_obj, args.profile)
         if state_path.exists():
             require_state_binding(plan, state_path)
-        summary = state_summary(state_path)
+        summary = state_summary(state_path, spec_path)
         return 0, result_envelope(
             "status", True, summary["phase"], artifacts={"plan": str(plan_path),
                                                           "state": str(state_path)}, data=summary
@@ -1101,7 +1131,7 @@ def command_status(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     items = []
     for item in plan.get("items") or []:
         state_path = resolve_input(item["state_path"])
-        items.append({**item, "status": state_summary(state_path)})
+        items.append({**item, "status": state_summary(state_path, resolve_input(item["spec_path"]))})
     phase = "verified" if items and all(i["status"]["activation_ready"] for i in items) else "built_paused"
     if any(i["status"]["in_flight"] for i in items):
         phase = "reconcile_required"
@@ -1639,6 +1669,7 @@ def parser() -> argparse.ArgumentParser:
     action = assets_sub.add_parser("set-products", help="replace a declared product-set filter")
     action.add_argument("--set", required=True, help="product-set alias from workspace profile")
     action.add_argument("--retailer-ids", required=True, help="comma-separated retailer ids")
+    action.add_argument("--confirm", required=True, help="must be literal SET")
     action.set_defaults(handler=command_assets_set_products)
 
     p = sub.add_parser("doctor", help="token/account preflight through probe.py")
@@ -1746,15 +1777,16 @@ def human_summary(payload: dict[str, Any]) -> None:
 
 def main() -> int:
     args = parser().parse_args()
-    if args.timeout <= 0:
-        payload = result_envelope(args.command, False, "launcher_error",
-                                  error={"kind": "usage", "message": "--timeout must be > 0"})
-        if args.json:
-            print(json.dumps(payload, ensure_ascii=False))
-        else:
-            human_summary(payload)
-        return 2
     try:
+        if not any(arg == "--timeout" or arg.startswith("--timeout=") for arg in sys.argv[1:]):
+            raw_timeout = os.environ.get("METAOPS_TIMEOUT_SECONDS")
+            if raw_timeout is not None:
+                try:
+                    args.timeout = int(raw_timeout)
+                except ValueError as exc:
+                    raise MetaOpsError("METAOPS_TIMEOUT_SECONDS must be a positive integer") from exc
+        if args.timeout <= 0:
+            raise MetaOpsError("--timeout must be > 0")
         args.workspace_obj = configure_workspace(args.workspace)
         require_command_workspace(args)
         code, payload = args.handler(args)

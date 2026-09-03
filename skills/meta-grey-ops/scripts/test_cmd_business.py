@@ -116,7 +116,6 @@ class CmdBusinessTests(unittest.TestCase):
                 )
                 with self.assertRaisesRegex(metaops.MetaOpsError, "literal --confirm SHARE"):
                     cmd_business._user_assign(metaops, args)
-
                 args = make_args(
                     workspace_obj=workspace, profile="test", confirm="WRONG",
                     partner_business="20", asset="page", tasks="ADVERTISE",
@@ -124,6 +123,11 @@ class CmdBusinessTests(unittest.TestCase):
                 with self.assertRaisesRegex(metaops.MetaOpsError, "literal --confirm SHARE"):
                     cmd_business._partner_share(metaops, args)
                 post.assert_not_called()
+
+    def test_page_tasks_reject_ad_account_only_values(self) -> None:
+        with self.assertRaisesRegex(metaops.MetaOpsError, "not valid for page"):
+            cmd_business._tasks_list(metaops, "DRAFT,AA_ANALYZE", "page")
+        self.assertEqual(cmd_business._tasks_list(metaops, "ADVERTISE,ANALYZE", "page"), ["ADVERTISE", "ANALYZE"])
 
     # --- payload shapes ----------------------------------------------------------
 
@@ -357,8 +361,8 @@ class CmdBusinessTests(unittest.TestCase):
 
             def fake_get(path, params=None, context=""):
                 calls["n"] += 1
-                if params:  # first page for every edge
-                    return {"data": [{"id": "a"}], "paging": {"next": "https://x/next"}}
+                if "after" not in params:
+                    return {"data": [{"id": "a"}], "paging": {"cursors": {"after": "cursor"}, "next": "https://x/next"}}
                 return {"data": [{"id": "b"}]}
 
             with mock.patch.object(metaops.graph, "get", side_effect=fake_get):

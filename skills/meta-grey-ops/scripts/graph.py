@@ -9,7 +9,7 @@ and process lists):
     META_TOKEN        System User or long-lived user token. Required.
     META_PROXY        socks5h://user:pass@host:port  (see 01 — socks5:// breaks TLS)
     META_API_VERSION  Override the pinned version below.
-    META_ALLOW_NO_PROXY=1  Escape hatch for a server-side System User token only.
+    META_ALLOW_NO_PROXY=1  Deliberate confirmation that direct egress is expected for this BM.
     META_APP_SECRET   Optional. When set, every call carries `appsecret_proof`
                       (HMAC-SHA256 of the token) — required once the app enforces
                       "Require App Secret", and cheap insurance against a leaked token
@@ -41,7 +41,7 @@ def _requests():
 
 
 # Pinned deliberately. An unpinned call silently changes behavior when Meta ships a
-# version; re-pin only after re-reading meta-ads/00 §4.1.
+# version; re-pin only after re-validating this transport and its SDK/API references.
 API_VERSION = os.environ.get("META_API_VERSION", "v26.0")
 BASE = f"https://graph.facebook.com/{API_VERSION}"
 
@@ -206,7 +206,7 @@ def require_write_authority(method: str, path: str) -> None:
     if method.upper() == "GET":
         return
     _load_write_capability()
-    if _WRITE_ACCOUNTS is None:
+    if not _WRITE_ACCOUNTS:
         sys.exit(
             f"direct Graph {method.upper()} is disabled for {path}; use metaops from a "
             "validated workspace (low-level write scripts are internal implementations)"
@@ -216,6 +216,20 @@ def require_write_authority(method: str, path: str) -> None:
         sys.exit(
             f"workspace does not authorize Graph write target {match.group(1)}"
         )
+
+
+def next_page_params(response: dict[str, Any], params: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the next cursor request without following Graph's opaque ``paging.next`` URL.
+
+    Graph has historically embedded access tokens in that URL. Requests here authenticate with
+    a Bearer header, so preserve the original edge and query while advancing only with its
+    cursor. Returning ``None`` also covers a malformed/terminal paging envelope.
+    """
+    paging = response.get("paging") or {}
+    after = (paging.get("cursors") or {}).get("after")
+    if not after or not paging.get("next"):
+        return None
+    return {**params, "after": str(after)}
 
 
 def normalize_graph_path(path: str) -> str:

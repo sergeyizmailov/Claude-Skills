@@ -49,7 +49,10 @@ def rename_options(args, n: int) -> dict:
 
 
 def copy_obj(obj_id: str, payload: dict, dry: bool, label: str) -> str | None:
-    payload = dict(payload, status_option="PAUSED", deep_copy=False)
+    payload = dict(payload, status_option="PAUSED")
+    # SDK 26.0.1's Ad.create_copy has no deep_copy parameter; campaigns/ad sets do.
+    if label != "ad":
+        payload["deep_copy"] = False
     if dry:
         print(f"  would POST /{obj_id}/copies {json.dumps(payload, ensure_ascii=False)}")
         return None
@@ -68,10 +71,9 @@ def children(edge: str, obj_id: str) -> list[dict]:
     while True:
         resp = graph.get(path, params=params, context=edge)
         rows.extend(resp.get("data", []))
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt:
+        params = graph.next_page_params(resp, params)
+        if params is None:
             return rows
-        path, params = nxt, {}
 
 
 def copyable(rows: list[dict], label: str) -> list[dict]:
@@ -192,8 +194,8 @@ def main() -> int:
             fh.write(graph.redact(json.dumps(results, indent=2)))
     if not args.dry_run:
         print("\nAll copies PAUSED. Copies have no spec, so activate.py (which needs a spec'd verify "
-              "receipt) does not apply: check them in Ads Manager, then edit.py --ids <ids> --status "
-              "ACTIVE --confirm ACTIVATE.")
+              "receipt) does not apply: check them in Ads Manager, then run metaops edit status "
+              "--ids <ids> --status ACTIVE --confirm SPEND.")
     print(json.dumps({"schema": "clone.result/v1", "ok": not failed, "dry_run": args.dry_run,
                       "kind": args.kind, "source_id": args.id, "times": args.times,
                       "completed": len(results), "results": results}, ensure_ascii=False))

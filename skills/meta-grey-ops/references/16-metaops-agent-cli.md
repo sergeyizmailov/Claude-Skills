@@ -8,7 +8,7 @@ writes are rejected unless a workspace-bound `metaops` process launched them.
 ## Why this exists
 
 - One stable command surface and JSON result schema for agents.
-- Absolute paths and a fixed child working directory.
+- Absolute paths and a child working directory fixed to the workspace project.
 - Immutable input snapshots bound to the saved plan by SHA-256.
 - Account/Page/dataset-specific `doctor` receipts bound to each plan.
 - A per-state lock that prevents two launcher processes from creating against one state.
@@ -49,7 +49,7 @@ If a product set is empty, inspect valid catalog IDs without leaving the interfa
 ```bash
 metaops --workspace . --profile <profile> --json assets products --limit 100
 metaops --workspace . --profile <profile> --json assets set-products \
-  --set <workspace-alias> --retailer-ids <id1>,<id2>
+  --set <workspace-alias> --retailer-ids <id1>,<id2> --confirm SET
 metaops --workspace . --profile <profile> --json assets verify --scope all
 ```
 
@@ -105,7 +105,7 @@ running after `--wait` (default 120 s); re-check `GET /{upload_id}`.
 metaops … edit status  (--ids a,b | --state run.json --level adset | --all --level campaign) --status PAUSED|ACTIVE --confirm PAUSE|SPEND
 metaops … edit budget  --ids … (--budget-minor N | --budget-pct ±N) [--force-step] [--confirm SPEND]   # ±20%/late-day guard from edit.py
 metaops … edit rename  --ids … --prefix P [--suffix S]
-metaops … edit ramp    --ids … --steps 20,20,20 --confirm RAMP                       # one guarded step per rung
+metaops … edit ramp    --ids … --step 20 --confirm RAMP                              # exactly one rung; wait 48–72h before the next call
 metaops … clone campaign|adset|ad <id> [--times N] [--prefix/--suffix] [--start ISO] [--into-campaign/--into-adset] [--dry-run]   # /copies, level by level, PAUSED; skips deleted/archived children
 metaops … rules ladder --target-minor N --event E --level ADSET|AD [--rungs 0-6] [--mode notify|pause] [--ids] [--prefix] [--confirm RULES]
 metaops … rules list | history [--since] | execute --rule-id ID --confirm EXECUTE | delete --prefix P --confirm DELETE
@@ -150,7 +150,9 @@ metaops … business partner share --partner-business B --asset adaccount|page|p
 ```bash
 metaops … review [--state run.json | --ids a,b | --all] [--previews --format DESKTOP_FEED_STANDARD,MOBILE_FEED_STANDARD]   # ad_review_feedback, issues_info; exit 1 on DISAPPROVED/WITH_ISSUES
 metaops … monitor --accounts accounts.json [--stall-impressions 40] [--telegram] [--log] [--out-json rows.json]   # global `--json` remains before `monitor`; TG_BOT_TOKEN + TG_CHAT_ID env only
-metaops … comments list|hide|delete [--ads a,b | --all] [--matching REGEX] [--all-comments] --confirm HIDE|DELETE   # Page token
+metaops … comments list [--ads a,b | --all]                                               # Page token, read-only
+metaops … comments hide --ads a,b|--all (--matching REGEX | --all-comments) --confirm HIDE
+metaops … comments delete --ads a,b|--all --matching REGEX --confirm DELETE
 metaops … page show | set --avatar f --cover f --about "…" --website URL --confirm PAGE | list-pages
 metaops … insights pull --level ad (--date-preset yesterday | --since --until) [--csv]
 metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # joins on ad_name only when all rows have one currency

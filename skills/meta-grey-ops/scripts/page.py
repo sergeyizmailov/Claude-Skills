@@ -38,8 +38,14 @@ def main() -> int:
     args = ap.parse_args()
 
     if args.list_pages:
-        rows = graph.get("me/accounts", params={"fields": "id,name,category,tasks,fan_count", "limit": 200},
-                         context="pages").get("data", [])
+        rows: list[dict] = []
+        params: dict = {"fields": "id,name,category,tasks,fan_count", "limit": 200}
+        while True:
+            response = graph.get("me/accounts", params=params, context="pages")
+            rows.extend(response.get("data", []))
+            params = graph.next_page_params(response, params)
+            if params is None:
+                break
         for p in rows:
             print(f"  {p['id']}  {(p.get('name') or '?')[:40]:<40} {p.get('category')}  tasks={p.get('tasks')}")
         print(json.dumps({"schema": SUMMARY_SCHEMA, "action": "list-pages", "pages": rows},

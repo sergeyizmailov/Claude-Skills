@@ -62,7 +62,7 @@ DEFAULT_ATTRIBUTION = {"click_days": 1, "engaged_video_view_days": 1, "view_days
 # `attribution` object is sent as written — Graph will reject it, which is the right outcome.
 CLICK_ONLY_ATTRIBUTION_GOALS = {
     "LINK_CLICKS", "LANDING_PAGE_VIEWS", "REACH", "IMPRESSIONS", "THRUPLAY", "POST_ENGAGEMENT",
-    "PAGE_LIKES", "VIDEO_VIEWS", "TWO_SECOND_CONTINUOUS_VIDEO_VIEWS", "AD_RECALL_LIFT",
+    "PAGE_LIKES", "AD_RECALL_LIFT",
     "PROFILE_VISIT", "VISIT_INSTAGRAM_PROFILE", "PROFILE_AND_PAGE_ENGAGEMENT", "REMINDERS_SET",
     "ENGAGED_USERS",
 }
@@ -205,7 +205,8 @@ def load_spec(path: str) -> dict:
         raise SpecError(
             "campaign.special_ad_categories must be explicit. Use [] for none, or declare "
             "the real category (HOUSING / FINANCIAL_PRODUCTS_SERVICES / EMPLOYMENT / "
-            "ISSUES_ELECTIONS_POLITICS). A false declaration is a violation, not a bypass."
+            "ISSUES_ELECTIONS_POLITICS / CREDIT / ONLINE_GAMBLING_AND_GAMING / NONE). "
+            "A false declaration is a violation, not a bypass."
         )
 
     if not spec["adsets"]:

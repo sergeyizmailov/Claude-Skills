@@ -210,10 +210,7 @@ def command_catalog_feed_list(args: argparse.Namespace, ctx: Any) -> tuple[int, 
 
 
 def command_catalog_feed_uploads(args: argparse.Namespace, ctx: Any) -> tuple[int, dict[str, Any]]:
-    profile_name, profile = _profile(ctx, args)
-    feed_id = args.feed_id or str(profile.get("feed_id") or "")
-    if not feed_id:
-        raise ctx.MetaOpsError("no feed id: pass --feed-id or set profiles.<p>.feed_id")
+    profile_name, _profile_data, feed_id = ctx.feed_binding(args)
     import feed_upload
     rows = _paginate(ctx, f"{feed_id}/uploads", feed_upload.UPLOAD_FIELDS, limit=args.limit)
     return 0, ctx.result_envelope(

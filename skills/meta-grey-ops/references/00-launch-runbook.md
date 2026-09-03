@@ -134,6 +134,9 @@ metaops --workspace . --json bulk-plan \
   --template specs/mine.json --accounts accounts.json --run <wave>
 ```
 
+`bulk-plan` deliberately has no `--profile`: each row in `accounts.json` selects its bound
+workspace profile. An absent or mismatched binding fails; do not add a catch-all profile flag.
+
 `execution_options: ["validate_only"]` — Meta validates, nothing created. On failure read
 `error_data.blame_field_specs` (names the field path at fault). Campaign+creative payloads
 validated by Meta now; ad sets/ads reference parents that don't exist yet, so checked locally
@@ -149,7 +152,9 @@ metaops --workspace . --json bulk-apply \
   --plan .metaops/plans/<bulk-plan>.json --verify [--dlo-tested]
 ```
 
-DLO/catalog template on >1 account: build ONE such ad with `launch.py`, verify it, then `--dlo-tested` — a dry run cannot prove the objective/creative combination is accepted (`04` → DLO).
+DLO/catalog template on >1 account: use `metaops apply` to build ONE account PAUSED, verify it,
+then pass `--dlo-tested` to `bulk-apply` — a dry run cannot prove the
+objective/creative combination is accepted (`04` → DLO).
 
 Every object created `PAUSED`. Workspace state `.metaops/<run_id>.json` records each create
 in-flight **before** the POST, id on success; a create is never retried on dropped connection
@@ -172,7 +177,7 @@ metaops --workspace . --profile <name> --json verify --plan .metaops/plans/<plan
 `verify.py` fails (no receipt) on **incomplete** state: any `in_flight` key (create whose
 outcome is unknown — live 2026-09-02 a creative POST got a bare 503; object didn't exist, but
 only Ads Manager can tell you that) or any spec ad set/ad missing from `objects`. Reconcile,
-re-run `launch.py` — resumes from state, creates only what's missing.
+then re-run `metaops apply --plan …` — it resumes from state and creates only what's missing.
 
 Reads every object back, diffs: budget (campaign under CBO, ad set under ABO) in minor units,
 bid strategy, optimization goal, promoted object, targeting, **attribution_spec**, **DSA
@@ -242,7 +247,8 @@ transport guard. Still UI-only: appeals, billing, BM/Page creation. Ladder math/
 ## 9.5 — Daily sync
 
 ```bash
-python3 insights.py --account act_123 --level ad --date-preset yesterday --csv day.csv
+metaops --workspace . --profile <name> --json insights pull \
+  --level ad --date-preset yesterday --csv .metaops/day.csv
 ```
 
 Rows in ad account timezone, attribution window stated explicitly (1d/1d here; Meta's own
@@ -252,8 +258,8 @@ cost push = no CPL. Verify one day by hand, then trust it.
 ## 10 — Kill rules, agreed in writing
 
 Spend-without-lead cap, CPL cap, account verdict threshold — with TL, before launch. Ladder/
-small-sample math → `senior-buyer-ops/04`. Configure rules in Ads Manager until the CLI exposes
-a workspace-bound rules command. Judge accounts after $30–50, cohorts on click date
+small-sample math → `senior-buyer-ops/04`. Use the workspace-bound `metaops rules` commands in
+§9.1. Judge accounts after $30–50, cohorts on click date
 (`tracker-ops/03`).
 
 ## When a step fails

@@ -1,5 +1,9 @@
 # 12 — Meta Ads CLIs
 
+**Agent boundary:** do not use either CLI to write. Route every agent mutation through the
+workspace-bound `metaops` command, which supplies the plan/apply/verify/activation gates. This
+reference is for a human operator's diagnosis and manual recovery only.
+
 Verified 2026-09-02: the official **`meta-ads` 1.1.0** package is proprietary, ships compiled
 wheels without a source distribution, and exposes no public extension interface. It is not an
 open-source base to fork. Re-verify on new version: `meta --version`.

@@ -74,6 +74,14 @@ class WorkspaceTests(unittest.TestCase):
             with self.assertRaisesRegex(meta_workspace.WorkspaceError, "outside skill stores"):
                 meta_workspace.load_workspace(str(root))
 
+    def test_rejects_workspace_inside_another_agent_skill_store(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td) / ".grok" / "skills" / "campaign-project"
+            root.mkdir(parents=True)
+            self.write_workspace(root)
+            with self.assertRaisesRegex(meta_workspace.WorkspaceError, "outside skill stores"):
+                meta_workspace.load_workspace(str(root))
+
     def test_rejects_state_directory_outside_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = pathlib.Path(td) / "campaign-project"
@@ -278,6 +286,15 @@ class WorkspaceTests(unittest.TestCase):
             self.assertTrue(payload["ok"])
             self.assertEqual(payload["artifacts"], {})
             run.assert_called_once_with("probe.py", ["--whoami"], 10)
+
+    def test_whoami_refuses_mutating_probe_flags(self) -> None:
+        args = type("Args", (), {
+            "workspace_obj": None, "profile": None, "account": None, "page": "14",
+            "dataset": None, "business": None, "whoami": True, "create_pbia": True,
+            "attach_pixel": False, "timeout": 10,
+        })()
+        with self.assertRaisesRegex(metaops.MetaOpsError, "intake-only"):
+            metaops.command_doctor(args)
 
 
 class AssetGraphTests(unittest.TestCase):

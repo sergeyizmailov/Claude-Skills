@@ -65,10 +65,9 @@ def fetch(account: str, level: str, params: dict) -> list[dict]:
     while True:
         resp = graph.get(path, params=query, context=f"insights {level}")
         rows.extend(resp.get("data", []))
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt:
+        query = graph.next_page_params(resp, query)
+        if query is None:
             return rows
-        path, query = nxt, {}
         time.sleep(0.3)  # a read is 1 point; do not sprint through paging
 
 

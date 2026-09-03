@@ -94,8 +94,8 @@ def discover_workspace(start: pathlib.Path | None = None) -> pathlib.Path | None
 def load_workspace(value: str) -> Workspace:
     path = workspace_path(value)
     parts = path.parts
-    if any(parts[index] in {".claude", ".codex"} and parts[index + 1] == "skills"
-           for index in range(len(parts) - 1)):
+    if any(parts[index] == "skills" and index > 0 and parts[index - 1].startswith(".")
+           for index in range(len(parts))):
         raise WorkspaceError(
             "workspace.json must live in a project directory outside skill stores"
         )

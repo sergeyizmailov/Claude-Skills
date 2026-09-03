@@ -66,10 +66,9 @@ def ad_status_counts(account: str) -> dict[str, int]:
         resp = graph.get(path, params=params, context="ads status")
         for ad in resp.get("data", []):
             counts[ad.get("effective_status", "?")] = counts.get(ad.get("effective_status", "?"), 0) + 1
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt:
+        params = graph.next_page_params(resp, params)
+        if params is None:
             return counts
-        path, params = nxt, {}
 
 
 def adset_issues(account: str) -> list[dict]:
@@ -88,14 +87,14 @@ STALL_MIN_IMPRESSIONS = 40
 def _adsets(account: str, params: dict, context: str) -> list[dict]:
     """Fetch every matching ad set; an account routinely has more than one page."""
     rows: list[dict] = []
-    path: str | None = f"{account}/adsets"
-    page_params = params
-    while path:
+    path = f"{account}/adsets"
+    page_params = dict(params)
+    while True:
         response = graph.get(path, params=page_params, context=context)
         rows.extend(response.get("data", []))
-        path = (response.get("paging") or {}).get("next")
-        page_params = {}
-    return rows
+        page_params = graph.next_page_params(response, page_params)
+        if page_params is None:
+            return rows
 
 
 def adset_delivery(account: str) -> list[dict]:

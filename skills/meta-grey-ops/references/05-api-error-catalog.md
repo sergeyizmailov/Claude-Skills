@@ -18,5 +18,5 @@ evidence only.
 | "Not delivering", no error | Future start_time (normal), review pending, billing hold, or spend cap — wait/verify before touching |
 | Account "Disabled"/restricted | Routine in agency stock. Document (ID, date, spend at death), request replacement, move on — don't appeal fresh stock (`03`) |
 | CSV import blocked on fresh accounts (3738001) | Build via API/UI instead |
-| Rate limits (BUC/header-driven, detail in `14`) | Back off, don't burn calls — a single buyer never nears the ceiling; don't poll in tight loops, a throttle storm on one persona's IP is a needless signal |
+| Rate limits (BUC/header-driven, detail in `meta-ads/14`) | Back off, don't burn calls — a single buyer never nears the ceiling; don't poll in tight loops, a throttle storm on one persona's IP is a needless signal |
 | Rising bot_share / domain-level flags (tracker-ops/03, not an API error) | Rotate the domain before it burns the account — don't wait for the ban |

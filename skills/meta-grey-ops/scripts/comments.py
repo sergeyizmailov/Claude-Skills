@@ -44,14 +44,17 @@ def ad_ids(account: str | None, ads: str | None) -> list[str]:
     while True:
         resp = graph.get(path, params=params, context="ads")
         out.extend(a["id"] for a in resp.get("data", []))
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt:
+        params = graph.next_page_params(resp, params)
+        if params is None:
             return out
-        path, params = nxt, {}
 
 
-def story_id(ad_id: str) -> str | None:
-    ad = graph.get(ad_id, params={"fields": "creative{effective_object_story_id}"}, context="ad story")
+def story_id(ad_id: str, expected_account: str | None = None) -> str | None:
+    ad = graph.get(ad_id, params={"fields": "account_id,creative{effective_object_story_id}"}, context="ad story")
+    if expected_account:
+        actual = ad.get("account_id")
+        if not actual or graph.normalize_account(actual) != graph.normalize_account(expected_account):
+            raise SystemExit(f"{ad_id} belongs to {actual or '?'} not {expected_account}; refusing cross-profile comments")
     return (ad.get("creative") or {}).get("effective_object_story_id")
 
 
@@ -62,12 +65,12 @@ def comments(post_id: str, ptoken: str) -> list[dict]:
     while True:
         resp = graph.call("GET", path, params=params, token_override=ptoken, context="comments")
         out.extend(resp.get("data", []))
-        nxt = (resp.get("paging") or {}).get("next")
-        if not nxt or len(out) >= 1000:
-            if nxt:
+        next_params = graph.next_page_params(resp, params)
+        if next_params is None or len(out) >= 1000:
+            if next_params is not None:
                 print("  ! 1000-comment cap hit — older comments were NOT swept; re-run later", file=sys.stderr)
             return out
-        path, params = nxt, {}
+        params = next_params
 
 
 def main() -> int:
@@ -75,6 +78,7 @@ def main() -> int:
     ap.add_argument("--account", help="act_<id>: all ACTIVE/PAUSED/PENDING ads")
     ap.add_argument("--ads", help="comma-separated ad ids instead of --account")
     ap.add_argument("--page", required=True, help="Page id that owns the ad posts")
+    ap.add_argument("--expected-account", help="internal metaops profile binding for explicit ad ids")
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--list", action="store_true")
     g.add_argument("--hide-all", action="store_true")
@@ -92,7 +96,7 @@ def main() -> int:
     rows_out: list[dict] = []
     for aid in ad_ids(args.account, args.ads):
         try:
-            post = story_id(aid)
+            post = story_id(aid, args.expected_account)
         except graph.GraphError as e:
             print(f"  ! ad {aid}: {e}", file=sys.stderr)
             continue

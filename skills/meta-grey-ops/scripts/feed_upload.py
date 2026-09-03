@@ -55,8 +55,15 @@ def main() -> int:
     u = poll(upload_id, args.wait)
     out = {"upload_id": upload_id, "finished": finished(u), **{k: u.get(k) for k in UPLOAD_FIELDS.split(",") if k != "id"}}
     if args.errors and (u.get("error_count") or 0) > 0:
-        out["errors"] = graph.get(f"{upload_id}/errors", params={"fields": "id,severity,summary,description,total_count", "limit": 50},
-                                  context="feed upload errors").get("data", [])
+        errors: list[dict] = []
+        params: dict = {"fields": "id,severity,summary,description,total_count", "limit": 50}
+        while True:
+            response = graph.get(f"{upload_id}/errors", params=params, context="feed upload errors")
+            errors.extend(response.get("data", []))
+            params = graph.next_page_params(response, params)
+            if params is None:
+                break
+        out["errors"] = errors
     print(json.dumps(out, ensure_ascii=False))
     if not finished(u):
         print("upload still running; re-check GET /{upload_id}", file=sys.stderr)
