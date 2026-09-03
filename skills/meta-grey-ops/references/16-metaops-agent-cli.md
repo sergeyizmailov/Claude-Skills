@@ -60,7 +60,8 @@ metaops --workspace . --profile <profile> --json assets verify --scope all
 ## Single-account lifecycle
 
 From the package directory, install with `uv tool install .`. Without installation, use
-`uv run --project /path/to/meta/meta-grey-ops metaops` before every argument shown below.
+`uv run --project /path/to/meta/meta-grey-ops metaops` before every argument shown below, or install
+once with `uv tool install /path/to/meta/meta-grey-ops` (Python ≥3.11; deps from `uv.lock`).
 Global flags precede the command. Put `--json` before the subcommand when an agent consumes it.
 Child diagnostics go to stderr; stdout contains exactly one `metaops.result/v1` object.
 

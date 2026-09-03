@@ -1,6 +1,6 @@
 ---
 name: meta-grey-ops
-description: "Use when operating Meta FB/IG ads through the workspace-bound Marketing API CLI: build PAUSED campaigns, bulk-launch accounts, manage catalog feeds/assets, diagnose API gates or perform guarded account/Page operations. Do not use for marketing strategy (meta-ads) or tracker reporting (tracker-ops)."
+description: "Launch and run Meta (FB/IG) ads via the workspace-bound Marketing API CLI (metaops): access/scopes/System User, MCP vs API, PAUSED bulk launch across ad accounts, edit/clone/rules, catalog/DLO/carousel creatives, catalog as an agent-edited Google Sheet, attribution 1/1/1, Advantage+ and multi-advertiser opt-out, EU DSA, BM setup (accounts/pixel/CAPI/users), review/monitor/comments, plus grey-market survival: antidetect/proxy/session hygiene, agency accounts, token death, cloaking/review-layer tricks, verification gates, no-path verticals, per-vertical playbooks (casino, nutra, crypto, news-tg). Use for: 'launch FB ads through the API', 'I have a BM access token, set up campaigns', 'bulk launch on N accounts', 'connect Claude to Meta ads / MCP', 'why did the ad set create fail', 'duplicate campaigns / set kill rules / hide comments via API'. Clean marketing theory = meta-ads; tracker metrics = tracker-ops."
 ---
 
 # Meta Grey Ops
@@ -88,3 +88,7 @@ Declared gaps: no dating or loans playbook; `APP_PROMOTION` only directional in 
 owns command syntax in `references/16-metaops-agent-cli.md`. Low-level scripts are internal; their
 POST/DELETE calls run only through a validated, workspace-bound `metaops` process. Generated files
 belong in the project workspace. Run `16`'s isolated checks after an implementation change.
+
+Env: `META_TOKEN` (required), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
+(`appsecret_proof`), `META_API_VERSION` (pinned `v26.0`), `GSHEETS_JSON_KEY_FILE` (sheetfeed / feed
+swap), `TG_BOT_TOKEN`+`TG_CHAT_ID` (`monitor --telegram`). Never pass a token on argv.
