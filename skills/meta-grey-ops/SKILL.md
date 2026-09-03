@@ -5,7 +5,7 @@ description: "Launch and run Meta (FB/IG) ads via the workspace-bound Marketing 
 
 # Meta Grey Ops
 
-Reviewed 2026-09-03. Launch/operate via API on your own token (= autolaunch SaaS without UI, `13`) + grey survival. "buy well" → `meta-ads` · "count & sync" → `tracker-ops` · "portfolio decisions" → `senior-buyer-ops`.
+Reviewed 2026-09-03. Baseline 2026-09-03 (Sonnet 5 blind): bulk-launch task [K] — shared BM pixel still needs per-account attach (1815045). Launch/operate via API on your own token (= autolaunch SaaS without UI, `13`) + grey survival. "buy well" → `meta-ads` · "count & sync" → `tracker-ops` · "portfolio decisions" → `senior-buyer-ops`.
 
 ## Start here
 

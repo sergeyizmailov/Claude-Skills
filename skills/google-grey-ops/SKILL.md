@@ -5,7 +5,7 @@ description: "Launch and run Google Ads via the API from a developer token + OAu
 
 # Google Grey Ops
 
-Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
+Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02; 2026-09-03 blind cascade task [A] — payment+email cascade named only when prompted.
 Launch/operate via API on your own MCC credentials (`googleops`, `10`) + survive aggressive
 verticals without losing accounts, domains, payment identities.
 

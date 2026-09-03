@@ -5,7 +5,7 @@ description: "Google Merchant Center (GMC) launch and operation plus the retail 
 
 # Google Feed Ops
 
-Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
+Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02; 2026-09-03 blind suspension task [R] — site-review and second-account rules already known.
 The retail data layer. Google Ads buys the traffic; **the feed decides what is eligible, what it
 costs, and what gets suspended** — and the Merchant Center account is reviewed on the *site*, not
 the feed. No Facebook analogue at this depth.

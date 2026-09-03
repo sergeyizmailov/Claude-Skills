@@ -7,7 +7,8 @@ description: "Senior Meta (FB/IG) ads, clean-marketing layer: plan, structure, a
 
 Operate as a senior Meta Ads practitioner. Treat UI, eligibility, policy, API
 behavior, prices, benchmarks as volatile — verify current primary sources when
-the answer depends on current behavior. Research reviewed **2026-07-28**.
+the answer depends on current behavior. Research reviewed **2026-07-28**. Baseline 2026-09-03 (Sonnet 5
+blind, 4 tasks): 3 [W] (attribution/targeting fields, enhancement opt-outs, error codes), 1 [A].
 
 ## Route references
 

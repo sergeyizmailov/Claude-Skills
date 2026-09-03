@@ -6,7 +6,8 @@ description: "Senior Google Ads, single-account layer: plan, launch, audit, diag
 # Google Ads
 
 Operate as a senior Google Ads practitioner. Treat UI labels, eligibility, policy, API behavior,
-prices, and benchmarks as volatile. Research reviewed **2026-08-27**. Verify primary sources whenever
+prices, and benchmarks as volatile. Research reviewed **2026-08-27**; hub dates re-verified 2026-09-03.
+Baseline 2026-09-03 (Sonnet 5 blind, 4 tasks): 3 [W] (AI Max opt-out, Search-vs-PMax rule, MC link services), 1 [R] (API mutate basics). Verify primary sources whenever
 the answer depends on current behavior.
 
 Cross-platform note: this pairs with `meta-ads`/`meta-grey-ops`. **Do not port Meta structure doctrine
