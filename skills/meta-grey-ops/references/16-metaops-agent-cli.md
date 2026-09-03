@@ -87,11 +87,12 @@ Before `activate`, complete every UI-only check in `00` §6–8. The command req
 ## Feed (catalog as Google Sheet, `17`)
 
 ```bash
-metaops --workspace . --profile <p> --json feed sync  --sheet <url> [--gid N] [--update-only]   # POST /{feed_id}/uploads url=<csv export> → poll end_time
-metaops --workspace . --profile <p> --json feed swap  --sheet <url> --file items.json          # upsert rows → sync → prove no ad re-entered review
+metaops --workspace . --profile <p> --json feed sync  --sheet <url> [--gid N] [--update-only] --confirm FEED   # POST /{feed_id}/uploads url=<csv export> → poll end_time
+metaops --workspace . --profile <p> --json feed swap  --sheet <url> --file items.json --confirm FEED             # validate prospective rows → upsert → sync → prove no ad re-entered review
 ```
 
-`feed_id` from `--feed-id` or `profiles.<p>.feed_id`. Sheet CSV export needs a public link; tab
+`feed_id` comes from `profiles.<p>.feed_id`; `--feed-id` is accepted only when the profile has no
+declared feed. Sheet CSV export needs a public link; tab
 gid resolves via `GSHEETS_JSON_KEY_FILE` or `--gid`. `swap` refuses while any ad on the account is
 `PENDING_REVIEW`/`IN_PROCESS`/`PREAPPROVED` (`--force` overrides); exit 1 + phase `re_review`
 lists ads whose status flipped into review after the fetch. Result `data.upload`:
@@ -101,17 +102,19 @@ running after `--wait` (default 120 s); re-check `GET /{upload_id}`.
 ## Edit / clone / rules (wrap `edit.py`, `clone.py`, `rules.py`)
 
 ```bash
-metaops … edit status  (--ids a,b | --state run.json --level adset | --all --level campaign) --status PAUSED|ACTIVE [--confirm SPEND]
+metaops … edit status  (--ids a,b | --state run.json --level adset | --all --level campaign) --status PAUSED|ACTIVE --confirm PAUSE|SPEND
 metaops … edit budget  --ids … (--budget-minor N | --budget-pct ±N) [--force-step] [--confirm SPEND]   # ±20%/late-day guard from edit.py
 metaops … edit rename  --ids … --prefix P [--suffix S]
 metaops … edit ramp    --ids … --steps 20,20,20 --confirm RAMP                       # one guarded step per rung
-metaops … clone campaign|adset|ad <id> [--times N] [--prefix/--suffix] [--start ISO] [--into-campaign/--into-adset] [--dry-run]   # /copies, level by level, PAUSED
+metaops … clone campaign|adset|ad <id> [--times N] [--prefix/--suffix] [--start ISO] [--into-campaign/--into-adset] [--dry-run]   # /copies, level by level, PAUSED; skips deleted/archived children
 metaops … rules ladder --target-minor N --event E --level ADSET|AD [--rungs 0-6] [--mode notify|pause] [--ids] [--prefix] [--confirm RULES]
-metaops … rules list | history [--since] | execute --rule-id ID | delete --prefix P --confirm DELETE
+metaops … rules list | history [--since] | execute --rule-id ID --confirm EXECUTE | delete --prefix P --confirm DELETE
 ```
 
-ACTIVE / budget raise → `--confirm SPEND`; `--mode pause` → `--confirm RULES`. Children print a
-final `*.result/v1` JSON line that lands in `data`.
+ACTIVE / budget raise → `--confirm SPEND`; PAUSED → `--confirm PAUSE`; `--mode pause` →
+`--confirm RULES`; manual rule execution → `--confirm EXECUTE`. For opaque IDs, the child reads
+back `account_id` and refuses an object outside the profile. Children print a final `*.result/v1`
+JSON line that lands in `data`.
 
 ## Catalog lifecycle (`17`)
 
@@ -122,7 +125,7 @@ metaops … catalog feed create --name N --url <csv/sheet export> --schedule hou
 metaops … catalog feed list | uploads [--feed-id]
 metaops … catalog set create --name N (--filter f.json | --retailer-ids a,b) --confirm CREATE   # filter sent as dict, encoded once
 metaops … catalog set list · products list [--set-id] [--limit]
-metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s]      # items_batch item_type=PRODUCT_ITEM → check_batch_request_status
+metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s] --confirm BATCH   # items_batch item_type=PRODUCT_ITEM → check_batch_request_status
 ```
 
 `schedule` is a JSON string (`interval HOURLY|DAILY|WEEKLY|MONTHLY, hour, minute, day_of_week,
@@ -138,7 +141,7 @@ metaops … business adaccount create --name N --currency USD --timezone-id 1 [-
 metaops … business pixel create --name N [--is-crm] --confirm CREATE · pixel share --account act_X --confirm SHARE · pixel shared
 metaops … business capi test --event Lead --test-code TESTxxxx [--url …]           # /{dataset}/events, hashed dummy user_data → Events Manager "Test events"
 metaops … business user invite --email E --role EMPLOYEE|ADMIN --confirm SHARE
-metaops … business user assign --user-id U --asset adaccount|page|pixel --tasks MANAGE,ADVERTISE --confirm SHARE   # /assigned_users {user,tasks}
+metaops … business user assign --user-id U --asset adaccount|page|pixel --tasks … --confirm SHARE   # /assigned_users {user,tasks}; pixel: ADVERTISE,ANALYZE,EDIT,UPLOAD
 metaops … business partner share --partner-business B --asset adaccount|page|pixel --tasks … --confirm SHARE       # /agencies {business,permitted_tasks}
 ```
 
@@ -146,11 +149,11 @@ metaops … business partner share --partner-business B --asset adaccount|page|p
 
 ```bash
 metaops … review [--state run.json | --ids a,b | --all] [--previews --format DESKTOP_FEED_STANDARD,MOBILE_FEED_STANDARD]   # ad_review_feedback, issues_info; exit 1 on DISAPPROVED/WITH_ISSUES
-metaops … monitor --accounts accounts.json [--stall-impressions 40] [--telegram] [--log] [--json]   # TG_BOT_TOKEN + TG_CHAT_ID env only
+metaops … monitor --accounts accounts.json [--stall-impressions 40] [--telegram] [--log] [--out-json rows.json]   # global `--json` remains before `monitor`; TG_BOT_TOKEN + TG_CHAT_ID env only
 metaops … comments list|hide|delete [--ads a,b | --all] [--matching REGEX] [--all-comments] --confirm HIDE|DELETE   # Page token
 metaops … page show | set --avatar f --cover f --about "…" --website URL --confirm PAGE | list-pages
 metaops … insights pull --level ad (--date-preset yesterday | --since --until) [--csv]
-metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # join on ad_name across accounts
+metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # joins on ad_name only when all rows have one currency
 ```
 
 ## Bulk lifecycle

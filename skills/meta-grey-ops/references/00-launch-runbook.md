@@ -230,7 +230,7 @@ different spec), UI multi-advertiser check done.
 metaops … review --state .metaops/run.json            # ad_review_feedback / issues_info; exit 1 on rejects
 metaops … monitor --accounts accounts.json --telegram   # status + spend sweep, STALL (≥40 impr, 0 clicks), survival log, TG alerts
 metaops … rules ladder --target-minor 1200 --event … --level ADSET --mode pause --confirm RULES
-metaops … edit budget --ids … --budget-pct +20 --confirm SPEND · clone campaign <id> --times 2
+metaops … edit budget --ids … --budget-pct +20 --confirm SPEND · edit status --ids … --status PAUSED --confirm PAUSE · clone campaign <id> --times 2
 metaops … comments hide --all --matching "scam|fake" --confirm HIDE
 metaops … insights pull --level ad --date-preset yesterday --csv day.csv · insights leaderboard --accounts accounts.json
 ```

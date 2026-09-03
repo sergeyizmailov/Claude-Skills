@@ -11,7 +11,9 @@ import tempfile
 import unittest
 from unittest import mock
 
+import clone
 import cmd_edit
+import edit
 import metaops
 
 os.environ.setdefault("META_TOKEN", "TEST_TOKEN")
@@ -79,6 +81,11 @@ class CmdEditTests(unittest.TestCase):
     def test_parse_last_json_line_empty_when_absent(self) -> None:
         self.assertEqual(cmd_edit._parse_last_json_line("no json here\n"), {})
 
+    def test_edit_help_expands_percent_literals(self) -> None:
+        with self.assertRaises(SystemExit) as exit_info:
+            self.ap.parse_args(["edit", "--help"])
+        self.assertEqual(exit_info.exception.code, 0)
+
     # --- edit status ---------------------------------------------------------
 
     def test_edit_status_active_requires_confirm_spend(self) -> None:
@@ -100,10 +107,18 @@ class CmdEditTests(unittest.TestCase):
         self.assertEqual(payload["data"]["count"], 2)
         script, child_args, _timeout = run_child.call_args[0]
         self.assertEqual(script, "edit.py")
-        self.assertEqual(child_args, ["--ids", "1,2", "--status", "ACTIVE", "--confirm", "ACTIVATE"])
+        self.assertEqual(child_args, [
+            "--ids", "1,2", "--status", "ACTIVE", "--confirm", "ACTIVATE",
+            "--expected-account", "act_1",
+        ])
 
-    def test_edit_status_paused_needs_no_confirm(self) -> None:
+    def test_edit_status_paused_requires_delivery_confirm(self) -> None:
         args = self.parse(["edit", "status", "--ids", "1,2", "--status", "PAUSED"])
+        with self.assertRaises(metaops.MetaOpsError):
+            args.handler(args)
+        args = self.parse([
+            "edit", "status", "--ids", "1,2", "--status", "PAUSED", "--confirm", "PAUSE",
+        ])
         with mock.patch.object(
             metaops, "run_child",
             return_value=fake_child('{"schema": "edit.result/v1", "ok": true}\n'),
@@ -112,13 +127,15 @@ class CmdEditTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertTrue(payload["ok"])
         _script, child_args, _timeout = run_child.call_args[0]
-        self.assertNotIn("--confirm", child_args)
+        self.assertIn("--confirm", child_args)
+        self.assertEqual(child_args[child_args.index("--confirm") + 1], "PAUSE")
+        self.assertEqual(child_args[-2:], ["--expected-account", "act_1"])
 
     def test_edit_status_state_account_mismatch_refused(self) -> None:
         state_path = self.root / "state.json"
         state_path.write_text(json.dumps({"spec_account": "act_2", "objects": {}}), encoding="utf-8")
         args = self.parse([
-            "edit", "status", "--state", str(state_path), "--level", "campaign", "--status", "PAUSED",
+            "edit", "status", "--state", str(state_path), "--level", "campaign", "--status", "PAUSED", "--confirm", "PAUSE",
         ])
         with self.assertRaises(metaops.MetaOpsError):
             args.handler(args)
@@ -127,7 +144,7 @@ class CmdEditTests(unittest.TestCase):
         state_path = self.root / "state.json"
         state_path.write_text(json.dumps({"spec_account": "act_1", "objects": {}}), encoding="utf-8")
         args = self.parse([
-            "edit", "status", "--state", str(state_path), "--level", "campaign", "--status", "PAUSED",
+            "edit", "status", "--state", str(state_path), "--level", "campaign", "--status", "PAUSED", "--confirm", "PAUSE",
         ])
         with mock.patch.object(
             metaops, "run_child",
@@ -136,10 +153,13 @@ class CmdEditTests(unittest.TestCase):
             code, _payload = args.handler(args)
         self.assertEqual(code, 0)
         _script, child_args, _timeout = run_child.call_args[0]
-        self.assertEqual(child_args, ["--state", str(state_path), "--level", "campaign", "--status", "PAUSED"])
+        self.assertEqual(child_args, [
+            "--state", str(state_path), "--level", "campaign", "--status", "PAUSED",
+            "--confirm", "PAUSE", "--expected-account", "act_1",
+        ])
 
     def test_edit_status_all_routes_through_profile_account(self) -> None:
-        args = self.parse(["edit", "status", "--all", "--level", "adset", "--status", "PAUSED"])
+        args = self.parse(["edit", "status", "--all", "--level", "adset", "--status", "PAUSED", "--confirm", "PAUSE"])
         with mock.patch.object(
             metaops, "run_child",
             return_value=fake_child('{"schema": "edit.result/v1", "ok": true}\n'),
@@ -147,11 +167,12 @@ class CmdEditTests(unittest.TestCase):
             args.handler(args)
         _script, child_args, _timeout = run_child.call_args[0]
         self.assertEqual(
-            child_args, ["--account", "act_1", "--level", "adset", "--all", "--status", "PAUSED"]
+            child_args, ["--account", "act_1", "--level", "adset", "--all", "--status", "PAUSED",
+                         "--confirm", "PAUSE", "--expected-account", "act_1"]
         )
 
     def test_edit_status_child_failure_is_reported(self) -> None:
-        args = self.parse(["edit", "status", "--ids", "1", "--status", "PAUSED"])
+        args = self.parse(["edit", "status", "--ids", "1", "--status", "PAUSED", "--confirm", "PAUSE"])
         with mock.patch.object(
             metaops, "run_child",
             return_value=fake_child("boom\n", returncode=1),
@@ -176,7 +197,7 @@ class CmdEditTests(unittest.TestCase):
             code, _payload = args.handler(args)
         self.assertEqual(code, 0)
         _script, child_args, _timeout = run_child.call_args[0]
-        self.assertEqual(child_args, ["--ids", "1", "--budget-pct", "-15"])
+        self.assertEqual(child_args, ["--ids", "1", "--expected-account", "act_1", "--budget-pct", "-15"])
 
     def test_edit_budget_minor_always_requires_confirm(self) -> None:
         args = self.parse(["edit", "budget", "--ids", "1", "--budget-minor", "500"])
@@ -193,7 +214,7 @@ class CmdEditTests(unittest.TestCase):
             code, _payload = args.handler(args)
         self.assertEqual(code, 0)
         _script, child_args, _timeout = run_child.call_args[0]
-        self.assertEqual(child_args, ["--ids", "1", "--budget-minor", "500", "--force-step"])
+        self.assertEqual(child_args, ["--ids", "1", "--expected-account", "act_1", "--budget-minor", "500", "--force-step"])
 
     def test_edit_budget_rejects_both_forms(self) -> None:
         # argparse's mutually-exclusive group refuses --budget-minor with --budget-pct at parse time.
@@ -214,7 +235,7 @@ class CmdEditTests(unittest.TestCase):
         self.assertEqual(code, 0)
         _script, child_args, _timeout = run_child.call_args[0]
         self.assertEqual(
-            child_args, ["--ids", "1,2", "--rename-prefix", "J41|", "--rename-suffix", "|v2"]
+            child_args, ["--ids", "1,2", "--expected-account", "act_1", "--rename-prefix", "J41|", "--rename-suffix", "|v2"]
         )
 
     # --- edit ramp ---------------------------------------------------------
@@ -245,7 +266,7 @@ class CmdEditTests(unittest.TestCase):
         self.assertEqual(run_child.call_count, 3)
         for call in run_child.call_args_list:
             _script, child_args, _timeout = call[0]
-            self.assertEqual(child_args, ["--ids", "1", "--budget-pct", "+20"])
+            self.assertEqual(child_args, ["--ids", "1", "--expected-account", "act_1", "--budget-pct", "+20"])
         self.assertEqual(len(payload["data"]["steps"]), 3)
 
     def test_edit_ramp_stops_on_first_child_failure(self) -> None:
@@ -280,7 +301,7 @@ class CmdEditTests(unittest.TestCase):
         self.assertEqual(script, "clone.py")
         self.assertEqual(
             child_args,
-            ["campaign", "1234", "--times", "2", "--prefix", "S2|", "--start", "2030-01-01T00:00:00+00:00"],
+            ["campaign", "1234", "--times", "2", "--expected-account", "act_1", "--prefix", "S2|", "--start", "2030-01-01T00:00:00+00:00"],
         )
 
     def test_clone_requires_workspace(self) -> None:
@@ -298,6 +319,37 @@ class CmdEditTests(unittest.TestCase):
             code, payload = args.handler(args)
         self.assertEqual(code, 1)
         self.assertFalse(payload["ok"])
+
+    def test_clone_rejects_source_outside_expected_account(self) -> None:
+        with mock.patch.object(clone.graph, "get", return_value={"id": "42", "account_id": "2"}):
+            with self.assertRaisesRegex(SystemExit, "refusing cross-profile clone"):
+                clone.require_expected_account("42", "act_1")
+
+    def test_clone_skips_deleted_and_archived_children(self) -> None:
+        rows = [
+            {"id": "active", "effective_status": "ACTIVE"},
+            {"id": "deleted", "effective_status": "DELETED"},
+            {"id": "archived", "status": "ARCHIVED"},
+        ]
+        self.assertEqual([row["id"] for row in clone.copyable(rows, "ad")], ["active"])
+
+    def test_edit_child_rejects_opaque_id_outside_expected_account_before_post(self) -> None:
+        argv = [
+            "edit.py", "--ids", "42", "--status", "PAUSED", "--confirm", "PAUSE",
+            "--expected-account", "act_1",
+        ]
+        foreign = {
+            "id": "42", "account_id": "2", "name": "foreign", "status": "ACTIVE",
+            "daily_budget": "100", "effective_status": "ACTIVE",
+        }
+        with (
+            mock.patch.object(edit.sys, "argv", argv),
+            mock.patch.object(edit.graph, "require_write_authority"),
+            mock.patch.object(edit.graph, "get", return_value=foreign),
+            mock.patch.object(edit.graph, "post") as post,
+        ):
+            self.assertEqual(edit.main(), 1)
+        post.assert_not_called()
 
     # --- rules -------------------------------------------------------------
 
@@ -366,14 +418,14 @@ class CmdEditTests(unittest.TestCase):
         )
 
     def test_rules_execute_child_args(self) -> None:
-        args = self.parse(["rules", "execute", "--rule-id", "999"])
+        args = self.parse(["rules", "execute", "--rule-id", "999", "--confirm", "EXECUTE"])
         with mock.patch.object(
             metaops, "run_child",
             return_value=fake_child('{"schema": "rules.result/v1", "ok": true}\n'),
         ) as run_child:
             args.handler(args)
         _script, child_args, _timeout = run_child.call_args[0]
-        self.assertEqual(child_args, ["--account", "act_1", "--execute", "999"])
+        self.assertEqual(child_args, ["--account", "act_1", "--execute", "999", "--confirm", "EXECUTE"])
 
     def test_rules_delete_requires_confirm_delete(self) -> None:
         args = self.parse(["rules", "delete", "--prefix", "LADDER|"])

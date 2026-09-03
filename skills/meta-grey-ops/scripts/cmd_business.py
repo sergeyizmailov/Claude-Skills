@@ -24,7 +24,7 @@ Commands (each returns ``(exit_code, metaops.result/v1 dict)``, matching every o
     business adaccount create --name --currency --timezone-id [--end-advertiser
         --media-agency --partner --funding-id] --confirm CREATE
     business pixel create --name [--is-crm] --confirm CREATE
-    business pixel share --account act_X [--business-id B] --confirm SHARE
+    business pixel share --account act_X --confirm SHARE
     business pixel shared
     business capi test --event NAME --test-code TESTxxxx [--url URL]
     business user invite --email E --role EMPLOYEE|ADMIN --confirm SHARE
@@ -70,10 +70,23 @@ def _require_confirm(ctx: Any, args: argparse.Namespace, expected: str, label: s
         raise ctx.MetaOpsError(f"{label} requires the literal --confirm {expected}")
 
 
-def _tasks_list(ctx: Any, raw: str) -> list[str]:
+TASKS_BY_ASSET = {
+    "adaccount": frozenset({"AA_ANALYZE", "ADVERTISE", "ANALYZE", "DRAFT", "MANAGE"}),
+    "page": frozenset({"AA_ANALYZE", "ADVERTISE", "ANALYZE", "DRAFT", "MANAGE"}),
+    "pixel": frozenset({"ADVERTISE", "ANALYZE", "EDIT", "UPLOAD"}),
+}
+
+
+def _tasks_list(ctx: Any, raw: str, asset_kind: str) -> list[str]:
     tasks = [t.strip().upper() for t in raw.split(",") if t.strip()]
     if not tasks:
         raise ctx.MetaOpsError("--tasks must contain at least one task")
+    invalid = sorted(set(tasks) - TASKS_BY_ASSET[asset_kind])
+    if invalid:
+        allowed = ", ".join(sorted(TASKS_BY_ASSET[asset_kind]))
+        raise ctx.MetaOpsError(
+            f"--tasks {invalid} are not valid for {asset_kind}; allowed: {allowed}"
+        )
     return tasks
 
 
@@ -204,8 +217,17 @@ def _pixel_share(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, Any
     _require_confirm(ctx, args, "SHARE", "pixel share")
     profile_name, profile = args.workspace_obj.profile(args.profile)
     dataset_id = str(profile["dataset_id"])
-    business_id = str(args.business_id or profile["business_id"])
+    business_id = str(profile["business_id"])
     account = ctx.graph.normalize_account(args.account)
+    declared_accounts = {
+        ctx.graph.normalize_account(candidate["ad_account_id"])
+        for candidate in args.workspace_obj.data.get("profiles", {}).values()
+        if candidate.get("ad_account_id")
+    }
+    if account not in declared_accounts:
+        raise ctx.MetaOpsError(
+            f"{account} is not declared by this workspace; add/select its profile before pixel share"
+        )
     report_path = (args.workspace_obj.state_root / "business" / f"pixel-share-{account}.json").resolve()
     report_path.parent.mkdir(parents=True, exist_ok=True)
     child = ctx.run_child(
@@ -307,7 +329,7 @@ def _user_assign(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, Any
     _require_confirm(ctx, args, "SHARE", "user assign")
     profile_name, profile = args.workspace_obj.profile(args.profile)
     asset_id = _resolve_asset_id(ctx, profile, args.asset)
-    tasks = _tasks_list(ctx, args.tasks)
+    tasks = _tasks_list(ctx, args.tasks, args.asset)
     payload = {"user": args.user_id, "tasks": tasks}
     ctx.graph.post(f"{asset_id}/assigned_users", payload, context="assign business user")
     return 0, ctx.result_envelope(
@@ -330,7 +352,7 @@ def _partner_share(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, A
     _require_confirm(ctx, args, "SHARE", "partner share")
     profile_name, profile = args.workspace_obj.profile(args.profile)
     asset_id = _resolve_asset_id(ctx, profile, args.asset)
-    tasks = _tasks_list(ctx, args.tasks)
+    tasks = _tasks_list(ctx, args.tasks, args.asset)
     payload = {"business": str(args.partner_business), "permitted_tasks": tasks}
     ctx.graph.post(f"{asset_id}/agencies", payload, context="partner share asset")
     return 0, ctx.result_envelope(
@@ -387,8 +409,6 @@ def register(sub: argparse._SubParsersAction, ctx: Any) -> None:
         "share", help="attach the profile pixel to an ad account (reuses probe.py --attach-pixel)"
     )
     action.add_argument("--account", required=True, help="act_<id> to attach the pixel to")
-    action.add_argument("--business-id", dest="business_id",
-                        help="BM id that owns the pixel; default profile business_id")
     action.add_argument("--confirm", required=True, help="must be literal SHARE")
     action.set_defaults(handler=functools.partial(_pixel_share, ctx))
     action = pixel_sub.add_parser("shared", help="list ad accounts the profile pixel is attached to")
@@ -413,7 +433,7 @@ def register(sub: argparse._SubParsersAction, ctx: Any) -> None:
     action = user_sub.add_parser("assign", help="POST /{asset}/assigned_users")
     action.add_argument("--user-id", required=True, dest="user_id")
     action.add_argument("--asset", required=True, choices=("adaccount", "page", "pixel"))
-    action.add_argument("--tasks", required=True, help="comma-separated tasks, e.g. MANAGE,ADVERTISE")
+    action.add_argument("--tasks", required=True, help="comma-separated tasks valid for the chosen asset")
     action.add_argument("--confirm", required=True, help="must be literal SHARE")
     action.set_defaults(handler=functools.partial(_user_assign, ctx))
 

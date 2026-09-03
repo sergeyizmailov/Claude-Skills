@@ -73,9 +73,11 @@ def ad_status_counts(account: str) -> dict[str, int]:
 
 
 def adset_issues(account: str) -> list[dict]:
-    rows = graph.get(f"{account}/adsets",
-                     params={"fields": "id,name,effective_status,issues_info", "limit": 200},
-                     context="adset issues").get("data", [])
+    rows = _adsets(
+        account,
+        {"fields": "id,name,effective_status,issues_info", "limit": 200},
+        "adset issues",
+    )
     return [{"id": a["id"], "name": a.get("name"), "issues": a["issues_info"]}
             for a in rows if a.get("issues_info")]
 
@@ -83,11 +85,26 @@ def adset_issues(account: str) -> list[dict]:
 STALL_MIN_IMPRESSIONS = 40
 
 
+def _adsets(account: str, params: dict, context: str) -> list[dict]:
+    """Fetch every matching ad set; an account routinely has more than one page."""
+    rows: list[dict] = []
+    path: str | None = f"{account}/adsets"
+    page_params = params
+    while path:
+        response = graph.get(path, params=page_params, context=context)
+        rows.extend(response.get("data", []))
+        path = (response.get("paging") or {}).get("next")
+        page_params = {}
+    return rows
+
+
 def adset_delivery(account: str) -> list[dict]:
-    rows = graph.get(f"{account}/adsets",
-                     params={"fields": "id,name,effective_status,insights.date_preset(today){impressions,clicks}",
-                             "effective_status": json.dumps(["ACTIVE"]), "limit": 200},
-                     context="adset delivery").get("data", [])
+    rows = _adsets(
+        account,
+        {"fields": "id,name,effective_status,insights.date_preset(today){impressions,clicks}",
+         "effective_status": json.dumps(["ACTIVE"]), "limit": 200},
+        "adset delivery",
+    )
     out = []
     for a in rows:
         ins = ((a.get("insights") or {}).get("data") or [{}])[0]

@@ -212,6 +212,51 @@ def load_items(path: str) -> list[dict[str, Any]]:
     return data if isinstance(data, list) else [data]
 
 
+def merged_upsert_rows(
+    header: list[str], rows: list[list[str]], items: list[dict[str, Any]]
+) -> tuple[list[str], list[list[str]]]:
+    """Return the exact sheet rows an upsert would produce, without writing.
+
+    The caller can validate this prospective state before it mutates a Google Sheet.
+    Duplicate input ids are refused: two full-row updates to the same range make the
+    outcome depend on request ordering and can silently erase fields from the first row.
+    """
+    if "id" not in header:
+        raise SheetError("sheet has no id column")
+    out_header = list(header)
+    columns = {name: index for index, name in enumerate(out_header)}
+    for item in items:
+        for key in item:
+            if key not in columns:
+                columns[key] = len(out_header)
+                out_header.append(key)
+
+    id_col = columns["id"]
+    out_rows = [list(row) + [""] * (len(out_header) - len(row)) for row in rows]
+    by_id = {
+        row[id_col]: index for index, row in enumerate(out_rows)
+        if len(row) > id_col and row[id_col]
+    }
+    seen: set[str] = set()
+    for item in items:
+        product_id = str(item.get("id", "")).strip()
+        if not product_id:
+            raise SheetError("every item needs an id")
+        if product_id in seen:
+            raise SheetError(f"input contains duplicate id {product_id!r}")
+        seen.add(product_id)
+        if product_id in by_id:
+            line = out_rows[by_id[product_id]]
+        else:
+            line = [""] * len(out_header)
+            line[id_col] = product_id
+            by_id[product_id] = len(out_rows)
+            out_rows.append(line)
+        for key, value in item.items():
+            line[columns[key]] = "" if value is None else str(value)
+    return out_header, out_rows
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(prog="sheetfeed", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sheet", required=True, help="spreadsheet URL or id")
@@ -260,18 +305,8 @@ def main() -> int:
             header, rows = sheet.read()
             items = load_items(args.file) if args.command == "upsert" else [{"id": args.id, args.field: args.value}]
             if args.command == "upsert":
-                probe_header = list(dict.fromkeys(header + [k for i in items for k in i]))
-                merged = {r[header.index("id")]: r for r in rows if header and len(r) > header.index("id")} if "id" in header else {}
-                for it in items:
-                    line = [""] * len(probe_header)
-                    base = merged.get(str(it.get("id", "")))
-                    if base:
-                        for i, val in enumerate(base):
-                            line[i] = val
-                    for k, val in it.items():
-                        line[probe_header.index(k)] = "" if val is None else str(val)
-                    merged[str(it.get("id", ""))] = line
-                problems = validate_rows(probe_header, list(merged.values()), args.target)
+                prospective_header, prospective_rows = merged_upsert_rows(header, rows, items)
+                problems = validate_rows(prospective_header, prospective_rows, args.target)
                 if problems:
                     raise SheetError("refusing to write invalid rows: " + "; ".join(problems[:10]))
             counts = sheet.upsert(items, header, rows)

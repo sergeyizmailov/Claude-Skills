@@ -627,6 +627,19 @@ class MetaOpsContractTests(unittest.TestCase):
             self.assertIs(metaops.graph.session(), new_session)
         rebuild.assert_called_once_with()
 
+    def test_json_parse_error_names_a_new_command(self) -> None:
+        with mock.patch.object(sys, "argv", ["metaops", "--json", "monitor"]):
+            with self.assertRaises(SystemExit) as exit_info, mock.patch("builtins.print") as printed:
+                metaops.parser().error("the following arguments are required: --accounts")
+        self.assertEqual(exit_info.exception.code, 2)
+        payload = json.loads(printed.call_args.args[0])
+        self.assertEqual(payload["command"], "monitor")
+
+    def test_global_json_survives_monitor_subparser(self) -> None:
+        parsed = metaops.parser().parse_args(["--json", "monitor", "--accounts", "act_1"])
+        self.assertTrue(parsed.json)
+        self.assertIsNone(parsed.out_json)
+
 
 
 
@@ -660,10 +673,34 @@ class FeedAndMonitorTests(unittest.TestCase):
             items = MetaOpsContractTests().write_json(root, "items.json", [{"id": "SKU1", "link": "https://a/"}])
             args = type("Args", (), {"workspace_obj": ws, "profile": "test", "feed_id": "5", "sheet": "abc",
                                      "tab": "products", "gid": 0, "url": None, "update_only": False,
-                                     "wait": 1, "timeout": 5, "file": str(items), "force": False})()
+                                     "wait": 1, "timeout": 5, "file": str(items), "force": False,
+                                     "confirm": "FEED"})()
             with mock.patch.object(metaops, "ad_statuses", return_value={"a1": "PENDING_REVIEW"}):
                 with self.assertRaisesRegex(metaops.MetaOpsError, "swap gate"):
                     metaops.command_feed_swap(args)
+
+    def test_feed_swap_validates_prospective_rows_before_sheet_write(self) -> None:
+        import sheetfeed
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            ws = MetaOpsContractTests().workspace(root)
+            args = type("Args", (), {"workspace_obj": ws, "profile": "test", "feed_id": "5", "sheet": "abc",
+                                     "tab": "products", "gid": 0, "url": None, "update_only": False,
+                                     "wait": 1, "timeout": 5, "file": str(root / "items.json"), "force": False,
+                                     "confirm": "FEED"})()
+            sheet = mock.Mock()
+            sheet.read.return_value = (["id"], [])  # Missing required feed columns.
+            with (
+                mock.patch.object(sheetfeed, "load_items", return_value=[{"id": "SKU1"}]),
+                mock.patch.object(sheetfeed, "Sheet", return_value=sheet),
+                mock.patch.object(metaops, "ad_statuses", return_value={}),
+                mock.patch.object(metaops, "run_feed_upload") as upload,
+            ):
+                code, payload = metaops.command_feed_swap(args)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["phase"], "sheet_invalid")
+            sheet.upsert.assert_not_called()
+            upload.assert_not_called()
 
     def test_feed_binding_requires_feed_id(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -673,6 +710,16 @@ class FeedAndMonitorTests(unittest.TestCase):
                 metaops.feed_binding(args)
             args.feed_id = "42"
             self.assertEqual(metaops.feed_binding(args)[2], "42")
+
+    def test_monitor_adset_queries_follow_pagination(self) -> None:
+        pages = [
+            {"data": [{"id": "a1", "issues_info": {"error_code": 1}}], "paging": {"next": "next"}},
+            {"data": [{"id": "a2", "issues_info": {"error_code": 2}}]},
+        ]
+        with mock.patch.object(monitor.graph, "get", side_effect=lambda *a, **k: pages.pop(0)) as get:
+            issues = monitor.adset_issues("act_1")
+        self.assertEqual([issue["id"] for issue in issues], ["a1", "a2"])
+        self.assertEqual(get.call_count, 2)
 
     def test_workspace_schema_accepts_feed_id(self) -> None:
         schema = json.loads((SCHEMA_DIR / "workspace.v1.json").read_text(encoding="utf-8"))
@@ -696,7 +743,8 @@ class FeedAndMonitorTests(unittest.TestCase):
             Image.new("RGB", (64, 48), (200, 30, 30)).save(src, "JPEG")
             dst = pathlib.Path(td) / "a.v01.jpg"
             uniquify.uniq_image(src, dst, uniquify.seed_for(src, "v01"), crop=False)
-            self.assertEqual(Image.open(dst).size, (64, 48))
+            with Image.open(dst) as image:
+                self.assertEqual(image.size, (64, 48))
             self.assertNotEqual(src.read_bytes(), dst.read_bytes())
 
 if __name__ == "__main__":

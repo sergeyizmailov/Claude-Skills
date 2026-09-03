@@ -45,6 +45,7 @@ def args_for(**overrides) -> object:
     base = {
         "workspace_obj": FakeWorkspace(_profile()),
         "profile": "test",
+        "confirm": "BATCH",
     }
     base.update(overrides)
     return type("Args", (), base)()
@@ -126,6 +127,18 @@ class CatalogSetTests(unittest.TestCase):
             with self.assertRaisesRegex(metaops.MetaOpsError, "JSON object"):
                 cmd_catalog.command_catalog_set_create(args, metaops)
 
+    def test_set_create_resolves_filter_path_through_context(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            filter_path = pathlib.Path(td) / "filter.json"
+            filter_path.write_text(json.dumps({"retailer_id": {"is_any": ["x"]}}), encoding="utf-8")
+            args = args_for(name="Set", filter="~/filter.json", retailer_ids=None, confirm="CREATE")
+            with (
+                mock.patch.object(metaops, "resolve_input", return_value=filter_path) as resolve,
+                mock.patch.object(metaops.graph, "post", return_value={"id": "321"}),
+            ):
+                cmd_catalog.command_catalog_set_create(args, metaops)
+            resolve.assert_called_once_with("~/filter.json")
+
 
 class CatalogMissingIdTests(unittest.TestCase):
     def test_missing_catalog_id_raises(self) -> None:
@@ -137,6 +150,13 @@ class CatalogMissingIdTests(unittest.TestCase):
 
 
 class CatalogProductsBatchTests(unittest.TestCase):
+    def test_batch_requires_literal_confirm_before_reading_or_writing(self) -> None:
+        args = args_for(file="not-read.json", method="DELETE", wait=1, confirm="DELETE")
+        with mock.patch.object(metaops.graph, "post") as post:
+            with self.assertRaisesRegex(metaops.MetaOpsError, "literal --confirm BATCH"):
+                cmd_catalog.command_catalog_products_batch(args, metaops)
+        post.assert_not_called()
+
     def test_batch_requires_valid_method(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             items_path = pathlib.Path(td) / "items.json"
@@ -161,9 +181,9 @@ class CatalogProductsBatchTests(unittest.TestCase):
             args = args_for(file=str(items_path), method="UPDATE", wait=30)
 
             statuses = [
-                {"handle": "H1", "status": "in_progress"},
-                {"handle": "H1", "status": "finished", "errors_total_count": 0,
-                 "warnings_total_count": 0, "errors": [], "ids_of_invalid_requests": []},
+                {"data": [{"handle": "H1", "status": "in_progress"}]},
+                {"data": [{"handle": "H1", "status": "finished", "errors_total_count": 0,
+                           "warnings_total_count": 0, "errors": [], "ids_of_invalid_requests": []}]},
             ]
             with (
                 mock.patch.object(metaops.graph, "post", return_value={"handles": ["H1"]}) as post,
@@ -177,7 +197,9 @@ class CatalogProductsBatchTests(unittest.TestCase):
             self.assertEqual(sent["allow_upsert"], True)
             self.assertEqual(len(sent["requests"]), 2)
             self.assertEqual(sent["requests"][0], {"method": "UPDATE", "data": items[0]})
-            self.assertEqual(get.call_args.kwargs["params"], {"handle": "H1"})
+            self.assertEqual(get.call_args.kwargs["params"], {
+                "handle": "H1", "fields": cmd_catalog.BATCH_STATUS_FIELDS,
+            })
             self.assertTrue(payload["data"]["finished"])
             self.assertEqual(payload["data"]["errors_total_count"], 0)
             self.assertEqual(payload["phase"], "finished")

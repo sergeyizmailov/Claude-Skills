@@ -4,7 +4,7 @@
 Adds workspace-bound, no-Graph-code commands to the metaops CLI:
 
     metaops review [--state PATH | --ids a,b | --all] [--previews --format F1,F2]
-    metaops monitor --accounts accounts.json|act_a,act_b [--telegram] [--stall-impressions N]
+    metaops monitor --accounts accounts.json|act_a,act_b [--telegram] [--stall-impressions N] [--out-json PATH]
     metaops comments list|hide|delete [--ads a,b | --all] [--matching REGEX] --confirm HIDE|DELETE
     metaops page show|set|list-pages [--avatar f] [--cover f] [--about ..] [--website URL] --confirm PAGE
     metaops insights pull --level L (--date-preset X | --since --until)
@@ -140,12 +140,22 @@ def _review_ad_ids(ctx, args, account: str) -> list[str]:
     return out
 
 
+def _review_all_ads(ctx, account: str) -> list[dict[str, Any]]:
+    """Read review fields on the account edge to avoid one request per ad."""
+    rows: list[dict[str, Any]] = []
+    path: str | None = f"{account}/ads"
+    params: dict[str, Any] = {"fields": AD_REVIEW_FIELDS, "limit": 500}
+    while path:
+        response = ctx.graph.get(path, params=params, context="review ads")
+        rows.extend(row for row in response.get("data", []) if isinstance(row, dict))
+        path = (response.get("paging") or {}).get("next")
+        params = {}
+    return rows
+
+
 def command_review(args, ctx) -> tuple[int, dict[str, Any]]:
     _, _, profile = _profile(ctx, args, "review")
     account = ctx.graph.normalize_account(profile["ad_account_id"])
-    ad_ids = _review_ad_ids(ctx, args, account)
-    if not ad_ids:
-        raise ctx.MetaOpsError("no ads to review: pass --state, --ids, or --all")
 
     formats: list[str] = []
     if args.previews:
@@ -156,10 +166,23 @@ def command_review(args, ctx) -> tuple[int, dict[str, Any]]:
                 f"unknown --format value(s): {unknown}; see facebook_business AdPreview.AdFormat"
             )
 
+    if args.all:
+        ads = _review_all_ads(ctx, account)
+    else:
+        ad_ids = _review_ad_ids(ctx, args, account)
+        ads = [
+            ctx.graph.get(ad_id, params={"fields": AD_REVIEW_FIELDS}, context="review ad")
+            for ad_id in ad_ids
+        ]
+    if not ads:
+        if args.all:
+            raise ctx.MetaOpsError(f"no ads found on {account}")
+        raise ctx.MetaOpsError("no ad ids resolved from --state or --ids")
+
     rows: list[dict[str, Any]] = []
     counts: dict[str, int] = {}
-    for ad_id in ad_ids:
-        ad = ctx.graph.get(ad_id, params={"fields": AD_REVIEW_FIELDS}, context="review ad")
+    for ad in ads:
+        ad_id = str(ad.get("id") or "")
         status = ad.get("effective_status", "?")
         counts[status] = counts.get(status, 0) + 1
         row: dict[str, Any] = {
@@ -225,7 +248,11 @@ def command_monitor(args, ctx) -> tuple[int, dict[str, Any]]:
         str(ctx.resolve_input(args.accounts)) if args.accounts.endswith(".json") else args.accounts
     )
     log_path = ctx.resolve_input(args.log) if args.log else (workspace.state_root / "survival.jsonl").resolve()
-    json_path = ctx.resolve_input(args.json) if args.json else (operate_dir / f"monitor.{_stamp(ctx)}.json").resolve()
+    json_path = (
+        ctx.resolve_input(args.out_json)
+        if args.out_json
+        else (operate_dir / f"monitor.{_stamp(ctx)}.json").resolve()
+    )
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     child_args = [
@@ -357,7 +384,7 @@ def command_page(args, ctx) -> tuple[int, dict[str, Any]]:
         return 0, ctx.result_envelope("page", True, "listed", data={"pages": summary.get("pages", [])})
 
     _, _, profile = _profile(ctx, args, "page")
-    page_id = str(getattr(args, "page", None) or profile["page_id"])
+    page_id = str(profile["page_id"])
 
     if mode == "show":
         child = ctx.run_child("page.py", [page_id, "--show"], args.timeout)
@@ -431,6 +458,7 @@ def _insights_leaderboard(args, ctx) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("insights leaderboard: no accounts resolved from --accounts")
 
     aggregate: dict[str, dict[str, Any]] = {}
+    currencies_seen: set[str] = set()
     per_account: list[dict[str, Any]] = []
     for account in accounts:
         json_path = (operate_dir / f"lb-{account}-{_stamp(ctx)}.json").resolve()
@@ -445,6 +473,8 @@ def _insights_leaderboard(args, ctx) -> tuple[int, dict[str, Any]]:
         rows = ctx.read_json(json_path, "insights rows") if json_path.is_file() else []
         for row in rows:
             name = row.get("ad_name") or "?"
+            currency = str(row.get("account_currency") or "UNKNOWN")
+            currencies_seen.add(currency)
             bucket = aggregate.setdefault(name, {
                 "ad_name": name, "spend": 0.0, "impressions": 0, "clicks": 0,
                 "actions": {}, "accounts": set(), "currencies": set(),
@@ -463,6 +493,17 @@ def _insights_leaderboard(args, ctx) -> tuple[int, dict[str, Any]]:
                     value = 0.0
                 bucket["actions"][atype] = bucket["actions"].get(atype, 0.0) + value
         per_account.append({"account": account, "ok": True, "summary": _last_json_line(child.stdout)})
+
+    if len(currencies_seen) > 1:
+        return 1, ctx.result_envelope(
+            "insights", False, "currency_mismatch",
+            data={"accounts": per_account, "currencies": sorted(currencies_seen)},
+            error={
+                "kind": "currency_mismatch",
+                "message": "cannot sum or rank nominal spend across different account currencies",
+            },
+            next_action="Run the leaderboard separately for each account currency or convert spend outside metaops.",
+        )
 
     leaderboard = [
         {
@@ -525,7 +566,8 @@ def register(sub, ctx) -> None:
     p.add_argument("--stall-impressions", type=int, default=40)
     p.add_argument("--telegram", action="store_true", help="TG_BOT_TOKEN + TG_CHAT_ID from env, never argv")
     p.add_argument("--log", help="default: <workspace>/survival.jsonl")
-    p.add_argument("--json", help="default: a fresh file under <workspace>/.metaops/operate")
+    p.add_argument("--out-json", dest="out_json",
+                   help="write monitor rows here; default: a fresh file under <workspace>/.metaops/operate")
     p.set_defaults(handler=lambda args: command_monitor(args, ctx))
 
     p = sub.add_parser("comments", help="comment moderation on ad posts via the Page token")
@@ -545,12 +587,10 @@ def register(sub, ctx) -> None:
     p = sub.add_parser("page", help="Page housekeeping writes via the Page token")
     psub = p.add_subparsers(dest="page_action", required=True)
     show = psub.add_parser("show")
-    show.add_argument("--page", help="override the profile's page_id")
     show.set_defaults(handler=lambda args: command_page(args, ctx), page_mode="show")
     lst = psub.add_parser("list-pages")
     lst.set_defaults(handler=lambda args: command_page(args, ctx), page_mode="list-pages")
     setp = psub.add_parser("set")
-    setp.add_argument("--page", help="override the profile's page_id")
     setp.add_argument("--avatar", help="image file")
     setp.add_argument("--cover", help="image file")
     setp.add_argument("--about")

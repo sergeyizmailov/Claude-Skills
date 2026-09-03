@@ -57,8 +57,8 @@ uv run --isolated --project $S sheetfeed --sheet "$SHEET" --json pull --out item
 ```
 
 Result envelope `sheetfeed.result/v1`; `validate` exit 1 lists `problems`. Then force the fetch:
-`metaops feed sync --sheet <url>` (`POST /{feed_id}/uploads`, ~10 s) instead of waiting for the
-schedule or clicking "Request update now"; one-shot swap = `metaops feed swap --file items.json`
+`metaops feed sync --sheet <url> --confirm FEED` (`POST /{feed_id}/uploads`, ~10 s) instead of waiting for the
+schedule or clicking "Request update now"; one-shot swap = `metaops feed swap --file items.json --confirm FEED`
 (`16`). Then `metaops assets set-products` / catalog product-set repair
 (`04`) as usual. Edit the sheet, not `/{catalog_id}/batch`, when the sheet is the source: the next
 scheduled fetch overwrites API edits.

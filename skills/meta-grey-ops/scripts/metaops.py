@@ -827,7 +827,12 @@ def feed_binding(args: argparse.Namespace) -> tuple[str, dict[str, Any], str]:
     if not args.workspace_obj:
         raise MetaOpsError("feed commands require --workspace")
     profile_name, profile = args.workspace_obj.profile(args.profile)
-    feed_id = args.feed_id or profile.get("feed_id")
+    declared_feed_id = str(profile.get("feed_id") or "")
+    if args.feed_id and declared_feed_id and str(args.feed_id) != declared_feed_id:
+        raise MetaOpsError(
+            "--feed-id does not match profiles.<p>.feed_id; select the profile that owns this feed"
+        )
+    feed_id = declared_feed_id or args.feed_id
     if not feed_id:
         raise MetaOpsError("no feed id: pass --feed-id or set profiles.<p>.feed_id in workspace.json")
     if not str(feed_id).isdigit():
@@ -880,6 +885,8 @@ def run_feed_upload(args: argparse.Namespace, feed_id: str, url: str) -> tuple[C
 
 def command_feed_sync(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     profile_name, profile, feed_id = feed_binding(args)
+    if args.confirm != "FEED":
+        raise MetaOpsError("feed sync changes catalog data: pass the literal --confirm FEED")
     url = feed_source_url(args)
     child, upload = run_feed_upload(args, feed_id, url)
     if not child.ok:
@@ -896,6 +903,8 @@ def command_feed_swap(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     """Sheet upsert → immediate fetch → prove no ad re-entered review (swap gate, 04)."""
     import sheetfeed
     profile_name, profile, feed_id = feed_binding(args)
+    if args.confirm != "FEED":
+        raise MetaOpsError("feed swap changes catalog data: pass the literal --confirm FEED")
     if not args.sheet:
         raise MetaOpsError("feed swap requires --sheet")
     items = sheetfeed.load_items(args.file)
@@ -913,16 +922,16 @@ def command_feed_swap(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     header, rows = sheet.read()
     if not header:
         raise MetaOpsError("sheet tab has no header row; run sheetfeed init-header first")
-    counts = sheet.upsert(items, header, rows)
-    header, rows = sheet.read()
-    problems = sheetfeed.validate_rows(header, rows, "meta")
+    prospective_header, prospective_rows = sheetfeed.merged_upsert_rows(header, rows, items)
+    problems = sheetfeed.validate_rows(prospective_header, prospective_rows, "meta")
     if problems:
         return 1, result_envelope(
             "feed swap", False, "sheet_invalid",
-            data={"sheet": counts, "problems": problems},
-            error={"kind": "validation", "message": f"{len(problems)} row problem(s) after upsert"},
-            next_action="Fix the rows (sheetfeed set/upsert), then metaops feed sync.",
+            data={"problems": problems},
+            error={"kind": "validation", "message": f"{len(problems)} prospective row problem(s)"},
+            next_action="Fix the input rows, then retry feed swap; the sheet was not changed.",
         )
+    counts = sheet.upsert(items, header, rows)
     url = feed_source_url(args)
     child, upload = run_feed_upload(args, feed_id, url)
     if not child.ok:
@@ -1580,10 +1589,12 @@ def command_bulk_activate(args: argparse.Namespace) -> tuple[int, dict[str, Any]
 class MetaOpsParser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
         if "--json" in sys.argv[1:]:
-            command = next((part for part in sys.argv[1:] if part in {
-                "doctor", "media", "plan", "apply", "verify", "status", "activate",
-                "bulk-plan", "bulk-apply", "bulk-activate", "workspace", "assets",
-            }), "parse")
+            command = next(
+                (part for part in sys.argv[1:] if part in WORKSPACE_LIFECYCLE_COMMANDS | {
+                    "doctor", "workspace", "assets",
+                }),
+                "parse",
+            )
             payload = result_envelope(
                 command, False, "launcher_error",
                 error={"kind": "usage", "message": message},
@@ -1653,13 +1664,14 @@ def parser() -> argparse.ArgumentParser:
         ("swap", command_feed_swap, "upsert rows into the sheet, fetch now, prove no ad re-entered review"),
     ):
         action = feed_sub.add_parser(name, help=help_text)
-        action.add_argument("--feed-id", help="product feed id; default profiles.<p>.feed_id")
+        action.add_argument("--feed-id", help="only allowed when the profile has no feed_id")
         action.add_argument("--sheet", help="Google Sheet URL/id (public link for Meta)")
         action.add_argument("--tab", default="products")
         action.add_argument("--gid", type=int, help="tab gid when GSHEETS_JSON_KEY_FILE is not set")
         action.add_argument("--url", help="explicit feed URL instead of the sheet CSV export")
         action.add_argument("--update-only", action="store_true")
         action.add_argument("--wait", type=int, default=120)
+        action.add_argument("--confirm", required=True, help="must be literal FEED")
         if name == "swap":
             action.add_argument("--file", required=True, help="CSV/JSON items keyed by id")
             action.add_argument("--force", action="store_true", help="skip the in-review swap gate")
@@ -1713,10 +1725,7 @@ def parser() -> argparse.ArgumentParser:
 
     import importlib
     for module_name in COMMAND_MODULES:
-        try:
-            module = importlib.import_module(module_name)
-        except ImportError:
-            continue
+        module = importlib.import_module(module_name)
         module.register(sub, sys.modules[__name__])
 
     add_json_help(ap)

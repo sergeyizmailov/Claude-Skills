@@ -1,11 +1,11 @@
 ---
 name: meta-grey-ops
-description: "Launch and run Meta (FB/IG) ads via the Marketing API from a token — access/scopes/System User, MCP vs API, PAUSED bulk launch across ad accounts, catalog/DLO/carousel creatives, catalog as an agent-edited Google Sheet, attribution 1/1/1, Advantage+ and multi-advertiser opt-out, EU DSA, plus grey-market survival: antidetect/proxy/session hygiene, agency accounts, token death, cloaking/review-layer tricks, verification gates, no-path verticals, per-vertical playbooks (casino, nutra, crypto, news-tg). Use for: 'launch FB ads through the API', 'I have a BM access token, set up campaigns', 'bulk launch on N accounts', 'connect Claude to Meta ads / MCP', 'why did the ad set create fail'. Clean marketing theory = meta-ads; tracker metrics = tracker-ops."
+description: "Use when operating Meta FB/IG ads through the workspace-bound Marketing API CLI: build PAUSED campaigns, bulk-launch accounts, manage catalog feeds/assets, diagnose API gates or perform guarded account/Page operations. Do not use for marketing strategy (meta-ads) or tracker reporting (tracker-ops)."
 ---
 
 # Meta Grey Ops
 
-Reviewed 2026-09-02. Launch/operate via API on your own token (= autolaunch SaaS without UI, `13`) + grey survival. "buy well" → `meta-ads` · "count & sync" → `tracker-ops` · "portfolio decisions" → `senior-buyer-ops`.
+Reviewed 2026-09-03. Launch/operate via API on your own token (= autolaunch SaaS without UI, `13`) + grey survival. "buy well" → `meta-ads` · "count & sync" → `tracker-ops` · "portfolio decisions" → `senior-buyer-ops`.
 
 ## Start here
 
@@ -81,32 +81,9 @@ Not in the scripts and therefore on you: account-level "test new optimizations" 
 
 Declared gaps: no dating or loans playbook; `APP_PROMOTION` only directional in `playbooks/casino.md`.
 
-## Scripts
+## Implementation boundary
 
-`metaops` is the agent write boundary: rejects workspaces inside the skills directory; generated
-files belong in the project workspace. Low-level scripts: read-only inspection only — POST/DELETE
-enabled only inside a validated workspace-bound `metaops` process. Run `16`'s isolated checks after
-any edit.
-
-| Script | Does | Spends? |
-|---|---|---|
-| `metaops.py` | agent interface: workspace/assets/doctor/media/feed/catalog/business, hash-bound plan → apply PAUSED → verify → explicit single/bulk activate, then edit/clone/rules/review/monitor/comments/page/insights | activate, `edit … --confirm SPEND` |
-| `probe.py` | internal doctor implementation: identity/scopes/account/PBIA/dataset/write gates | no spend |
-| `media.py` | internal `metaops media` implementation | no spend |
-| `launch.py` | spec → `validate_only` → create PAUSED; resume-safe state | no |
-| `bulk.py` | internal bulk-plan/apply implementation | no |
-| `verify.py` | read-back diff of every spec field; exit 0 writes `<state>.verified.json` | no |
-| `activate.py` | internal single/bulk activation implementation; receipt required | **yes** |
-| `cmd_edit.py` · `cmd_catalog.py` · `cmd_business.py` · `cmd_operate.py` | `metaops` command groups: edit/clone/rules · catalog/feed/set/products · BM accounts/pixel/CAPI/users/partners · review/monitor/comments/page/insights (`16`) | edit ACTIVE/budget only with `--confirm SPEND` |
-| `edit.py` · `clone.py` · `rules.py` | internal implementations behind `metaops edit/clone/rules` | mutating |
-| `monitor.py` | N-account status/spend sweep → verdicts incl. `STALL` (ad set ≥40 impr, 0 clicks), JSONL | no |
-| `insights.py` | spend/delivery, explicit attribution window, CSV for tracker | no |
-| `comments.py` | internal `metaops comments list/hide/delete` (Page token) | no spend |
-| `mcp.py` | official Meta Ads MCP: tools, rollout diagnostics, allowlisted reads only; mutating tools are rejected in code | no |
-| `mutate_set.py` | internal `metaops assets set-products` implementation | no spend |
-| `sheetfeed.py` | edit/validate the Google-Sheet catalog via service account (`17`); Meta pulls it as a scheduled feed | no spend |
-| `uniquify.py` · `page.py` | local creative variants (`--no-crop` keeps exact pixels for text/border banners) · internal `metaops page` | no spend |
-| `feed_upload.py` | internal `metaops feed sync/swap`: `POST /{feed_id}/uploads` + poll | no spend |
-
-Env: `META_TOKEN` (required), `GSHEETS_JSON_KEY_FILE` (sheetfeed only), `TG_BOT_TOKEN`+`TG_CHAT_ID` (`monitor --telegram`), `META_PROXY` or `META_ALLOW_NO_PROXY=1`, optional `META_APP_SECRET`
-(adds `appsecret_proof`), `META_API_VERSION` (pinned `v26.0`). Never pass a token on argv.
+`metaops` is the only agent write boundary: it rejects workspaces inside the skill directory and
+owns command syntax in `references/16-metaops-agent-cli.md`. Low-level scripts are internal; their
+POST/DELETE calls run only through a validated, workspace-bound `metaops` process. Generated files
+belong in the project workspace. Run `16`'s isolated checks after an implementation change.

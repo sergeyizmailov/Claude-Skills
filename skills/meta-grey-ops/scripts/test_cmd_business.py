@@ -97,7 +97,7 @@ class CmdBusinessTests(unittest.TestCase):
                  mock.patch.object(metaops, "run_child") as run_child:
                 args = make_args(
                     workspace_obj=workspace, profile="test", confirm="WRONG",
-                    account="act_2", business_id=None, timeout=10,
+                    account="act_2", timeout=10,
                 )
                 with self.assertRaisesRegex(metaops.MetaOpsError, "literal --confirm SHARE"):
                     cmd_business._pixel_share(metaops, args)
@@ -234,7 +234,7 @@ class CmdBusinessTests(unittest.TestCase):
 
                 args = make_args(
                     workspace_obj=workspace, profile="test", confirm="SHARE",
-                    user_id="1", asset="pixel", tasks="MANAGE",
+                    user_id="1", asset="pixel", tasks="EDIT",
                 )
                 cmd_business._user_assign(metaops, args)
                 self.assertEqual(post.call_args.args[0], "3/assigned_users")
@@ -271,13 +271,13 @@ class CmdBusinessTests(unittest.TestCase):
             workspace = self.workspace(root)
             args = make_args(
                 workspace_obj=workspace, profile="test", confirm="SHARE",
-                account="act_2", business_id=None, timeout=10,
+                account="act_1", timeout=10,
             )
 
             def fake_run_child(script, argv, timeout):
                 self.assertEqual(script, "probe.py")
                 self.assertIn("--attach-pixel", argv)
-                self.assertEqual(argv[argv.index("--account") + 1], "act_2")
+                self.assertEqual(argv[argv.index("--account") + 1], "act_1")
                 self.assertEqual(argv[argv.index("--dataset") + 1], "3")
                 self.assertEqual(argv[argv.index("--business") + 1], "10")
                 report_path = pathlib.Path(argv[argv.index("--json") + 1])
@@ -285,7 +285,7 @@ class CmdBusinessTests(unittest.TestCase):
                 report_path.write_text(
                     __import__("json").dumps(
                         [{"gate": "pixel attached to account", "state": "PASS",
-                          "detail": "3 attached to act_2 just now"}]
+                          "detail": "3 attached to act_1 just now"}]
                     ),
                     encoding="utf-8",
                 )
@@ -302,7 +302,7 @@ class CmdBusinessTests(unittest.TestCase):
             workspace = self.workspace(pathlib.Path(td))
             args = make_args(
                 workspace_obj=workspace, profile="test", confirm="SHARE",
-                account="act_2", business_id="99", timeout=10,
+                account="act_1", timeout=10,
             )
             with mock.patch.object(
                 metaops, "run_child",
@@ -311,6 +311,26 @@ class CmdBusinessTests(unittest.TestCase):
                 code, payload = cmd_business._pixel_share(metaops, args)
             self.assertEqual(code, 1)
             self.assertFalse(payload["ok"])
+
+    def test_pixel_share_rejects_account_outside_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workspace = self.workspace(pathlib.Path(td))
+            args = make_args(
+                workspace_obj=workspace, profile="test", confirm="SHARE",
+                account="act_2", timeout=10,
+            )
+            with self.assertRaisesRegex(metaops.MetaOpsError, "not declared by this workspace"):
+                cmd_business._pixel_share(metaops, args)
+
+    def test_pixel_task_enum_rejects_manage(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workspace = self.workspace(pathlib.Path(td))
+            args = make_args(
+                workspace_obj=workspace, profile="test", confirm="SHARE",
+                user_id="1", asset="pixel", tasks="MANAGE",
+            )
+            with self.assertRaisesRegex(metaops.MetaOpsError, "not valid for pixel"):
+                cmd_business._user_assign(metaops, args)
 
     # --- reads / listing -----------------------------------------------------------
 

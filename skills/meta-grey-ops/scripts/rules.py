@@ -152,6 +152,7 @@ def main() -> int:
     ap.add_argument("--prefix", default="LADDER|", help="rule name prefix; {k} available")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--execute", help="rule id: fire now and read adrules_history")
+    ap.add_argument("--confirm", help="literal EXECUTE when using --execute")
     ap.add_argument("--delete-prefix", help="delete every rule whose name starts with this")
     ap.add_argument("--history", action="store_true", help="read adrules_history for the account")
     ap.add_argument("--since", help="--history filter: Unix timestamp or ISO-8601 datetime")
@@ -211,6 +212,10 @@ def main() -> int:
         return 0
 
     if args.execute:
+        if args.confirm != "EXECUTE":
+            sys.exit("--execute can trigger a live rule: pass --confirm EXECUTE")
+        if str(args.execute) not in {str(rule.get("id")) for rule in list_rules(account)}:
+            sys.exit(f"rule {args.execute} is not in {account}'s rules library")
         graph.post(f"{args.execute}/execute", {}, context="execute rule", idempotent=True)
         print("  fired; reading history (lags 1-2 min) …")
         time.sleep(20)

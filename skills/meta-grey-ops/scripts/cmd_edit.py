@@ -18,7 +18,7 @@ the same contract as every other `metaops` command.
 Command surface:
 
     edit status  --ids a,b | --state PATH --level campaign|adset|ad | --all --level L
-                 --status PAUSED|ACTIVE [--confirm SPEND] [--dry-run]
+                 --status PAUSED|ACTIVE --confirm PAUSE|SPEND [--dry-run]
     edit budget  --ids a,b (--budget-minor N | --budget-pct +-N) [--force-step]
                  [--confirm SPEND] [--dry-run]
     edit rename  --ids a,b --prefix P [--suffix S] [--dry-run]
@@ -32,24 +32,21 @@ Command surface:
                   [--confirm RULES] [--dry-run]
     rules list
     rules history [--since S]
-    rules execute --rule-id ID
+    rules execute --rule-id ID --confirm EXECUTE
     rules delete  --prefix P --confirm DELETE [--dry-run]
 
-Every command is workspace-bound: the ad account, and where a local artifact makes
-it checkable (a `--state` file's `spec_account`), the target ids are refused when
-they do not belong to `args.profile`'s `ad_account_id`. A bare `--ids` list of
-arbitrary object ids cannot be account-checked offline (Graph object ids carry no
-account prefix); that check would need a live `GET`, which this module deliberately
-does not perform — `edit.py`'s own `graph.require_write_authority` still refuses a
-write outside the authorized account at call time.
+Every command is workspace-bound. The ad account comes from `args.profile`; state
+files must name that account; and the child reads the `account_id` of every opaque
+edit/clone object before it can mutate it. A raw id from another accessible account
+is therefore refused rather than relying on its numeric shape.
 
 Any action that sets ACTIVE (spend can start) or can raise a budget requires the
-literal `--confirm SPEND` at this layer; `edit.py` itself is then called with its
-own literal (`--confirm ACTIVATE` for status, none for budget — `edit.py` has no
-separate spend confirmation for budget raises, only the ±20%/late-day guards).
+literal `--confirm SPEND`; PAUSED status changes require `--confirm PAUSE`.
+`edit.py` receives its own status literal (`ACTIVATE`/`PAUSE`).
 `edit ramp` requires the distinct literal `--confirm RAMP` since it composes several
 budget raises. `rules ... --mode pause` requires `--confirm RULES` since an armed
-pause rule can act unattended. `rules delete` requires `--confirm DELETE`.
+pause rule can act unattended; `rules execute` requires `--confirm EXECUTE`; and
+`rules delete` requires `--confirm DELETE`.
 
 API facts below were verified against the installed facebook_business SDK, not
 against developers.facebook.com (verified 2026-09-03, SDK 26.0.1):
@@ -81,9 +78,11 @@ import json
 from typing import Any
 
 RAISE_CONFIRM = "SPEND"
+PAUSE_CONFIRM = "PAUSE"
 RAMP_CONFIRM = "RAMP"
 RULES_PAUSE_CONFIRM = "RULES"
 RULES_DELETE_CONFIRM = "DELETE"
+RULES_EXECUTE_CONFIRM = "EXECUTE"
 RAMP_STEP_LIMIT = 20
 
 
@@ -146,9 +145,10 @@ def handle_edit_status(args) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("edit status needs exactly one of --ids, --state, --all")
     if (args.state or args.all) and not args.level:
         raise ctx.MetaOpsError("--state / --all need --level")
-    if args.status == "ACTIVE" and args.confirm != RAISE_CONFIRM:
+    expected_confirm = RAISE_CONFIRM if args.status == "ACTIVE" else PAUSE_CONFIRM
+    if args.confirm != expected_confirm:
         raise ctx.MetaOpsError(
-            f"--status ACTIVE can start spend: pass the literal --confirm {RAISE_CONFIRM}"
+            f"--status {args.status} changes delivery: pass the literal --confirm {expected_confirm}"
         )
     child_args: list[str] = []
     if args.ids:
@@ -161,6 +161,9 @@ def handle_edit_status(args) -> tuple[int, dict[str, Any]]:
     child_args += ["--status", args.status]
     if args.status == "ACTIVE":
         child_args += ["--confirm", "ACTIVATE"]
+    else:
+        child_args += ["--confirm", "PAUSE"]
+    child_args += ["--expected-account", account]
     if args.dry_run:
         child_args.append("--dry-run")
     return _run_child(ctx, args, "edit status", "edit.py", child_args, "edited")
@@ -168,7 +171,8 @@ def handle_edit_status(args) -> tuple[int, dict[str, Any]]:
 
 def handle_edit_budget(args) -> tuple[int, dict[str, Any]]:
     ctx = ctx_module()
-    _profile(args, ctx)  # workspace-bound; --ids has no offline-checkable account
+    _, profile = _profile(args, ctx)
+    account = _account(profile, ctx)
     if not args.ids:
         raise ctx.MetaOpsError("edit budget requires --ids")
     if (args.budget_minor is None) == (args.budget_pct is None):
@@ -180,7 +184,7 @@ def handle_edit_budget(args) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError(
             f"a budget change that may raise spend requires the literal --confirm {RAISE_CONFIRM}"
         )
-    child_args = ["--ids", args.ids]
+    child_args = ["--ids", args.ids, "--expected-account", account]
     if args.budget_minor is not None:
         child_args += ["--budget-minor", str(args.budget_minor)]
     else:
@@ -194,10 +198,11 @@ def handle_edit_budget(args) -> tuple[int, dict[str, Any]]:
 
 def handle_edit_rename(args) -> tuple[int, dict[str, Any]]:
     ctx = ctx_module()
-    _profile(args, ctx)
+    _, profile = _profile(args, ctx)
+    account = _account(profile, ctx)
     if not args.ids:
         raise ctx.MetaOpsError("edit rename requires --ids")
-    child_args = ["--ids", args.ids, "--rename-prefix", args.prefix]
+    child_args = ["--ids", args.ids, "--expected-account", account, "--rename-prefix", args.prefix]
     if args.suffix:
         child_args += ["--rename-suffix", args.suffix]
     if args.dry_run:
@@ -207,7 +212,8 @@ def handle_edit_rename(args) -> tuple[int, dict[str, Any]]:
 
 def handle_edit_ramp(args) -> tuple[int, dict[str, Any]]:
     ctx = ctx_module()
-    _profile(args, ctx)  # workspace-bound; --ids has no offline-checkable account
+    _, profile = _profile(args, ctx)
+    account = _account(profile, ctx)
     if not args.ids:
         raise ctx.MetaOpsError("edit ramp requires --ids")
     if args.confirm != RAMP_CONFIRM:
@@ -230,7 +236,10 @@ def handle_edit_ramp(args) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("--steps must contain at least one value")
     step_results = []
     for step in steps:
-        child_args = ["--ids", args.ids, "--budget-pct", f"+{step}" if step > 0 else str(step)]
+        child_args = [
+            "--ids", args.ids, "--expected-account", account,
+            "--budget-pct", f"+{step}" if step > 0 else str(step),
+        ]
         if args.dry_run:
             child_args.append("--dry-run")
         child = ctx.run_child("edit.py", child_args, args.timeout)
@@ -252,8 +261,9 @@ def handle_edit_ramp(args) -> tuple[int, dict[str, Any]]:
 
 def handle_clone(args) -> tuple[int, dict[str, Any]]:
     ctx = ctx_module()
-    _profile(args, ctx)  # workspace-bound even though clone.py has no --account
-    child_args = [args.kind, args.id, "--times", str(args.times)]
+    _, profile = _profile(args, ctx)
+    account = _account(profile, ctx)
+    child_args = [args.kind, args.id, "--times", str(args.times), "--expected-account", account]
     if args.prefix:
         child_args += ["--prefix", args.prefix]
     if args.suffix:
@@ -318,7 +328,11 @@ def handle_rules_execute(args) -> tuple[int, dict[str, Any]]:
     account = _account(profile, ctx)
     if not args.rule_id:
         raise ctx.MetaOpsError("rules execute requires --rule-id")
-    child_args = ["--account", account, "--execute", args.rule_id]
+    if args.confirm != RULES_EXECUTE_CONFIRM:
+        raise ctx.MetaOpsError(
+            f"rules execute can trigger a live rule: pass the literal --confirm {RULES_EXECUTE_CONFIRM}"
+        )
+    child_args = ["--account", account, "--execute", args.rule_id, "--confirm", RULES_EXECUTE_CONFIRM]
     return _run_child(ctx, args, "rules execute", "rules.py", child_args, "executed")
 
 
@@ -362,16 +376,16 @@ def register(sub: argparse._SubParsersAction, ctx) -> None:
     grp.add_argument("--all", action="store_true", help="every ACTIVE object at --level in the profile account")
     p.add_argument("--level", choices=["campaign", "adset", "ad"], help="needed with --state / --all")
     p.add_argument("--status", required=True, choices=["ACTIVE", "PAUSED"])
-    p.add_argument("--confirm", help=f"literal {RAISE_CONFIRM}, required for --status ACTIVE")
+    p.add_argument("--confirm", help=f"literal {RAISE_CONFIRM} for ACTIVE or {PAUSE_CONFIRM} for PAUSED")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(handler=handle_edit_status)
 
-    p = edit_sub.add_parser("budget", help="change daily_budget with the ±20%/late-day guard")
+    p = edit_sub.add_parser("budget", help="change daily_budget with the ±20%%/late-day guard")
     p.add_argument("--ids", required=True, help="comma-separated object ids")
     bgrp = p.add_mutually_exclusive_group(required=True)
     bgrp.add_argument("--budget-minor", type=int, help="new daily_budget, integer minor units")
     bgrp.add_argument("--budget-pct", help="relative change, e.g. +20 or -15")
-    p.add_argument("--force-step", action="store_true", help="bypass the ±20%/late-day guards")
+    p.add_argument("--force-step", action="store_true", help="bypass the ±20%%/late-day guards")
     p.add_argument("--confirm", help=f"literal {RAISE_CONFIRM}, required when the change may raise spend")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(handler=handle_edit_budget)
@@ -383,7 +397,7 @@ def register(sub: argparse._SubParsersAction, ctx) -> None:
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(handler=handle_edit_rename)
 
-    p = edit_sub.add_parser("ramp", help="sequential +N% budget steps, each within the ±20% guard")
+    p = edit_sub.add_parser("ramp", help="sequential +N%% budget steps, each within the ±20%% guard")
     p.add_argument("--ids", required=True, help="comma-separated object ids")
     p.add_argument("--steps", required=True, help="comma-separated percentages, e.g. 20,20,20")
     p.add_argument("--confirm", help=f"literal {RAMP_CONFIRM}, required")
@@ -428,6 +442,7 @@ def register(sub: argparse._SubParsersAction, ctx) -> None:
 
     p = rules_sub.add_parser("execute", help="dry-fire one rule and read its history")
     p.add_argument("--rule-id", required=True)
+    p.add_argument("--confirm", required=True, help=f"must be literal {RULES_EXECUTE_CONFIRM}")
     p.set_defaults(handler=handle_rules_execute)
 
     p = rules_sub.add_parser("delete", help="delete every rule whose name starts with --prefix")

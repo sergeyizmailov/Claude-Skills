@@ -82,6 +82,7 @@ def main() -> int:
     ap.add_argument("--rename-suffix")
     ap.add_argument("--force-step", action="store_true", help="bypass the 20%% / late-day guards")
     ap.add_argument("--confirm", help="literal ACTIVATE when setting --status ACTIVE")
+    ap.add_argument("--expected-account", help="internal metaops profile binding for opaque object ids")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -107,12 +108,24 @@ def main() -> int:
     if args.status == "ACTIVE" and args.confirm != "ACTIVATE":
         sys.exit("--status ACTIVE is spend-producing: pass --confirm ACTIVATE (or use activate.py "
                  "for a fresh launch, which also refreshes start_time).")
+    if args.status == "PAUSED" and args.confirm != "PAUSE":
+        sys.exit("--status PAUSED changes delivery: pass --confirm PAUSE.")
 
     bad = 0
     results: list[dict] = []
     for oid in ids:
         obj = graph.get(oid, params={"fields": "name,status,daily_budget,lifetime_budget,account_id,effective_status"},
                         context=f"read {oid}")
+        if args.expected_account:
+            actual = obj.get("account_id")
+            if not actual or graph.normalize_account(actual) != graph.normalize_account(args.expected_account):
+                print(
+                    f"  x {oid}: belongs to {actual or '?'} not {args.expected_account}; refusing cross-profile edit",
+                    file=sys.stderr,
+                )
+                bad += 1
+                results.append({"id": oid, "ok": False, "error": "object outside profile account"})
+                continue
         payload: dict = {}
         if args.status:
             payload["status"] = args.status

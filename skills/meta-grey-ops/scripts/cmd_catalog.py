@@ -65,6 +65,9 @@ TERMINAL_STOPWORDS = ("progress", "pending", "queued", "processing")
 CATALOG_FIELDS = "id,name,vertical,product_count,business{id,name}"
 FEED_FIELDS = "id,name,schedule,update_schedule,file_name,default_currency,deletion_enabled"
 SET_FIELDS = "id,name,product_count,filter,product_catalog{id,name}"
+BATCH_STATUS_FIELDS = (
+    "handle,status,errors_total_count,warnings_total_count,errors,warnings,ids_of_invalid_requests"
+)
 
 
 def _profile(ctx: Any, args: argparse.Namespace) -> tuple[str, dict[str, Any]]:
@@ -230,7 +233,8 @@ def command_catalog_set_create(args: argparse.Namespace, ctx: Any) -> tuple[int,
     if bool(args.filter) == bool(args.retailer_ids):
         raise ctx.MetaOpsError("pass exactly one of --filter or --retailer-ids")
     if args.filter:
-        with open(args.filter, encoding="utf-8") as fh:
+        filter_path = ctx.resolve_input(args.filter)
+        with filter_path.open(encoding="utf-8") as fh:
             new_filter = json.load(fh)
         if not isinstance(new_filter, dict):
             raise ctx.MetaOpsError("--filter must contain a JSON object, not a string or array")
@@ -282,18 +286,19 @@ def command_catalog_products_list(args: argparse.Namespace, ctx: Any) -> tuple[i
 
 
 def _load_batch_items(path: str, ctx: Any) -> list[dict[str, Any]]:
+    source_path = ctx.resolve_input(path)
     try:
-        with open(path, encoding="utf-8") as fh:
+        with source_path.open(encoding="utf-8") as fh:
             items = json.load(fh)
     except FileNotFoundError as exc:
-        raise ctx.MetaOpsError(f"{path}: does not exist") from exc
+        raise ctx.MetaOpsError(f"{source_path}: does not exist") from exc
     except json.JSONDecodeError as exc:
-        raise ctx.MetaOpsError(f"{path}: not valid JSON: {exc}") from exc
+        raise ctx.MetaOpsError(f"{source_path}: not valid JSON: {exc}") from exc
     if not isinstance(items, list) or not items:
-        raise ctx.MetaOpsError(f"{path}: must be a non-empty JSON array of item objects")
+        raise ctx.MetaOpsError(f"{source_path}: must be a non-empty JSON array of item objects")
     for index, item in enumerate(items):
         if not isinstance(item, dict):
-            raise ctx.MetaOpsError(f"{path}[{index}]: each item must be a JSON object")
+            raise ctx.MetaOpsError(f"{source_path}[{index}]: each item must be a JSON object")
     return items
 
 
@@ -304,9 +309,19 @@ def _batch_finished(status: str | None) -> bool:
     return not any(word in lowered for word in TERMINAL_STOPWORDS)
 
 
+def _batch_status_item(payload: dict[str, Any]) -> dict[str, Any]:
+    """Normalise the edge's Graph envelope, while tolerating a direct-object mock."""
+    data = payload.get("data")
+    if isinstance(data, list):
+        return data[0] if data and isinstance(data[0], dict) else {}
+    return payload
+
+
 def command_catalog_products_batch(args: argparse.Namespace, ctx: Any) -> tuple[int, dict[str, Any]]:
     profile_name, profile = _profile(ctx, args)
     catalog_id = _catalog_id(profile, ctx)
+    if args.confirm != "BATCH":
+        raise ctx.MetaOpsError("catalog products batch changes catalog data: pass the literal --confirm BATCH")
     if args.method not in BATCH_METHODS:
         raise ctx.MetaOpsError(f"--method must be one of {sorted(BATCH_METHODS)}")
     items = _load_batch_items(args.file, ctx)
@@ -324,28 +339,30 @@ def command_catalog_products_batch(args: argparse.Namespace, ctx: Any) -> tuple[
     handle = str(handles[0])
     deadline = time.monotonic() + args.wait
     status_payload: dict[str, Any] = {}
+    status_item: dict[str, Any] = {}
     while True:
         status_payload = ctx.graph.get(
             f"{catalog_id}/check_batch_request_status",
-            params={"handle": handle},
+            params={"handle": handle, "fields": BATCH_STATUS_FIELDS},
             context="catalog products batch status",
         )
-        if _batch_finished(status_payload.get("status")) or time.monotonic() >= deadline:
+        status_item = _batch_status_item(status_payload)
+        if _batch_finished(status_item.get("status")) or time.monotonic() >= deadline:
             break
         time.sleep(5)
-    finished = _batch_finished(status_payload.get("status"))
-    errors_total = int(status_payload.get("errors_total_count") or 0)
+    finished = _batch_finished(status_item.get("status"))
+    errors_total = int(status_item.get("errors_total_count") or 0)
     ok = finished and errors_total == 0
     return (0 if ok else 1), ctx.result_envelope(
         "catalog products batch", ok, "finished" if finished else "still_running",
         data={
             "profile": profile_name, "catalog_id": catalog_id, "method": args.method,
             "items": len(items), "handle": handle, "finished": finished,
-            "status": status_payload.get("status"),
+            "status": status_item.get("status"),
             "errors_total_count": errors_total,
-            "errors": status_payload.get("errors"),
-            "warnings_total_count": status_payload.get("warnings_total_count"),
-            "ids_of_invalid_requests": status_payload.get("ids_of_invalid_requests"),
+            "errors": status_item.get("errors"),
+            "warnings_total_count": status_item.get("warnings_total_count"),
+            "ids_of_invalid_requests": status_item.get("ids_of_invalid_requests"),
         },
         error=None if ok else {
             "kind": "batch_incomplete" if not finished else "batch_errors",
@@ -422,4 +439,5 @@ def register(sub: Any, ctx: Any) -> None:
     action.add_argument("--file", required=True, help="JSON array of item objects")
     action.add_argument("--method", required=True, choices=sorted(BATCH_METHODS))
     action.add_argument("--wait", type=int, default=120, help="seconds to poll check_batch_request_status")
+    action.add_argument("--confirm", required=True, help="must be literal BATCH")
     action.set_defaults(handler=lambda a: command_catalog_products_batch(a, ctx))

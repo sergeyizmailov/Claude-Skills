@@ -37,6 +37,8 @@ import sys
 
 import graph
 
+UNCOPYABLE_STATUSES = {"ARCHIVED", "DELETED"}
+
 
 def rename_options(args, n: int) -> dict:
     if args.prefix or args.suffix:
@@ -72,11 +74,41 @@ def children(edge: str, obj_id: str) -> list[dict]:
         path, params = nxt, {}
 
 
+def copyable(rows: list[dict], label: str) -> list[dict]:
+    """Skip entities which Graph will refuse on /copies rather than aborting a whole tree."""
+    out: list[dict] = []
+    for row in rows:
+        statuses = {str(row.get(key) or "").upper() for key in ("status", "effective_status")}
+        if statuses & UNCOPYABLE_STATUSES:
+            print(f"  ! skipping {label} {row.get('id')}: {sorted(statuses & UNCOPYABLE_STATUSES)[0]}")
+            continue
+        out.append(row)
+    return out
+
+
+def require_expected_account(obj_id: str, expected_account: str | None) -> None:
+    """Object ids are opaque; prove the source/explicit destination belongs to the profile."""
+    if not expected_account:
+        return
+    obj = graph.get(
+        obj_id, params={"fields": "id,account_id,status,effective_status"},
+        context=f"clone ownership {obj_id}",
+    )
+    actual = obj.get("account_id")
+    if not actual or graph.normalize_account(actual) != graph.normalize_account(expected_account):
+        raise SystemExit(
+            f"{obj_id} belongs to {actual or '?'} not {expected_account}; refusing cross-profile clone"
+        )
+    statuses = {str(obj.get(key) or "").upper() for key in ("status", "effective_status")}
+    if statuses & UNCOPYABLE_STATUSES:
+        raise SystemExit(f"{obj_id} is {sorted(statuses & UNCOPYABLE_STATUSES)[0]}; refusing to copy it")
+
+
 def copy_campaign_tree(cid: str, args, n: int, out: dict) -> None:
     new_c = copy_obj(cid, {"rename_options": rename_options(args, n)}, args.dry_run, "campaign")
     out["campaign"] = new_c
     print(f"  + campaign {cid} → {new_c or '<dry>'}")
-    for aset in children("adsets", cid):
+    for aset in copyable(children("adsets", cid), "adset"):
         payload = {"campaign_id": new_c or "<new-campaign>", "rename_options": {"rename_strategy": "NO_RENAME"}}
         if args.start:
             payload["start_time"] = args.start
@@ -85,7 +117,7 @@ def copy_campaign_tree(cid: str, args, n: int, out: dict) -> None:
         new_a = copy_obj(aset["id"], payload, args.dry_run, "adset")
         out.setdefault("adsets", []).append(new_a)
         print(f"    + adset {aset['id']} {aset.get('name', '')[:40]} → {new_a or '<dry>'}")
-        for ad in children("ads", aset["id"]):
+        for ad in copyable(children("ads", aset["id"]), "ad"):
             new_ad = copy_obj(ad["id"], {"adset_id": new_a or "<new-adset>",
                                          "rename_options": {"rename_strategy": "NO_RENAME"}},
                               args.dry_run, "ad")
@@ -104,9 +136,15 @@ def main() -> int:
     ap.add_argument("--into-adset", help="ad copies: target ad set id")
     ap.add_argument("--start", help="ISO8601 start_time for copied ad sets (never 00:00 for conversions)")
     ap.add_argument("--end", help="ISO8601 end_time for copied ad sets")
+    ap.add_argument("--expected-account", help="internal metaops profile binding for opaque object ids")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--json", help="write all new ids here")
     args = ap.parse_args()
+
+    require_expected_account(args.id, args.expected_account)
+    for destination in (args.into_campaign, args.into_adset):
+        if destination:
+            require_expected_account(destination, args.expected_account)
 
     if args.kind != "ad" and not args.start and not args.dry_run:
         print("  ! no --start: copies inherit the source start_time, which may be in the past → "
@@ -128,7 +166,7 @@ def main() -> int:
                 new_a = copy_obj(args.id, payload, args.dry_run, "adset")
                 out["adset"] = new_a
                 print(f"  + adset {args.id} → {new_a or '<dry>'}")
-                for ad in children("ads", args.id):
+                for ad in copyable(children("ads", args.id), "ad"):
                     new_ad = copy_obj(ad["id"], {"adset_id": new_a or "<new-adset>",
                                                  "rename_options": {"rename_strategy": "NO_RENAME"}},
                                       args.dry_run, "ad")

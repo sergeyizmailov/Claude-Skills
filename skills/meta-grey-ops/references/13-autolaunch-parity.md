@@ -29,12 +29,12 @@ quality/spend velocity, not the pipe.
 | Import accounts by cookies / token | operator hands System User token + ids (`02` §1) | — |
 | Template → N accounts | `metaops bulk-plan` → `bulk-apply` (template × accounts, bound inputs, PAUSED) | `POST /act_X/campaigns\|adsets\|adcreatives\|ads` |
 | Creative "uniquification" | `uniquify.py` (`--no-crop` for text-heavy banners) locally, then workspace-bound `metaops media` per account | client-side; `POST /adimages`, `/advideos` |
-| Catalog/feed/product-set create, batch upsert/delete, instant fetch | `metaops catalog create\|feed create\|set create\|products batch`, `metaops feed sync\|swap` (`16`, `17`) | `POST /{business}/owned_product_catalogs`, `/{catalog}/product_feeds`, `/{catalog}/product_sets`, `/{catalog}/items_batch`, `/{feed}/uploads` |
+| Catalog/feed/product-set create, batch upsert/delete, instant fetch | `metaops catalog create\|feed create\|set create\|products batch`, `metaops feed sync\|swap` (`16`, `17`; mutating batch/feed actions require literal confirms) | `POST /{business}/owned_product_catalogs`, `/{catalog}/product_feeds`, `/{catalog}/product_sets`, `/{catalog}/items_batch`, `/{feed}/uploads` |
 | Distribution "All→All" / "1→1" | spec shape: ads per ad set in template; per-account `media` block | — |
-| Duplicate campaign/ad set ×N | `metaops clone campaign\|adset\|ad <id> --times N` (level by level, PAUSED; `deep_copy` capped at <3 objects) | `POST /{id}/copies` |
+| Duplicate campaign/ad set ×N | `metaops clone campaign\|adset\|ad <id> --times N` (level by level, PAUSED; deleted/archived descendants skipped; `deep_copy` capped at <3 objects) | `POST /{id}/copies` |
 | Scheduled launch / dead-hours avoidance | spec `start_time`; `metaops activate --refresh-start`; `04` → Scheduling | `start_time` |
-| Autorules (kill/scale/notify) | `metaops rules ladder/list/history/execute/delete` (Poisson ladder, `--confirm RULES` for pause mode) | `POST /act_X/adrules_library`, `/{rule}/execute`, `/adrules_history` |
-| Budget ramp / mass status | `metaops edit status/budget/rename/ramp` (±20% + late-day guard, `--confirm SPEND`) | `POST /{id}` |
+| Autorules (kill/scale/notify) | `metaops rules ladder/list/history/execute/delete` (Poisson ladder, `--confirm RULES` for pause mode, `EXECUTE` to dry-fire) | `POST /act_X/adrules_library`, `/{rule}/execute`, `/adrules_history` |
+| Budget ramp / mass status | `metaops edit status/budget/rename/ramp` (±20% + late-day guard, `--confirm SPEND` to activate/raise, `PAUSE` to stop delivery) | `POST /{id}` |
 | Comment auto-hide by trigger words | `metaops comments hide\|delete --matching REGEX --confirm HIDE\|DELETE` (Page token) | `GET /{post}/comments`, `POST /{comment}?is_hidden=true` |
 | Spend/status/ban dashboard, Telegram alerts | `metaops monitor --telegram` (verdicts incl. STALL, JSONL, Bot API via `TG_BOT_TOKEN`/`TG_CHAT_ID`) | `GET /act_X?fields=account_status…`, `/insights`, `/ads?fields=effective_status` |
 | Rejected-ad review + appeal | `metaops review [--previews]` (ad_review_feedback, issues_info); **appeal is UI-only** | `issues_info` read only |
@@ -43,7 +43,7 @@ quality/spend velocity, not the pipe.
 | Card binding, auto-topup, balance payment | **UI-only** — no billing writes in Marketing API. Agency crypto topup or persona's browser (`03`) | — |
 | BM creation, new ad account under BM | BM: UI-only. Ad account: `metaops business adaccount create` (new-BM cap = 1 account, `03`); users/partners: `business user invite\|assign`, `partner share` | partial |
 | Tracker cost push (Keitaro/Binom) | `insights.py --csv` → `tracker-ops/01 update_costs` | `/insights` |
-| Per-creative stats every 15 min, cross-account | `metaops insights leaderboard --accounts …` (join on `ad_name` = creative name, `03`); `insights pull --csv` → tracker | `/insights` |
+| Per-creative stats every 15 min, cross-account | `metaops insights leaderboard --accounts …` (join on `ad_name` = creative name only within one currency; mixed currencies are rejected); `insights pull --csv` → tracker | `/insights` |
 | Team seats/roles | `metaops business user invite --role EMPLOYEE\|ADMIN` | — |
 | "AI assistant over your data" (cabinet.partners) | this skill + `insights.py` output | — |
 | 2FA/checkpoint handling, warm-up | not an API concept — `01` freeze protocol, antidetect profile | — |
