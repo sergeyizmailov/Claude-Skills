@@ -577,58 +577,87 @@ def _num(value: Any) -> float:
 
 
 def _half_totals(rows: list[dict[str, Any]], event: str | None) -> dict[str, float]:
-    t = {"spend": 0.0, "impressions": 0.0, "clicks": 0.0, "reach": 0.0, "results": 0.0}
+    """Sum spend/impressions/clicks/results across rows. NEVER sum `reach` here — reach is
+    unique users, not additive across days or ads (meta-ads/12 §5: "never sum reach across
+    rows"). Ad-set saturation reach/frequency come from single-row-per-half adset pulls via
+    _adset_half_totals, not from this function."""
+    t = {"spend": 0.0, "impressions": 0.0, "clicks": 0.0, "results": 0.0}
     for r in rows:
         t["spend"] += _num(r.get("spend"))
         t["impressions"] += _num(r.get("impressions"))
         t["clicks"] += _num(r.get("inline_link_clicks") or r.get("clicks"))
-        t["reach"] += _num(r.get("reach"))
         if event:
             for a in r.get("actions") or []:
                 if a.get("action_type") == event:
                     t["results"] += _num(a.get("value"))
-    t["frequency"] = t["impressions"] / t["reach"] if t["reach"] else 0.0
     t["ctr"] = t["clicks"] / t["impressions"] if t["impressions"] else 0.0
     t["cpc"] = t["spend"] / t["clicks"] if t["clicks"] else 0.0
     t["cpa"] = t["spend"] / t["results"] if t["results"] else 0.0
     return t
 
 
+def _adset_half_totals(row: dict[str, Any] | None) -> dict[str, float]:
+    """One adset-level row (time_increment=all_days over a single date range) → reach taken
+    as-is (Graph already deduplicated it across that range) and frequency = impressions/reach
+    from that same row. Never call this with more than one row per half."""
+    if not row:
+        return {"spend": 0.0, "impressions": 0.0, "reach": 0.0, "frequency": 0.0}
+    spend = _num(row.get("spend"))
+    impressions = _num(row.get("impressions"))
+    reach = _num(row.get("reach"))
+    return {"spend": spend, "impressions": impressions, "reach": reach,
+            "frequency": impressions / reach if reach else 0.0}
+
+
 def fatigue_verdicts(rows: list[dict[str, Any]], min_spend: float = 20.0,
-                     event: str | None = None) -> list[dict[str, Any]]:
+                     event: str | None = None,
+                     adset_halves: dict[str, dict[str, dict[str, Any]]] | None = None) -> list[dict[str, Any]]:
     """Daily ad-level insight rows → one row per ad: baseline half vs recent half.
 
     ROTATE-CANDIDATE: frequency +20% AND CTR -20% AND (CPC or CPA +20%) with enough recent
     volume. WATCH: two of the three, or CTR -30% alone. NO-DATA: recent spend < min_spend or
     recent impressions < 1000 (fresh objects, conversion lag). POSSIBLE-SATURATION is an ad-set
-    flag: reach -20% while spend within ±15% — a differential diagnosis, not a verdict."""
+    flag: reach -20% while spend within ±15% — a differential diagnosis, not a verdict.
+
+    `adset_halves`, when given, is {adset_id: {"baseline": row, "recent": row}} where each row
+    is ONE adset-level insights row (time_increment=all_days) for that half's date range, so
+    its `reach` is already deduplicated by Graph and safe to compare directly — never derived
+    by summing the daily ad-level `rows` (reach is unique users, not additive). Ad-level
+    frequency is also read from these rows, not from summed ad-level impressions/reach. When
+    `adset_halves` is absent, no POSSIBLE-SATURATION flag and no frequency signal are computed
+    (there is no correct way to get either from summed daily rows)."""
     dates = sorted({r.get("date_start") for r in rows if r.get("date_start")})
     if len(dates) < 4:
         return [{"ad_id": None, "verdict": "NO-DATA", "reason": f"only {len(dates)} day(s) with data; need >= 4 for baseline/recent halves"}]
     cut = dates[len(dates) // 2]
     by_ad: dict[str, list[dict[str, Any]]] = {}
-    by_adset: dict[str, list[dict[str, Any]]] = {}
     for r in rows:
         by_ad.setdefault(str(r.get("ad_id")), []).append(r)
-        by_adset.setdefault(str(r.get("adset_id")), []).append(r)
     saturated: set[str] = set()
-    for adset_id, arows in by_adset.items():
-        b = _half_totals([r for r in arows if r.get("date_start") < cut], None)
-        c = _half_totals([r for r in arows if r.get("date_start") >= cut], None)
-        if b["reach"] and b["spend"] and abs(c["spend"] - b["spend"]) <= 0.15 * b["spend"] and c["reach"] < 0.8 * b["reach"]:
-            saturated.add(adset_id)
+    adset_freq: dict[str, dict[str, float]] = {}
+    if adset_halves:
+        for adset_id, halves in adset_halves.items():
+            b = _adset_half_totals(halves.get("baseline"))
+            c = _adset_half_totals(halves.get("recent"))
+            adset_freq[adset_id] = {"baseline": b["frequency"], "recent": c["frequency"]}
+            if b["reach"] and b["spend"] and abs(c["spend"] - b["spend"]) <= 0.15 * b["spend"] and c["reach"] < 0.8 * b["reach"]:
+                saturated.add(adset_id)
     out = []
     for ad_id, arows in by_ad.items():
         b = _half_totals([r for r in arows if r.get("date_start") < cut], event)
         c = _half_totals([r for r in arows if r.get("date_start") >= cut], event)
+        adset_id = str(arows[0].get("adset_id"))
+        freq = adset_freq.get(adset_id)
+        if freq:
+            b["frequency"], c["frequency"] = freq["baseline"], freq["recent"]
         row = {"ad_id": ad_id, "ad_name": arows[0].get("ad_name"), "adset_id": arows[0].get("adset_id"),
                "baseline": {k: round(v, 4) for k, v in b.items()}, "recent": {k: round(v, 4) for k, v in c.items()},
-               "flags": ["POSSIBLE-SATURATION"] if str(arows[0].get("adset_id")) in saturated else []}
+               "flags": ["POSSIBLE-SATURATION"] if adset_id in saturated else []}
         if c["spend"] < min_spend or c["impressions"] < FATIGUE_MIN_IMPRESSIONS or not b["impressions"]:
             row.update(verdict="NO-DATA", reason="recent half below min spend/impressions or no baseline")
             out.append(row)
             continue
-        freq_up = b["frequency"] and c["frequency"] > 1.2 * b["frequency"]
+        freq_up = bool(freq) and b["frequency"] and c["frequency"] > 1.2 * b["frequency"]
         ctr_down = b["ctr"] and c["ctr"] < 0.8 * b["ctr"]
         ctr_crash = b["ctr"] and c["ctr"] < 0.7 * b["ctr"]
         cost_up = (b["cpc"] and c["cpc"] > 1.2 * b["cpc"]) or (event and b["cpa"] and c["cpa"] > 1.2 * b["cpa"])
@@ -653,22 +682,56 @@ def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("insights fatigue --days must be 4..60")
     until = dt.date.today() - dt.timedelta(days=1)
     since = until - dt.timedelta(days=args.days - 1)
-    json_path = (_operate_dir(workspace) / f"fatigue-{account}-{_stamp(ctx)}.json").resolve()
+    # Same baseline/recent split fatigue_verdicts derives from the daily dates: half the
+    # window each side of the midpoint day (inclusive on the recent side, same convention
+    # as `dates[len(dates)//2]` in fatigue_verdicts).
+    mid_offset = args.days // 2
+    baseline_until = since + dt.timedelta(days=mid_offset - 1)
+    recent_since = since + dt.timedelta(days=mid_offset)
+
+    stamp = _stamp(ctx)
+    json_path = (_operate_dir(workspace) / f"fatigue-{account}-{stamp}.json").resolve()
     child = ctx.run_child("insights.py", ["--account", account, "--level", "ad", "--since", since.isoformat(),
                                          "--until", until.isoformat(), "--json", str(json_path)], args.timeout)
     ctx.echo_child(child)
     if not child.ok:
         return child.returncode, ctx.child_failure("insights", "pull_failed", child)
     rows = ctx.read_json(json_path, "insights rows") if json_path.is_file() else []
-    verdicts = fatigue_verdicts(rows, args.min_spend, args.event)
+
+    # Second pull, ad-set level, time_increment=all_days, one range per half — so `reach` in
+    # each returned row is deduplicated by Graph over that half, never summed by us
+    # (meta-ads/12 §5). This is what POSSIBLE-SATURATION and ad-set frequency are computed
+    # from; per-ad CTR/CPC/CPA above stay on the summed daily ad rows (those fields sum fine).
+    adset_json = (_operate_dir(workspace) / f"fatigue-adset-{account}-{stamp}.json").resolve()
+    adset_child = ctx.run_child(
+        "insights.py",
+        ["--account", account, "--level", "adset",
+         "--since", since.isoformat(), "--until", until.isoformat(),
+         "--time-increment", "all_days", "--json", str(adset_json)],
+        args.timeout,
+    )
+    ctx.echo_child(adset_child)
+    adset_halves: dict[str, dict[str, dict[str, Any]]] = {}
+    if adset_child.ok and adset_json.is_file():
+        adset_rows = ctx.read_json(adset_json, "adset insights rows") or []
+        for r in adset_rows:
+            adset_id = str(r.get("adset_id"))
+            date_start = r.get("date_start") or ""
+            half = "baseline" if date_start <= baseline_until.isoformat() else "recent"
+            adset_halves.setdefault(adset_id, {})[half] = r
+
+    verdicts = fatigue_verdicts(rows, args.min_spend, args.event, adset_halves=adset_halves or None)
     counts: dict[str, int] = {}
     for v in verdicts:
         counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
     return 0, ctx.result_envelope(
         "insights", True, "assessed",
-        artifacts={"json": str(json_path)},
+        artifacts={"json": str(json_path), "adset_json": str(adset_json) if adset_child.ok else None},
         data={"account_id": account, "since": since.isoformat(), "until": until.isoformat(),
-              "event": args.event, "counts": counts, "ads": verdicts[: args.top]},
+              "baseline_range": [since.isoformat(), baseline_until.isoformat()],
+              "recent_range": [recent_since.isoformat(), until.isoformat()],
+              "event": args.event, "counts": counts, "ads": verdicts[: args.top],
+              "adset_saturation_available": bool(adset_halves)},
         next_action="ROTATE-CANDIDATE → build a new creative angle, do not pause on this alone; "
                     "POSSIBLE-SATURATION → audience, not creative (meta-ads/08 §10).",
     )
@@ -749,7 +812,9 @@ def register(sub, ctx) -> None:
     lb.add_argument("--top", type=int, default=20)
     lb.set_defaults(handler=lambda args: command_insights(args, ctx), insights_mode="leaderboard")
     fat = isub.add_parser("fatigue", help="per-ad creative-fatigue verdicts vs own baseline; notifies, never pauses")
-    fat.add_argument("--days", type=int, default=14, help="window, split into baseline/recent halves")
+    fat.add_argument("--days", type=int, default=14,
+                      help="window, split into baseline/recent halves; bounds are UTC dates "
+                           "(host clock), not the ad account's reporting timezone")
     fat.add_argument("--min-spend", type=float, default=20.0, help="recent-half spend below this → NO-DATA")
     fat.add_argument("--event", help="action_type for CPA signal, e.g. offsite_conversion.fb_pixel_lead")
     fat.add_argument("--top", type=int, default=50)

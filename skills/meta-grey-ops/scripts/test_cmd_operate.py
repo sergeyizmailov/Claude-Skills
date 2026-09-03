@@ -365,32 +365,65 @@ class LeaderboardTests(unittest.TestCase):
 class FatigueTests(unittest.TestCase):
     @staticmethod
     def rows(ad, adset, days, spend, impr, clicks, reach, leads=0):
+        # `reach` is kept per-row only so a test written against the OLD (buggy, summing)
+        # behavior would visibly disagree; fatigue_verdicts must never read reach off these
+        # daily ad-level rows (meta-ads/12 §5: never sum reach).
         return [{"date_start": f"2026-08-{d:02d}", "ad_id": ad, "ad_name": f"c_{ad}", "adset_id": adset,
                  "spend": spend, "impressions": impr, "clicks": clicks, "reach": reach,
                  "actions": [{"action_type": "lead", "value": leads}]} for d in days]
 
-    def test_rotate_candidate_needs_three_signals(self):
-        import cmd_operate
-        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2)      # freq 1.25, ctr 5%, cpa 5
-        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)   # freq 2.0, ctr 3%, cpa 10
-        v = cmd_operate.fatigue_verdicts(base + recent, min_spend=20, event="lead")
-        self.assertEqual(v[0]["verdict"], "ROTATE-CANDIDATE")
-        self.assertEqual(set(v[0]["signals"]), {"frequency_up", "ctr_down", "cost_up"})
+    @staticmethod
+    def adset_row(adset, spend, impr, reach):
+        return {"adset_id": adset, "spend": spend, "impressions": impr, "reach": reach}
 
-    def test_watch_on_two_signals_and_ok_on_none(self):
+    def test_watch_needs_two_of_three_without_adset_halves(self):
+        # No adset_halves supplied → frequency_up can never be true (reach is not summed from
+        # daily rows), so at most 2 of 3 signals fire and ROTATE-CANDIDATE is unreachable here.
         import cmd_operate
-        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400)
-        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 400)      # ctr down, cpc up, freq flat
-        self.assertEqual(cmd_operate.fatigue_verdicts(base + recent)[0]["verdict"], "WATCH")
+        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2)
+        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)   # ctr down, cpc/cpa up
+        v = cmd_operate.fatigue_verdicts(base + recent, min_spend=20, event="lead")
+        self.assertEqual(v[0]["verdict"], "WATCH")
+        self.assertEqual(set(v[0]["signals"]), {"ctr_down", "cost_up"})
+        self.assertNotIn("frequency", v[0]["baseline"])
+        self.assertNotIn("reach", v[0]["baseline"])
+
+    def test_ok_on_no_signals(self):
+        import cmd_operate
         steady = self.rows("a2", "s2", range(1, 15), 10, 500, 25, 400)
         self.assertEqual(cmd_operate.fatigue_verdicts(steady)[0]["verdict"], "OK")
 
-    def test_no_data_on_thin_recent_half_and_saturation_flag(self):
+    def test_no_data_on_thin_recent_half(self):
         import cmd_operate
         thin = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400) + self.rows("a1", "s1", range(8, 15), 1, 50, 2, 40)
         self.assertEqual(cmd_operate.fatigue_verdicts(thin)[0]["verdict"], "NO-DATA")
-        sat = self.rows("a3", "s3", range(1, 8), 10, 500, 25, 400) + self.rows("a3", "s3", range(8, 15), 10, 500, 25, 250)
-        self.assertIn("POSSIBLE-SATURATION", cmd_operate.fatigue_verdicts(sat)[0]["flags"])
+
+    def test_adset_halves_drive_saturation_and_frequency_and_rotate_candidate(self):
+        # adset_halves rows are the ad-set-level, time_increment=all_days pulls: one row per
+        # half, reach already deduplicated by Graph over that half's date range.
+        import cmd_operate
+        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2)      # ctr 5%, cpa 5
+        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)   # ctr 3%, cpa 10
+        adset_halves = {
+            "s1": {
+                "baseline": self.adset_row("s1", 70, 3500, 2800),   # freq 1.25
+                "recent": self.adset_row("s1", 70, 3500, 1750),     # freq 2.0, spend flat, reach -37.5%
+            }
+        }
+        v = cmd_operate.fatigue_verdicts(base + recent, min_spend=20, event="lead", adset_halves=adset_halves)
+        self.assertEqual(v[0]["verdict"], "ROTATE-CANDIDATE")
+        self.assertEqual(set(v[0]["signals"]), {"frequency_up", "ctr_down", "cost_up"})
+        self.assertIn("POSSIBLE-SATURATION", v[0]["flags"])
+        self.assertAlmostEqual(v[0]["baseline"]["frequency"], 1.25)
+        self.assertAlmostEqual(v[0]["recent"]["frequency"], 2.0)
+
+    def test_adset_halves_missing_for_adset_means_no_flag_or_frequency_signal(self):
+        import cmd_operate
+        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2)
+        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)
+        v = cmd_operate.fatigue_verdicts(base + recent, min_spend=20, event="lead", adset_halves={})
+        self.assertNotIn("POSSIBLE-SATURATION", v[0]["flags"])
+        self.assertNotIn("frequency", v[0]["baseline"])
 
 
 if __name__ == "__main__":

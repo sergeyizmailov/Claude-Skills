@@ -180,7 +180,7 @@ metaops … comments delete --ads a,b|--all --matching REGEX --confirm DELETE
 metaops … page show | set --avatar f --cover f --about "…" --website URL --confirm PAGE | list-pages
 metaops … insights pull --level ad (--date-preset yesterday | --since --until) [--csv]
 metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # joins on ad_name only when all rows have one currency
-metaops … insights fatigue [--days 14] [--min-spend 20] [--event offsite_conversion.fb_pixel_lead]   # per ad, own baseline half vs recent half: ROTATE-CANDIDATE (freq +20% ∧ CTR −20% ∧ CPC/CPA +20%) / WATCH / OK / NO-DATA; ad-set flag POSSIBLE-SATURATION (reach −20% at flat spend); never pauses
+metaops … insights fatigue [--days 14] [--min-spend 20] [--event offsite_conversion.fb_pixel_lead]   # per ad, own baseline half vs recent half: ROTATE-CANDIDATE (freq +20% ∧ CTR −20% ∧ CPC/CPA +20%) / WATCH / OK / NO-DATA; reach/frequency/POSSIBLE-SATURATION come from a second ad-set-level pull per half (time_increment=all_days, one row per half) — never summed from the daily ad rows, since reach is unique users; never pauses
 ```
 
 Live-verified 2026-09-03 on an own BM (System User, Admin): workspace validate, assets verify (core/all),

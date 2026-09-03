@@ -78,6 +78,10 @@ def main() -> int:
     ap.add_argument("--since", help="YYYY-MM-DD, account timezone")
     ap.add_argument("--until", help="YYYY-MM-DD, account timezone")
     ap.add_argument("--date-preset", help="e.g. yesterday, last_7d — used when --since is absent")
+    ap.add_argument("--time-increment", default="1",
+                     help="Graph time_increment: an integer day count, or 'all_days' to "
+                          "collapse the whole range into one row per object (reach is then "
+                          "deduplicated by Graph across the range, not summed) (default 1)")
     ap.add_argument("--click-window", type=int, default=1, help="attribution click days (default 1)")
     ap.add_argument("--view-window", type=int, default=1, help="attribution view days (default 1)")
     ap.add_argument("--breakdown", help="e.g. country, publisher_platform")
@@ -97,14 +101,21 @@ def main() -> int:
             f"{args.click_window}d_click", f"{args.view_window}d_view"
         ],
     }
+    time_increment: str | int = args.time_increment
+    if time_increment != "all_days":
+        try:
+            time_increment = int(time_increment)
+        except ValueError:
+            sys.exit("--time-increment must be an integer day count or 'all_days'")
+
     if args.since or args.until:
         if not (args.since and args.until):
             sys.exit("--since and --until must be given together")
         params["time_range"] = {"since": args.since, "until": args.until}
-        params["time_increment"] = 1
+        params["time_increment"] = time_increment
     else:
         params["date_preset"] = args.date_preset or "yesterday"
-        params["time_increment"] = 1
+        params["time_increment"] = time_increment
     if args.breakdown:
         params["breakdowns"] = args.breakdown
 
