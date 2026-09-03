@@ -609,6 +609,16 @@ def _adset_half_totals(row: dict[str, Any] | None) -> dict[str, float]:
             "frequency": impressions / reach if reach else 0.0}
 
 
+def fatigue_cut(rows: list[dict[str, Any]]) -> str | None:
+    """The baseline/recent boundary: first date of the recent half, taken from the days that
+    actually have data. Days with no delivery are absent from insights, so a calendar midpoint
+    would put the ad-level halves and the ad-set-level halves on different cuts."""
+    dates = sorted({r.get("date_start") for r in rows if r.get("date_start")})
+    if len(dates) < 4:
+        return None
+    return dates[len(dates) // 2]
+
+
 def fatigue_verdicts(rows: list[dict[str, Any]], min_spend: float = 20.0,
                      event: str | None = None,
                      adset_halves: dict[str, dict[str, dict[str, Any]]] | None = None) -> list[dict[str, Any]]:
@@ -626,10 +636,10 @@ def fatigue_verdicts(rows: list[dict[str, Any]], min_spend: float = 20.0,
     frequency is also read from these rows, not from summed ad-level impressions/reach. When
     `adset_halves` is absent, no POSSIBLE-SATURATION flag and no frequency signal are computed
     (there is no correct way to get either from summed daily rows)."""
-    dates = sorted({r.get("date_start") for r in rows if r.get("date_start")})
-    if len(dates) < 4:
-        return [{"ad_id": None, "verdict": "NO-DATA", "reason": f"only {len(dates)} day(s) with data; need >= 4 for baseline/recent halves"}]
-    cut = dates[len(dates) // 2]
+    cut = fatigue_cut(rows)
+    if cut is None:
+        days = len({r.get("date_start") for r in rows if r.get("date_start")})
+        return [{"ad_id": None, "verdict": "NO-DATA", "reason": f"only {days} day(s) with data; need >= 4 for baseline/recent halves"}]
     by_ad: dict[str, list[dict[str, Any]]] = {}
     for r in rows:
         by_ad.setdefault(str(r.get("ad_id")), []).append(r)
@@ -682,13 +692,6 @@ def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
         raise ctx.MetaOpsError("insights fatigue --days must be 4..60")
     until = dt.date.today() - dt.timedelta(days=1)
     since = until - dt.timedelta(days=args.days - 1)
-    # Same baseline/recent split fatigue_verdicts derives from the daily dates: half the
-    # window each side of the midpoint day (inclusive on the recent side, same convention
-    # as `dates[len(dates)//2]` in fatigue_verdicts).
-    mid_offset = args.days // 2
-    baseline_until = since + dt.timedelta(days=mid_offset - 1)
-    recent_since = since + dt.timedelta(days=mid_offset)
-
     stamp = _stamp(ctx)
     json_path = (_operate_dir(workspace) / f"fatigue-{account}-{stamp}.json").resolve()
     child = ctx.run_child("insights.py", ["--account", account, "--level", "ad", "--since", since.isoformat(),
@@ -698,10 +701,27 @@ def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
         return child.returncode, ctx.child_failure("insights", "pull_failed", child)
     rows = ctx.read_json(json_path, "insights rows") if json_path.is_file() else []
 
-    # Two ad-set-level pulls, one per half, each time_increment=all_days — so `reach` in a
-    # returned row is deduplicated by Graph over exactly that half. A single pull over the
-    # whole window would collapse to one row per ad set and leave `recent` empty, silently
-    # disabling frequency and saturation (meta-ads/12 §5). Per-ad CTR/CPC/CPA above stay on
+    # Halves are cut on the days that actually have delivery, not on the calendar midpoint:
+    # days with no impressions are absent from insights, so a calendar cut would compare the
+    # ad-level CTR/CPA halves against ad-set reach halves drawn from a different period.
+    cut = fatigue_cut(rows)
+    if cut is None:
+        return 0, ctx.result_envelope(
+            "insights", True, "assessed",
+            artifacts={"json": str(json_path)},
+            data={"account_id": account, "since": since.isoformat(), "until": until.isoformat(),
+                  "event": args.event, "counts": {"NO-DATA": 1},
+                  "ads": fatigue_verdicts(rows, args.min_spend, args.event),
+                  "adset_saturation_available": False},
+            next_action="Not enough days with delivery for a baseline/recent split (need >= 4).",
+        )
+    recent_since = dt.date.fromisoformat(cut)
+    baseline_until = recent_since - dt.timedelta(days=1)
+
+    # Two ad-set-level pulls, one per half of the cut above, each time_increment=all_days — so
+    # `reach` in a returned row is deduplicated by Graph over exactly that half. A single pull
+    # over the whole window would collapse to one row per ad set and leave `recent` empty,
+    # silently disabling frequency and saturation (meta-ads/12 §5). Per-ad CTR/CPC/CPA stay on
     # the summed daily ad rows; those fields sum fine.
     adset_halves: dict[str, dict[str, dict[str, Any]]] = {}
     adset_artifacts: dict[str, str] = {}

@@ -480,6 +480,42 @@ class FatiguePullTests(unittest.TestCase):
         self.assertLess(adset_calls[0][2], adset_calls[1][1])
         self.assertTrue(payload["data"]["adset_saturation_available"])
 
+    def test_halves_follow_delivery_days_not_the_calendar_midpoint(self):
+        """Delivery only in the last 8 days of a 14-day window: the ad-set pulls must be cut
+        on the same day as the ad-level halves, or reach/frequency get compared across a
+        different period than CTR/CPA."""
+        calls = []
+        days = list(range(7, 15))  # 2026-08-07 .. 2026-08-14, nothing before
+
+        def fake_run_child(script, child_args, timeout):
+            level = child_args[child_args.index("--level") + 1]
+            since = child_args[child_args.index("--since") + 1]
+            until = child_args[child_args.index("--until") + 1]
+            calls.append((level, since, until))
+            json_path = pathlib.Path(child_args[child_args.index("--json") + 1])
+            json_path.parent.mkdir(parents=True, exist_ok=True)
+            if level == "ad":
+                rows = FatigueTests.rows("a1", "s1", days, 10, 500, 25, 400, 2)
+            else:
+                rows = [{"date_start": since, "adset_id": "s1", "spend": 40,
+                         "impressions": 2000, "reach": 300}]
+            json_path.write_text(json.dumps(rows), encoding="utf-8")
+            return metaops.ChildResult(argv=[], returncode=0, stdout="{}", stderr="")
+
+        args = make_args(workspace_obj=self.workspace, days=14, min_spend=20, event="lead",
+                         top=20, insights_mode="fatigue")
+        with mock.patch.object(metaops, "run_child", side_effect=fake_run_child), \
+             mock.patch.object(metaops, "echo_child", lambda c: None):
+            code, payload = cmd_operate.command_insights(args, metaops)
+
+        self.assertEqual(code, 0)
+        adset_calls = [c for c in calls if c[0] == "adset"]
+        self.assertEqual(len(adset_calls), 2)
+        # 8 delivery days -> cut at dates[4] = 2026-08-11, NOT the calendar midpoint.
+        self.assertEqual(adset_calls[1][1], "2026-08-11")
+        self.assertEqual(adset_calls[0][2], "2026-08-10")
+        self.assertEqual(payload["data"]["recent_range"][0], "2026-08-11")
+
     def test_a_half_that_failed_to_pull_disables_saturation(self):
         def fake_run_child(script, child_args, timeout):
             level = child_args[child_args.index("--level") + 1]
