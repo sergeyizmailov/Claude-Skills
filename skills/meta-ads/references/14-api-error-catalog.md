@@ -72,9 +72,10 @@ long-lived immediately, store in a secrets manager.
   code 100 / subcode 1885252 [unverified-official — not in Meta's error reference].
   Confirm that pair against a live error on your own account before hardcoding it; the
   matching rule at the top of this file still applies once you have.
-- 2490468 HARD_ERROR: a REJECTED ad cannot be enabled at all — editing does not
-  help; the fix is a brand-new ad (grey-ops practice: don't fight rejects,
-  leave them off — meta-grey-ops/05).
+- 2490468 HARD_ERROR: a REJECTED ad cannot be flipped to ACTIVE via API while the
+  disapproval stands. Help Center: editing the violating component (creative, targeting,
+  landing page) re-submits it for review; build new only when the creative/offer itself is
+  non-compliant (grey-ops practice: don't fight rejects, leave them off — meta-grey-ops/05).
 - 100 / subcode **1772103** "Instagram Account Is Missing" on POST `/ads`: the
   ad set's placements include Instagram and the CREATIVE carries no IG identity.
   It is a creative-identity error, never "this account/Page can't run Instagram"

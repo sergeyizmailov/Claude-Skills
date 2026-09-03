@@ -28,7 +28,7 @@ Ads Manager → Campaigns → "+ Create". **Guided creation** (step-by-step) vs 
 2. Campaign settings (§2) + budget amount if CBO on.
 3. Ad set fields (§2) + conversion location/pixel event.
 4. Ad fields (§2) + live per-placement preview.
-5. Review and publish — review typically minutes to hours, **officially up to 24h** [Shopify, 2026].
+5. Review and publish — review typically minutes to hours; Help Center: "most ads reviewed within 24 hours, although may take longer" — no hard cap; approved ads can be re-reviewed later.
 
 Gotchas: objective gates downstream destinations/goals/events — verify live. Some edits are "significant" and reset learning — check Delivery status, don't assume uniform effect. Special Ad Category campaigns restrict targeting/features by category+country — verify live.
 
