@@ -98,10 +98,11 @@ def _resolve_asset_id(ctx: Any, profile: dict[str, Any], asset_kind: str) -> str
     return ctx.graph.normalize_account(value) if asset_kind == "adaccount" else str(value)
 
 
-def _list_edge(ctx: Any, node_id: str, edge: str, fields: str, limit: int = 200) -> list[dict]:
+def _list_edge(ctx: Any, node_id: str, edge: str, fields: str, limit: int = 200,
+               extra: dict[str, Any] | None = None) -> list[dict]:
     out: list[dict] = []
     path: str | None = f"{node_id}/{edge}"
-    params: dict[str, Any] = {"fields": fields, "limit": limit}
+    params: dict[str, Any] = {"fields": fields, "limit": limit, **(extra or {})}
     while path:
         resp = ctx.graph.get(path, params=params, context=f"business {edge}")
         out.extend(resp.get("data", []))
@@ -260,7 +261,10 @@ def _pixel_shared(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, An
     _require_workspace(ctx, args, "business pixel shared")
     profile_name, profile = args.workspace_obj.profile(args.profile)
     dataset_id = str(profile["dataset_id"])
-    rows = _list_edge(ctx, dataset_id, "shared_accounts", "id,name")
+    # Live 2026-09-03: GET /{pixel}/shared_accounts fails code 100 "The parameter business is
+    # required" without the owning business id.
+    rows = _list_edge(ctx, dataset_id, "shared_accounts", "id,name",
+                      extra={"business": str(profile["business_id"])})
     return 0, ctx.result_envelope(
         "business pixel shared", True, "listed",
         data={"profile": profile_name, "dataset_id": dataset_id, "shared_accounts": rows},

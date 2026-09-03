@@ -321,6 +321,28 @@ class RegisterTests(unittest.TestCase):
         self.assertEqual(parsed.catalog_set_action, "create")
         self.assertTrue(callable(parsed.handler))
 
+class BatchItemIdTests(unittest.TestCase):
+    def test_started_is_not_finished(self):
+        import cmd_catalog
+        self.assertFalse(cmd_catalog._batch_finished("started"))
+        self.assertFalse(cmd_catalog._batch_finished("in_progress"))
+        self.assertTrue(cmd_catalog._batch_finished("finished"))
+        self.assertTrue(cmd_catalog._batch_finished("complete"))
+
+    def test_batch_items_require_id_and_map_retailer_id(self):
+        import tempfile, pathlib, json as _json
+        import cmd_catalog, metaops
+        with tempfile.TemporaryDirectory() as td:
+            good = pathlib.Path(td) / "ok.json"
+            good.write_text(_json.dumps([{"retailer_id": "SKU1", "availability": "in stock"}, {"id": "SKU2"}]))
+            items = cmd_catalog._load_batch_items(str(good), metaops)
+            self.assertEqual([i["id"] for i in items], ["SKU1", "SKU2"])
+            self.assertNotIn("retailer_id", items[0])
+            bad = pathlib.Path(td) / "bad.json"
+            bad.write_text(_json.dumps([{"availability": "in stock"}]))
+            with self.assertRaisesRegex(metaops.MetaOpsError, "needs `id`"):
+                cmd_catalog._load_batch_items(str(bad), metaops)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

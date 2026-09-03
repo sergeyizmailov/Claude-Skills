@@ -297,14 +297,24 @@ def _load_batch_items(path: str, ctx: Any) -> list[dict[str, Any]]:
     for index, item in enumerate(items):
         if not isinstance(item, dict):
             raise ctx.MetaOpsError(f"{source_path}[{index}]: each item must be a JSON object")
+        # Live 2026-09-03: items_batch rejects a request whose data lacks `id` ("Can not find
+        # required field id") and returns no handle. `id` is the feed-format retailer id.
+        if not item.get("id"):
+            if item.get("retailer_id"):
+                item["id"] = str(item.pop("retailer_id"))
+            else:
+                raise ctx.MetaOpsError(f"{source_path}[{index}]: item needs `id` (retailer id)")
     return items
 
 
 def _batch_finished(status: str | None) -> bool:
+    """Live 2026-09-03: a fresh handle reports status "started"; treat it and the usual
+    in-progress words as not finished. Unknown/empty status counts as finished only after the
+    deadline (caller)."""
     if not status:
         return False
-    lowered = status.lower()
-    return not any(word in lowered for word in TERMINAL_STOPWORDS)
+    text = str(status).lower()
+    return not any(word in text for word in ("started", "progress", "pending", "queued", "processing"))
 
 
 def _batch_status_item(payload: dict[str, Any]) -> dict[str, Any]:

@@ -137,7 +137,7 @@ metaops … catalog feed create --name N --url <csv/sheet export> --schedule hou
 metaops … catalog feed list | uploads [--feed-id]
 metaops … catalog set create --name N (--filter f.json | --retailer-ids a,b) --confirm CREATE   # filter sent as dict, encoded once
 metaops … catalog set list · products list [--set-id] [--limit]
-metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s] --confirm BATCH   # items_batch item_type=PRODUCT_ITEM → check_batch_request_status
+metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s] --confirm BATCH   # items_batch item_type=PRODUCT_ITEM → check_batch_request_status; each item needs `id` (= retailer id; `retailer_id` is mapped)
 ```
 
 `catalog create` requires a token for an **Admin-role System User**. An Employee System User can
@@ -182,6 +182,14 @@ metaops … insights pull --level ad (--date-preset yesterday | --since --until)
 metaops … insights leaderboard --accounts accounts.json [--date-preset] [--top N] [--csv]            # joins on ad_name only when all rows have one currency
 metaops … insights fatigue [--days 14] [--min-spend 20] [--event offsite_conversion.fb_pixel_lead]   # per ad, own baseline half vs recent half: ROTATE-CANDIDATE (freq +20% ∧ CTR −20% ∧ CPC/CPA +20%) / WATCH / OK / NO-DATA; ad-set flag POSSIBLE-SATURATION (reach −20% at flat spend); never pauses
 ```
+
+Live-verified 2026-09-03 on an own BM (System User, Admin): workspace validate, assets verify (core/all),
+doctor, business assets/pixel shared/capi test, catalog list/access/set list/feed list/uploads/products
+list, rules ladder (notify) → list → history → delete, review (+previews), clone --dry-run, edit status,
+insights pull/fatigue, page show, comments list, monitor, feed sync (`POST /{feed_id}/uploads` on a public
+Google Sheet: 4 items persisted in 11 s). catalog products batch (UPDATE, handle returned; status `started` = in progress). Not yet live:
+catalog/business/set/feed *create*, clone without --dry-run, edit budget/ramp, comments hide/delete,
+page set, feed swap.
 
 ## Bulk lifecycle
 

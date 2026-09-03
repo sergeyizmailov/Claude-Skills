@@ -604,7 +604,7 @@ def fatigue_verdicts(rows: list[dict[str, Any]], min_spend: float = 20.0,
     flag: reach -20% while spend within ±15% — a differential diagnosis, not a verdict."""
     dates = sorted({r.get("date_start") for r in rows if r.get("date_start")})
     if len(dates) < 4:
-        return [{"ad_id": r.get("ad_id"), "verdict": "NO-DATA", "reason": "fewer than 4 days"} for r in rows][:1]
+        return [{"ad_id": None, "verdict": "NO-DATA", "reason": f"only {len(dates)} day(s) with data; need >= 4 for baseline/recent halves"}]
     cut = dates[len(dates) // 2]
     by_ad: dict[str, list[dict[str, Any]]] = {}
     by_adset: dict[str, list[dict[str, Any]]] = {}
