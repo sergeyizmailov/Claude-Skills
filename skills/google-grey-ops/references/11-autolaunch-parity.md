@@ -56,3 +56,14 @@ MCC/payment history — `04` cascade applies from day one.
 The lift isn't launch speed (a Search campaign is a dozen operations) — it's **not dying at the
 payment event and the destination review**. Spend engineering on `doctor` gates, tracking before
 spend, review-layer discipline (`05`), per-account kill rules — not a UI bot.
+
+## Google Ads Editor (desktop) — not an automation surface
+
+Checked 2026-09-03 (Editor 2.13). Free Windows/macOS app: download account → bulk edit offline →
+review change list → Post. Edits Search/PMax/Shopping/Demand Gen/Video/App; CSV and `.aes` import
+across MCC children. **No API, CLI, plugin, or AI hooks** — GUI plus file import only; Playwright
+cannot drive it, OS-level GUI automation is fragile and login-session-bound (persona hygiene, `01`).
+No `validate_only`/PAUSED contract: Post applies live. Use only when an account has UI login but no
+developer-token access, or for a human offline diff before a large manual edit; an agent may
+generate the CSV, a human imports and posts. Never as the `googleops` path.
+
