@@ -893,6 +893,24 @@ class FeedAndMonitorTests(unittest.TestCase):
             with Image.open(dst) as image:
                 self.assertEqual(image.size, (64, 48))
             self.assertNotEqual(src.read_bytes(), dst.read_bytes())
+            report = uniquify.image_report(src, dst)
+            self.assertTrue(report["same_size"])
+            self.assertLessEqual(report["dhash"], 8)
+            self.assertLessEqual(report["phash"], 8)
+
+    def test_uniquify_hashes_separate_distinct_images(self) -> None:
+        try:
+            from PIL import Image, ImageDraw
+        except ImportError:
+            self.skipTest("pillow not installed")
+        import uniquify
+        a = Image.new("L", (64, 64), 0)
+        ImageDraw.Draw(a).rectangle((0, 0, 31, 63), fill=255)
+        b = Image.new("L", (64, 64), 0)
+        ImageDraw.Draw(b).rectangle((0, 0, 63, 31), fill=255)
+        self.assertEqual(uniquify.hamming(uniquify.dhash(a), uniquify.dhash(a)), 0)
+        self.assertGreater(uniquify.hamming(uniquify.dhash(a), uniquify.dhash(b)), 8)
+        self.assertGreater(uniquify.hamming(uniquify.phash(a), uniquify.phash(b)), 8)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

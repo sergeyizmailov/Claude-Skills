@@ -28,7 +28,7 @@ quality/spend velocity, not the pipe.
 |---|---|---|
 | Import accounts by cookies / token | operator hands System User token + ids (`02` §1) | — |
 | Template → N accounts | `metaops bulk-plan` → `bulk-apply` (template × accounts, bound inputs, PAUSED) | `POST /act_X/campaigns\|adsets\|adcreatives\|ads` |
-| Creative-file hygiene | `uniquify.py` (`--no-crop` for text-heavy banners) changes local bytes only; use independently produced source creatives for real test variance, then workspace-bound `metaops media` per account | client-side; `POST /adimages`, `/advideos` |
+| Creative-file hygiene | `uniquify.py` (`--no-crop` for text-heavy banners, `--report` prints dHash/pHash distance) changes local bytes only — measured 2026-09-03: its jitters move 64-bit dHash 0–6 / pHash ≤6, under the ~8 near-duplicate threshold, and Meta's detector is SSCD; use independently produced source creatives for real variance, then workspace-bound `metaops media` per account | client-side; `POST /adimages`, `/advideos` |
 | Catalog/feed/product-set create, batch upsert/delete, instant fetch | `metaops catalog create\|feed create\|set create\|products batch`, `metaops feed sync\|swap` (`16`, `17`; mutating batch/feed actions require literal confirms) | `POST /{business}/owned_product_catalogs`, `/{catalog}/product_feeds`, `/{catalog}/product_sets`, `/{catalog}/items_batch`, `/{feed}/uploads` |
 | Distribution "All→All" / "1→1" | spec shape: ads per ad set in template; per-account `media` block | — |
 | Duplicate campaign/ad set ×N | `metaops clone campaign\|adset\|ad <id> --times N` (level by level, PAUSED; deleted/archived descendants skipped; `deep_copy` capped at <3 objects) | `POST /{id}/copies` |
