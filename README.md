@@ -9,6 +9,13 @@
 
 **Not knowledge for beginners. Missing expertise for already-capable AI.**
 
+Scope: Meta and Google paid media (no TikTok/Microsoft), affiliate trackers (Keitaro deep,
+Binom partial), plus frontend/engineering/security skills. The media-buying set has a **clean
+lane** (buy mechanics, feeds, measurement) and an **opt-in grey lane** (`*-grey-ops`,
+`senior-buyer-ops`) that teaches account-survival tactics for aggressive verticals — install
+the grey lane only if that is your business; an agent with it in context will propose those
+tactics as normal steps.
+
 ```text
 baseline what the model already does  →  research only the gaps  →  distil  →  ship the delta
 ```
@@ -91,7 +98,16 @@ Personal-scope directory by runtime, verified against each vendor's docs on
 | Gemini CLI | `~/.gemini/skills/` (alias `~/.agents/skills/`) |
 | opencode | `~/.config/opencode/skills/` (also reads `~/.claude/skills/`) |
 
-The eight media-buying skills reference each other by name — install them together.
+Media-buying lanes (skills cross-reference each other by name — install a whole lane):
+
+| Lane | Install | For |
+|---|---|---|
+| Clean | `meta-ads` `google-ads` `google-feed-ops` `tracker-ops` `measurement-experimentation-ops` | white ecom / lead-gen / SaaS buyers; no grey tactics enter context |
+| Full | clean + `meta-grey-ops` `google-grey-ops` `senior-buyer-ops` | affiliate/grey portfolios; API launchers `metaops`/`googleops` live here with review-layer and account-survival playbooks |
+
+Pointers from clean skills into grey files degrade to "not installed"; nothing breaks. Playbook
+numbers (CPL, kill thresholds, tags) are one team's priors — replace with your contract before
+an agent acts on them.
 
 ## Nothing here is permanent
 

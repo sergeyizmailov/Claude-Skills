@@ -9,6 +9,9 @@ Reviewed 2026-09-02. Baseline: Sonnet 5 / Claude Code subagent / 2026-09-02.
 Launch/operate via API on your own MCC credentials (`googleops`, `10`) + survive aggressive
 verticals without losing accounts, domains, payment identities.
 
+**`googleops`/`gmcops` are NOT yet live-verified** (2026-09-03): offline tests only, no run against
+a real customer. A human watches the first live `plan` → `apply`; record the result in `10`.
+
 ## Start here
 
 | You are… | Read | Then |

@@ -1,6 +1,6 @@
 ---
 name: meta-ads
-description: "Senior Meta (FB/IG) ads: plan, launch, audit, diagnose, optimize. Clean-marketing layer — grey infra/survival is meta-grey-ops, trackers/metrics are tracker-ops."
+description: "Senior Meta (FB/IG) ads, clean-marketing layer: plan, structure, audit, diagnose, scale an ad account — ODAX objectives, CBO/ABO, Advantage+ audiences and creative, attribution windows, Pixel/CAPI/EMQ, learning phase, creative fatigue, policy rejections, unit economics, API error codes. Use for: 'why is CPA up', 'ad set stuck in learning', 'CBO vs ABO', 'which attribution setting', 'pixel vs CAPI events mismatch', 'Meta ad rejected Personal Attributes', 'Graph API error 1885501'. Executing an API launch and grey infra/survival = meta-grey-ops; tracker metrics = tracker-ops; portfolio decisions = senior-buyer-ops."
 ---
 
 # Meta Ads

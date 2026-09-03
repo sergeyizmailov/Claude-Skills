@@ -9,7 +9,9 @@ Layered by concern, not platform: buy mechanics (`meta-ads`, `google-ads`) → s
 infrastructure (`meta-grey-ops`, `google-grey-ops`) → retail data layer
 (`google-feed-ops`) → counting (`tracker-ops`) → experiment validity
 (`measurement-experimentation-ops`) → portfolio orchestration (`senior-buyer-ops`) on
-top. These eight cross-reference each other by name — install the set together.
+top. Two lanes: **clean** (`meta-ads`, `google-ads`, `google-feed-ops`, `tracker-ops`,
+`measurement-experimentation-ops`) and **grey opt-in** (`meta-grey-ops`, `google-grey-ops`,
+`senior-buyer-ops`) — see README § Install. Skills cross-reference by name; install a whole lane.
 
 | Skill | Adds |
 |---|---|

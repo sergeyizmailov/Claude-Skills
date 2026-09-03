@@ -1,6 +1,6 @@
 # Playbook — Gambling, casino, betting, sweepstakes
 
-Reviewed 2026-08-27. **Three rule changes landed between March and September 2026. Anything built from
+Reviewed 2026-09-03. **Three rule changes landed between March and September 2026. Anything built from
 this file must re-fetch the live policy pages first.** Policy context → `google-ads/09`.
 
 ## The change that invalidates old playbooks
@@ -32,9 +32,13 @@ Per-country **online gambling application** in the Help Center; submit the websi
 
 **2026-08-26: a revised, stricter certification process took effect** for online gambling,
 gambling-related content, and certain non-casino games. All new applicants must use the revised forms.
-**Treat this as the current baseline, not a legacy process.**
+**Treat this as the current baseline, not a legacy process.** [confirmed 2026-09-03,
+support.google.com/adspolicy/answer/17258294]
 
-**2026-09-14: the March 2026 EMEA tightening expands to all categories** under the policy.
+**2026-09-14: the March 2026 EMEA tightening expands to all categories** under the policy — good-policy
+-health gate applies globally across online gambling, social casino, and skill-based/prize games.
+[confirmed 2026-09-03, support.google.com/adspolicy/answer/17199930 — date not yet reached, not yet
+effective as of this review]
 
 Structural rules from the 2026 changes:
 
