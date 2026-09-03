@@ -9,6 +9,7 @@ Adds workspace-bound, no-Graph-code commands to the metaops CLI:
     metaops page show|set|list-pages [--avatar f] [--cover f] [--about ..] [--website URL] --confirm PAGE
     metaops insights pull --level L (--date-preset X | --since --until)
     metaops insights leaderboard --accounts accounts.json [--date-preset X] [--top N]
+    metaops insights fatigue [--days 14] [--min-spend 20] [--event E]
 
 Every command is workspace-bound: the ad account and Page come from the active profile
 (`ad_account_id`, `page_id`), never typed in by the agent. Nothing here builds Graph
@@ -563,9 +564,121 @@ def _insights_leaderboard(args, ctx) -> tuple[int, dict[str, Any]]:
     )
 
 
+# Creative fatigue (meta-ads/08 §10): compare each ad against its OWN baseline, several signals
+# together, never a fixed frequency threshold, never auto-pause. Verdicts are notifications.
+FATIGUE_MIN_IMPRESSIONS = 1000
+
+
+def _num(value: Any) -> float:
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _half_totals(rows: list[dict[str, Any]], event: str | None) -> dict[str, float]:
+    t = {"spend": 0.0, "impressions": 0.0, "clicks": 0.0, "reach": 0.0, "results": 0.0}
+    for r in rows:
+        t["spend"] += _num(r.get("spend"))
+        t["impressions"] += _num(r.get("impressions"))
+        t["clicks"] += _num(r.get("inline_link_clicks") or r.get("clicks"))
+        t["reach"] += _num(r.get("reach"))
+        if event:
+            for a in r.get("actions") or []:
+                if a.get("action_type") == event:
+                    t["results"] += _num(a.get("value"))
+    t["frequency"] = t["impressions"] / t["reach"] if t["reach"] else 0.0
+    t["ctr"] = t["clicks"] / t["impressions"] if t["impressions"] else 0.0
+    t["cpc"] = t["spend"] / t["clicks"] if t["clicks"] else 0.0
+    t["cpa"] = t["spend"] / t["results"] if t["results"] else 0.0
+    return t
+
+
+def fatigue_verdicts(rows: list[dict[str, Any]], min_spend: float = 20.0,
+                     event: str | None = None) -> list[dict[str, Any]]:
+    """Daily ad-level insight rows → one row per ad: baseline half vs recent half.
+
+    ROTATE-CANDIDATE: frequency +20% AND CTR -20% AND (CPC or CPA +20%) with enough recent
+    volume. WATCH: two of the three, or CTR -30% alone. NO-DATA: recent spend < min_spend or
+    recent impressions < 1000 (fresh objects, conversion lag). POSSIBLE-SATURATION is an ad-set
+    flag: reach -20% while spend within ±15% — a differential diagnosis, not a verdict."""
+    dates = sorted({r.get("date_start") for r in rows if r.get("date_start")})
+    if len(dates) < 4:
+        return [{"ad_id": r.get("ad_id"), "verdict": "NO-DATA", "reason": "fewer than 4 days"} for r in rows][:1]
+    cut = dates[len(dates) // 2]
+    by_ad: dict[str, list[dict[str, Any]]] = {}
+    by_adset: dict[str, list[dict[str, Any]]] = {}
+    for r in rows:
+        by_ad.setdefault(str(r.get("ad_id")), []).append(r)
+        by_adset.setdefault(str(r.get("adset_id")), []).append(r)
+    saturated: set[str] = set()
+    for adset_id, arows in by_adset.items():
+        b = _half_totals([r for r in arows if r.get("date_start") < cut], None)
+        c = _half_totals([r for r in arows if r.get("date_start") >= cut], None)
+        if b["reach"] and b["spend"] and abs(c["spend"] - b["spend"]) <= 0.15 * b["spend"] and c["reach"] < 0.8 * b["reach"]:
+            saturated.add(adset_id)
+    out = []
+    for ad_id, arows in by_ad.items():
+        b = _half_totals([r for r in arows if r.get("date_start") < cut], event)
+        c = _half_totals([r for r in arows if r.get("date_start") >= cut], event)
+        row = {"ad_id": ad_id, "ad_name": arows[0].get("ad_name"), "adset_id": arows[0].get("adset_id"),
+               "baseline": {k: round(v, 4) for k, v in b.items()}, "recent": {k: round(v, 4) for k, v in c.items()},
+               "flags": ["POSSIBLE-SATURATION"] if str(arows[0].get("adset_id")) in saturated else []}
+        if c["spend"] < min_spend or c["impressions"] < FATIGUE_MIN_IMPRESSIONS or not b["impressions"]:
+            row.update(verdict="NO-DATA", reason="recent half below min spend/impressions or no baseline")
+            out.append(row)
+            continue
+        freq_up = b["frequency"] and c["frequency"] > 1.2 * b["frequency"]
+        ctr_down = b["ctr"] and c["ctr"] < 0.8 * b["ctr"]
+        ctr_crash = b["ctr"] and c["ctr"] < 0.7 * b["ctr"]
+        cost_up = (b["cpc"] and c["cpc"] > 1.2 * b["cpc"]) or (event and b["cpa"] and c["cpa"] > 1.2 * b["cpa"])
+        signals = [n for n, v in (("frequency_up", freq_up), ("ctr_down", ctr_down), ("cost_up", cost_up)) if v]
+        if len(signals) == 3:
+            verdict = "ROTATE-CANDIDATE"
+        elif len(signals) == 2 or ctr_crash:
+            verdict = "WATCH"
+        else:
+            verdict = "OK"
+        row.update(verdict=verdict, signals=signals)
+        out.append(row)
+    order = {"ROTATE-CANDIDATE": 0, "WATCH": 1, "OK": 2, "NO-DATA": 3}
+    return sorted(out, key=lambda r: (order[r["verdict"]], -r["recent"].get("spend", 0) if "recent" in r else 0))
+
+
+def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
+    import datetime as dt
+    workspace, _, profile = _profile(ctx, args, "insights fatigue")
+    account = ctx.graph.normalize_account(profile["ad_account_id"])
+    if args.days < 4 or args.days > 60:
+        raise ctx.MetaOpsError("insights fatigue --days must be 4..60")
+    until = dt.date.today() - dt.timedelta(days=1)
+    since = until - dt.timedelta(days=args.days - 1)
+    json_path = (_operate_dir(workspace) / f"fatigue-{account}-{_stamp(ctx)}.json").resolve()
+    child = ctx.run_child("insights.py", ["--account", account, "--level", "ad", "--since", since.isoformat(),
+                                         "--until", until.isoformat(), "--json", str(json_path)], args.timeout)
+    ctx.echo_child(child)
+    if not child.ok:
+        return child.returncode, ctx.child_failure("insights", "pull_failed", child)
+    rows = ctx.read_json(json_path, "insights rows") if json_path.is_file() else []
+    verdicts = fatigue_verdicts(rows, args.min_spend, args.event)
+    counts: dict[str, int] = {}
+    for v in verdicts:
+        counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
+    return 0, ctx.result_envelope(
+        "insights", True, "assessed",
+        artifacts={"json": str(json_path)},
+        data={"account_id": account, "since": since.isoformat(), "until": until.isoformat(),
+              "event": args.event, "counts": counts, "ads": verdicts[: args.top]},
+        next_action="ROTATE-CANDIDATE → build a new creative angle, do not pause on this alone; "
+                    "POSSIBLE-SATURATION → audience, not creative (meta-ads/08 §10).",
+    )
+
+
 def command_insights(args, ctx) -> tuple[int, dict[str, Any]]:
     if args.insights_mode == "pull":
         return _insights_pull(args, ctx)
+    if args.insights_mode == "fatigue":
+        return _insights_fatigue(args, ctx)
     return _insights_leaderboard(args, ctx)
 
 
@@ -635,3 +748,9 @@ def register(sub, ctx) -> None:
     lb.add_argument("--csv")
     lb.add_argument("--top", type=int, default=20)
     lb.set_defaults(handler=lambda args: command_insights(args, ctx), insights_mode="leaderboard")
+    fat = isub.add_parser("fatigue", help="per-ad creative-fatigue verdicts vs own baseline; notifies, never pauses")
+    fat.add_argument("--days", type=int, default=14, help="window, split into baseline/recent halves")
+    fat.add_argument("--min-spend", type=float, default=20.0, help="recent-half spend below this → NO-DATA")
+    fat.add_argument("--event", help="action_type for CPA signal, e.g. offsite_conversion.fb_pixel_lead")
+    fat.add_argument("--top", type=int, default=50)
+    fat.set_defaults(handler=lambda args: command_insights(args, ctx), insights_mode="fatigue")

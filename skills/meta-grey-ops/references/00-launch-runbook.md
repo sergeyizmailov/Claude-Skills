@@ -237,6 +237,7 @@ metaops … rules ladder --target-minor 1200 --event … --level ADSET --mode pa
 metaops … edit budget --ids … --budget-pct +20 --confirm SPEND · edit status --ids … --status PAUSED --confirm PAUSE · clone campaign <id> --times 2
 metaops … comments hide --all --matching "scam|fake" --confirm HIDE
 metaops … insights pull --level ad --date-preset yesterday --csv day.csv · insights leaderboard --accounts accounts.json
+metaops … insights fatigue --event offsite_conversion.fb_pixel_lead   # weekly per-ad creative-fatigue sweep (meta-ads/08 §10), notify only
 ```
 
 All operate mutations are workspace-bound `metaops` commands (`16`); do not bypass the

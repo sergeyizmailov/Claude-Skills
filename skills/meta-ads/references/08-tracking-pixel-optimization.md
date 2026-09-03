@@ -116,6 +116,8 @@ Reviewed 2026-07-22. UI reflects 2025–2026 interface (Business Portfolio + rew
 
 ---
 
+Tooling: `metaops insights fatigue` (`meta-grey-ops/16`) applies these rules per ad against its own baseline and only notifies.
+
 ## 11. Launch-day & weekly checklists
 
 **Launch**: verify events in Test events (value/currency, dedup) — EMQ is diagnostic, not a launch gate; verify domain only if the feature requires it, check legacy AEM only if it exists for the account; UTM template on every ad, click-test GA4 realtime; naming conventions finalized (name tokens lock at publish); budget sized to the decision being made; objective/performance goal matches the tracked event; purchaser/customer exclusions only if matching objective/retention strategy; test landing page on representative mobile/connections; **no AEM/event-config changes within 72h of launch** if on legacy AEM (cool-down pauses delivery); record launch time + expected conversion delay, keep explicit emergency-stop conditions.

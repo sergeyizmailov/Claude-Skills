@@ -360,5 +360,38 @@ class LeaderboardTests(unittest.TestCase):
         child.assert_not_called()
 
 
+
+
+class FatigueTests(unittest.TestCase):
+    @staticmethod
+    def rows(ad, adset, days, spend, impr, clicks, reach, leads=0):
+        return [{"date_start": f"2026-08-{d:02d}", "ad_id": ad, "ad_name": f"c_{ad}", "adset_id": adset,
+                 "spend": spend, "impressions": impr, "clicks": clicks, "reach": reach,
+                 "actions": [{"action_type": "lead", "value": leads}]} for d in days]
+
+    def test_rotate_candidate_needs_three_signals(self):
+        import cmd_operate
+        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2)      # freq 1.25, ctr 5%, cpa 5
+        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)   # freq 2.0, ctr 3%, cpa 10
+        v = cmd_operate.fatigue_verdicts(base + recent, min_spend=20, event="lead")
+        self.assertEqual(v[0]["verdict"], "ROTATE-CANDIDATE")
+        self.assertEqual(set(v[0]["signals"]), {"frequency_up", "ctr_down", "cost_up"})
+
+    def test_watch_on_two_signals_and_ok_on_none(self):
+        import cmd_operate
+        base = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400)
+        recent = self.rows("a1", "s1", range(8, 15), 10, 500, 15, 400)      # ctr down, cpc up, freq flat
+        self.assertEqual(cmd_operate.fatigue_verdicts(base + recent)[0]["verdict"], "WATCH")
+        steady = self.rows("a2", "s2", range(1, 15), 10, 500, 25, 400)
+        self.assertEqual(cmd_operate.fatigue_verdicts(steady)[0]["verdict"], "OK")
+
+    def test_no_data_on_thin_recent_half_and_saturation_flag(self):
+        import cmd_operate
+        thin = self.rows("a1", "s1", range(1, 8), 10, 500, 25, 400) + self.rows("a1", "s1", range(8, 15), 1, 50, 2, 40)
+        self.assertEqual(cmd_operate.fatigue_verdicts(thin)[0]["verdict"], "NO-DATA")
+        sat = self.rows("a3", "s3", range(1, 8), 10, 500, 25, 400) + self.rows("a3", "s3", range(8, 15), 10, 500, 25, 250)
+        self.assertIn("POSSIBLE-SATURATION", cmd_operate.fatigue_verdicts(sat)[0]["flags"])
+
+
 if __name__ == "__main__":
     unittest.main()
