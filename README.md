@@ -83,8 +83,10 @@ Copy the skill directories you want — nothing else to configure.
 ```bash
 git clone https://github.com/sergeyizmailov/knowledge-delta-skills.git
 mkdir -p ~/.claude/skills
-cp -R knowledge-delta-skills/skills/meta-ads ~/.claude/skills/   # one skill
-cp -R knowledge-delta-skills/skills/* ~/.claude/skills/          # everything
+cd knowledge-delta-skills/skills
+cp -R meta-ads ~/.claude/skills/                                                    # one skill
+cp -R meta-ads google-ads google-feed-ops tracker-ops measurement-experimentation-ops ~/.claude/skills/   # clean lane
+cp -R meta-grey-ops google-grey-ops senior-buyer-ops ~/.claude/skills/              # + grey lane (opt-in)
 ```
 
 Personal-scope directory by runtime, verified against each vendor's docs on
