@@ -426,5 +426,81 @@ class FatigueTests(unittest.TestCase):
         self.assertNotIn("frequency", v[0]["baseline"])
 
 
+class FatiguePullTests(unittest.TestCase):
+    """_insights_fatigue must issue one ad-set pull PER HALF; a single whole-window pull
+    with time_increment=all_days yields one row per ad set, leaving `recent` empty and
+    silently disabling frequency and saturation."""
+
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.addCleanup(self.td.cleanup)
+        self.root = pathlib.Path(self.td.name)
+        self.workspace = FakeWorkspace(self.root, {"ad_account_id": "act_1"})
+
+    def _run(self, days=14):
+        calls = []
+
+        def fake_run_child(script, child_args, timeout):
+            level = child_args[child_args.index("--level") + 1]
+            since = child_args[child_args.index("--since") + 1]
+            until = child_args[child_args.index("--until") + 1]
+            calls.append((level, since, until,
+                          child_args[child_args.index("--time-increment") + 1]
+                          if "--time-increment" in child_args else None))
+            json_path = pathlib.Path(child_args[child_args.index("--json") + 1])
+            json_path.parent.mkdir(parents=True, exist_ok=True)
+            if level == "ad":
+                rows = FatigueTests.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2) + \
+                    FatigueTests.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)
+            else:
+                reach = 400 if since < until and calls[-1][1] == since and len(calls) == 2 else 250
+                rows = [{"date_start": since, "date_stop": until, "adset_id": "s1",
+                         "spend": 70, "impressions": 3500, "reach": reach}]
+            json_path.write_text(json.dumps(rows), encoding="utf-8")
+            return metaops.ChildResult(argv=[], returncode=0, stdout="{}", stderr="")
+
+        args = make_args(workspace_obj=self.workspace, days=days, min_spend=20, event="lead",
+                         top=20, insights_mode="fatigue")
+        with mock.patch.object(metaops, "run_child", side_effect=fake_run_child), \
+             mock.patch.object(metaops, "echo_child", lambda c: None):
+            code, payload = cmd_operate.command_insights(args, metaops)
+        return code, payload, calls
+
+    def test_adset_pull_is_split_into_two_half_ranges(self):
+        code, payload, calls = self._run()
+        self.assertEqual(code, 0)
+        adset_calls = [c for c in calls if c[0] == "adset"]
+        self.assertEqual(len(adset_calls), 2, "one ad-set pull per half, not one over the window")
+        self.assertTrue(all(c[3] == "all_days" for c in adset_calls))
+        # The two ranges must be disjoint and cover baseline then recent.
+        self.assertEqual(adset_calls[0][1], payload["data"]["baseline_range"][0])
+        self.assertEqual(adset_calls[0][2], payload["data"]["baseline_range"][1])
+        self.assertEqual(adset_calls[1][1], payload["data"]["recent_range"][0])
+        self.assertEqual(adset_calls[1][2], payload["data"]["recent_range"][1])
+        self.assertLess(adset_calls[0][2], adset_calls[1][1])
+        self.assertTrue(payload["data"]["adset_saturation_available"])
+
+    def test_a_half_that_failed_to_pull_disables_saturation(self):
+        def fake_run_child(script, child_args, timeout):
+            level = child_args[child_args.index("--level") + 1]
+            json_path = pathlib.Path(child_args[child_args.index("--json") + 1])
+            json_path.parent.mkdir(parents=True, exist_ok=True)
+            if level == "adset":
+                return metaops.ChildResult(argv=[], returncode=1, stdout="", stderr="boom")
+            json_path.write_text(json.dumps(
+                FatigueTests.rows("a1", "s1", range(1, 8), 10, 500, 25, 400, 2) +
+                FatigueTests.rows("a1", "s1", range(8, 15), 10, 500, 15, 250, 1)), encoding="utf-8")
+            return metaops.ChildResult(argv=[], returncode=0, stdout="{}", stderr="")
+
+        args = make_args(workspace_obj=self.workspace, days=14, min_spend=20, event="lead",
+                         top=20, insights_mode="fatigue")
+        with mock.patch.object(metaops, "run_child", side_effect=fake_run_child), \
+             mock.patch.object(metaops, "echo_child", lambda c: None):
+            code, payload = cmd_operate.command_insights(args, metaops)
+        self.assertEqual(code, 0)
+        self.assertFalse(payload["data"]["adset_saturation_available"])
+        self.assertNotIn("POSSIBLE-SATURATION", payload["data"]["ads"][0]["flags"])
+
+
 if __name__ == "__main__":
     unittest.main()

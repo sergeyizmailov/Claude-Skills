@@ -698,27 +698,34 @@ def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
         return child.returncode, ctx.child_failure("insights", "pull_failed", child)
     rows = ctx.read_json(json_path, "insights rows") if json_path.is_file() else []
 
-    # Second pull, ad-set level, time_increment=all_days, one range per half — so `reach` in
-    # each returned row is deduplicated by Graph over that half, never summed by us
-    # (meta-ads/12 §5). This is what POSSIBLE-SATURATION and ad-set frequency are computed
-    # from; per-ad CTR/CPC/CPA above stay on the summed daily ad rows (those fields sum fine).
-    adset_json = (_operate_dir(workspace) / f"fatigue-adset-{account}-{stamp}.json").resolve()
-    adset_child = ctx.run_child(
-        "insights.py",
-        ["--account", account, "--level", "adset",
-         "--since", since.isoformat(), "--until", until.isoformat(),
-         "--time-increment", "all_days", "--json", str(adset_json)],
-        args.timeout,
-    )
-    ctx.echo_child(adset_child)
+    # Two ad-set-level pulls, one per half, each time_increment=all_days — so `reach` in a
+    # returned row is deduplicated by Graph over exactly that half. A single pull over the
+    # whole window would collapse to one row per ad set and leave `recent` empty, silently
+    # disabling frequency and saturation (meta-ads/12 §5). Per-ad CTR/CPC/CPA above stay on
+    # the summed daily ad rows; those fields sum fine.
     adset_halves: dict[str, dict[str, dict[str, Any]]] = {}
-    if adset_child.ok and adset_json.is_file():
-        adset_rows = ctx.read_json(adset_json, "adset insights rows") or []
-        for r in adset_rows:
-            adset_id = str(r.get("adset_id"))
-            date_start = r.get("date_start") or ""
-            half = "baseline" if date_start <= baseline_until.isoformat() else "recent"
-            adset_halves.setdefault(adset_id, {})[half] = r
+    adset_artifacts: dict[str, str] = {}
+    adset_ok = True
+    for half, (h_since, h_until) in (("baseline", (since, baseline_until)),
+                                     ("recent", (recent_since, until))):
+        half_json = (_operate_dir(workspace) / f"fatigue-adset-{half}-{account}-{stamp}.json").resolve()
+        half_child = ctx.run_child(
+            "insights.py",
+            ["--account", account, "--level", "adset",
+             "--since", h_since.isoformat(), "--until", h_until.isoformat(),
+             "--time-increment", "all_days", "--json", str(half_json)],
+            args.timeout,
+        )
+        ctx.echo_child(half_child)
+        if not (half_child.ok and half_json.is_file()):
+            adset_ok = False
+            continue
+        adset_artifacts[half] = str(half_json)
+        for r in ctx.read_json(half_json, "adset insights rows") or []:
+            adset_halves.setdefault(str(r.get("adset_id")), {})[half] = r
+    # Saturation and frequency need both halves; a partial pull is not usable.
+    if not adset_ok or not any(len(h) == 2 for h in adset_halves.values()):
+        adset_halves = {}
 
     verdicts = fatigue_verdicts(rows, args.min_spend, args.event, adset_halves=adset_halves or None)
     counts: dict[str, int] = {}
@@ -726,7 +733,7 @@ def _insights_fatigue(args, ctx) -> tuple[int, dict[str, Any]]:
         counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
     return 0, ctx.result_envelope(
         "insights", True, "assessed",
-        artifacts={"json": str(json_path), "adset_json": str(adset_json) if adset_child.ok else None},
+        artifacts={"json": str(json_path), "adset_json": adset_artifacts or None},
         data={"account_id": account, "since": since.isoformat(), "until": until.isoformat(),
               "baseline_range": [since.isoformat(), baseline_until.isoformat()],
               "recent_range": [recent_since.isoformat(), until.isoformat()],
