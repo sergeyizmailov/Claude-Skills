@@ -145,8 +145,9 @@ def whoami_verdict(r: Report) -> None:
     scopes = set(dbg.get("scopes") or [])
     lines = []
     if ttype == "SYSTEM_USER":
-        lines.append("SYSTEM_USER token: session-independent, no persona proxy needed "
-                     "(META_ALLOW_NO_PROXY=1 is acceptable); direct API via scripts/ is the pipe.")
+        lines.append("SYSTEM_USER token: session-independent, but token type does not waive the "
+                     "Business Portfolio's assigned egress. Use META_PROXY unless the operator has "
+                     "explicitly confirmed direct egress for this BM (then META_ALLOW_NO_PROXY=1).")
     elif ttype == "USER":
         lines.append("USER token: it IS a persona session. Route every call through that persona's proxy "
                      "(META_PROXY=socks5h://…); it dies on logout/password change/checkpoint (190/460-467) "
@@ -176,9 +177,13 @@ def gate_pixel_attached(r: Report, account: str, dataset_id: str, business: str 
     Field-hit 2026-09-01. --attach-pixel does the POST; it needs the owning business id and
     is idempotent (re-sharing an already-shared account is a no-op)."""
     def listed() -> list[str]:
-        rows = graph.get(f"{account}/adspixels", params={"fields": "id,name", "limit": 200},
-                         context="account pixels").get("data", [])
-        return [x["id"] for x in rows]
+        rows: list[dict] = []
+        params: dict = {"fields": "id,name", "limit": 200}
+        while params is not None:
+            page = graph.get(f"{account}/adspixels", params=params, context="account pixels")
+            rows.extend(row for row in page.get("data", []) if isinstance(row, dict))
+            params = graph.next_page_params(page, params)
+        return [str(row["id"]) for row in rows if row.get("id")]
 
     try:
         ids = listed()

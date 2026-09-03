@@ -12,12 +12,15 @@ child is still misconfigured is how a bad ad set gets a live hour.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import hashlib
 import json
 import os
 import sys
 
 import graph
+
+VERIFY_RECEIPT_MAX_AGE_SECONDS = 3600
 
 
 def receipt_path(state_path: str) -> str:
@@ -27,6 +30,28 @@ def receipt_path(state_path: str) -> str:
 def file_sha(path: str) -> str:
     with open(path, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()[:16]
+
+
+def receipt_timestamp_error(value: object, now: dt.datetime | None = None) -> str | None:
+    """Reject a missing, malformed, future or stale read-back result before it can spend."""
+    if not isinstance(value, str):
+        return "verification receipt has no timestamp — run metaops verify again"
+    try:
+        checked_at = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return "verification receipt timestamp is malformed — run metaops verify again"
+    if checked_at.tzinfo is None:
+        return "verification receipt timestamp has no UTC offset — run metaops verify again"
+    current = now or dt.datetime.now(dt.timezone.utc)
+    age = (current - checked_at.astimezone(dt.timezone.utc)).total_seconds()
+    if age < -300:
+        return "verification receipt is future-dated — run metaops verify again"
+    if age > VERIFY_RECEIPT_MAX_AGE_SECONDS:
+        return (
+            f"verification receipt is {int(age)}s old (maximum {VERIFY_RECEIPT_MAX_AGE_SECONDS}s) — "
+            "run metaops verify again immediately before activation"
+        )
+    return None
 
 
 def check_receipt(state_path: str, state: dict | None = None) -> str | None:
@@ -45,6 +70,9 @@ def check_receipt(state_path: str, state: dict | None = None) -> str | None:
         return f"unreadable receipt {rp}"
     if not r.get("ok"):
         return "receipt records a failed verification"
+    timestamp_problem = receipt_timestamp_error(r.get("ts"))
+    if timestamp_problem:
+        return timestamp_problem
     if r.get("state_sha") != file_sha(state_path):
         return "state file changed after verification — run verify.py again"
     if state is None:

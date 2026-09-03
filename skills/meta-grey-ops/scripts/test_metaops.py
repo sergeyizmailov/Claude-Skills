@@ -18,6 +18,7 @@ import mcp
 import metaops
 import monitor
 import probe
+import verify
 
 os.environ.setdefault("META_TOKEN", "TEST_TOKEN")
 
@@ -189,6 +190,32 @@ class MetaOpsContractTests(unittest.TestCase):
             payload = json.loads(rows[0])
             self.assertFalse(payload["ok"])
             self.assertEqual(payload["error"]["kind"], "precondition")
+
+    def test_dlo_requires_an_explicit_static_adset(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            spec = valid_spec()
+            spec["adsets"][0]["ads"][0]["creative"]["kind"] = "dlo"
+            path = self.write_json(root, "dlo.json", spec)
+            with self.assertRaisesRegex(metaops.launch.SpecError, "is_dynamic_creative: false"):
+                metaops.launch.load_spec(str(path))
+            spec["adsets"][0]["is_dynamic_creative"] = False
+            self.write_json(root, "dlo.json", spec)
+            self.assertEqual(metaops.launch.load_spec(str(path))["adsets"][0]["is_dynamic_creative"], False)
+
+    def test_verify_receipt_expires_before_activation(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            spec = {"adsets": [{"ads": [{}]}]}
+            state = {"objects": {"campaign": "1", "adset[0]": "2", "ad[0.0]": "3"},
+                     "spec_sha": metaops.launch.spec_hash(spec)}
+            state_path = self.write_json(root, "state.json", state)
+            verify.write_receipt(str(state_path), "spec.json", spec)
+            receipt_path = pathlib.Path(str(state_path) + ".verified.json")
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["ts"] = "2000-01-01T00:00:00+00:00"
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            self.assertIn("maximum", metaops.activate.check_receipt(str(state_path), state) or "")
 
     def test_lock_excludes_concurrent_writer_and_is_removed(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -809,6 +836,15 @@ class FeedAndMonitorTests(unittest.TestCase):
             mock.patch.object(probe, "whoami_verdict"),
         ):
             self.assertEqual(probe.main(), 1)
+
+    def test_pixel_gate_follows_pagination_before_declaring_missing(self) -> None:
+        report = probe.Report()
+        first = {"data": [{"id": "first"}], "paging": {"cursors": {"after": "cursor-2"}, "next": "yes"}}
+        second = {"data": [{"id": "wanted"}]}
+        with mock.patch.object(probe.graph, "get", side_effect=[first, second]) as get:
+            probe.gate_pixel_attached(report, "act_1", "wanted", None, False)
+        self.assertEqual(get.call_count, 2)
+        self.assertEqual(report.rows[-1]["state"], probe.PASS)
 
     def test_monitor_adset_queries_follow_pagination(self) -> None:
         pages = [

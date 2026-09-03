@@ -78,7 +78,7 @@ Whether the language layer clears review is a `07` question — this is only wha
 - A rule missing its media label (`image_label`/`video_label`) is rejected; one image/video may omit its label to serve all languages.
 - 🔺 `descriptions` is **REQUIRED** — a single-space string for blank; an omitted key or empty list is rejected.
 - Exactly one rule carries `is_default: true` (the "Default" slot in `07`'s language trick). Docs conflict on rule count: asset-customization-rules page wants ≥2, autotranslate example ships one — assume two.
-- Adset needs `is_dynamic_creative = false` for a rule-based feed.
+- Adset must explicitly set `is_dynamic_creative: false` for a rule-based feed; `load_spec` rejects a missing or true value before any Graph call.
 - Autotranslate (`asset_feed_spec.autotranslate: [...]` + `optimization_type: "LANGUAGE"`): manual edits to a locale also autotranslate-listed are dropped.
 - Limits: ≤49 assets/type, title ≤255, body ≤4096, description ≤10000 chars.
 - Objective support documented against LEGACY names only, excludes Messenger. Whether ODAX `OUTCOME_*` works is [unverified] and **a dry run won't tell you** — `validate_only` can't validate an ad without a real parent adset id, rejection lands at `POST /ads` on the real create. Build one live DLO ad before scheduling a launch. Hard constraint: Website destination only, no Instant Experience, no Messaging Apps (`07`).

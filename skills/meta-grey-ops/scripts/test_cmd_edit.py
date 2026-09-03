@@ -384,6 +384,19 @@ class CmdEditTests(unittest.TestCase):
             "--level", "ADSET", "--rungs", "0-6", "--mode", "notify", "--prefix", "LADDER|",
         ])
 
+    def test_rules_ladder_rejects_ids_outside_profile_before_child(self) -> None:
+        args = self.parse([
+            "rules", "ladder", "--target-minor", "1200", "--event", "results", "--level", "ADSET",
+            "--ids", "42",
+        ])
+        with (
+            mock.patch.object(metaops.graph, "get", return_value={"id": "42", "account_id": "2"}),
+            mock.patch.object(metaops, "run_child") as child,
+        ):
+            with self.assertRaisesRegex(metaops.MetaOpsError, "cross-profile rule"):
+                args.handler(args)
+        child.assert_not_called()
+
     def test_rules_ladder_pause_with_confirm_passes(self) -> None:
         args = self.parse([
             "rules", "ladder", "--target-minor", "1200", "--event", "results", "--level", "ADSET",

@@ -15,13 +15,17 @@ import csv
 import json
 import os
 import pathlib
+import random
 import re
 import sys
+import time
 from typing import Any
 
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 RESULT_SCHEMA = "sheetfeed.result/v1"
+SHEETS_RATE_RETRY_ATTEMPTS = 5
+SHEETS_MAX_BACKOFF_SECONDS = 32.0
 
 # Column names shared by the Merchant Center product spec and the Meta catalog feed spec.
 REQUIRED = ["id", "title", "description", "availability", "condition", "price", "link", "image_link", "brand"]
@@ -38,6 +42,36 @@ URL_RE = re.compile(r"^https://")
 
 class SheetError(Exception):
     pass
+
+
+def unique_input_ids(items: list[dict[str, Any]]) -> None:
+    """Reject ambiguous input before an upsert can write either copy of an id."""
+    seen: set[str] = set()
+    for item in items:
+        product_id = str(item.get("id", "")).strip()
+        if not product_id:
+            raise SheetError("every item needs an id")
+        if product_id in seen:
+            raise SheetError(f"input contains duplicate id {product_id!r}")
+        seen.add(product_id)
+
+
+def indexed_sheet_ids(header: list[str], rows: list[list[str]]) -> dict[str, int]:
+    """Map each non-empty id to its 1-based sheet row, refusing a non-deterministic sheet."""
+    if "id" not in header:
+        raise SheetError("sheet has no id column")
+    id_col = header.index("id")
+    out: dict[str, int] = {}
+    for row_number, row in enumerate(rows, start=2):
+        product_id = str(row[id_col]).strip() if len(row) > id_col else ""
+        if not product_id:
+            continue
+        if product_id in out:
+            raise SheetError(
+                f"sheet contains duplicate id {product_id!r} on rows {out[product_id]} and {row_number}"
+            )
+        out[product_id] = row_number
+    return out
 
 
 def envelope(command: str, ok: bool, phase: str, *, data: dict | None = None, error: dict | None = None,
@@ -121,8 +155,37 @@ class Sheet:
         self.tab = tab
         self.sa_email = getattr(creds, "service_account_email", None)
 
+    def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+        """Run one Sheets request, retrying only an unexecuted quota rejection.
+
+        Google Sheets documents truncated exponential backoff for quota errors. HTTP 429 is
+        safe to retry: the server rejected it before applying a values mutation. Do not retry
+        other failures here; a timed-out append might already have written a row.
+        """
+        request = getattr(self.session, method.lower())
+        url = f"{API}/{self.id}{path}"
+        last = None
+        for attempt in range(SHEETS_RATE_RETRY_ATTEMPTS):
+            response = request(url, timeout=60, **kwargs)
+            if response.status_code != 429:
+                return response
+            last = response
+            if attempt + 1 == SHEETS_RATE_RETRY_ATTEMPTS:
+                break
+            retry_after = (getattr(response, "headers", {}) or {}).get("Retry-After")
+            try:
+                delay = float(retry_after)
+            except (TypeError, ValueError):
+                delay = (2 ** attempt) + random.uniform(0, 1)
+            time.sleep(max(0.0, min(delay, SHEETS_MAX_BACKOFF_SECONDS)))
+        detail = getattr(last, "text", "")[:400]
+        raise SheetError(
+            f"429: Google Sheets quota remained exhausted after {SHEETS_RATE_RETRY_ATTEMPTS} attempts; "
+            f"retry later. {detail}"
+        )
+
     def _get(self, path: str, **params: Any) -> dict[str, Any]:
-        r = self.session.get(f"{API}/{self.id}{path}", params=params, timeout=60)
+        r = self._request("GET", path, params=params)
         if r.status_code == 403:
             raise SheetError(f"403: share the sheet with {self.sa_email} as Editor, or enable the Sheets API "
                              "on the service account's project")
@@ -132,13 +195,13 @@ class Sheet:
         return r.json()
 
     def _post(self, path: str, body: dict[str, Any], **params: Any) -> dict[str, Any]:
-        r = self.session.post(f"{API}/{self.id}{path}", params=params, json=body, timeout=60)
+        r = self._request("POST", path, params=params, json=body)
         if r.status_code >= 400:
             raise SheetError(f"{r.status_code}: {r.text[:400]}")
         return r.json()
 
     def _put(self, path: str, body: dict[str, Any], **params: Any) -> dict[str, Any]:
-        r = self.session.put(f"{API}/{self.id}{path}", params=params, json=body, timeout=60)
+        r = self._request("PUT", path, params=params, json=body)
         if r.status_code >= 400:
             raise SheetError(f"{r.status_code}: {r.text[:400]}")
         return r.json()
@@ -167,6 +230,8 @@ class Sheet:
         """Match on `id`; update in place, append new. Values written RAW so '19.99 USD' stays text."""
         if "id" not in header:
             raise SheetError("sheet has no id column")
+        unique_input_ids(items)
+        by_id = indexed_sheet_ids(header, rows)
         col_idx = {c: i for i, c in enumerate(header)}
         new_cols = [k for item in items for k in item if k not in col_idx]
         for k in dict.fromkeys(new_cols):
@@ -174,7 +239,6 @@ class Sheet:
             col_idx[k] = len(header) - 1
         if new_cols:
             self.write_header(header)
-        by_id = {row[col_idx["id"]]: n for n, row in enumerate(rows, start=2) if len(row) > col_idx["id"]}
         updates: list[dict[str, Any]] = []
         appends: list[list[str]] = []
         counts = {"updated": 0, "appended": 0}
@@ -223,6 +287,7 @@ def merged_upsert_rows(
     """
     if "id" not in header:
         raise SheetError("sheet has no id column")
+    unique_input_ids(items)
     out_header = list(header)
     columns = {name: index for index, name in enumerate(out_header)}
     for item in items:
@@ -234,17 +299,11 @@ def merged_upsert_rows(
     id_col = columns["id"]
     out_rows = [list(row) + [""] * (len(out_header) - len(row)) for row in rows]
     by_id = {
-        row[id_col]: index for index, row in enumerate(out_rows)
-        if len(row) > id_col and row[id_col]
+        product_id: row_number - 2
+        for product_id, row_number in indexed_sheet_ids(out_header, out_rows).items()
     }
-    seen: set[str] = set()
     for item in items:
         product_id = str(item.get("id", "")).strip()
-        if not product_id:
-            raise SheetError("every item needs an id")
-        if product_id in seen:
-            raise SheetError(f"input contains duplicate id {product_id!r}")
-        seen.add(product_id)
         if product_id in by_id:
             line = out_rows[by_id[product_id]]
         else:

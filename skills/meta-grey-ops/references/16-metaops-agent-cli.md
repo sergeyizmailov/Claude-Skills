@@ -80,6 +80,8 @@ metaops --workspace . --profile <profile> --json activate --plan .metaops/plans/
 
 `doctor` must pass first; its account/Page/dataset-specific receipt is checked by every later command and
 expires after 24 hours by default (`METAOPS_DOCTOR_MAX_AGE_SECONDS` overrides the TTL).
+The separate read-back receipt written by `verify` expires after one hour: re-run `verify` immediately
+before activation if UI review or scheduling took longer. This is a live GET-only check, not a rebuild.
 Media upload and product-set repair also require that fresh receipt. Product-set repair performs
 a live System User/catalog/set ownership check that permits an empty set, then invalidates any
 old `all` asset receipt; rerun `assets verify --scope all` after repair.

@@ -234,6 +234,17 @@ def load_spec(path: str) -> dict:
         if not aset.get("ads"):
             raise SpecError(f"adsets[{i}] has no ads")
 
+        has_dlo = any(
+            isinstance(ad.get("creative"), dict) and ad["creative"].get("kind") == "dlo"
+            for ad in aset["ads"]
+            if isinstance(ad, dict)
+        )
+        if has_dlo and aset.get("is_dynamic_creative") is not False:
+            raise SpecError(
+                f"adsets[{i}] contains creative.kind=dlo and must explicitly set "
+                "is_dynamic_creative: false"
+            )
+
         t = aset["targeting"]
         if "advantage_audience" not in t and "advantage_audience" not in (t.get("targeting_automation") or {}):
             raise SpecError(
