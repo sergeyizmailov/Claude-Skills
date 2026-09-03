@@ -13,7 +13,7 @@ here for mechanics.
 | Pipe | What | Use for | Not for |
 |---|---|---|---|
 | **Marketing API via `metaops`** (internal `scripts/`) | Workspace-bound Graph calls, System User or long-lived user token | **every agent launch and write.** Only surface with confirmed control of `attribution_spec`, `degrees_of_freedom_spec`, `contextual_multi_ads`, `asset_feed_spec`, catalog/template creatives, `validate_only`, batching | direct low-level script writes — internal implementation only |
-| **Meta Ads MCP** (`mcp.facebook.com/ads`) | Meta-hosted, 106 tools (live 2026-09-02), bearer System User token w/ `ads_mcp_management` or OAuth; per-account rollout flag | conversational reads: insights, anomaly/benchmarks, entity search, previews, catalog/pixel diagnostics, Ad Library; bounded edits (`ads_update_entity`) | launches: no `contextual_multi_ads` (inherits OPT_IN), defaults push 7d-click/CBO/Advantage+, no `validate_only`, no batch, one account/call, `ads_get_ad_entities` can't read `attribution_spec` back — §5 |
+| **Meta Ads MCP** (`mcp.facebook.com/ads`) | Meta-hosted, 106 tools (live 2026-09-02), bearer System User token w/ `ads_mcp_management` or OAuth; per-account rollout flag | conversational reads: insights, anomaly/benchmarks, entity search, previews, catalog/pixel diagnostics, Ad Library; bounded edits (`ads_update_entity`) | launches: no `contextual_multi_ads` (inherits OPT_IN), defaults push 7d-click/CBO/Advantage+, no `validate_only`, no batch, one account/call, `ads_get_ad_entities` can't read `attribution_spec` back — §6 |
 | **Meta Ads CLI** (`pip install meta-ads`, `12`) | click CLI over `facebook-business` SDK, System User token via `ACCESS_TOKEN` | human-operator inspection and diagnosis | **all agent writes** — it has no workspace binding or spend-confirmation gates; also no `validate_only`, multi-account run, resume state, read-back diff, currency guard, or proxy setting; SDK video host deprecated (#701) |
 | Third-party Meta MCP servers (pipeboard, hashcott, brijr, ScaleForge…) | community wrappers | nothing here | shared dev apps + raw tokens + unsupervised writes = reported ban mechanism [practitioner-multiple, no Meta statement]; never hand a work token to one |
 | CSV bulk import | Ads Manager | human review of thousands of rows | agents: no validate_only; blocked on fresh accounts (3738001) |
@@ -34,9 +34,12 @@ Agent needs **one token + ids**; rest is BM owner's setup:
    `Manage everything on your Page` · `Manage products with Catalog API` · `Create & manage
    ads with ads MCP server` (only if MCP reads wanted). App **Live** (Privacy Policy URL 200)
    — dev mode blocks creative create (1885183).
-2. **System User**, Admin only if it must govern MCP rules else Employee. Assign **Full
-   control**: every ad account, Page, IG account, pixel/dataset, catalog, the app. Per-asset —
-   portfolio membership assigns nothing.
+2. **Admin System User** for agent provisioning — do not choose Employee when the agent must
+   create a catalog, dataset/pixel, claim an asset, or assign an asset elsewhere in this Business
+   Portfolio. Assign **Full control**: every ad account, Page, IG account, pixel/dataset,
+   catalog, and the app. Per-asset — portfolio membership assigns nothing. An Employee System
+   User is suitable only for a least-privilege agent operating assets that a BM admin has already
+   assigned in the UI; see §2.
 3. **Generate token**, expiry Never (60-day option exists; Never is System User default),
    scopes below. Store once, gitignored.
 4. **Pixel attached to every ad account** (Datasets → Add assets → ad account). Shared-to-BM
@@ -58,7 +61,27 @@ tracker campaign URL + macro mapping: ...
 Agent's first command is `metaops --workspace . --profile <name> --json doctor --whoami`
 (runbook step 1). Nothing else until exit 0.
 
-## 2. Scopes
+## 2. System User roles: Admin vs Employee
+
+The token's OAuth scopes and the System User's Business Portfolio role are separate gates. Giving
+an Employee token `catalog_management` and `business_management` does **not** turn it into a BM
+admin.
+
+| System User role | Can do | Cannot do |
+|---|---|---|
+| **Employee** | Operate only the ad accounts, existing catalogs, Pages, and other assets explicitly assigned to that System User in Business Settings. It is a valid least-privilege choice for an agent that only launches into preassigned accounts or maintains a preassigned catalog. | Provision or reassign Business-Portfolio-owned assets: creating a catalog or dataset/pixel, claiming assets, or assigning assets to other entities. In particular, `POST /{business_id}/owned_product_catalogs` fails before scopes help. |
+| **Admin** | In addition to assigned-asset operations, provision and administer BM-owned catalogs, datasets/pixels, and asset assignments. | It still needs the relevant app scopes, asset access, and API access tier; Admin is not a substitute for those gates. |
+
+**[R, reported 2026-09-03] Catalog-creation trap:** an Employee System User calling
+`POST /{business_id}/owned_product_catalogs` can receive `OAuthException` code **10**, subcode
+**1690129**, even when `catalog_management` and `business_management` are granted. The reported
+English text is equivalent to “You do not have permission to create a catalog because you are not
+an admin of this business”; Meta localises error text, so branch on code/subcode rather than that
+string. Revalidate this result against the intended BM before relying on it. Use an **Admin System
+User** for any agent workflow that must autonomously create or assign BM-level assets. Do not
+over-privilege an agent that only operates already assigned assets.
+
+## 3. Scopes
 
 Request only these; verify **granted** via `GET /me/permissions` (use-case bundling grants
 extras — `facebook_branded_content_ads_brand`, `threads_business_basic`; requested ≠ granted).
@@ -81,7 +104,7 @@ Own-business assets: Limited tier + these scopes suffice. Other businesses' asse
 App Review with screencasts. Permission docs redirect to one consolidated
 `developers.facebook.com/docs/permissions` page.
 
-## 3. Access tier (renamed 2026-05-04)
+## 4. Access tier (renamed 2026-05-04)
 
 "Ads Management Standard Access"→**Marketing API Access Tier**; Standard→**Limited**,
 Advanced→**Full**. Full is automatic after **≥500 calls in 15 days, <15% errors over last
@@ -91,7 +114,7 @@ Business Verification is a prerequisite, app's Privacy Policy URL checked there 
 Tier is a property of the **app**, not the BM — a verified agency BM doesn't lift your app.
 Read `ads_api_access_tier` in `X-Business-Use-Case-Usage` header (`meta-ads/14` rate limits).
 
-## 4. Token types and lifecycle
+## 5. Token types and lifecycle
 
 | Token | Lives | Dies when | Proxy rule |
 |---|---|---|---|
@@ -155,7 +178,7 @@ damage.
 `META_APP_SECRET` set) stays a query param — a hash, not the secret. `graph.redact()` scrubs
 token+proxy creds from anything printed/written.
 
-## 5. Meta Ads MCP — live-verified 2026-09-02 (own BM, System User token)
+## 6. Meta Ads MCP — live-verified 2026-09-02 (own BM, System User token)
 
 - Endpoint `https://mcp.facebook.com/ads`, Streamable HTTP. `initialize` returns
   `Mcp-Session-Id`, send back every call. Errors: JSON-RPC `result.isError=true` w/
@@ -204,7 +227,7 @@ token+proxy creds from anything printed/written.
   overspend. Direct-API scripts carry the currency guard; MCP has `min_daily_budget_cents` but
   no offset guard.
 
-## 6. Ad account facts scripts read for you
+## 7. Ad account facts scripts read for you
 
 `currency`+`timezone_name` (`probe.py`, `launch.py`) — changing either **closes** account,
 opens new act id (`08`). `account_status` 1 active / 2 disabled / 3 unsettled (unpaid, not a

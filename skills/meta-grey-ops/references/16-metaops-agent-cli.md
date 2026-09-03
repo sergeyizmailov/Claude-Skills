@@ -30,6 +30,10 @@ Account-agnostic: `workspace.json` lives in a per-launch project directory outsi
 directory (one per BM/agency setup — holds `workspace.json`, `.metaops/`, `.notes/` with the
 token env file). CLI rejects skill-store workspaces and state directories escaping the project.
 Start from `scripts/specs/example-workspace.json`.
+`workspace.json.api_version` must exactly equal the launcher's effective `graph.API_VERSION`
+(**`v26.0`** in this release without an explicit version override), not merely match the `vNN.N`
+shape. `metaops` rejects a mismatch before it makes a Graph call; after a launcher-version
+upgrade, update the workspace and re-plan and re-verify its receipts.
 
 ```bash
 metaops --workspace . --profile <profile> --json workspace validate
@@ -127,6 +131,11 @@ metaops … catalog set create --name N (--filter f.json | --retailer-ids a,b) -
 metaops … catalog set list · products list [--set-id] [--limit]
 metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREATE [--wait s] --confirm BATCH   # items_batch item_type=PRODUCT_ITEM → check_batch_request_status
 ```
+
+`catalog create` requires a token for an **Admin-role System User**. An Employee System User can
+maintain a catalog explicitly assigned to it, but cannot create one at the BM edge; see `02` §2.
+The `workspace.json` used here must set `api_version` exactly to the effective launcher version
+(`v26.0` in this release without an explicit version override).
 
 `schedule` is a JSON string (`interval HOURLY|DAILY|WEEKLY|MONTHLY, hour, minute, day_of_week,
 timezone, url`). items_batch takes feed-format `price` "9.99 USD"; `/products` takes integer

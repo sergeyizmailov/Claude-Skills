@@ -17,6 +17,15 @@ schedule; the agent edits rows through a service account with permanent access.*
    survives password changes and sessions.
 4. Sheets API caps: 60 reads + 60 writes/min/user, 300/min/project. `sheetfeed` batches writes.
 
+### Meta API prerequisite for a new catalog
+
+If the catalog does not yet exist, create it through `metaops … catalog create` (`16`) with an
+**Admin-role System User** token. An Employee System User may maintain an already assigned
+catalog, but `POST /{business_id}/owned_product_catalogs` needs the Business Portfolio's Admin
+role; OAuth scopes alone do not grant it. In the project `workspace.json`, set `api_version` to
+the launcher's exact effective version (**`v26.0`** in this release without a version override).
+`metaops` refuses a mismatch before any Graph call.
+
 ## Connect the platforms (UI only)
 
 | Platform | Path | Sharing the platform needs | Schedule |
