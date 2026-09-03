@@ -7,6 +7,7 @@ description: "Tracker ops for affiliate/media buying: Keitaro + Binom APIs (keys
 
 Count money correctly and automate tracker work. Keitaro + Binom specifics
 below; the metric rules and daily sync port to any tracker.
+Baseline 2026-09-03 (Sonnet 5 blind, CPL cohort task): [R] — click-date cohort and pinned attribution window already known; do not expand that section.
 
 ## Metric rule (NEVER violate)
 
