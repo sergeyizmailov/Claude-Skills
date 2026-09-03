@@ -1,24 +1,24 @@
 # 05 — AI Max, AI Overviews, and the September 2026 forced migration
 
-Reviewed 2026-08-27. **The most time-critical file in this skill.** Everything here is 🔺 volatile.
+Reviewed 2026-09-03. **The most time-critical file in this skill.** Everything here is 🔺 volatile.
 
 ## What auto-converts and when
 
 | Trigger | Migrates to | Window | Reprieve |
 |---|---|---|---|
-| Campaign-level Broad Match setting | AI Max search term matching | **2026-09-01 → 09-30** | None |
-| Legacy Automatically Created Assets (ACA) | AI Max asset optimization | Same window | None |
-| Dynamic Search Ads | AI Max | **Delayed to Feb 2027** | Yes — 8-month extension announced 2026-06-11 by Ginny Marvin, attributed to advertiser feedback about Q4 planning risk |
+| Campaign-level Broad Match setting | AI Max search term matching | **Migrating now, 2026-09-01 → 09-30** [confirmed 2026-09-03: rollout is live, progressive across the month — a campaign untouched on Sep 2 may still convert on Sep 24] | None |
+| Legacy Automatically Created Assets (ACA) | AI Max asset optimization | Same window, in progress | None |
+| Dynamic Search Ads | AI Max | **Delayed to Feb 2027** [confirmed 2026-09-03] | Yes — 8-month extension announced 2026-06-11 by Ginny Marvin, attributed to advertiser feedback about Q4 planning risk. DSA creation was restored 2026-06-15, then removed again Jan 2027; automigration runs Feb 2027 for anything not voluntarily migrated |
 
 Since **2026-08-03** Google blocks *creating* new campaign-level Broad Match or legacy ACA configs
 across UI, Editor, API. Existing config survives until swept; no opt-back-in. Mechanics published Ads
 Developer Blog 2026-08-12; advertisers emailed 2026-08-05. Brand inclusions/exclusions carry over
 automatically.
 
-**The only real opt-out: disable campaign-level Broad Match / ACA *before* September 1.** Google will
-not auto-migrate a campaign that no longer uses the legacy feature, which leaves you free to enable
-AI Max manually on your own schedule — or not at all. **There is no rollback once auto-migration
-executes.**
+**The only real opt-out was disabling campaign-level Broad Match / ACA *before* September 1** — that
+window has closed as of this review. Google does not auto-migrate a campaign that no longer uses the
+legacy feature; for campaigns still on it, the sweep is now running. **There is no rollback once
+auto-migration executes.**
 
 ## Controls that survive — the actual steering wheel
 

@@ -1,6 +1,6 @@
 # 09 — Policy, verification, certifications
 
-Reviewed 2026-08-27. Compliance layer. Suspension survival, appeals under fire, and the grey lane →
+Reviewed 2026-09-03. Compliance layer. Suspension survival, appeals under fire, and the grey lane →
 `google-grey-ops`. **Gambling and financial policy are the fastest-moving surfaces in the manual —
 re-fetch live pages before acting.**
 
@@ -161,8 +161,10 @@ ads blocked cumulatively.
 ### Gambling — three rule changes in six months
 
 2026-03-23 EMEA-managed account tightening · Jul 2026 further eligibility update · **2026-08-26 forms
-and standards revised globally — all new applicants must use the revised forms** · **2026-09-14 the
-March requirements expand to all categories under the policy**.
+and standards revised globally — all new applicants must use the revised forms** [confirmed 2026-09-03,
+support.google.com/adspolicy/answer/17258294] · **2026-09-14 the March requirements expand to all
+categories under the policy (good-policy-health gate, all gambling/games categories)** [confirmed
+2026-09-03, support.google.com/adspolicy/answer/17199930 — not yet effective as of this review].
 
 The direction: mandatory per-jurisdiction, per-category certification with **"good policy health" as a
 prerequisite before licensing proof is even reviewed**. Any gambling workflow built from this file must

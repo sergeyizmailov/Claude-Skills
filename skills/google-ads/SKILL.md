@@ -21,11 +21,11 @@ margins, funnel stages, because Google can read the intent Meta cannot. Ani pres
 
 ## Check these two things first on any 2026 account
 
-1. **The 2026-09-01 AI Max forced migration** (`05`). Campaign-level broad match and Automatically
-   Created Assets auto-convert during September with no rollback. The only opt-out is disabling the
-   legacy setting *before* the date.
+1. **The AI Max forced migration** (`05`). Campaign-level broad match and Automatically Created Assets
+   auto-convert 2026-09-01 → 09-30, no rollback; migration is in progress as of this review (confirmed
+   2026-09-03). The opt-out window (disabling the legacy setting before Sep 1) has closed.
 2. **The 2026-08-17 budget-limited target enforcement** (`02`). Any tCPA/tROAS drift on a "Limited by
-   budget" campaign after that date is **expected behavior, not a tracking bug.**
+   budget" campaign since that date is **expected behavior, not a tracking bug** [confirmed 2026-09-03].
 
 ## Route references
 
