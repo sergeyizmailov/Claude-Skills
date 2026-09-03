@@ -156,6 +156,7 @@ def _adaccount_create(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str
     _require_workspace(ctx, args, "business adaccount create")
     _require_confirm(ctx, args, "CREATE", "adaccount create")
     profile_name, profile = args.workspace_obj.profile(args.profile)
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     business_id = str(profile["business_id"])
     payload: dict[str, Any] = {
         "name": args.name,
@@ -192,6 +193,7 @@ def _pixel_create(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, An
     _require_workspace(ctx, args, "business pixel create")
     _require_confirm(ctx, args, "CREATE", "pixel create")
     profile_name, profile = args.workspace_obj.profile(args.profile)
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     business_id = str(profile["business_id"])
     payload: dict[str, Any] = {"name": args.name}
     if args.is_crm:
@@ -229,6 +231,7 @@ def _pixel_share(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, Any
         raise ctx.MetaOpsError(
             f"{account} is not declared by this workspace; add/select its profile before pixel share"
         )
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     report_path = (args.workspace_obj.state_root / "business" / f"pixel-share-{account}.json").resolve()
     report_path.parent.mkdir(parents=True, exist_ok=True)
     child = ctx.run_child(
@@ -309,6 +312,7 @@ def _user_invite(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, Any
     _require_workspace(ctx, args, "business user invite")
     _require_confirm(ctx, args, "SHARE", "user invite")
     profile_name, profile = args.workspace_obj.profile(args.profile)
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     business_id = str(profile["business_id"])
     payload = {"email": args.email, "role": args.role}
     created = ctx.graph.post(f"{business_id}/business_users", payload, context="invite business user")
@@ -331,6 +335,7 @@ def _user_assign(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, Any
     profile_name, profile = args.workspace_obj.profile(args.profile)
     asset_id = _resolve_asset_id(ctx, profile, args.asset)
     tasks = _tasks_list(ctx, args.tasks, args.asset)
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     payload = {"user": args.user_id, "tasks": tasks}
     ctx.graph.post(f"{asset_id}/assigned_users", payload, context="assign business user")
     return 0, ctx.result_envelope(
@@ -354,6 +359,7 @@ def _partner_share(ctx: Any, args: argparse.Namespace) -> tuple[int, dict[str, A
     profile_name, profile = args.workspace_obj.profile(args.profile)
     asset_id = _resolve_asset_id(ctx, profile, args.asset)
     tasks = _tasks_list(ctx, args.tasks, args.asset)
+    ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     payload = {"business": str(args.partner_business), "permitted_tasks": tasks}
     ctx.graph.post(f"{asset_id}/agencies", payload, context="partner share asset")
     return 0, ctx.result_envelope(

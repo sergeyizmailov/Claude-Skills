@@ -20,6 +20,15 @@ def make_args(**kwargs):
 
 
 class CmdBusinessTests(unittest.TestCase):
+    def setUp(self) -> None:
+        provisioning_patch = mock.patch.object(
+            metaops,
+            "require_provisioning_admin",
+            return_value={"system_user_id": "12", "role": "ADMIN"},
+        )
+        self.provisioning = provisioning_patch.start()
+        self.addCleanup(provisioning_patch.stop)
+
     def workspace(self, root: pathlib.Path) -> metaops.meta_workspace.Workspace:
         path = root / "workspace.json"
         path.write_text(
@@ -153,6 +162,7 @@ class CmdBusinessTests(unittest.TestCase):
             self.assertNotIn("media_agency", body)
             self.assertEqual(payload["data"]["ad_account_id"], "act_123")
             self.assertIn("1 ad account", payload["next_action"])
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_pixel_create_payload(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -168,6 +178,7 @@ class CmdBusinessTests(unittest.TestCase):
             self.assertEqual(path, "10/adspixels")
             self.assertEqual(body, {"name": "Px", "is_crm": True})
             self.assertEqual(payload["data"]["dataset_id"], "555")
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_capi_test_event_shape_has_hashed_user_data_and_test_code(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -209,6 +220,7 @@ class CmdBusinessTests(unittest.TestCase):
             self.assertEqual(path, "10/business_users")
             self.assertEqual(body, {"email": "agent@example.com", "role": "ADMIN"})
             self.assertEqual(payload["data"]["user_id"], "777")
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_user_assign_tasks_list_and_no_business_field(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -224,6 +236,7 @@ class CmdBusinessTests(unittest.TestCase):
             self.assertEqual(path, "act_1/assigned_users")
             self.assertEqual(body, {"user": "999", "tasks": ["MANAGE", "ADVERTISE"]})
             self.assertNotIn("business", body)
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_user_assign_resolves_page_and_pixel_asset_ids(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -256,6 +269,7 @@ class CmdBusinessTests(unittest.TestCase):
             path, body = post.call_args.args[0], post.call_args.args[1]
             self.assertEqual(path, "3/agencies")
             self.assertEqual(body, {"business": "404", "permitted_tasks": ["ADVERTISE", "ANALYZE"]})
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_partner_share_rejects_empty_tasks(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -300,6 +314,7 @@ class CmdBusinessTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue(payload["ok"])
             self.assertEqual(payload["data"]["probe_gate"]["state"], "PASS")
+            self.provisioning.assert_called_once_with(workspace, "test")
 
     def test_pixel_share_propagates_child_failure(self) -> None:
         with tempfile.TemporaryDirectory() as td:

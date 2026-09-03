@@ -39,7 +39,8 @@ Agent needs **one token + ids**; rest is BM owner's setup:
    Portfolio. Assign **Full control**: every ad account, Page, IG account, pixel/dataset,
    catalog, and the app. Per-asset — portfolio membership assigns nothing. An Employee System
    User is suitable only for a least-privilege agent operating assets that a BM admin has already
-   assigned in the UI; see §2.
+   assigned in the UI; see §2. Before any provisioning, run `metaops --workspace . --profile
+   <name> --json doctor --scope provisioning`.
 3. **Generate token**, expiry Never (60-day option exists; Never is System User default),
    scopes below. Store once, gitignored.
 4. **Pixel attached to every ad account** (Datasets → Add assets → ad account). Shared-to-BM
@@ -80,6 +81,12 @@ an admin of this business”; Meta localises error text, so branch on code/subco
 string. Revalidate this result against the intended BM before relying on it. Use an **Admin System
 User** for any agent workflow that must autonomously create or assign BM-level assets. Do not
 over-privilege an agent that only operates already assigned assets.
+
+`metaops doctor --scope provisioning` is read-only: it compares `GET /me` with the workspace's
+`system_user_id`, then reads `GET /{business_id}/system_users?fields=id,name,role` and requires
+that exact System User to be `ADMIN`. The same check repeats immediately before `catalog create`
+and every Business Manager create/asset-assignment command; a stale success cannot authorise a
+later write.
 
 ## 3. Scopes
 

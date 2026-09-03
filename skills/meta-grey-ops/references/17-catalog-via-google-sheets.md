@@ -26,6 +26,10 @@ role; OAuth scopes alone do not grant it. In the project `workspace.json`, set `
 the launcher's exact effective version (**`v26.0`** in this release without a version override).
 `metaops` refuses a mismatch before any Graph call.
 
+Before the create, run `metaops --workspace . --profile <name> --json doctor --scope
+provisioning`. It is read-only and verifies that the token is the workspace's current Admin System
+User; `catalog create` repeats the same check immediately before its POST.
+
 ## Connect the platforms (UI only)
 
 | Platform | Path | Sharing the platform needs | Schedule |

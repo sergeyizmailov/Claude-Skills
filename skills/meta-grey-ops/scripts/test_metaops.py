@@ -457,6 +457,43 @@ class MetaOpsContractTests(unittest.TestCase):
             metaops.graph.get("https://example.com/collect")
         session.assert_not_called()
 
+    def test_provisioning_admin_binds_the_token_to_workspace_role(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workspace = self.workspace(pathlib.Path(td))
+
+            def fake_get(path, params=None, context=""):
+                if path == "me":
+                    self.assertEqual(params, {"fields": "id,name"})
+                    return {"id": "12", "name": "Launcher"}
+                self.assertEqual(path, "10/system_users")
+                self.assertEqual(params, {"fields": "id,name,role", "limit": 500})
+                return {"data": [{"id": "12", "name": "Launcher", "role": "ADMIN"}]}
+
+            with mock.patch.object(metaops.graph, "get", side_effect=fake_get) as get:
+                result = metaops.require_provisioning_admin(workspace, "test")
+            self.assertEqual(result["role"], "ADMIN")
+            self.assertEqual(result["system_user_id"], "12")
+            self.assertEqual(get.call_count, 2)
+
+    def test_provisioning_rejects_employee_system_user(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workspace = self.workspace(pathlib.Path(td))
+            responses = [
+                {"id": "12", "name": "Launcher"},
+                {"data": [{"id": "12", "name": "Launcher", "role": "EMPLOYEE"}]},
+            ]
+            with mock.patch.object(metaops.graph, "get", side_effect=responses):
+                with self.assertRaisesRegex(metaops.MetaOpsError, "requires an ADMIN"):
+                    metaops.require_provisioning_admin(workspace, "test")
+
+    def test_provisioning_rejects_a_token_other_than_workspace_system_user(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            workspace = self.workspace(pathlib.Path(td))
+            with mock.patch.object(metaops.graph, "get", return_value={"id": "99", "name": "Other"}) as get:
+                with self.assertRaisesRegex(metaops.MetaOpsError, "workspace System User token"):
+                    metaops.require_provisioning_admin(workspace, "test")
+            get.assert_called_once()
+
     def test_only_whoami_doctor_is_workspace_free(self) -> None:
         blocked = type("Args", (), {
             "command": "doctor", "whoami": False, "workspace_obj": None,
@@ -467,6 +504,11 @@ class MetaOpsContractTests(unittest.TestCase):
             "command": "doctor", "whoami": True, "workspace_obj": None,
         })()
         metaops.require_command_workspace(allowed)
+        provisioning = type("Args", (), {
+            "command": "doctor", "whoami": True, "workspace_obj": None, "scope": "provisioning",
+        })()
+        with self.assertRaisesRegex(metaops.MetaOpsError, "scope provisioning requires a workspace"):
+            metaops.require_command_workspace(provisioning)
 
     def test_state_summary_does_not_claim_past_spec_ready_for_activation(self) -> None:
         with tempfile.TemporaryDirectory() as td:

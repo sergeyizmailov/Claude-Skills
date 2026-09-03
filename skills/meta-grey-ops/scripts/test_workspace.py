@@ -287,6 +287,35 @@ class WorkspaceTests(unittest.TestCase):
             self.assertEqual(payload["artifacts"], {})
             run.assert_called_once_with("probe.py", ["--whoami"], 10)
 
+    def test_workspace_doctor_provisioning_scope_reads_admin_role(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            self.write_workspace(root)
+            workspace = meta_workspace.load_workspace(str(root))
+            args = type("Args", (), {
+                "workspace_obj": workspace,
+                "profile": "test",
+                "account": None,
+                "page": None,
+                "dataset": None,
+                "business": None,
+                "whoami": False,
+                "create_pbia": False,
+                "attach_pixel": False,
+                "scope": "provisioning",
+                "timeout": 10,
+            })()
+            child = metaops.ChildResult(["probe.py"], 0, "", "")
+            authority = {"system_user_id": "12", "role": "ADMIN"}
+            with (
+                mock.patch.object(metaops, "run_child", return_value=child),
+                mock.patch.object(metaops, "require_provisioning_admin", return_value=authority) as gate,
+            ):
+                code, payload = metaops.command_doctor(args)
+            self.assertEqual(code, 0)
+            self.assertEqual(payload["data"], {"scope": "provisioning", "provisioning": authority})
+            gate.assert_called_once_with(workspace, "test")
+
     def test_whoami_refuses_mutating_probe_flags(self) -> None:
         args = type("Args", (), {
             "workspace_obj": None, "profile": None, "account": None, "page": "14",

@@ -60,13 +60,35 @@ class CatalogCreateTests(unittest.TestCase):
 
     def test_create_posts_owned_product_catalogs(self) -> None:
         args = args_for(name="Shop", vertical="commerce", confirm="CREATE")
-        with mock.patch.object(metaops.graph, "post", return_value={"id": "999"}) as post:
+        with (
+            mock.patch.object(
+                metaops,
+                "require_provisioning_admin",
+                return_value={"system_user_id": "12", "role": "ADMIN"},
+            ) as gate,
+            mock.patch.object(metaops.graph, "post", return_value={"id": "999"}) as post,
+        ):
             code, payload = cmd_catalog.command_catalog_create(args, metaops)
         self.assertEqual(code, 0)
+        gate.assert_called_once_with(args.workspace_obj, "test")
         self.assertEqual(post.call_args.args[0], "10/owned_product_catalogs")
         self.assertEqual(post.call_args.args[1], {"name": "Shop", "vertical": "commerce"})
         self.assertEqual(payload["data"]["catalog_id"], "999")
         self.assertIn("workspace.json", payload["next_action"])
+
+    def test_create_rejects_non_admin_before_post(self) -> None:
+        args = args_for(name="Shop", vertical="commerce", confirm="CREATE")
+        with (
+            mock.patch.object(
+                metaops,
+                "require_provisioning_admin",
+                side_effect=metaops.MetaOpsError("provisioning requires an ADMIN System User"),
+            ),
+            mock.patch.object(metaops.graph, "post") as post,
+        ):
+            with self.assertRaisesRegex(metaops.MetaOpsError, "ADMIN System User"):
+                cmd_catalog.command_catalog_create(args, metaops)
+        post.assert_not_called()
 
 
 class CatalogFeedTests(unittest.TestCase):

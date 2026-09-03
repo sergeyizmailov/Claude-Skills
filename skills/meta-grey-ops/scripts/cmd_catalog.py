@@ -115,6 +115,7 @@ def _paginate(ctx: Any, path: str, fields: str, limit: int | None = None) -> lis
 def command_catalog_create(args: argparse.Namespace, ctx: Any) -> tuple[int, dict[str, Any]]:
     profile_name, profile = _profile(ctx, args)
     _require_confirm(ctx, args)
+    provisioning = ctx.require_provisioning_admin(args.workspace_obj, profile_name)
     business_id = str(profile.get("business_id") or "")
     if not business_id:
         raise ctx.MetaOpsError(f"profile {profile_name} has no business_id")
@@ -124,7 +125,7 @@ def command_catalog_create(args: argparse.Namespace, ctx: Any) -> tuple[int, dic
     return 0, ctx.result_envelope(
         "catalog create", True, "created",
         data={"profile": profile_name, "business_id": business_id, "catalog_id": catalog_id,
-              "name": args.name, "vertical": args.vertical},
+              "name": args.name, "vertical": args.vertical, "provisioning": provisioning},
         next_action=(
             f"Put \"catalog_id\": \"{catalog_id}\" into profiles.{profile_name} in workspace.json, "
             "then run assets verify --scope all."

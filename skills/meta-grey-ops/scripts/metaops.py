@@ -131,6 +131,69 @@ def require_command_workspace(args: argparse.Namespace) -> None:
         raise MetaOpsError(
             "account-targeted doctor requires a workspace; only doctor --whoami is workspace-free"
         )
+    if (
+        args.command == "doctor"
+        and getattr(args, "scope", "core") == "provisioning"
+        and not args.workspace_obj
+    ):
+        raise MetaOpsError("doctor --scope provisioning requires a workspace profile")
+
+
+def require_provisioning_admin(
+    workspace: meta_workspace.Workspace,
+    requested_profile: str | None,
+) -> dict[str, str]:
+    """Prove the caller is the workspace's current Admin System User.
+
+    Business-level provisioning creates or assigns assets outside an ad-account write
+    boundary. OAuth scopes and an assigned asset do not establish that authority, so
+    compare the token identity with the workspace System User and read its current role
+    from the owning Business Portfolio immediately before the write.
+    """
+    profile_name, profile = workspace.profile(requested_profile)
+    business_id = str(profile["business_id"])
+    expected_id = str(profile["system_user_id"])
+    me = graph.get("me", params={"fields": "id,name"}, context="provisioning token identity")
+    current_id = str(me.get("id") or "")
+    if not current_id:
+        raise MetaOpsError("provisioning could not read the current token identity")
+    if current_id != expected_id:
+        raise MetaOpsError(
+            "provisioning requires the workspace System User token: "
+            f"/me is {current_id}, but profiles.{profile_name}.system_user_id is {expected_id}"
+        )
+
+    rows: list[dict[str, Any]] = []
+    params: dict[str, Any] | None = {"fields": "id,name,role", "limit": 500}
+    while params is not None:
+        page = graph.get(
+            f"{business_id}/system_users",
+            params=params,
+            context="provisioning System User role",
+        )
+        rows.extend(row for row in page.get("data", []) if isinstance(row, dict))
+        params = graph.next_page_params(page, params)
+
+    system_user = next((row for row in rows if str(row.get("id")) == expected_id), None)
+    if system_user is None:
+        raise MetaOpsError(
+            f"workspace System User {expected_id} is not listed on Business Portfolio {business_id}; "
+            "assign an Admin System User and retry"
+        )
+    role = str(system_user.get("role") or "").upper()
+    if role != "ADMIN":
+        raise MetaOpsError(
+            f"provisioning requires an ADMIN System User; {expected_id} has role {role or 'unknown'}. "
+            "Employee System Users may operate assigned assets but cannot create or assign "
+            "Business-Portfolio assets."
+        )
+    return {
+        "profile": profile_name,
+        "business_id": business_id,
+        "system_user_id": expected_id,
+        "system_user_name": str(system_user.get("name") or me.get("name") or ""),
+        "role": role,
+    }
 
 
 def require_plan_workspace(
@@ -617,8 +680,15 @@ def state_summary(state_path: pathlib.Path, spec_path: pathlib.Path | None = Non
 
 
 def command_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
+    scope = getattr(args, "scope", "core")
     if not args.workspace_obj and args.profile:
         raise MetaOpsError("--profile requires --workspace")
+    if scope == "provisioning" and not args.workspace_obj:
+        raise MetaOpsError("doctor --scope provisioning requires a workspace profile")
+    if scope == "provisioning" and args.whoami:
+        raise MetaOpsError("doctor --scope provisioning is profile-bound; omit --whoami")
+    if scope == "provisioning" and (args.create_pbia or args.attach_pixel):
+        raise MetaOpsError("doctor --scope provisioning is read-only; omit --create-pbia/--attach-pixel")
     if args.workspace_obj and not args.whoami:
         _, profile = args.workspace_obj.profile(args.profile)
         for attr, key in (
@@ -652,6 +722,9 @@ def command_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
     echo_child(child)
     if not child.ok:
         return child.returncode, child_failure("doctor", "gate_failed", child)
+    provisioning: dict[str, str] | None = None
+    if scope == "provisioning":
+        provisioning = require_provisioning_admin(args.workspace_obj, args.profile)
     artifacts: dict[str, Any] = {}
     if args.account:
         account = graph.normalize_account(args.account)
@@ -669,7 +742,11 @@ def command_doctor(args: argparse.Namespace) -> tuple[int, dict[str, Any]]:
         artifacts["doctor_receipt"] = str(receipt_path)
     return 0, result_envelope(
         "doctor", True, "preflight_passed", artifacts=artifacts,
-        next_action="Create media/spec, then run metaops plan."
+        data={"scope": scope, "provisioning": provisioning} if provisioning else None,
+        next_action=(
+            "Provisioning authority is live; run a guarded create or asset-assignment command."
+            if provisioning else "Create media/spec, then run metaops plan."
+        ),
     )
 
 
@@ -1673,6 +1750,10 @@ def parser() -> argparse.ArgumentParser:
     action.set_defaults(handler=command_assets_set_products)
 
     p = sub.add_parser("doctor", help="token/account preflight through probe.py")
+    p.add_argument(
+        "--scope", choices=("core", "provisioning"), default="core",
+        help="provisioning additionally proves the declared System User is currently ADMIN",
+    )
     p.add_argument("--whoami", action="store_true")
     p.add_argument("--account")
     p.add_argument("--page")

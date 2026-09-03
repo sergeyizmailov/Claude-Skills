@@ -40,6 +40,8 @@ metaops --workspace . --profile <profile> --json workspace validate
 metaops --workspace . --profile <profile> --json assets verify --scope core
 # Catalog specs require: assets verify --scope all
 metaops --workspace . --profile <profile> --json doctor
+# Before any BM create/asset assignment: read-only Admin-System-User preflight
+metaops --workspace . --profile <profile> --json doctor --scope provisioning
 ```
 
 `--scope core` checks BM/app/System User/account/Page/PBIA/dataset; `--scope all` adds catalog +
@@ -137,6 +139,9 @@ metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREA
 maintain a catalog explicitly assigned to it, but cannot create one at the BM edge; see `02` §2.
 The `workspace.json` used here must set `api_version` exactly to the effective launcher version
 (`v26.0` in this release without an explicit version override).
+Run `doctor --scope provisioning` first. It verifies the token identity equals the profile's
+`system_user_id` and its current BM role is `ADMIN`; `catalog create` repeats that read-only check
+immediately before POST.
 
 `schedule` is a JSON string (`interval HOURLY|DAILY|WEEKLY|MONTHLY, hour, minute, day_of_week,
 timezone, url`). items_batch takes feed-format `price` "9.99 USD"; `/products` takes integer
@@ -144,6 +149,11 @@ minor units — the command passes the file through verbatim. Unverified: `statu
 `check_batch_request_status` (polled case-insensitively).
 
 ## Business Manager setup (no billing surface exists)
+
+`business adaccount create`, `business pixel create`, `business pixel share`, `business user
+invite|assign`, and `business partner share` are provisioning operations. They require the same
+Admin System User check and repeat it immediately before their write. `business capi test` and
+read-only listing do not require Admin.
 
 ```bash
 metaops … business assets                                                          # owned/client accounts, pages, pixels, catalogs, system users
