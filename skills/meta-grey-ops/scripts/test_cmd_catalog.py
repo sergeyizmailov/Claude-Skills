@@ -330,8 +330,12 @@ class BatchItemIdTests(unittest.TestCase):
         self.assertTrue(cmd_catalog._batch_finished("complete"))
 
     def test_batch_items_require_id_and_map_retailer_id(self):
-        import tempfile, pathlib, json as _json
-        import cmd_catalog, metaops
+        import json as _json
+        import pathlib
+        import tempfile
+
+        import cmd_catalog
+        import metaops
         with tempfile.TemporaryDirectory() as td:
             good = pathlib.Path(td) / "ok.json"
             good.write_text(_json.dumps([{"retailer_id": "SKU1", "availability": "in stock"}, {"id": "SKU2"}]))

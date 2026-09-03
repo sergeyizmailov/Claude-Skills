@@ -61,7 +61,7 @@ from typing import Any
 
 INTERVAL_MAP = {"hourly": "HOURLY", "daily": "DAILY", "weekly": "WEEKLY"}
 BATCH_METHODS = {"UPDATE", "DELETE", "CREATE"}
-TERMINAL_STOPWORDS = ("progress", "pending", "queued", "processing")
+TERMINAL_STOPWORDS = ("started", "progress", "pending", "queued", "processing")  # in-progress words
 CATALOG_FIELDS = "id,name,vertical,product_count,business{id,name}"
 FEED_FIELDS = "id,name,schedule,update_schedule,file_name,default_currency,deletion_enabled"
 SET_FIELDS = "id,name,product_count,filter,product_catalog{id,name}"
@@ -314,7 +314,7 @@ def _batch_finished(status: str | None) -> bool:
     if not status:
         return False
     text = str(status).lower()
-    return not any(word in text for word in ("started", "progress", "pending", "queued", "processing"))
+    return not any(word in text for word in TERMINAL_STOPWORDS)
 
 
 def _batch_status_item(payload: dict[str, Any]) -> dict[str, Any]:
