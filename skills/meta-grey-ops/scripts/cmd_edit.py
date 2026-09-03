@@ -269,23 +269,6 @@ def handle_clone(args) -> tuple[int, dict[str, Any]]:
 
 # --- rules -------------------------------------------------------------------
 
-
-def require_rules_ids_in_profile(ctx, account: str, ids_text: str) -> None:
-    """Prove opaque rule targets belong to the selected workspace account before arming."""
-    ids = [value.strip() for value in ids_text.split(",") if value.strip()]
-    if not ids:
-        raise ctx.MetaOpsError("rules --ids must contain at least one object id")
-    expected = ctx.graph.normalize_account(account)
-    for object_id in ids:
-        obj = ctx.graph.get(object_id, params={"fields": "id,account_id"}, context="rules target ownership")
-        actual = obj.get("account_id")
-        if not actual or ctx.graph.normalize_account(actual) != expected:
-            raise ctx.MetaOpsError(
-                f"rules target {object_id} belongs to {actual or '?'} not {expected}; "
-                "refusing a cross-profile rule"
-            )
-
-
 def handle_rules_ladder(args) -> tuple[int, dict[str, Any]]:
     ctx = ctx_module()
     _, profile = _profile(args, ctx)
@@ -300,7 +283,6 @@ def handle_rules_ladder(args) -> tuple[int, dict[str, Any]]:
         "--mode", args.mode, "--prefix", args.prefix,
     ]
     if args.ids:
-        require_rules_ids_in_profile(ctx, account, args.ids)
         child_args += ["--ids", args.ids]
     if args.dry_run:
         child_args.append("--dry-run")

@@ -117,10 +117,9 @@ Costliest decisions:
 - **`start_time`.** Conversions: 06:00–08:00 geo-time or 1–2h before evening window, **never
   00:00**. Reach/traffic: next 00:00 (`04` → Scheduling).
 
-Attribution: omit key → 1d click/1d engaged-view/1d view. Set only to deviate;
-`"account_default"` sends nothing. **Immutable after create** (1504040) — wrong window = new
-ad set. Enhancements + multi-advertiser OFF by default; catalog creative wanting video cards
-must opt `media_type_automation` back in via `creative.opt_out_features`.
+Attribution defaults: `SKILL.md` → Launch defaults. `"account_default"` sends nothing.
+**Immutable after create** (1504040) — wrong window = new ad set. Catalog creative wanting video
+cards must opt `media_type_automation` back in via `creative.opt_out_features`.
 
 Two adapter gaps: DLO objectives documented against legacy names only — `OUTCOME_*`
 acceptance unverified, a dry run can't catch it (ad create can). Test one DLO ad before a
@@ -259,7 +258,7 @@ cost push = no CPL. Verify one day by hand, then trust it.
 
 Spend-without-lead cap, CPL cap, account verdict threshold — with TL, before launch. Ladder/
 small-sample math → `senior-buyer-ops/04`. Use the workspace-bound `metaops rules` commands in
-§9.1. Judge accounts after $30–50, cohorts on click date
+§9.1. Judge accounts after $30–50 (`SKILL.md` non-negotiable #5), cohorts on click date
 (`tracker-ops/03`).
 
 ## When a step fails

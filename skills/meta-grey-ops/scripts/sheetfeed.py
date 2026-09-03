@@ -24,8 +24,8 @@ from typing import Any
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 RESULT_SCHEMA = "sheetfeed.result/v1"
-SHEETS_RATE_RETRY_ATTEMPTS = 5
-SHEETS_MAX_BACKOFF_SECONDS = 32.0
+SHEETS_RATE_RETRY_ATTEMPTS = 4
+SHEETS_MAX_BACKOFF_SECONDS = 64.0
 
 # Column names shared by the Merchant Center product spec and the Meta catalog feed spec.
 REQUIRED = ["id", "title", "description", "availability", "condition", "price", "link", "image_link", "brand"]
@@ -156,18 +156,17 @@ class Sheet:
         self.sa_email = getattr(creds, "service_account_email", None)
 
     def _request(self, method: str, path: str, **kwargs: Any) -> Any:
-        """Run one Sheets request, retrying only an unexecuted quota rejection.
+        """Run one Sheets request with the API's bounded time-error backoff.
 
-        Google Sheets documents truncated exponential backoff for quota errors. HTTP 429 is
-        safe to retry: the server rejected it before applying a values mutation. Do not retry
-        other failures here; a timed-out append might already have written a row.
+        Google Sheets documents truncated exponential backoff for time-based failures. Keep the
+        attempt bound finite so a workspace command returns a result rather than waiting forever.
         """
         request = getattr(self.session, method.lower())
         url = f"{API}/{self.id}{path}"
         last = None
         for attempt in range(SHEETS_RATE_RETRY_ATTEMPTS):
             response = request(url, timeout=60, **kwargs)
-            if response.status_code != 429:
+            if response.status_code not in {429, 503}:
                 return response
             last = response
             if attempt + 1 == SHEETS_RATE_RETRY_ATTEMPTS:
@@ -180,7 +179,8 @@ class Sheet:
             time.sleep(max(0.0, min(delay, SHEETS_MAX_BACKOFF_SECONDS)))
         detail = getattr(last, "text", "")[:400]
         raise SheetError(
-            f"429: Google Sheets quota remained exhausted after {SHEETS_RATE_RETRY_ATTEMPTS} attempts; "
+            f"{last.status_code}: Google Sheets remained unavailable after "
+            f"{SHEETS_RATE_RETRY_ATTEMPTS} attempts; "
             f"retry later. {detail}"
         )
 

@@ -50,10 +50,22 @@ class SheetFeedTests(unittest.TestCase):
         session = mock.Mock()
         session.get.return_value = Response(429, headers={"Retry-After": "0"}, text="quota")
         with mock.patch.object(sheetfeed.time, "sleep") as sleep:
-            with self.assertRaisesRegex(sheetfeed.SheetError, "quota remained exhausted"):
+            with self.assertRaisesRegex(sheetfeed.SheetError, "remained unavailable"):
                 bare_sheet(session)._get("/values/products")
         self.assertEqual(session.get.call_count, sheetfeed.SHEETS_RATE_RETRY_ATTEMPTS)
         self.assertEqual(sleep.call_count, sheetfeed.SHEETS_RATE_RETRY_ATTEMPTS - 1)
+
+    def test_503_uses_the_same_bounded_backoff(self) -> None:
+        session = mock.Mock()
+        session.get.side_effect = [
+            Response(503, text="backend unavailable"),
+            Response(200, {"values": [["id"], ["sku-1"]]}),
+        ]
+        with mock.patch.object(sheetfeed.time, "sleep") as sleep:
+            result = bare_sheet(session)._get("/values/products")
+        self.assertEqual(result["values"][1][0], "sku-1")
+        self.assertEqual(session.get.call_count, 2)
+        self.assertEqual(sleep.call_count, 1)
 
     def test_upsert_rejects_duplicate_input_before_a_write(self) -> None:
         sheet = bare_sheet(mock.Mock())

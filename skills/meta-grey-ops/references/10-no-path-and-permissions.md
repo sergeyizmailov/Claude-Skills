@@ -1,5 +1,7 @@
 # 10 — Restricted verticals: permission, conditions, or no path
 
+Reviewed 2026-09-03.
+
 Fetched live from `transparency.meta.com/policies/ad-standards/...` 2026-08-27 (JS shell — must render). **[official]** unless labeled. 🔺 = revised multiple times a year, re-check before spend.
 
 **Q1/Q2 below decide whether to build anything.**

@@ -20,7 +20,8 @@ import sys
 
 import graph
 
-VERIFY_RECEIPT_MAX_AGE_SECONDS = 3600
+DEFAULT_VERIFY_RECEIPT_MAX_AGE_SECONDS = 3600
+VERIFY_RECEIPT_MAX_AGE_ENV = "METAOPS_VERIFY_MAX_AGE_SECONDS"
 
 
 def receipt_path(state_path: str) -> str:
@@ -30,6 +31,19 @@ def receipt_path(state_path: str) -> str:
 def file_sha(path: str) -> str:
     with open(path, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()[:16]
+
+
+def verify_receipt_max_age() -> int:
+    raw = os.environ.get(VERIFY_RECEIPT_MAX_AGE_ENV)
+    if raw is None:
+        return DEFAULT_VERIFY_RECEIPT_MAX_AGE_SECONDS
+    try:
+        seconds = int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{VERIFY_RECEIPT_MAX_AGE_ENV} must be a positive integer") from exc
+    if seconds <= 0:
+        raise ValueError(f"{VERIFY_RECEIPT_MAX_AGE_ENV} must be a positive integer")
+    return seconds
 
 
 def receipt_timestamp_error(value: object, now: dt.datetime | None = None) -> str | None:
@@ -42,13 +56,17 @@ def receipt_timestamp_error(value: object, now: dt.datetime | None = None) -> st
         return "verification receipt timestamp is malformed — run metaops verify again"
     if checked_at.tzinfo is None:
         return "verification receipt timestamp has no UTC offset — run metaops verify again"
+    try:
+        max_age = verify_receipt_max_age()
+    except ValueError as exc:
+        return str(exc)
     current = now or dt.datetime.now(dt.timezone.utc)
     age = (current - checked_at.astimezone(dt.timezone.utc)).total_seconds()
     if age < -300:
         return "verification receipt is future-dated — run metaops verify again"
-    if age > VERIFY_RECEIPT_MAX_AGE_SECONDS:
+    if age > max_age:
         return (
-            f"verification receipt is {int(age)}s old (maximum {VERIFY_RECEIPT_MAX_AGE_SECONDS}s) — "
+            f"verification receipt is {int(age)}s old (maximum {max_age}s) — "
             "run metaops verify again immediately before activation"
         )
     return None

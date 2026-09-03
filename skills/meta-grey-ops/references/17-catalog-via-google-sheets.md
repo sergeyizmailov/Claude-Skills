@@ -22,9 +22,8 @@ schedule; the agent edits rows through a service account with permanent access.*
 If the catalog does not yet exist, create it through `metaops … catalog create` (`16`) with an
 **Admin-role System User** token. An Employee System User may maintain an already assigned
 catalog, but `POST /{business_id}/owned_product_catalogs` needs the Business Portfolio's Admin
-role; OAuth scopes alone do not grant it. In the project `workspace.json`, set `api_version` to
-the launcher's exact effective version (**`v26.0`** in this release without a version override).
-`metaops` refuses a mismatch before any Graph call.
+role; OAuth scopes alone do not grant it. `workspace.json.api_version`: follow the canonical
+Workspace contract in `16`; `metaops` refuses a mismatch before any Graph call.
 
 Before the create, run `metaops --workspace . --profile <name> --json doctor --scope
 provisioning`. It is read-only and verifies that the token is the workspace's current Admin System

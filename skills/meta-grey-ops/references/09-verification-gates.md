@@ -1,5 +1,7 @@
 # 09 — Verification gates (Meta)
 
+Reviewed 2026-09-03.
+
 Researched 2026-08-27. Labels: **[official]** with article ID · **[practitioner]** · **[unverified]** · 🔺 = re-verify before acting. **Meta publishes no SLA for any gate** — every day-count below is a practitioner estimate unless [official], and estimates conflict with each other.
 
 ## Gate summary — trigger → unlocks → order

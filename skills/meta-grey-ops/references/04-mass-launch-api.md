@@ -1,5 +1,7 @@
 # 04 — Mass launch via API
 
+Reviewed 2026-09-03.
+
 **Execute every mutation through `metaops`** in the order defined by `00-launch-runbook.md`.
 The files in `../scripts/` are internal implementations and debugging surfaces; their direct
 writes are blocked. Everything below explains what the implementation encodes and cannot decide.
@@ -88,7 +90,7 @@ Whether the language layer clears review is a `07` question — this is only wha
 
 Run `scripts/media.py`; notes below are why. [doc-confirmed 2026-08-31 unless marked]
 
-**Images** — `POST /act_X/adimages`, multipart. Multipart FIELD NAME is the filename; needs a real extension (`sample.jpg` works, `sample`/`sample.tmp` rejected). Response keyed by that name: `{"images": {"<name>": {"hash", "url", "width"}}}` — `hash` nested. Returned `url` is temporary, don't reuse in creative creation. Hashes account-scoped in practice (`copy_from={source_account_id, hash}` moves one) — re-upload per account. Uniquify per account (crop+re-encode) as cheap insurance — identical bytes/hash linking accounts is [unverified], no Meta doc supports it.
+**Images** — `POST /act_X/adimages`, multipart. Multipart FIELD NAME is the filename; needs a real extension (`sample.jpg` works, `sample`/`sample.tmp` rejected). Response keyed by that name: `{"images": {"<name>": {"hash", "url", "width"}}}` — `hash` nested. Returned `url` is temporary, don't reuse in creative creation. Hashes account-scoped in practice (`copy_from={source_account_id, hash}` moves one) — re-upload per account. Use independently produced source creatives for any legitimate creative-test variance; local re-encoding changes file bytes only and is not evidence of platform-level uniqueness.
 
 **Videos** — `POST /act_X/advideos`. Small files: `source`/`file_url`. Anything real: chunked session (resumes).
 

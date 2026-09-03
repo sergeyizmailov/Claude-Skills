@@ -15,6 +15,7 @@ import clone
 import cmd_edit
 import edit
 import metaops
+import rules
 
 os.environ.setdefault("META_TOKEN", "TEST_TOKEN")
 
@@ -384,18 +385,31 @@ class CmdEditTests(unittest.TestCase):
             "--level", "ADSET", "--rungs", "0-6", "--mode", "notify", "--prefix", "LADDER|",
         ])
 
-    def test_rules_ladder_rejects_ids_outside_profile_before_child(self) -> None:
+    def test_rules_ladder_passes_ids_to_the_bound_child(self) -> None:
         args = self.parse([
             "rules", "ladder", "--target-minor", "1200", "--event", "results", "--level", "ADSET",
             "--ids", "42",
         ])
+        with mock.patch.object(
+            metaops, "run_child", return_value=fake_child('{"schema": "rules.result/v1", "ok": true}\n')
+        ) as child:
+            args.handler(args)
+        self.assertIn("--ids", child.call_args.args[1])
+        self.assertEqual(child.call_args.args[1][child.call_args.args[1].index("--ids") + 1], "42")
+
+    def test_rules_child_rejects_ids_outside_account_before_listing_or_posting(self) -> None:
+        argv = [
+            "rules.py", "--account", "act_1", "--target-minor", "1200", "--ids", "42", "--dry-run",
+        ]
         with (
-            mock.patch.object(metaops.graph, "get", return_value={"id": "42", "account_id": "2"}),
-            mock.patch.object(metaops, "run_child") as child,
+            mock.patch.object(rules.sys, "argv", argv),
+            mock.patch.object(rules.graph, "get", return_value={"id": "42", "account_id": "2"}) as get,
+            mock.patch.object(rules.graph, "post") as post,
         ):
-            with self.assertRaisesRegex(metaops.MetaOpsError, "cross-profile rule"):
-                args.handler(args)
-        child.assert_not_called()
+            with self.assertRaisesRegex(SystemExit, "cross-profile rule"):
+                rules.main()
+        self.assertEqual(get.call_count, 1)
+        post.assert_not_called()
 
     def test_rules_ladder_pause_with_confirm_passes(self) -> None:
         args = self.parse([

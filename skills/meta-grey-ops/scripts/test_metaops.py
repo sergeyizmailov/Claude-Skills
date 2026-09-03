@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import pathlib
@@ -216,6 +217,17 @@ class MetaOpsContractTests(unittest.TestCase):
             receipt["ts"] = "2000-01-01T00:00:00+00:00"
             receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
             self.assertIn("maximum", metaops.activate.check_receipt(str(state_path), state) or "")
+
+    def test_verify_receipt_ttl_is_configurable_without_import_time_failure(self) -> None:
+        checked_at = dt.datetime(2030, 1, 1, tzinfo=dt.timezone.utc)
+        with mock.patch.dict(os.environ, {"METAOPS_VERIFY_MAX_AGE_SECONDS": "1"}, clear=False):
+            why = metaops.activate.receipt_timestamp_error(
+                checked_at.isoformat(), now=checked_at + dt.timedelta(seconds=2)
+            )
+        self.assertIn("maximum 1s", why or "")
+        with mock.patch.dict(os.environ, {"METAOPS_VERIFY_MAX_AGE_SECONDS": "bad"}, clear=False):
+            why = metaops.activate.receipt_timestamp_error(checked_at.isoformat(), now=checked_at)
+        self.assertIn("must be a positive integer", why or "")
 
     def test_lock_excludes_concurrent_writer_and_is_removed(self) -> None:
         with tempfile.TemporaryDirectory() as td:

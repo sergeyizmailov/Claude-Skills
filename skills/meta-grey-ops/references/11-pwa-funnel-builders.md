@@ -1,5 +1,7 @@
 # 11 — PWA funnel builders (casino/iGaming)
 
+Reviewed 2026-09-03.
+
 Builders = PWA "install-page" LP + tracker + geo-cloak + CAPI forwarder, one per domain. Contract identical across vendors; only macro spelling, postback host, test tooling differ. Facts: vendor docs/bundles fetched 2026-08-30 (SPA sites, extracted from JS bundles) + practitioner sources — mostly vendor blogs, not neutral measurement.
 
 ## Universal contract — verify all 5 per vendor before spend

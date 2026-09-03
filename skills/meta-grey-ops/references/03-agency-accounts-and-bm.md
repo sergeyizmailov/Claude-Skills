@@ -1,5 +1,7 @@
 # 03 — Agency accounts, BMs, asset sharing
 
+Reviewed 2026-09-03.
+
 **New BM = 1 ad account cap** (UI, field-observed 2026-08-30): more only after
 "several weeks of following policies." Second account today = create BM2, create
 the account there, partner-share it to BM1 (BM2 Partners → share ad account →

@@ -141,6 +141,19 @@ def dt_parse_since(value: str) -> float:
     return parsed.timestamp()
 
 
+def require_ids_in_account(ids: list[str], account: str) -> None:
+    """Refuse an opaque rule filter that names an object outside this account."""
+    expected = graph.normalize_account(account)
+    for object_id in ids:
+        obj = graph.get(object_id, params={"fields": "id,account_id"}, context="rule target ownership")
+        actual = obj.get("account_id")
+        if not actual or graph.normalize_account(actual) != expected:
+            sys.exit(
+                f"rule target {object_id} belongs to {actual or '?'} not {expected}; "
+                "refusing cross-profile rule"
+            )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--account", help="act_<id>")
@@ -233,10 +246,14 @@ def main() -> int:
                           "rule_id": args.execute, "history": hist}, ensure_ascii=False))
         return 0
 
+    ids = [i.strip() for i in args.ids.split(",") if i.strip()] if args.ids else None
+    if args.ids and not ids:
+        sys.exit("--ids must contain at least one object id")
+    if ids:
+        require_ids_in_account(ids, account)
     existing = len(list_rules(account))
     if existing + len(rows) > 250:
         sys.exit(f"{existing} rules exist; adding {len(rows)} exceeds the 250/account cap")
-    ids = [i.strip() for i in args.ids.split(",")] if args.ids else None
     created = []
     for r in rows:
         name = f"{args.prefix.replace('{k}', str(r['k']))}k{r['k']}|>{r['spend_minor']}|<{r['k'] + 1}|{args.mode}"

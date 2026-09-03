@@ -1,5 +1,7 @@
 # 16 — `metaops`: agent-facing launch interface
 
+Reviewed 2026-09-03.
+
 `metaops` is the preferred orchestration surface for an agent. It wraps the proven
 `probe.py`, `launch.py`, `bulk.py`, `verify.py`, and `activate.py` implementations; it does not
 reimplement Graph payloads. Underlying scripts are internal/debugging surfaces; their Graph
@@ -80,8 +82,9 @@ metaops --workspace . --profile <profile> --json activate --plan .metaops/plans/
 
 `doctor` must pass first; its account/Page/dataset-specific receipt is checked by every later command and
 expires after 24 hours by default (`METAOPS_DOCTOR_MAX_AGE_SECONDS` overrides the TTL).
-The separate read-back receipt written by `verify` expires after one hour: re-run `verify` immediately
-before activation if UI review or scheduling took longer. This is a live GET-only check, not a rebuild.
+The separate read-back receipt written by `verify` expires after one hour by default
+(`METAOPS_VERIFY_MAX_AGE_SECONDS` overrides it): re-run `verify` immediately before activation if UI
+review or scheduling took longer. This is a live GET-only check, not a rebuild.
 Media upload and product-set repair also require that fresh receipt. Product-set repair performs
 a live System User/catalog/set ownership check that permits an empty set, then invalidates any
 old `all` asset receipt; rerun `assets verify --scope all` after repair.
@@ -139,8 +142,7 @@ metaops … catalog products batch --file items.json --method UPDATE|DELETE|CREA
 
 `catalog create` requires a token for an **Admin-role System User**. An Employee System User can
 maintain a catalog explicitly assigned to it, but cannot create one at the BM edge; see `02` §2.
-The `workspace.json` used here must set `api_version` exactly to the effective launcher version
-(`v26.0` in this release without an explicit version override).
+`workspace.json.api_version`: see the canonical Workspace contract above.
 Run `doctor --scope provisioning` first. It verifies the token identity equals the profile's
 `system_user_id` and its current BM role is `ADMIN`; `catalog create` repeats that read-only check
 immediately before POST.
